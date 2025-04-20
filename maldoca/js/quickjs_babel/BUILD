@@ -24,7 +24,7 @@ genrule(
     srcs = ["native.js"],
     outs = ["native_cc_embed_data.cc.inc"],
     cmd = "( echo \"constexpr char kNative[] = {\"" +
-          "&& od -t x1 $(location native.js) | sed -e 's/ /,0x/g' -e 's/$$/,/' -e 's/[^,]*,//' && echo \"};\"" +
+          "&& od -t x1 $(location native.js) | sed -e 's/ /,0x/g' -e 's/$$/,/' -e 's/[^,]*,//' -e 's/0x,//g' && echo \"};\"" +
           "&& echo -n \"constexpr size_t kNativeSize = \"" +
           "&& wc -c < $(location native.js)" +
           "&& echo \";\" )" +
@@ -42,7 +42,7 @@ genrule(
     srcs = ["//third_party/babel_standalone:babel.min.js"],
     outs = ["babel_standalone_cc_embed_data.cc.inc"],
     cmd = "( echo \"constexpr char kBabelStandalone[] = {\"" +
-          "&& od -t x1 $(location //third_party/babel_standalone:babel.min.js) | sed -e 's/ /,0x/g' -e 's/$$/,/' -e 's/[^,]*,//' && echo \"};\"" +
+          "&& od -t x1 $(location //third_party/babel_standalone:babel.min.js) | sed -e 's/ /,0x/g' -e 's/$$/,/' -e 's/[^,]*,//' -e 's/0x,//g' && echo \"};\"" +
           "&& echo -n \"constexpr size_t kBabelStandaloneSize = \"" +
           "&& wc -c < $(location //third_party/babel_standalone:babel.min.js)" +
           "&& echo \";\" )" +
