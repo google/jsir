@@ -20,4 +20,4 @@ common --cxxopt='-std=c++17'
 
 try-import %workspace%/third_party/llvm-project/utils/bazel/.bazelrc
 
-build --repo_env=CC=clang++ --cxxopt=--std=c++17 --cxxopt=-Wno-return-type --cxxopt=-Wno-trigraphs --cxxopt=-Wno-implicit-const-int-float-conversion --cxxopt=-Wno-c++11-narrowing
+build --macos_sdk_version=15.0 --host_macos_minimum_os=11.0 --repo_env=CC=clang --repo_env=CXX=clang++ --cxxopt=--std=c++17 --cxxopt=-Wno-return-type --cxxopt=-Wno-trigraphs --cxxopt=-Wno-implicit-const-int-float-conversion --cxxopt=-Wno-c++11-narrowing
