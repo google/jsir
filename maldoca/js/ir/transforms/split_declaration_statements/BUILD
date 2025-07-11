@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 licenses(["notice"])
 
 package(
@@ -30,6 +32,7 @@ cc_library(
         "//maldoca/js/ir",
         "//maldoca/js/ir:jsir_utils",
         "@abseil-cpp//absl/status",
+        "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Pass",
     ],

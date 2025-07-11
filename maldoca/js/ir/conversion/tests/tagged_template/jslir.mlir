@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.identifier"() <{name = "raw"}> : () -> !jsir.any
 // JSLIR-NEXT:     %1 = "jsir.template_element_value"() <{cooked = "42", raw = "42"}> : () -> !jsir.any

@@ -1,4 +1,4 @@
-// JSHIR:      "jsir.file"() ({
+// JSHIR:      "jsir.file"() <{comments = []}> ({
 // JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSHIR-NEXT:     %0 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
 // JSHIR-NEXT:     %1 = "jsir.optional_member_expression"(%0) <{literal_property = #jsir<identifier   <L 1 C 3>, <L 1 C 4>, "b", 3, 4, 0, "b">, optional = true}> : (!jsir.any) -> !jsir.any

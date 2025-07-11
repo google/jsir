@@ -16,6 +16,7 @@
 
 #include <vector>
 
+#include "llvm/Support/Casting.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/Value.h"
@@ -45,10 +46,31 @@ std::vector<mlir::Operation *> GetDependencyOps(mlir::Operation *root) {
   return dependency_ops;
 }
 
+bool BlockIsForHeader(mlir::Block &block) {
+  auto for_op =
+      llvm::dyn_cast_if_present<JshirForStatementOp>(block.getParentOp());
+  if (for_op == nullptr) {
+    return false;
+  }
+
+  auto *region = block.getParent();
+  if (region == nullptr) {
+    return false;
+  }
+
+  return &for_op.getInit() == region || &for_op.getTest() == region ||
+         &for_op.getUpdate() == region;
+}
+
 void SplitDeclarationStatements(mlir::Operation *root) {
   std::vector<mlir::Block *> modified_blocks;
   root->walk([&](JsirVariableDeclarationOp declaration_op) {
     mlir::Block *parent_block = declaration_op->getBlock();
+
+    if (BlockIsForHeader(*parent_block)) {
+      // Skip
+      return;
+    }
 
     MALDOCA_ASSIGN_OR_RETURN(
         JsirExprsRegionEndOp declarators_op,
@@ -100,8 +122,8 @@ void SplitDeclarationStatements(mlir::Operation *root) {
       //   jsir.exprs_region_end(%5, %8)
       // })
       builder.setInsertionPoint(declaration_op);
-      auto new_declaration_op = builder.create<JsirVariableDeclarationOp>(
-          declaration_op.getLoc(), declaration_op.getKind());
+      auto new_declaration_op = JsirVariableDeclarationOp::create(
+          builder, declaration_op.getLoc(), declaration_op.getKind());
 
       // jsir.variable_declaration() <{kind = "const"}> ({ <- new_declaration_op
       // })
@@ -141,8 +163,8 @@ void SplitDeclarationStatements(mlir::Operation *root) {
       }
 
       builder.setInsertionPointToEnd(&block);
-      builder.create<JsirExprsRegionEndOp>(declarator_op->getLoc(),
-                                           mlir::ValueRange({declarator_op}));
+      JsirExprsRegionEndOp::create(builder, declarator_op->getLoc(),
+                                   mlir::ValueRange({declarator_op}));
     }
   });
 

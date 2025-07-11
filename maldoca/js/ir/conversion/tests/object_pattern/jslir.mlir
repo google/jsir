@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = [#jsir<comment_line  <L 1 C 0>, <L 1 C 48>, 0, 48, " Must wrap with \22()\22, otherwise doesn't parse.">]}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.object_pattern_ref"() ({
 // JSLIR-NEXT:       %4 = "jsir.identifier_ref"() <{name = "lvalue_shorthand"}> : () -> !jsir.any

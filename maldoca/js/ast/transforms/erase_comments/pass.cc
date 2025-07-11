@@ -24,12 +24,13 @@ namespace maldoca {
 
 void EraseCommentsInAst(JsFile& ast) {
   DefaultMutableJsAstVisitorLambdaWrapper pre_visitor([](JsNode& node) {
-    node.set_leading_comments(std::nullopt);
-    node.set_trailing_comments(std::nullopt);
-    node.set_inner_comments(std::nullopt);
+    node.set_leading_comment_uids(std::nullopt);
+    node.set_trailing_comment_uids(std::nullopt);
+    node.set_inner_comment_uids(std::nullopt);
   });
   MutableJsAstWalker walker(&pre_visitor, /*postorder_callback=*/nullptr);
   walker.VisitFile(ast);
+  ast.set_comments(std::nullopt);
 }
 
 }  // namespace maldoca

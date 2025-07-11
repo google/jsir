@@ -1,1 +1,1 @@
-// SOURCE:      [a,, b] = c;
+// SOURCE:      let [a,, b] = c;

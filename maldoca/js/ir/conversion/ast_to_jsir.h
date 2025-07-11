@@ -93,15 +93,7 @@ class AstToJsir {
       const JsModuleDeclaration *node);
 
  private:
-  JsirLocationAttr GetJsirLocationAttr(const JsSourceLocation *loc,
-                                       std::optional<int64_t> start,
-                                       std::optional<int64_t> end,
-                                       std::optional<int64_t> scope_uid);
-
-  std::vector<JsirCommentAttr> GetMlirCommentsFromJsComments(
-      std::optional<const std::vector<std::unique_ptr<JsComment>> *>
-          js_comments,
-      std::optional<int64_t> scope_uid);
+  JsirCommentAttrInterface VisitCommentAttr(const JsComment *node);
 
   template <typename T, typename... Args>
   T CreateExpr(const JsNode *node, Args &&...args) {

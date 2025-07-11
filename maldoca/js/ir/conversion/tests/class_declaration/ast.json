@@ -45,6 +45,16 @@
 // AST-NEXT:         "start": 0,
 // AST-NEXT:         "end": 265,
 // AST-NEXT:         "scopeUid": 1,
+// AST-NEXT:         "definedSymbols": [
+// AST-NEXT:           {
+// AST-NEXT:             "name": "Foo",
+// AST-NEXT:             "defScopeUid": 0
+// AST-NEXT:           },
+// AST-NEXT:           {
+// AST-NEXT:             "name": "Foo",
+// AST-NEXT:             "defScopeUid": 1
+// AST-NEXT:           }
+// AST-NEXT:         ],
 // AST-NEXT:         "superClass": null,
 // AST-NEXT:         "body": {
 // AST-NEXT:           "type": "ClassBody",
@@ -713,5 +723,6 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": []
 // AST-NEXT: }

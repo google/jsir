@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
 licenses(["notice"])
 
 package(
@@ -26,6 +28,7 @@ cc_library(
     srcs = ["pass.cc"],
     hdrs = ["pass.h"],
     deps = [
+        "//maldoca/js/ast",
         "//maldoca/js/ir",
         "//maldoca/js/ir/analyses:dataflow_analysis",
         "//maldoca/js/ir/analyses/constant_propagation:analysis",

@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.object_expression"() ({
 // JSLIR-NEXT:       %2 = "jsir.identifier"() <{name = "short_hand"}> : () -> !jsir.any

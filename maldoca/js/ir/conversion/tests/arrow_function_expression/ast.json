@@ -78,6 +78,12 @@
 // AST-NEXT:               "start": 0,
 // AST-NEXT:               "end": 1,
 // AST-NEXT:               "scopeUid": 1,
+// AST-NEXT:               "definedSymbols": [
+// AST-NEXT:                 {
+// AST-NEXT:                   "name": "x",
+// AST-NEXT:                   "defScopeUid": 1
+// AST-NEXT:                 }
+// AST-NEXT:               ],
 // AST-NEXT:               "name": "x"
 // AST-NEXT:             }
 // AST-NEXT:           ],
@@ -151,6 +157,12 @@
 // AST-NEXT:               "start": 8,
 // AST-NEXT:               "end": 9,
 // AST-NEXT:               "scopeUid": 2,
+// AST-NEXT:               "definedSymbols": [
+// AST-NEXT:                 {
+// AST-NEXT:                   "name": "x",
+// AST-NEXT:                   "defScopeUid": 2
+// AST-NEXT:                 }
+// AST-NEXT:               ],
 // AST-NEXT:               "name": "x"
 // AST-NEXT:             }
 // AST-NEXT:           ],
@@ -213,5 +225,6 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": []
 // AST-NEXT: }

@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "x"}> : () -> !jsir.any
 // JSLIR-NEXT:     %1 = "jsir.arrow_function_expression"(%0) <{async = false, generator = false, operandSegmentSizes = array<i32: 0, 1>}> ({

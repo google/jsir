@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("//maldoca/js:allowed_users.bzl", "JSIR_ALLOWED_USERS")
 
 licenses(["notice"])
@@ -60,6 +62,18 @@ cc_library(
 )
 
 cc_library(
+    name = "scope",
+    srcs = ["scope.cc"],
+    hdrs = ["scope.h"],
+    deps = [
+        ":babel_cc_proto",
+        "//maldoca/js/ast",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:string_view",
+    ],
+)
+
+cc_library(
     name = "babel_test",
     testonly = 1,
     srcs = ["babel_test.cc"],
@@ -67,6 +81,7 @@ cc_library(
     deps = [
         ":babel",
         ":babel_cc_proto",
+        ":scope",
         "//maldoca/base/testing:protocol-buffer-matchers",
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/strings",
@@ -94,7 +109,7 @@ cc_test(
         ":babel_cc_proto",
         "//maldoca/base/testing:protocol-buffer-matchers",
         "//maldoca/base/testing:status_matchers",
+        "@com_google_protobuf//:json",
         "@googletest//:gtest_main",
-        "@protobuf//:json",
     ],
 )

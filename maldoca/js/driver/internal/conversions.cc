@@ -45,8 +45,8 @@ static absl::Duration DecodeDurationProto(
 // =============================================================================
 
 absl::StatusOr<std::unique_ptr<JsConversion>> JsConversion::Create(
-    const JsConversionConfig &config, absl::Nullable<Babel *> babel,
-    absl::Nullable<mlir::MLIRContext *> mlir_context) {
+    const JsConversionConfig &config, Babel *absl_nullable babel,
+    mlir::MLIRContext *absl_nullable mlir_context) {
   switch (config.kind_case()) {
     case JsConversionConfig::KindCase::KIND_NOT_SET: {
       LOG(FATAL) << "Invalid JsConversionConfig kind";
@@ -104,7 +104,7 @@ absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsSourceToAstString::Convert(
 
 absl::StatusOr<std::unique_ptr<JsSourceToAstString>>
 JsSourceToAstString::Create(const JsSourceToAstStringConfig &config,
-                            absl::Nonnull<Babel *> babel) {
+                            Babel *absl_nonnull babel) {
   absl::Duration timeout = absl::InfiniteDuration();
   if (config.has_timeout()) {
     timeout = DecodeDurationProto(config.timeout());
@@ -127,7 +127,7 @@ absl::StatusOr<std::unique_ptr<JsSourceRepr>> JsAstStringToSource::Convert(
 
 absl::StatusOr<std::unique_ptr<JsAstStringToSource>>
 JsAstStringToSource::Create(const JsAstStringToSourceConfig &config,
-                            absl::Nonnull<Babel *> babel) {
+                            Babel *absl_nonnull babel) {
   absl::Duration timeout = absl::InfiniteDuration();
   if (config.has_timeout()) {
     timeout = DecodeDurationProto(config.timeout());

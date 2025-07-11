@@ -1,4 +1,4 @@
-// JSHIR:      "jsir.file"() ({
+// JSHIR:      "jsir.file"() <{comments = []}> ({
 // JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSHIR-NEXT:     "jsir.class_declaration"() <{id = #jsir<identifier   <L 1 C 6>, <L 1 C 9>, "Foo", 6, 9, 1, "Foo">}> ({
 // JSHIR-NEXT:       "jsir.class_body"() ({

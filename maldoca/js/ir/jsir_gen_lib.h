@@ -17,14 +17,12 @@
 #ifndef MALDOCA_JS_IR_JSIR_GEN_LIB_H_
 #define MALDOCA_JS_IR_JSIR_GEN_LIB_H_
 
-#include <memory>
 #include <string>
 #include <vector>
 
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/js/babel/babel.h"
-#include "maldoca/js/driver/driver.h"
 #include "maldoca/js/driver/driver.pb.h"
 
 namespace maldoca {
@@ -48,6 +46,7 @@ enum class JsirPassKind {
   kSplitDeclarationStatements,
   kEraseComments,
   kRemoveDirectives,
+  kNormalizeMemberExpressions,
 };
 
 // Analyzes and transforms the provided source code. It first translates the
@@ -59,7 +58,8 @@ struct JsirGenOutput {
   JsAnalysisOutputs analysis_outputs;
 };
 
-std::string DumpJsAnalysisOutput(const JsAnalysisOutput &output);
+std::string DumpJsAnalysisOutput(absl::string_view original_source,
+                                 const JsAnalysisOutput& output);
 
 absl::StatusOr<JsirGenOutput> JsirGen(
     Babel& babel, absl::string_view source,

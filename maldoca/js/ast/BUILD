@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("//maldoca/js:allowed_users.bzl", "JSIR_ALLOWED_USERS")
 
 licenses(["notice"])
@@ -47,7 +50,11 @@ cc_library(
     hdrs = [
         "ast_visitor.h",
     ],
-    deps = [":ast"],
+    deps = [
+        ":ast",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/memory",
+    ],
 )
 
 cc_library(

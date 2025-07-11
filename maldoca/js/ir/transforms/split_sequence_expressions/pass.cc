@@ -60,7 +60,7 @@ void SplitSequenceExpressions(mlir::Operation *root) {
 
     for (mlir::Value expr : op.getExpressions().drop_back(1)) {
       builder.setInsertionPointAfterValue(expr);
-      builder.create<JsirExpressionStatementOp>(expr.getLoc(), expr);
+      JsirExpressionStatementOp::create(builder, expr.getLoc(), expr);
     }
 
     mlir::Value last_expr = op.getExpressions().back();

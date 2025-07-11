@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jslir.labeled_statement_start"() <{label = #jsir<identifier   <L 1 C 0>, <L 1 C 5>, "label", 0, 5, 0, "label">}> : () -> !jsir.any
 // JSLIR-NEXT:     %1 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any

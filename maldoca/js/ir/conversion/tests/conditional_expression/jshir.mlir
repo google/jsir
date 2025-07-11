@@ -1,4 +1,4 @@
-// JSHIR:      "jsir.file"() ({
+// JSHIR:      "jsir.file"() <{comments = []}> ({
 // JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSHIR-NEXT:     %0 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
 // JSHIR-NEXT:     %1 = "jshir.conditional_expression"(%0) ({

@@ -1,4 +1,4 @@
-// JSHIR:      "jsir.file"() ({
+// JSHIR:      "jsir.file"() <{comments = []}> ({
 // JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSHIR-NEXT:     "jsir.variable_declaration"() <{kind = "let"}> ({
 // JSHIR-NEXT:       %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any

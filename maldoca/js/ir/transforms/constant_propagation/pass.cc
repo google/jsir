@@ -36,6 +36,7 @@
 #include "mlir/Support/LLVM.h"
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/Transforms/FoldUtils.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/ir.h"

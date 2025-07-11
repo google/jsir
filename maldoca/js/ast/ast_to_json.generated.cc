@@ -144,6 +144,28 @@ void JsCommentLine::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
+// JsSymbolId
+// =============================================================================
+
+void JsSymbolId::SerializeFields(std::ostream& os, bool &needs_comma) const {
+  MaybeAddComma(os, needs_comma);
+  os << "\"name\":" << (nlohmann::json(name_)).dump();
+  if (def_scope_uid_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"defScopeUid\":" << (nlohmann::json(def_scope_uid_.value())).dump();
+  }
+}
+
+void JsSymbolId::Serialize(std::ostream& os) const {
+  os << "{";
+  {
+    bool needs_comma = false;
+    JsSymbolId::SerializeFields(os, needs_comma);
+  }
+  os << "}";
+}
+
+// =============================================================================
 // JsNode
 // =============================================================================
 
@@ -167,38 +189,38 @@ void JsNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
   } else {
     os << "\"end\":" << "null";
   }
-  if (leading_comments_.has_value()) {
+  if (leading_comment_uids_.has_value()) {
     MaybeAddComma(os, needs_comma);
-    os << "\"leadingComments\":" << "[";
+    os << "\"leadingCommentUids\":" << "[";
     {
       bool needs_comma = false;
-      for (const auto& element : leading_comments_.value()) {
+      for (const auto& element : leading_comment_uids_.value()) {
         MaybeAddComma(os, needs_comma);
-        element->Serialize(os);
+        os << (nlohmann::json(element)).dump();
       }
     }
     os << "]";
   }
-  if (trailing_comments_.has_value()) {
+  if (trailing_comment_uids_.has_value()) {
     MaybeAddComma(os, needs_comma);
-    os << "\"trailingComments\":" << "[";
+    os << "\"trailingCommentUids\":" << "[";
     {
       bool needs_comma = false;
-      for (const auto& element : trailing_comments_.value()) {
+      for (const auto& element : trailing_comment_uids_.value()) {
         MaybeAddComma(os, needs_comma);
-        element->Serialize(os);
+        os << (nlohmann::json(element)).dump();
       }
     }
     os << "]";
   }
-  if (inner_comments_.has_value()) {
+  if (inner_comment_uids_.has_value()) {
     MaybeAddComma(os, needs_comma);
-    os << "\"innerComments\":" << "[";
+    os << "\"innerCommentUids\":" << "[";
     {
       bool needs_comma = false;
-      for (const auto& element : inner_comments_.value()) {
+      for (const auto& element : inner_comment_uids_.value()) {
         MaybeAddComma(os, needs_comma);
-        element->Serialize(os);
+        os << (nlohmann::json(element)).dump();
       }
     }
     os << "]";
@@ -206,6 +228,23 @@ void JsNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
   if (scope_uid_.has_value()) {
     MaybeAddComma(os, needs_comma);
     os << "\"scopeUid\":" << (nlohmann::json(scope_uid_.value())).dump();
+  }
+  if (referenced_symbol_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"referencedSymbol\":";
+    referenced_symbol_.value()->Serialize(os);
+  }
+  if (defined_symbols_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"definedSymbols\":" << "[";
+    {
+      bool needs_comma = false;
+      for (const auto& element : defined_symbols_.value()) {
+        MaybeAddComma(os, needs_comma);
+        element->Serialize(os);
+      }
+    }
+    os << "]";
   }
 }
 
@@ -379,6 +418,18 @@ void JsFile::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
   os << "\"program\":";
   program_->Serialize(os);
+  if (comments_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"comments\":" << "[";
+    {
+      bool needs_comma = false;
+      for (const auto& element : comments_.value()) {
+        MaybeAddComma(os, needs_comma);
+        element->Serialize(os);
+      }
+    }
+    os << "]";
+  }
 }
 
 void JsFile::Serialize(std::ostream& os) const {

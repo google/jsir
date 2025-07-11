@@ -61,6 +61,12 @@
 // AST-NEXT:             "start": 4,
 // AST-NEXT:             "end": 9,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "a",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "id": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -135,6 +141,12 @@
 // AST-NEXT:             "start": 15,
 // AST-NEXT:             "end": 20,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "b",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "id": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -209,6 +221,12 @@
 // AST-NEXT:             "start": 28,
 // AST-NEXT:             "end": 33,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "c",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "id": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -264,6 +282,12 @@
 // AST-NEXT:             "start": 35,
 // AST-NEXT:             "end": 40,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "d",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "id": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -309,5 +333,6 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": []
 // AST-NEXT: }

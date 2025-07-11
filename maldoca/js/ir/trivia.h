@@ -30,6 +30,14 @@
 
 namespace maldoca {
 
+std::unique_ptr<JsPosition> JsirPositionAttr2JsPosition(JsirPositionAttr attr);
+
+JsirLocationAttr GetJsirLocationAttr(mlir::MLIRContext *context,
+                                     const JsSourceLocation *loc,
+                                     std::optional<int64_t> start_index,
+                                     std::optional<int64_t> end_index,
+                                     std::optional<int64_t> scope_uid);
+
 // Contains metadata in each AST node.
 // This is equivalent to `JsirTriviaAttr` in JSIR.
 struct JsTrivia {
@@ -37,9 +45,11 @@ struct JsTrivia {
   std::optional<int64_t> start;
   std::optional<int64_t> end;
   std::optional<int64_t> scope_uid;
-  std::optional<std::vector<std::unique_ptr<JsComment>>> leading_comments;
-  std::optional<std::vector<std::unique_ptr<JsComment>>> trailing_comments;
-  std::optional<std::vector<std::unique_ptr<JsComment>>> inner_comments;
+  std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol;
+  std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols;
+  std::optional<std::vector<int64_t>> leading_comment_uids;
+  std::optional<std::vector<int64_t>> trailing_comment_uids;
+  std::optional<std::vector<int64_t>> inner_comment_uids;
 };
 
 JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr);
@@ -59,10 +69,13 @@ std::unique_ptr<NodeT> CreateJsNodeWithTrivia(JsTrivia trivia, Args &&...args) {
       /*loc=*/std::move(trivia.loc),
       /*start=*/trivia.start,
       /*end=*/trivia.end,
-      /*leading_comments=*/std::move(trivia.leading_comments),
-      /*trailing_comments=*/std::move(trivia.trailing_comments),
-      /*inner_comments=*/std::move(trivia.inner_comments),
-      /*scope_uid=*/trivia.scope_uid, std::forward<Args>(args)...);
+      /*leading_comments=*/std::move(trivia.leading_comment_uids),
+      /*trailing_comments=*/std::move(trivia.trailing_comment_uids),
+      /*inner_comments=*/std::move(trivia.inner_comment_uids),
+      /*scope_uid=*/trivia.scope_uid,
+      /*referenced_symbol=*/std::move(trivia.referenced_symbol),
+      /*defined_symbols=*/std::move(trivia.defined_symbols),
+      std::forward<Args>(args)...);
 }
 
 template <typename NodeT,

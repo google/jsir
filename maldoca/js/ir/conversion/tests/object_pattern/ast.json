@@ -44,23 +44,8 @@
 // AST-NEXT:         },
 // AST-NEXT:         "start": 49,
 // AST-NEXT:         "end": 216,
-// AST-NEXT:         "leadingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 1,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 1,
-// AST-NEXT:                 "column": 48
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " Must wrap with \"()\", otherwise doesn't parse.",
-// AST-NEXT:             "start": 0,
-// AST-NEXT:             "end": 48
-// AST-NEXT:           }
+// AST-NEXT:         "leadingCommentUids": [
+// AST-NEXT:           0
 // AST-NEXT:         ],
 // AST-NEXT:         "scopeUid": 0,
 // AST-NEXT:         "expression": {
@@ -448,5 +433,23 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": [
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 1,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 1,
+// AST-NEXT:           "column": 48
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " Must wrap with \"()\", otherwise doesn't parse.",
+// AST-NEXT:       "start": 0,
+// AST-NEXT:       "end": 48
+// AST-NEXT:     }
+// AST-NEXT:   ]
 // AST-NEXT: }

@@ -16,6 +16,7 @@
 #define MALDOCA_JS_IR_ANALYSES_CONDITIONAL_FORWARD_PER_VAR_DATAFLOW_ANALYSIS_H_
 
 #include <cassert>
+#include <string>
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
@@ -24,6 +25,7 @@
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Operation.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.pb.h"
 #include "maldoca/js/ir/analyses/conditional_forward_dataflow_analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
@@ -76,31 +78,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
     // region.
     //
     // Only in top-level ops, we initialize with boundary values.
-
-    bool is_entry_block = [&] {
-      mlir::Operation *parent_op = block->getParentOp();
-      if (llvm::isa<JsirProgramOp>(parent_op)) {
-        return true;
-      }
-      if (llvm::isa<JsirFileOp>(parent_op)) {
-        return true;
-      }
-
-      // TODO(tzx): Rethink this. Function parameters should be UNKNOWN but
-      // other variables should be UNINIT.
-      if (llvm::isa<JsirFunctionDeclarationOp>(parent_op)) {
-        return true;
-      }
-      if (llvm::isa<JsirFunctionExpressionOp>(parent_op)) {
-        return true;
-      }
-      if (parent_op->getParentOp() == nullptr) {
-        return true;
-      }
-      return false;
-    }();
-
-    if (is_entry_block) {
+    if (Base::IsEntryBlock(block)) {
       boundary_state.Write(StateT(BoundaryInitialValue()));
       for (auto arg_state : arg_states) {
         arg_state.Write(BoundaryInitialValue());
@@ -111,7 +89,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
   void WriteDenseAfterState(mlir::Operation *op, llvm::StringRef name,
                             const ValueT &value, const StateT *before,
                             JsirStateRef<StateT> after) {
-    JsirSymbolId target_symbol{name, FindSymbol(scopes_, op, name).value_or(0)};
+    JsSymbolId target_symbol{std::string(name), FindSymbol(scopes_, op, name)};
 
     after.Join(*before);
     after.Write([&](StateT *after) {
@@ -135,7 +113,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
                        OperandStates<JsirIdentifierOp> operands,
                        const StateT *before, JsirStateRef<ValueT> result) {
     absl::string_view name = op.getName();
-    JsirSymbolId symbol{name, FindSymbol(scopes_, op, name).value_or(0)};
+    JsSymbolId symbol{std::string(name), FindSymbol(scopes_, op, name)};
     ValueT value = before->Get(symbol);
     result.Join(value);
   }
@@ -146,7 +124,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
                             llvm::MutableArrayRef<JsirStateRef<ValueT>> results,
                             JsirStateRef<StateT> after) {
     absl::string_view name = op.getId().getName().strref();
-    JsirSymbolId symbol{name, FindSymbol(scopes_, op, name).value_or(0)};
+    JsSymbolId symbol{std::string(name), FindSymbol(scopes_, op, name)};
     ValueT value = before->Get(symbol);
 
     assert(results.size() == 1);

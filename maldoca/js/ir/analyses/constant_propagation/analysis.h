@@ -16,18 +16,18 @@
 #define MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_ANALYSIS_H_
 
 #include <optional>
-#include <utility>
-#include <vector>
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/raw_ostream.h"
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Attributes.h"
+#include "mlir/IR/Block.h"
 #include "mlir/IR/Operation.h"
 #include "maldoca/js/babel/babel.pb.h"
 #include "maldoca/js/ir/analyses/conditional_forward_per_var_dataflow_analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/analyses/per_var_state.h"
+#include "maldoca/js/ir/analyses/state.h"
 #include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
@@ -189,15 +189,12 @@ class JsirConstantPropagationAnalysis
       JsirStateRef<JsirConstantPropagationState> after);
 
   void VisitUpdateExpression(
-      JsirUpdateExpressionOp op,
-      OperandStates<JsirUpdateExpressionOp> operands,
+      JsirUpdateExpressionOp op, OperandStates<JsirUpdateExpressionOp> operands,
       const JsirConstantPropagationState *before,
       llvm::MutableArrayRef<JsirStateRef<JsirConstantPropagationValue>> results,
       JsirStateRef<JsirConstantPropagationState> after);
 
-  std::optional<std::vector<mlir::Block *>> InferExecutableSuccessors(
-      mlir::Operation *op,
-      llvm::ArrayRef<const JsirConstantPropagationValue *> operands) override;
+  bool IsCfgEdgeExecutable(JsirGeneralCfgEdge *edge) override;
 
   void VisitOp(
       mlir::Operation *op,

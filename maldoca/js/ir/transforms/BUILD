@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("//maldoca/js:allowed_users.bzl", "JSIR_ALLOWED_USERS")
 
 package(

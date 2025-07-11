@@ -15,60 +15,42 @@
 #ifndef MALDOCA_JS_IR_ANALYSES_SCOPE_H_
 #define MALDOCA_JS_IR_ANALYSES_SCOPE_H_
 
-#include <cstddef>
 #include <cstdint>
-#include <map>
-#include <memory>
 #include <optional>
-#include <string>
-#include <utility>
-#include <vector>
 
 #include "llvm/Support/raw_ostream.h"
 #include "mlir/IR/Operation.h"
-#include "mlir/Support/LogicalResult.h"
-#include "absl/base/nullability.h"
-#include "absl/container/btree_map.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
-#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.pb.h"
+#include "maldoca/js/babel/scope.h"
 #include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
 
-// A <name, scope ID> pair uniquely identifies a symbol.
-using JsirSymbolId = std::pair<std::string, int64_t>;
-
-// Searches all scopes from `scope_uid` to the global scope for a symbol.
-// Returns the uid of the scope where the symbol is defined.
-std::optional<int64_t> FindSymbol(const BabelScopes &scopes, int64_t scope_uid,
-                                  absl::string_view name);
+inline llvm::raw_ostream &operator<<(llvm::raw_ostream &os,
+                                     const JsSymbolId &s) {
+  return os << absl::StrCat(s);
+}
 
 // Searches all scopes from the one `op` is in to the global scope for a symbol.
 // Returns the uid of the scope where the symbol is defined.
 std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
                                   mlir::Operation *op, absl::string_view name);
 
-// Turns a symbol name into a JsirSymbolId, by searching all scopes from
-// `scope_uid` to the global scope. If the symbol is not found, assume it has
-// `scope_uid` 0.
-JsirSymbolId GetSymbolId(const BabelScopes &scopes, int64_t scope_uid,
-                         absl::string_view name);
-
-// Turns a symbol name into a JsirSymbolId, by searching all scopes from
+// Turns a symbol name into a JsSymbolId, by searching all scopes from
 // the one `op` is in to the global scope. If the symbol is not found, assume it
 // has `scope_uid` 0.
-JsirSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
-                         absl::string_view name);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
+                       absl::string_view name);
 
-// Turns an op / attr into a JsirSymbolId, by searching all scopes from
+// Turns an op / attr into a JsSymbolId, by searching all scopes from
 // the one op / attr is in to the global scope. If the symbol is not found,
 // assume it has `scope_uid` 0.
-JsirSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op);
-JsirSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierRefOp op);
-JsirSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierRefOp op);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr);
 
 }  // namespace maldoca
 

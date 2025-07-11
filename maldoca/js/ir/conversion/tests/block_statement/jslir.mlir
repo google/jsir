@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jslir.control_flow_starter"() <{kind = #jsir<cf_kind BlockStatement>}> : () -> !jsir.any
 // JSLIR-NEXT:     "jslir.control_flow_marker"(%0) <{kind = #jsir<cf_marker BlockStatementDirectives>}> : (!jsir.any) -> ()

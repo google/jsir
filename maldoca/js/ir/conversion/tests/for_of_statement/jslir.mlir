@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
 // JSLIR-NEXT:     %1 = "jsir.identifier"() <{name = "b"}> : () -> !jsir.any
@@ -17,7 +17,7 @@
 // JSLIR-NEXT:     "jslir.for_in_of_statement_end"(%2) : (!jsir.any) -> ()
 // JSLIR-NEXT:     %6 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
 // JSLIR-NEXT:     %7 = "jsir.identifier"() <{name = "b"}> : () -> !jsir.any
-// JSLIR-NEXT:     %8 = "jslir.for_of_statement_start"(%6, %7) <{await = false, left_declaration = #jsir<for_in_of_declaration   <L 4 C 5>, <L 4 C 10>, 24, 29, 2,   <L 4 C 9>, <L 4 C 10>, 28, 29, 2, "let">}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %8 = "jslir.for_of_statement_start"(%6, %7) <{await = false, left_declaration = #jsir<for_in_of_declaration   <L 4 C 5>, <L 4 C 10>, 24, 29, 2,   <L 4 C 9>, <L 4 C 10>, 28, 29, 2,  "a", 2, "let">}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSLIR-NEXT:     "cf.br"()[^bb4] : () -> ()
 // JSLIR-NEXT:   ^bb4:  // 2 preds: ^bb3, ^bb5
 // JSLIR-NEXT:     %9 = "jslir.for_in_of_statement_has_next"(%8) : (!jsir.any) -> !jsir.any

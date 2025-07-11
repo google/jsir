@@ -82,7 +82,6 @@ struct JsRepr {
   static absl::StatusOr<ReprT *> Cast(JsRepr *repr) {
     static_assert(std::is_base_of_v<JsRepr, ReprT>,
                   "ReprT must be a subclass of JsRepr");
-
     if (!llvm::isa<ReprT>(repr)) {
       return absl::InvalidArgumentError(absl::StrFormat(
           "expected %s, got %s", typeid(ReprT).name(), typeid(*repr).name()));
@@ -94,12 +93,23 @@ struct JsRepr {
   static absl::StatusOr<const ReprT *> Cast(const JsRepr *repr) {
     static_assert(std::is_base_of_v<JsRepr, ReprT>,
                   "ReprT must be a subclass of JsRepr");
-
     if (!llvm::isa<ReprT>(repr)) {
       return absl::InvalidArgumentError(absl::StrFormat(
           "expected %s, got %s", typeid(ReprT).name(), typeid(*repr).name()));
     }
     return llvm::cast<ReprT>(repr);
+  }
+
+  template <typename ReprT>
+  static absl::StatusOr<std::unique_ptr<ReprT>> Cast(
+      std::unique_ptr<JsRepr> repr) {
+    static_assert(std::is_base_of_v<JsRepr, ReprT>,
+                  "ReprT must be a subclass of JsRepr");
+    if (!llvm::isa<ReprT>(repr.get())) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "expected %s, got %s", typeid(ReprT).name(), typeid(*repr).name()));
+    }
+    return llvm::cast<ReprT>(std::move(repr));
   }
 
  protected:
@@ -214,8 +224,8 @@ class JsPass {
   virtual std::string name() const = 0;
 
   static absl::StatusOr<std::unique_ptr<JsPass>> Create(
-      const JsPassConfig &config, absl::Nullable<Babel *> babel,
-      absl::Nullable<mlir::MLIRContext *> mlir_context);
+      const JsPassConfig &config, Babel *absl_nullable babel,
+      mlir::MLIRContext *absl_nullable mlir_context);
 };
 
 // =============================================================================
@@ -223,11 +233,40 @@ class JsPass {
 // =============================================================================
 
 absl::Status RunPasses(const JsPassConfigs &pass_configs,
-                       JsPassContext &context, absl::Nullable<Babel *> babel,
-                       absl::Nullable<mlir::MLIRContext *> mlir_context);
+                       JsPassContext &context, Babel *absl_nullable babel,
+                       mlir::MLIRContext *absl_nullable mlir_context);
 
 absl::Status RunPasses(absl::Span<const std::unique_ptr<JsPass>> passes,
                        JsPassContext &context);
+
+bool PassRequiresBabel(const JsPassConfig &pass);
+
+class JsPassRunner {
+ public:
+  virtual ~JsPassRunner() = default;
+
+  struct Result {
+    JsReprPb output_repr_pb;
+    JsAnalysisOutputs analysis_outputs;
+  };
+
+  virtual absl::StatusOr<Result> Run(absl::string_view original_source,
+                                     const JsReprPb &input_repr_pb,
+                                     const JsPassConfigs &passes) = 0;
+};
+
+class UnsandboxedJsPassRunner : public JsPassRunner {
+ public:
+  explicit UnsandboxedJsPassRunner(Babel *absl_nullable babel)
+      : babel_(babel) {}
+
+  absl::StatusOr<Result> Run(absl::string_view original_source,
+                             const JsReprPb &input_repr_pb,
+                             const JsPassConfigs &passes) override;
+
+ private:
+  Babel *absl_nullable babel_;
+};
 
 // =============================================================================
 // JsConversion <: JsPass
@@ -274,8 +313,7 @@ class JsAnalysisTmpl : public JsAnalysis {
 
 class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
  public:
-  explicit JsirAnalysis(JsirAnalysisConfig config,
-                        absl::Nullable<Babel *> babel)
+  explicit JsirAnalysis(JsirAnalysisConfig config, Babel *absl_nullable babel)
       : config_(std::move(config)), babel_(babel) {}
 
   std::string name() const override {
@@ -294,7 +332,7 @@ class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
 
  private:
   JsirAnalysisConfig config_;
-  absl::Nullable<Babel *> babel_;
+  Babel *absl_nullable babel_;
 };
 
 // =============================================================================
@@ -358,8 +396,7 @@ class JsAstTransform : public JsTransformTmpl<JsAstRepr> {
 
 class JsirTransform : public JsTransformTmpl<JsirRepr> {
  public:
-  explicit JsirTransform(JsirTransformConfig config,
-                         absl::Nullable<Babel *> babel)
+  explicit JsirTransform(JsirTransformConfig config, Babel *absl_nullable babel)
       : config_(std::move(config)), babel_(babel) {}
 
   std::string name() const override {
@@ -369,11 +406,11 @@ class JsirTransform : public JsTransformTmpl<JsirRepr> {
  private:
   absl::Status Transform(std::optional<absl::string_view> original_source,
                          JsirRepr &repr, JsAnalysisOutputs &outputs) override {
-    return TransformJsir(outputs, *repr.op, repr.scopes, config_, babel_);
+    return TransformJsir(*repr.op, repr.scopes, config_, babel_, &outputs);
   }
 
   JsirTransformConfig config_;
-  absl::Nullable<Babel *> babel_;
+  Babel *absl_nullable babel_;
 };
 
 }  // namespace maldoca

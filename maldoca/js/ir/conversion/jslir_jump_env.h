@@ -99,6 +99,8 @@
 #include <utility>
 #include <vector>
 
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/DenseSet.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "absl/cleanup/cleanup.h"

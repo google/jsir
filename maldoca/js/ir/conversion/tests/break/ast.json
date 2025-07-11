@@ -44,105 +44,15 @@
 // AST-NEXT:         },
 // AST-NEXT:         "start": 195,
 // AST-NEXT:         "end": 233,
-// AST-NEXT:         "leadingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 1,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 1,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 0,
-// AST-NEXT:             "end": 80
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 2,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 2,
-// AST-NEXT:                 "column": 31
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " Breaking out of a while loop",
-// AST-NEXT:             "start": 81,
-// AST-NEXT:             "end": 112
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 3,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 3,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 113,
-// AST-NEXT:             "end": 193
-// AST-NEXT:           }
+// AST-NEXT:         "leadingCommentUids": [
+// AST-NEXT:           0,
+// AST-NEXT:           1,
+// AST-NEXT:           2
 // AST-NEXT:         ],
-// AST-NEXT:         "trailingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 11,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 11,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 235,
-// AST-NEXT:             "end": 315
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 12,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 12,
-// AST-NEXT:                 "column": 36
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " Breaking out of second while loop",
-// AST-NEXT:             "start": 316,
-// AST-NEXT:             "end": 352
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 13,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 13,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 353,
-// AST-NEXT:             "end": 433
-// AST-NEXT:           }
+// AST-NEXT:         "trailingCommentUids": [
+// AST-NEXT:           3,
+// AST-NEXT:           4,
+// AST-NEXT:           5
 // AST-NEXT:         ],
 // AST-NEXT:         "scopeUid": 1,
 // AST-NEXT:         "test": {
@@ -283,105 +193,15 @@
 // AST-NEXT:         },
 // AST-NEXT:         "start": 435,
 // AST-NEXT:         "end": 512,
-// AST-NEXT:         "leadingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 11,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 11,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 235,
-// AST-NEXT:             "end": 315
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 12,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 12,
-// AST-NEXT:                 "column": 36
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " Breaking out of second while loop",
-// AST-NEXT:             "start": 316,
-// AST-NEXT:             "end": 352
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 13,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 13,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 353,
-// AST-NEXT:             "end": 433
-// AST-NEXT:           }
+// AST-NEXT:         "leadingCommentUids": [
+// AST-NEXT:           3,
+// AST-NEXT:           4,
+// AST-NEXT:           5
 // AST-NEXT:         ],
-// AST-NEXT:         "trailingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 22,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 22,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 514,
-// AST-NEXT:             "end": 594
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 23,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 23,
-// AST-NEXT:                 "column": 35
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " Breaking immediately after label",
-// AST-NEXT:             "start": 595,
-// AST-NEXT:             "end": 630
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 24,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 24,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 631,
-// AST-NEXT:             "end": 711
-// AST-NEXT:           }
+// AST-NEXT:         "trailingCommentUids": [
+// AST-NEXT:           6,
+// AST-NEXT:           7,
+// AST-NEXT:           8
 // AST-NEXT:         ],
 // AST-NEXT:         "scopeUid": 0,
 // AST-NEXT:         "label": {
@@ -641,55 +461,10 @@
 // AST-NEXT:         },
 // AST-NEXT:         "start": 713,
 // AST-NEXT:         "end": 732,
-// AST-NEXT:         "leadingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 22,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 22,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 514,
-// AST-NEXT:             "end": 594
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 23,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 23,
-// AST-NEXT:                 "column": 35
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " Breaking immediately after label",
-// AST-NEXT:             "start": 595,
-// AST-NEXT:             "end": 630
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 24,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 24,
-// AST-NEXT:                 "column": 80
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " =============================================================================",
-// AST-NEXT:             "start": 631,
-// AST-NEXT:             "end": 711
-// AST-NEXT:           }
+// AST-NEXT:         "leadingCommentUids": [
+// AST-NEXT:           6,
+// AST-NEXT:           7,
+// AST-NEXT:           8
 // AST-NEXT:         ],
 // AST-NEXT:         "scopeUid": 0,
 // AST-NEXT:         "label": {
@@ -747,5 +522,151 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": [
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 1,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 1,
+// AST-NEXT:           "column": 80
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " =============================================================================",
+// AST-NEXT:       "start": 0,
+// AST-NEXT:       "end": 80
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 2,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 2,
+// AST-NEXT:           "column": 31
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " Breaking out of a while loop",
+// AST-NEXT:       "start": 81,
+// AST-NEXT:       "end": 112
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 3,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 3,
+// AST-NEXT:           "column": 80
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " =============================================================================",
+// AST-NEXT:       "start": 113,
+// AST-NEXT:       "end": 193
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 11,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 11,
+// AST-NEXT:           "column": 80
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " =============================================================================",
+// AST-NEXT:       "start": 235,
+// AST-NEXT:       "end": 315
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 12,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 12,
+// AST-NEXT:           "column": 36
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " Breaking out of second while loop",
+// AST-NEXT:       "start": 316,
+// AST-NEXT:       "end": 352
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 13,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 13,
+// AST-NEXT:           "column": 80
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " =============================================================================",
+// AST-NEXT:       "start": 353,
+// AST-NEXT:       "end": 433
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 22,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 22,
+// AST-NEXT:           "column": 80
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " =============================================================================",
+// AST-NEXT:       "start": 514,
+// AST-NEXT:       "end": 594
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 23,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 23,
+// AST-NEXT:           "column": 35
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " Breaking immediately after label",
+// AST-NEXT:       "start": 595,
+// AST-NEXT:       "end": 630
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 24,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 24,
+// AST-NEXT:           "column": 80
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " =============================================================================",
+// AST-NEXT:       "start": 631,
+// AST-NEXT:       "end": 711
+// AST-NEXT:     }
+// AST-NEXT:   ]
 // AST-NEXT: }

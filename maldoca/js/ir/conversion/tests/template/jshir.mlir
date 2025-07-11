@@ -1,4 +1,4 @@
-// JSHIR:      "jsir.file"() ({
+// JSHIR:      "jsir.file"() <{comments = []}> ({
 // JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSHIR-NEXT:     %0 = "jsir.template_element_value"() <{cooked = "a", raw = "a"}> : () -> !jsir.any
 // JSHIR-NEXT:     %1 = "jsir.template_element"(%0) <{tail = false}> : (!jsir.any) -> !jsir.any

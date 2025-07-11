@@ -37,6 +37,47 @@ function base64Decode(value) {
 }
 
 /**
+ * Recursively traverses an object, calling the callback on each object.
+ *
+ * @param {Object! | null | undefined} node
+ * @param {Set<Object!>!} visited
+ * @param {function(Object!): void} callback
+ */
+function traverseObjectInternal(node, visited, callback) {
+  if (node === undefined || node === null) {
+    return;
+  }
+
+  if (typeof(node) !== 'object') {
+    return;
+  }
+
+  if (visited.has(node)) {
+    return;
+  }
+  visited.add(node);
+
+  callback(node);
+
+  Object.values(node).forEach(field => {
+    if (typeof field === 'object') {
+      traverseObjectInternal(field, visited, callback);
+    }
+  });
+}
+
+/**
+ * Recursively traverses an object, calling the callback on each object.
+ *
+ * @param {Object! | null | undefined} node
+ * @param {function(Object!): void} callback
+ */
+function traverseObject(node, callback) {
+  const visited = new Set();
+  traverseObjectInternal(node, visited, callback);
+}
+
+/**
  * A StringLiteral looks like this:
  *
  * {
@@ -79,50 +120,146 @@ function mutateStringLiteral(node, visited, mutate) {
  * Base64-encode/decode all StringLiterals in the AST.
  *
  * @param {!Object} node
- * @param {!Set<!Object>} visited
  * @param {function(string): string} mutate
  */
-function mutateStringLiterals(node, visited, mutate) {
-  if (!(node instanceof Object)) {
-    return;
-  }
-
-  // Sometimes the same object appears multiple times in the AST, probably to
-  // reduce memory usage.
-  if (visited.has(node)) {
-    return;
-  }
-  visited.add(node);
-
-  if ('type' in node && node.type === 'StringLiteral') {
-    mutateStringLiteral(node, visited, mutate);
-  }
-
-  // Recursively walk the AST.
-  // Note that this for-loop also works if node is an array.
-  for (const element of Object.values(node)) {
-    mutateStringLiterals(element, visited, mutate);
-  }
+function mutateStringLiterals(node, mutate) {
+  const visited = new Set();
+  traverseObject(node, (n) => {
+    if ('type' in n && n.type === 'StringLiteral') {
+      mutateStringLiteral(n, visited, mutate);
+    }
+  });
 }
 
 /**
  * Base64-encode all StringLiterals in the AST.
  *
  * @param {!Object} node
- * @param {!Set<!Object>=} visited
  */
-function base64EncodeStringLiterals(node, visited = new Set()) {
-  mutateStringLiterals(node, visited, base64Encode);
+function base64EncodeStringLiterals(node) {
+  mutateStringLiterals(node, base64Encode);
 }
 
 /**
  * Base64-decode all StringLiterals in the AST.
  *
  * @param {!Object} node
- * @param {!Set<!Object>=} visited
  */
-function base64DecodeStringLiterals(node, visited = new Set()) {
-  mutateStringLiterals(node, visited, base64Decode);
+function base64DecodeStringLiterals(node) {
+  mutateStringLiterals(node, base64Decode);
+}
+
+// =============================================================================
+
+/**
+ * Turns a Comment[] into a number[] representing the comment UIDs, by looking
+ * them up in the commentToUid map.
+ *
+ * @param {Array<Object!>!} comments
+ * @param {Map<Object!, number>!} commentToUid
+ * @return {Array<number>!}
+ */
+function commentsToCommentUids(comments, commentToUid) {
+  return comments.flatMap((comment) => {
+    const uid = commentToUid.get(comment);
+    if (uid !== undefined) {
+      return [uid];
+    } else {
+      return [];
+    }
+  });
+}
+
+/**
+ * In each AST node, replaces {leading,trailing,inner}Comments with
+ * {leading,trailing,inner}CommentUids.
+ *
+ * @param {Object!} ast
+ */
+function convertCommentsToCommentUids(ast) {
+  const commentToUid = new Map();
+  if (ast.comments) {
+    ast.comments.forEach((comment, index) => {
+      commentToUid.set(comment, index);
+    });
+  }
+
+  traverseObject(ast, obj => {
+    if (!Babel.packages.types.isNode(obj)) {
+      return;
+    }
+
+    const node = obj;
+    if (node.leadingComments) {
+      node.leadingCommentUids =
+          commentsToCommentUids(node.leadingComments, commentToUid);
+      delete node.leadingComments;
+    }
+    if (node.innerComments) {
+      node.innerCommentUids =
+          commentsToCommentUids(node.innerComments, commentToUid);
+      delete node.innerComments;
+    }
+    if (node.trailingComments) {
+      node.trailingCommentUids =
+          commentsToCommentUids(node.trailingComments, commentToUid);
+      delete node.trailingComments;
+    }
+  });
+}
+
+/**
+ * Turns a number[] representing the comment UIDs into a Comment[], by looking
+ * them up in the commentPool.
+ *
+ * @param {Array<number>!} commentUids
+ * @param {Array<Object!>!} commentPool
+ * @return {Array<Object!>!}
+ */
+function commentUidsToComments(commentUids, commentPool) {
+  return commentUids.flatMap((uid) => {
+    const comment = commentPool[uid];
+    if (comment) {
+      return [comment];
+    } else {
+      return [];
+    }
+  });
+}
+
+/**
+ * In each AST node, replaces {leading,trailing,inner}CommentUids with
+ * {leading,trailing,inner}Comments.
+ *
+ * @param {Object!} ast
+ */
+function convertCommentUidsToComments(ast) {
+  if (ast.comments) {
+    const commentPool = ast.comments;
+
+    traverseObject(ast, obj => {
+      if (!Babel.packages.types.isNode(obj)) {
+        return;
+      }
+
+      const node = obj;
+      if (node.leadingCommentUids) {
+        node.leadingComments =
+            commentUidsToComments(node.leadingCommentUids, commentPool);
+        delete node.leadingCommentUids;
+      }
+      if (node.innerCommentUids) {
+        node.innerComments =
+            commentUidsToComments(node.innerCommentUids, commentPool);
+        delete node.innerCommentUids;
+      }
+      if (node.trailingCommentUids) {
+        node.trailingComments =
+            commentUidsToComments(node.trailingCommentUids, commentPool);
+        delete node.trailingCommentUids;
+      }
+    });
+  }
 }
 
 // =============================================================================
@@ -178,6 +315,8 @@ function parseInternal(source, options) {
     base64EncodeStringLiterals(ast);
   }
 
+  convertCommentsToCommentUids(ast);
+
   // Store all scopes in a dictionary, and add a scope UID to each AST node.
   //
   // We don't try to get scope information when there are errors in the AST
@@ -195,6 +334,26 @@ function parseInternal(source, options) {
         }
       }
     });
+
+    for (const scope of Object.values(scopes)) {
+      for (const [name, binding] of Object.entries(scope.bindings)) {
+        for (const referencePath of binding.referencePaths) {
+          referencePath.node.referencedSymbol = {
+            name: name,
+            defScopeUid: scope.uid,
+          };
+        }
+
+        const def_node = binding.path.node;
+        if (def_node.definedSymbols === undefined) {
+          def_node.definedSymbols = [];
+        }
+        def_node.definedSymbols.push({
+          name,
+          defScopeUid: scope.uid,
+        });
+      }
+    }
   }
 
   // We don't serialize to JSON even though it's possible. The reason is that
@@ -217,6 +376,8 @@ function generateInternal(ast, options) {
   if (options.base64DecodeStringLiterals) {
     base64DecodeStringLiterals(ast);
   }
+
+  convertCommentUidsToComments(ast);
 
   const {code} = Babel.packages.generator.default(ast, options);
   return code;

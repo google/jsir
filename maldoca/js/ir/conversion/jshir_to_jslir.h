@@ -35,7 +35,6 @@
 #include "mlir/IR/ValueRange.h"
 #include "absl/functional/function_ref.h"
 #include "absl/log/check.h"
-#include "absl/types/optional.h"
 #include "maldoca/js/ir/conversion/jslir_jump_env.h"
 #include "maldoca/js/ir/ir.h"
 

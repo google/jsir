@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = []}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
 // JSLIR-NEXT:     %1 = "jsir.unary_expression"(%0) <{operator_ = "-", prefix = true}> : (!jsir.any) -> !jsir.any

@@ -151,6 +151,10 @@ def JsirFileOp : Jsir_Op<
         NoTerminator,
         IsolatedFromAbove
     ]> {
+  let arguments = (ins
+    OptionalAttr<TypedArrayAttrBase<JsirCommentAttrInterface, "">>: $comments
+  );
+
   let regions = (region
     StmtRegion: $program
   );

@@ -146,6 +146,12 @@
 // AST-NEXT:               "start": 27,
 // AST-NEXT:               "end": 28,
 // AST-NEXT:               "scopeUid": 2,
+// AST-NEXT:               "definedSymbols": [
+// AST-NEXT:                 {
+// AST-NEXT:                   "name": "a",
+// AST-NEXT:                   "defScopeUid": 2
+// AST-NEXT:                 }
+// AST-NEXT:               ],
 // AST-NEXT:               "id": {
 // AST-NEXT:                 "type": "Identifier",
 // AST-NEXT:                 "loc": {
@@ -202,6 +208,10 @@
 // AST-NEXT:             "start": 36,
 // AST-NEXT:             "end": 37,
 // AST-NEXT:             "scopeUid": 2,
+// AST-NEXT:             "referencedSymbol": {
+// AST-NEXT:               "name": "a",
+// AST-NEXT:               "defScopeUid": 2
+// AST-NEXT:             },
 // AST-NEXT:             "name": "a"
 // AST-NEXT:           }
 // AST-NEXT:         }
@@ -365,5 +375,6 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": []
 // AST-NEXT: }

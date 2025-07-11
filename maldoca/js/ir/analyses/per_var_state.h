@@ -23,7 +23,7 @@
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
-#include "maldoca/js/ir/analyses/dataflow_analysis.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/analyses/scope.h"
 #include "maldoca/js/ir/analyses/state.h"
 
@@ -89,7 +89,7 @@ namespace maldoca {
 //            (Note: For b, Join(Unknown, 2) = Unknown.)
 // ```
 template <typename ValueT>
-class JsirPerVarState : public absl::flat_hash_map<JsirSymbolId, ValueT>,
+class JsirPerVarState : public absl::flat_hash_map<JsSymbolId, ValueT>,
                         public JsirState<JsirPerVarState<ValueT>> {
  public:
   static_assert(std::is_base_of_v<JsirState<ValueT>, ValueT>,
@@ -101,21 +101,22 @@ class JsirPerVarState : public absl::flat_hash_map<JsirSymbolId, ValueT>,
 
   explicit JsirPerVarState() : JsirPerVarState(ValueT()) {}
 
-  using absl::flat_hash_map<JsirSymbolId, ValueT>::find;
-  using absl::flat_hash_map<JsirSymbolId, ValueT>::begin;
-  using absl::flat_hash_map<JsirSymbolId, ValueT>::end;
-  using absl::flat_hash_map<JsirSymbolId, ValueT>::insert;
+  using absl::flat_hash_map<JsSymbolId, ValueT>::find;
+  using absl::flat_hash_map<JsSymbolId, ValueT>::begin;
+  using absl::flat_hash_map<JsSymbolId, ValueT>::end;
+  using absl::flat_hash_map<JsSymbolId, ValueT>::insert;
+  using absl::flat_hash_map<JsSymbolId, ValueT>::erase;
 
   // If the var does not exist in the map, returns the default value.
-  const ValueT &Get(const JsirSymbolId &var) const;
+  const ValueT &Get(const JsSymbolId &var) const;
 
   mlir::ChangeResult Set(
-      const JsirSymbolId &var,
+      const JsSymbolId &var,
       llvm::function_ref<mlir::ChangeResult(ValueT &)> setter);
 
-  mlir::ChangeResult Set(const JsirSymbolId &var, ValueT new_value);
+  mlir::ChangeResult Set(const JsSymbolId &var, ValueT new_value);
 
-  mlir::ChangeResult Join(const JsirSymbolId &var, ValueT other_value);
+  mlir::ChangeResult Join(const JsSymbolId &var, ValueT other_value);
 
   mlir::ChangeResult Join(const JsirPerVarState<ValueT> &other) override;
 
@@ -130,7 +131,7 @@ class JsirPerVarState : public absl::flat_hash_map<JsirSymbolId, ValueT>,
 };
 
 template <typename ValueT>
-const ValueT &JsirPerVarState<ValueT>::Get(const JsirSymbolId &var) const {
+const ValueT &JsirPerVarState<ValueT>::Get(const JsSymbolId &var) const {
   auto it = find(var);
   if (it == end()) {
     return default_value_;
@@ -140,7 +141,7 @@ const ValueT &JsirPerVarState<ValueT>::Get(const JsirSymbolId &var) const {
 
 template <typename ValueT>
 mlir::ChangeResult JsirPerVarState<ValueT>::Set(
-    const JsirSymbolId &var,
+    const JsSymbolId &var,
     llvm::function_ref<mlir::ChangeResult(ValueT &)> setter) {
   auto it = find(var);
   if (it == end()) {
@@ -149,16 +150,19 @@ mlir::ChangeResult JsirPerVarState<ValueT>::Set(
     if (result == mlir::ChangeResult::NoChange) {
       return mlir::ChangeResult::NoChange;
     }
-
+    // If we reach here, then `value` must be something non-default.
     insert({var, std::move(value)});
     return mlir::ChangeResult::Change;
   }
-
-  return setter(it->second);
+  mlir::ChangeResult result = setter(it->second);
+  if (it->second == default_value_) {
+    erase(it);
+  }
+  return result;
 }
 
 template <typename ValueT>
-mlir::ChangeResult JsirPerVarState<ValueT>::Set(const JsirSymbolId &var,
+mlir::ChangeResult JsirPerVarState<ValueT>::Set(const JsSymbolId &var,
                                                 ValueT new_value) {
   return Set(var, [&new_value](ValueT &value) {
     if (value == new_value) {
@@ -170,7 +174,7 @@ mlir::ChangeResult JsirPerVarState<ValueT>::Set(const JsirSymbolId &var,
 }
 
 template <typename ValueT>
-mlir::ChangeResult JsirPerVarState<ValueT>::Join(const JsirSymbolId &var,
+mlir::ChangeResult JsirPerVarState<ValueT>::Join(const JsSymbolId &var,
                                                  ValueT other_value) {
   return Set(var,
              [&other_value](ValueT &value) { return value.Join(other_value); });
@@ -193,6 +197,7 @@ mlir::ChangeResult JsirPerVarState<ValueT>::Join(
 
   result |= default_value_.Join(other.default_value_);
 
+  absl::erase_if(*this, [&](auto &kv) { return kv.second == default_value_; });
   return result;
 }
 
@@ -254,13 +259,13 @@ void JsirPerVarState<ValueT>::print(llvm::raw_ostream &os) const {
   default_value_.print(os);
   os << "] { ";
 
-  std::vector<std::pair<JsirSymbolId, ValueT>> pairs{begin(), end()};
+  std::vector<std::pair<JsSymbolId, ValueT>> pairs{begin(), end()};
   absl::c_sort(pairs, [&](const auto &lhs, const auto &rhs) {
     return lhs.first < rhs.first;
   });
 
   for (auto &[symbol, value] : pairs) {
-    os << "<" << symbol.first << " : ";
+    os << "<" << symbol << " : ";
     value.print(os);
     os << "> ";
   }

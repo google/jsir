@@ -140,7 +140,7 @@ message BabelParseRequest {
   // - A separate Scopes proto will be returned
   // - Each AST node will have an additional scopeUid field, specifying which
   //   scope it belongs to
-  optional bool compute_scopes = 6;
+  optional bool compute_scopes = 6 [default = true];
 }
 
 // Babel AST in the form of JSON string.

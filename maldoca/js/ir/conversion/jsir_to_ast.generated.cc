@@ -222,9 +222,23 @@ JsirToAst::VisitFile(JsirFileOp op) {
                      mlir_program_operation->getName().getStringRef().str(), "."));
   }
   MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsProgram> program, VisitProgram(program_op));
+  std::optional<std::vector<std::unique_ptr<JsComment>>> comments;
+  if (op.getCommentsAttr() != nullptr) {
+    std::vector<std::unique_ptr<JsComment>> comments_value;
+    for (mlir::Attribute mlir_comments_element_unchecked : op.getCommentsAttr().getValue()) {
+      auto comments_element_attr = llvm::dyn_cast<JsirCommentAttrInterface>(mlir_comments_element_unchecked);
+      if (comments_element_attr == nullptr) {
+        return absl::InvalidArgumentError("Invalid attribute.");
+      }
+      MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsComment> comments_element, VisitCommentAttr(comments_element_attr));
+      comments_value.push_back(std::move(comments_element));
+    }
+    comments = std::move(comments_value);
+  }
   return Create<JsFile>(
       op,
-      std::move(program));
+      std::move(program),
+      std::move(comments));
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
@@ -1613,11 +1627,11 @@ JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
   std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>> specifiers;
   for (mlir::Attribute mlir_specifiers_element_unchecked : op.getSpecifiersAttr().getValue()) {
     std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>> specifiers_element;
-    if (auto mlir_specifiers_element = mlir_specifiers_element_unchecked.dyn_cast<JsirImportSpecifierAttr>()) {
+    if (auto mlir_specifiers_element = llvm::dyn_cast<JsirImportSpecifierAttr>(mlir_specifiers_element_unchecked)) {
       MALDOCA_ASSIGN_OR_RETURN(specifiers_element, VisitImportSpecifierAttr(mlir_specifiers_element));
-    } else if (auto mlir_specifiers_element = mlir_specifiers_element_unchecked.dyn_cast<JsirImportDefaultSpecifierAttr>()) {
+    } else if (auto mlir_specifiers_element = llvm::dyn_cast<JsirImportDefaultSpecifierAttr>(mlir_specifiers_element_unchecked)) {
       MALDOCA_ASSIGN_OR_RETURN(specifiers_element, VisitImportDefaultSpecifierAttr(mlir_specifiers_element));
-    } else if (auto mlir_specifiers_element = mlir_specifiers_element_unchecked.dyn_cast<JsirImportNamespaceSpecifierAttr>()) {
+    } else if (auto mlir_specifiers_element = llvm::dyn_cast<JsirImportNamespaceSpecifierAttr>(mlir_specifiers_element_unchecked)) {
       MALDOCA_ASSIGN_OR_RETURN(specifiers_element, VisitImportNamespaceSpecifierAttr(mlir_specifiers_element));
     } else {
       return absl::InvalidArgumentError("mlir_specifiers_element_unchecked has invalid type.");
@@ -1651,7 +1665,7 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
   }
   std::vector<std::unique_ptr<JsExportSpecifier>> specifiers;
   for (mlir::Attribute mlir_specifiers_element_unchecked : op.getSpecifiersAttr().getValue()) {
-    auto specifiers_element_attr = mlir_specifiers_element_unchecked.dyn_cast<JsirExportSpecifierAttr>();
+    auto specifiers_element_attr = llvm::dyn_cast<JsirExportSpecifierAttr>(mlir_specifiers_element_unchecked);
     if (specifiers_element_attr == nullptr) {
       return absl::InvalidArgumentError("Invalid attribute.");
     }
@@ -1666,7 +1680,7 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
   if (op.getAssertionsAttr() != nullptr) {
     std::vector<std::unique_ptr<JsImportAttribute>> assertions_value;
     for (mlir::Attribute mlir_assertions_element_unchecked : op.getAssertionsAttr().getValue()) {
-      auto assertions_element_attr = mlir_assertions_element_unchecked.dyn_cast<JsirImportAttributeAttr>();
+      auto assertions_element_attr = llvm::dyn_cast<JsirImportAttributeAttr>(mlir_assertions_element_unchecked);
       if (assertions_element_attr == nullptr) {
         return absl::InvalidArgumentError("Invalid attribute.");
       }
@@ -1690,7 +1704,7 @@ JsirToAst::VisitExportAllDeclaration(JsirExportAllDeclarationOp op) {
   if (op.getAssertionsAttr() != nullptr) {
     std::vector<std::unique_ptr<JsImportAttribute>> assertions_value;
     for (mlir::Attribute mlir_assertions_element_unchecked : op.getAssertionsAttr().getValue()) {
-      auto assertions_element_attr = mlir_assertions_element_unchecked.dyn_cast<JsirImportAttributeAttr>();
+      auto assertions_element_attr = llvm::dyn_cast<JsirImportAttributeAttr>(mlir_assertions_element_unchecked);
       if (assertions_element_attr == nullptr) {
         return absl::InvalidArgumentError("Invalid attribute.");
       }

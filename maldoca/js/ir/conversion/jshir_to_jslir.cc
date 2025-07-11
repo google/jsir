@@ -34,7 +34,6 @@
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "absl/log/check.h"
-#include "absl/types/optional.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -278,8 +277,8 @@ mlir::Value JshirToJslir::VisitSwitchCaseTest(mlir::Value switch_token,
   mlir::OpBuilder::InsertionGuard insertion_guard(builder_);
   builder_.setInsertionPointToStart(test.lir_block);
 
-  mlir::Value case_token = builder_.create<JslirSwitchStatementCaseStartOp>(
-      test.loc, switch_token, case_idx);
+  mlir::Value case_token = JslirSwitchStatementCaseStartOp::create(
+      builder_, test.loc, switch_token, case_idx);
 
   // Lower all the ops except for the terminator.
   VisitOperations(test.hir_block->without_terminator());
@@ -290,7 +289,7 @@ mlir::Value JshirToJslir::VisitSwitchCaseTest(mlir::Value switch_token,
   mlir::Value lir_test = mapping_.lookup(hir_test_end_op.getArgument());
 
   // An op that marks the `lir_test` value.
-  builder_.create<JslirSwitchStatementCaseTestOp>(test.loc, lir_test);
+  JslirSwitchStatementCaseTestOp::create(builder_, test.loc, lir_test);
 
   // Perform the actual comparison.
   //
@@ -298,8 +297,8 @@ mlir::Value JshirToJslir::VisitSwitchCaseTest(mlir::Value switch_token,
   //   case <test>:
   //     ...
   // }
-  mlir::Value case_matched = builder_.create<JsirBinaryExpressionOp>(
-      test.loc, "===", lir_discriminant, lir_test);
+  mlir::Value case_matched = JsirBinaryExpressionOp::create(
+      builder_, test.loc, "===", lir_discriminant, lir_test);
 
   // Jump to the body on match, or a specified block on unmatch.
   CreateCondBranch(test.loc, case_matched, /*true_dest=*/lir_body_block, {},
@@ -325,19 +324,19 @@ void JshirToJslir::VisitSwitchCaseOp(mlir::Value switch_token,
     builder_.setInsertionPointToStart(kase.lir_body_block);
 
     if (kase.test.has_value()) {
-      builder_.create<JslirControlFlowMarkerOp>(
-          kase.body_loc, JsirControlFlowMarkerKind::SwitchStatementCaseBody,
-          case_token);
+      JslirControlFlowMarkerOp::create(
+          builder_, kase.body_loc,
+          JsirControlFlowMarkerKind::SwitchStatementCaseBody, case_token);
     } else {
-      builder_.create<JslirSwitchStatementDefaultStartOp>(
-          kase.loc, switch_token, kase.idx);
+      JslirSwitchStatementDefaultStartOp::create(builder_, kase.loc,
+                                                 switch_token, kase.idx);
     }
 
     VisitOperations(*kase.hir_body_block);
 
     // Jump to next body block.
-    builder_.create<mlir::cf::BranchOp>(kase.body_loc,
-                                        kase.lir_fall_through_block);
+    mlir::cf::BranchOp::create(builder_, kase.body_loc,
+                               kase.lir_fall_through_block);
   }
 }
 
@@ -776,7 +775,7 @@ void JshirToJslir::VisitForInOfStatementOp(
     }
   }
 
-  builder_.create<mlir::cf::BranchOp>(hir_op->getLoc(), lir_next_block);
+  mlir::cf::BranchOp::create(builder_, hir_op->getLoc(), lir_next_block);
 
   {
     builder_.setInsertionPointToStart(lir_body_block);
@@ -1030,12 +1029,13 @@ void JshirToJslir::CreateCondBranch(mlir::Location loc, mlir::Value test,
                                     mlir::ValueRange true_dest_operands,
                                     mlir::Block *false_dest,
                                     mlir::ValueRange false_dest_operands) {
-  auto test_i1 = builder_.create<mlir::UnrealizedConversionCastOp>(
-      loc, mlir::TypeRange{builder_.getI1Type()}, mlir::ValueRange{test});
+  auto test_i1 = mlir::UnrealizedConversionCastOp::create(
+      builder_, loc, mlir::TypeRange{builder_.getI1Type()},
+      mlir::ValueRange{test});
 
-  builder_.create<mlir::cf::CondBranchOp>(loc, test_i1.getResult(0), true_dest,
-                                          true_dest_operands, false_dest,
-                                          false_dest_operands);
+  mlir::cf::CondBranchOp::create(builder_, loc, test_i1.getResult(0), true_dest,
+                                 true_dest_operands, false_dest,
+                                 false_dest_operands);
 }
 
 }  // namespace maldoca

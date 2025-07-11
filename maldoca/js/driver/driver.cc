@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <ostream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -25,10 +26,12 @@
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/internal/conversions.h"
+#include "maldoca/js/ir/conversion/utils.h"
 
 namespace maldoca {
 
@@ -95,8 +98,8 @@ absl::StatusOr<JsReprPb> JsLirRepr::ToProto() const {
 // =============================================================================
 
 absl::StatusOr<std::unique_ptr<JsPass>> JsPass::Create(
-    const JsPassConfig &config, absl::Nullable<Babel *> babel,
-    absl::Nullable<mlir::MLIRContext *> mlir_context) {
+    const JsPassConfig &config, Babel *absl_nullable babel,
+    mlir::MLIRContext *absl_nullable mlir_context) {
   switch (config.kind_case()) {
     case JsPassConfig::KIND_NOT_SET: {
       LOG(FATAL) << "Pass kind not set";
@@ -141,8 +144,8 @@ absl::Status RunPasses(absl::Span<const std::unique_ptr<JsPass>> passes,
 }
 
 absl::Status RunPasses(const JsPassConfigs &pass_configs,
-                       JsPassContext &context, absl::Nullable<Babel *> babel,
-                       absl::Nullable<mlir::MLIRContext *> mlir_context) {
+                       JsPassContext &context, Babel *absl_nullable babel,
+                       mlir::MLIRContext *absl_nullable mlir_context) {
   std::vector<std::unique_ptr<JsPass>> passes;
 
   for (const JsPassConfig &pass_config : pass_configs.passes()) {
@@ -152,6 +155,46 @@ absl::Status RunPasses(const JsPassConfigs &pass_configs,
   }
 
   return RunPasses(passes, context);
+}
+
+bool PassRequiresBabel(const JsPassConfig &pass) {
+  switch (pass.kind_case()) {
+    case JsPassConfig::kConversion:
+      switch (pass.conversion().kind_case()) {
+        case JsConversionConfig::KindCase::kJsSourceToAstString:
+        case JsConversionConfig::KindCase::kJsAstStringToSource:
+          return true;
+        default:
+          return false;
+      }
+    default:
+      return false;
+  }
+}
+
+absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
+    absl::string_view original_source, const JsReprPb &input_repr_pb,
+    const JsPassConfigs &passes) {
+  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsRepr> input_repr,
+                           JsRepr::FromProto(input_repr_pb));
+
+  JsPassContext context{
+      .original_source = std::string(original_source),
+      .repr = std::move(input_repr),
+      .outputs = {},
+  };
+
+  mlir::MLIRContext mlir_context;
+  LoadNecessaryDialects(mlir_context);
+
+  MALDOCA_RETURN_IF_ERROR(RunPasses(passes, context, babel_, &mlir_context));
+
+  MALDOCA_ASSIGN_OR_RETURN(JsReprPb output_repr_pb, context.repr->ToProto());
+
+  return JsPassRunner::Result{
+      .output_repr_pb = std::move(output_repr_pb),
+      .analysis_outputs = std::move(context.outputs),
+  };
 }
 
 }  // namespace maldoca

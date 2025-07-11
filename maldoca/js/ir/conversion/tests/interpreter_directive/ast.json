@@ -46,5 +46,6 @@
 // AST-NEXT:     "sourceType": "script",
 // AST-NEXT:     "body": [],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": []
 // AST-NEXT: }

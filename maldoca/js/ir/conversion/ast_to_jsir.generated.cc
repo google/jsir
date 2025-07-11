@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "llvm/ADT/APFloat.h"
+#include "mlir/IR/Attributes.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
@@ -175,7 +176,16 @@ JsirProgramOp AstToJsir::VisitProgram(const JsProgram *node) {
 }
 
 JsirFileOp AstToJsir::VisitFile(const JsFile *node) {
-  auto op = CreateStmt<JsirFileOp>(node);
+  mlir::ArrayAttr mlir_comments;
+  if (node->comments().has_value()) {
+    std::vector<mlir::Attribute> mlir_comments_data;
+    for (const auto &element : *node->comments().value()) {
+      JsirCommentAttrInterface mlir_element = VisitCommentAttr(element.get());
+      mlir_comments_data.push_back(std::move(mlir_element));
+    }
+    mlir_comments = builder_.getArrayAttr(mlir_comments_data);
+  }
+  auto op = CreateStmt<JsirFileOp>(node, mlir_comments);
   mlir::Region &mlir_program_region = op.getProgram();
   AppendNewBlockAndPopulate(mlir_program_region, [&] {
     VisitProgram(node->program());

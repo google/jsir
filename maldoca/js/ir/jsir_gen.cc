@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -46,7 +47,6 @@
 // Maps pass string to enum.
 static auto *kStringToPassKind =
     new absl::flat_hash_map<std::string, maldoca::JsirPassKind>{
-
         {"source2ast", maldoca::JsirPassKind::kSourceToAst},
         {"ast2hir", maldoca::JsirPassKind::kAstToJshir},
         {"hir2lir", maldoca::JsirPassKind::kJshirToJslir},
@@ -55,7 +55,6 @@ static auto *kStringToPassKind =
         {"ast2source", maldoca::JsirPassKind::kAstToSource},
 
         {"erase_comments", maldoca::JsirPassKind::kEraseComments},
-
         {"constprop", maldoca::JsirPassKind::kConstantPropagation},
         {"movenamedfuncs", maldoca::JsirPassKind::kMoveNamedFunctions},
         {"normalizeobjprops",
@@ -71,18 +70,32 @@ static auto *kStringToPassKind =
 ABSL_FLAG(std::string, input_file, "", "The JavaScript file.");
 ABSL_FLAG(std::string, output_file, "", "The output file.");
 ABSL_FLAG(std::string, jsir_analysis, {}, "The JSIR analysis to run.");
-ABSL_FLAG(std::vector<std::string>, passes, {},
-          absl::StrCat(
-              "The passes to run. Available passes: ",
-              []() -> std::string {
-                std::vector<std::string> available_passes;
-                for (const auto &[pass, pass_kind] : *kStringToPassKind) {
-                  available_passes.push_back(pass);
-                }
-                return absl::StrJoin(available_passes, ", ");
-              }()));
+ABSL_FLAG(
+    std::vector<std::string>, passes, {},
+    absl::StrCat("The passes to run. Available passes: ", []() -> std::string {
+      std::vector<std::string> available_passes;
+      for (const auto &[pass, pass_kind] : *kStringToPassKind) {
+        available_passes.push_back(pass);
+      }
+      return absl::StrJoin(available_passes, ", ");
+    }()));
 
 namespace maldoca {
+
+static std::optional<JsirAnalysisConfig::KindCase> StringToJsirAnalysisKind(
+    absl::string_view kind) {
+  static const auto *kMap =
+      new absl::flat_hash_map<std::string, JsirAnalysisConfig::KindCase>{
+          {"constant_propagation", JsirAnalysisConfig::kConstantPropagation},
+      };
+
+  auto it = kMap->find(kind);
+  if (it != kMap->end()) {
+    return it->second;
+  }
+
+  return std::nullopt;
+}
 
 static JsirAnalysisConfig GetJsirAnalysisConfig() {
   auto analysis = absl::GetFlag(FLAGS_jsir_analysis);
@@ -91,10 +104,20 @@ static JsirAnalysisConfig GetJsirAnalysisConfig() {
     return JsirAnalysisConfig();
   }
 
-  if (analysis == "constant_propagation") {
-    JsirAnalysisConfig config;
-    config.mutable_constant_propagation();
-    return config;
+  std::optional<JsirAnalysisConfig::KindCase> kind =
+      StringToJsirAnalysisKind(analysis);
+
+  CHECK(kind.has_value()) << "Unknown JsirAnalysisConfig: " << analysis;
+
+  switch (*kind) {
+    case JsirAnalysisConfig::kConstantPropagation: {
+      JsirAnalysisConfig config;
+      config.mutable_constant_propagation();
+      return config;
+    }
+
+    case JsirAnalysisConfig::KIND_NOT_SET:
+      LOG(FATAL) << "JsirAnalysisConfig KIND_NOT_SET";
   }
 
   LOG(FATAL) << "Unknown JsirAnalysisConfig: " << analysis;
@@ -143,7 +166,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (const auto &analysis_output : output->analysis_outputs.outputs()) {
-    std::cout << DumpJsAnalysisOutput(analysis_output) << std::endl;
+    std::cout << DumpJsAnalysisOutput(*input, analysis_output) << std::endl;
   }
 
   return 0;

@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = [#jsir<comment_line  <L 1 C 0>, <L 1 C 21>, 0, 21, " regular expression">, #jsir<comment_line  <L 4 C 0>, <L 4 C 7>, 28, 35, " null">, #jsir<comment_line  <L 7 C 0>, <L 7 C 9>, 42, 51, " string">, #jsir<comment_line  <L 10 C 0>, <L 10 C 10>, 58, 68, " boolean">, #jsir<comment_line  <L 13 C 0>, <L 13 C 9>, 76, 85, " number">, #jsir<comment_line  <L 16 C 0>, <L 16 C 10>, 90, 100, " big int">]}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSLIR-NEXT:     %0 = "jsir.reg_exp_literal"() <{extra = #jsir<reg_exp_literal_extra "/1/">, flags = "", pattern = "1"}> : () -> !jsir.any
 // JSLIR-NEXT:     "jsir.expression_statement"(%0) : (!jsir.any) -> ()

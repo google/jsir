@@ -134,4 +134,8 @@ def JsirModuleSpecifierAttrInterface : AttrInterface<"JsirModuleSpecifierAttrInt
   let cppNamespace = "::maldoca";
 }
 
+def JsirCommentAttrInterface : AttrInterface<"JsirCommentAttrInterface"> {
+  let cppNamespace = "::maldoca";
+}
+
 #endif  // MALDOCA_JS_IR_INTERFACES_TD_

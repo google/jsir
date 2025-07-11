@@ -61,6 +61,12 @@
 // AST-NEXT:             "start": 7,
 // AST-NEXT:             "end": 24,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "default_specifier",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "local": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -134,6 +140,12 @@
 // AST-NEXT:             "start": 46,
 // AST-NEXT:             "end": 55,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "specifier",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "imported": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -225,6 +237,12 @@
 // AST-NEXT:             "start": 78,
 // AST-NEXT:             "end": 88,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "specifier1",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "imported": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -277,6 +295,12 @@
 // AST-NEXT:             "start": 90,
 // AST-NEXT:             "end": 100,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "specifier2",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "imported": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -368,6 +392,12 @@
 // AST-NEXT:             "start": 122,
 // AST-NEXT:             "end": 146,
 // AST-NEXT:             "scopeUid": 0,
+// AST-NEXT:             "definedSymbols": [
+// AST-NEXT:               {
+// AST-NEXT:                 "name": "namespace_specifier",
+// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:               }
+// AST-NEXT:             ],
 // AST-NEXT:             "local": {
 // AST-NEXT:               "type": "Identifier",
 // AST-NEXT:               "loc": {
@@ -412,5 +442,6 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": []
 // AST-NEXT: }

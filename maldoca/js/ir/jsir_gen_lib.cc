@@ -26,6 +26,8 @@
 #include "absl/log/log.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/base/ret_check.h"
 #include "maldoca/js/babel/babel.h"
@@ -38,11 +40,13 @@
 namespace maldoca {
 namespace {
 
-std::string DumpJsAstAnalysisResult(const JsAstAnalysisResult &result) {
+std::string DumpJsAstAnalysisResult(absl::string_view original_source,
+                                    const JsAstAnalysisResult &result) {
   return "JsAstAnalysisResult not implemented";
 }
 
-std::string DumpJsirAnalysisResult(const JsirAnalysisResult &result) {
+std::string DumpJsirAnalysisResult(absl::string_view original_source,
+                                   const JsirAnalysisResult &result) {
   switch (result.kind_case()) {
     case JsirAnalysisResult::KIND_NOT_SET:
       return "";
@@ -54,14 +58,15 @@ std::string DumpJsirAnalysisResult(const JsirAnalysisResult &result) {
 
 }  // namespace
 
-std::string DumpJsAnalysisOutput(const JsAnalysisOutput &output) {
+std::string DumpJsAnalysisOutput(absl::string_view original_source,
+                                 const JsAnalysisOutput &output) {
   switch (output.kind_case()) {
     case JsAnalysisOutput::KIND_NOT_SET:
       LOG(FATAL) << "JsAnalysisOutput::KIND_NOT_SET";
     case JsAnalysisOutput::kAstAnalysis:
-      return DumpJsAstAnalysisResult(output.ast_analysis());
+      return DumpJsAstAnalysisResult(original_source, output.ast_analysis());
     case JsAnalysisOutput::kJsirAnalysis:
-      return DumpJsirAnalysisResult(output.jsir_analysis());
+      return DumpJsirAnalysisResult(original_source, output.jsir_analysis());
   }
 }
 
@@ -81,7 +86,6 @@ absl::StatusOr<JsirGenOutput> JsirGen(
   JsPassConfigs pass_configs;
   for (JsirPassKind pass_kind : passes) {
     switch (pass_kind) {
-
       case JsirPassKind::kSourceToAst: {
         {
           BabelParseRequest request;

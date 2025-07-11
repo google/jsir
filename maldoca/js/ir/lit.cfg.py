@@ -32,5 +32,7 @@ runfiles_dir = pathlib.Path(os.environ["RUNFILES_DIR"])
 llvm_dir = runfiles_dir.joinpath("llvm-project/llvm")
 jsir_dir = runfiles_dir.joinpath("_main/maldoca/js/ir")
 
-config.environment["PATH"] = f"{str(llvm_dir)}:{str(jsir_dir)}:{os.environ['PATH']}"
+config.environment["PATH"] = (
+    f"{str(llvm_dir)}:{str(jsir_dir)}:{os.environ['PATH']}"
+)
 config.environment["RUNFILES_DIR"] = os.environ["RUNFILES_DIR"]

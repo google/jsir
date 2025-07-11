@@ -31,27 +31,33 @@
 namespace maldoca {
 
 // Creates the corresponding pass based on the given transform config.
+//
+// - scopes: Symbol table required for some analyses.
+// - config: The specification of the transform.
+// - babel: Used for simple code manipulation for some analyses.
+// - analysis_outputs: Used to append analysis results for some analyses.
 absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
-    const JsAnalysisOutputs &analysis_outputs, const BabelScopes *scopes,
-    JsirTransformConfig config, absl::Nullable<Babel *> babel);
+    const BabelScopes *absl_nullable scopes, const JsirTransformConfig &config,
+    Babel *absl_nullable babel,
+    JsAnalysisOutputs *absl_nullable analysis_outputs);
 
 // Performs a single transform on a JSHIR or JSLIR module.
-absl::Status TransformJsir(const JsAnalysisOutputs &analysis_outputs,
-                           JsirFileOp jsir_file, const BabelScopes &scopes,
-                           JsirTransformConfig config,
-                           absl::Nullable<Babel *> babel);
+absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
+                           const JsirTransformConfig &config,
+                           Babel *absl_nullable babel,
+                           JsAnalysisOutputs *absl_nullable analysis_outputs);
 
 // Performs the given list of transforms on a JSHIR or JSLIR module.
-absl::Status TransformJsir(const JsAnalysisOutputs &analysis_outputs,
-                           JsirFileOp jsir_file, const BabelScopes &scopes,
+absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
                            std::vector<JsirTransformConfig> configs,
-                           absl::Nullable<Babel *> babel);
+                           Babel *absl_nullable babel,
+                           JsAnalysisOutputs *absl_nullable analysis_outputs);
 
 // Converts the AST into JSHIR, performs the given list of transforms, and
 // converts back to an AST.
 absl::StatusOr<std::unique_ptr<JsFile>> TransformJsAst(
     const JsFile &ast, const BabelScopes &scopes,
-    std::vector<JsirTransformConfig> configs, absl::Nullable<Babel *> babel);
+    std::vector<JsirTransformConfig> configs, Babel *absl_nullable babel);
 
 }  // namespace maldoca
 

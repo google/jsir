@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
 licenses(["notice"])
 
@@ -30,11 +32,11 @@ cc_library(
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
+        "@com_google_protobuf//:differencer",
+        "@com_google_protobuf//:protobuf",
+        "@com_google_protobuf//src/google/protobuf/io",
+        "@com_google_protobuf//src/google/protobuf/io:tokenizer",
         "@googletest//:gtest",
-        "@protobuf",
-        "@protobuf//:differencer",
-        "@protobuf//src/google/protobuf/io",
-        "@protobuf//src/google/protobuf/io:tokenizer",
         "@re2",
     ],
 )

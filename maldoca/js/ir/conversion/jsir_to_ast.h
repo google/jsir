@@ -124,6 +124,9 @@ class JsirToAst {
   absl::StatusOr<std::unique_ptr<JsModuleSpecifier>> VisitModuleSpecifierAttr(
       JsirModuleSpecifierAttrInterface attr);
 
+  absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
+      JsirCommentAttrInterface attr);
+
  private:
   template <typename NodeT, typename IrT,
             typename = std::enable_if_t<std::is_base_of_v<JsNode, NodeT>>,

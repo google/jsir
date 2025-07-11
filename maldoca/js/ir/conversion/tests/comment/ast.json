@@ -1,0 +1,185 @@
+// AST:      {
+// AST-NEXT:   "type": "File",
+// AST-NEXT:   "loc": {
+// AST-NEXT:     "start": {
+// AST-NEXT:       "line": 1,
+// AST-NEXT:       "column": 0
+// AST-NEXT:     },
+// AST-NEXT:     "end": {
+// AST-NEXT:       "line": 6,
+// AST-NEXT:       "column": 0
+// AST-NEXT:     }
+// AST-NEXT:   },
+// AST-NEXT:   "start": 0,
+// AST-NEXT:   "end": 29,
+// AST-NEXT:   "program": {
+// AST-NEXT:     "type": "Program",
+// AST-NEXT:     "loc": {
+// AST-NEXT:       "start": {
+// AST-NEXT:         "line": 1,
+// AST-NEXT:         "column": 0
+// AST-NEXT:       },
+// AST-NEXT:       "end": {
+// AST-NEXT:         "line": 6,
+// AST-NEXT:         "column": 0
+// AST-NEXT:       }
+// AST-NEXT:     },
+// AST-NEXT:     "start": 0,
+// AST-NEXT:     "end": 29,
+// AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "interpreter": null,
+// AST-NEXT:     "sourceType": "script",
+// AST-NEXT:     "body": [
+// AST-NEXT:       {
+// AST-NEXT:         "type": "ExpressionStatement",
+// AST-NEXT:         "loc": {
+// AST-NEXT:           "start": {
+// AST-NEXT:             "line": 2,
+// AST-NEXT:             "column": 0
+// AST-NEXT:           },
+// AST-NEXT:           "end": {
+// AST-NEXT:             "line": 2,
+// AST-NEXT:             "column": 2
+// AST-NEXT:           }
+// AST-NEXT:         },
+// AST-NEXT:         "start": 5,
+// AST-NEXT:         "end": 7,
+// AST-NEXT:         "leadingCommentUids": [
+// AST-NEXT:           0
+// AST-NEXT:         ],
+// AST-NEXT:         "trailingCommentUids": [
+// AST-NEXT:           1
+// AST-NEXT:         ],
+// AST-NEXT:         "scopeUid": 0,
+// AST-NEXT:         "expression": {
+// AST-NEXT:           "type": "Identifier",
+// AST-NEXT:           "loc": {
+// AST-NEXT:             "start": {
+// AST-NEXT:               "line": 2,
+// AST-NEXT:               "column": 0
+// AST-NEXT:             },
+// AST-NEXT:             "end": {
+// AST-NEXT:               "line": 2,
+// AST-NEXT:               "column": 1
+// AST-NEXT:             },
+// AST-NEXT:             "identifierName": "a"
+// AST-NEXT:           },
+// AST-NEXT:           "start": 5,
+// AST-NEXT:           "end": 6,
+// AST-NEXT:           "scopeUid": 0,
+// AST-NEXT:           "name": "a"
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       {
+// AST-NEXT:         "type": "ExpressionStatement",
+// AST-NEXT:         "loc": {
+// AST-NEXT:           "start": {
+// AST-NEXT:             "line": 4,
+// AST-NEXT:             "column": 0
+// AST-NEXT:           },
+// AST-NEXT:           "end": {
+// AST-NEXT:             "line": 4,
+// AST-NEXT:             "column": 10
+// AST-NEXT:           }
+// AST-NEXT:         },
+// AST-NEXT:         "start": 13,
+// AST-NEXT:         "end": 23,
+// AST-NEXT:         "leadingCommentUids": [
+// AST-NEXT:           1
+// AST-NEXT:         ],
+// AST-NEXT:         "trailingCommentUids": [
+// AST-NEXT:           3
+// AST-NEXT:         ],
+// AST-NEXT:         "scopeUid": 0,
+// AST-NEXT:         "expression": {
+// AST-NEXT:           "type": "Identifier",
+// AST-NEXT:           "loc": {
+// AST-NEXT:             "start": {
+// AST-NEXT:               "line": 4,
+// AST-NEXT:               "column": 0
+// AST-NEXT:             },
+// AST-NEXT:             "end": {
+// AST-NEXT:               "line": 4,
+// AST-NEXT:               "column": 1
+// AST-NEXT:             },
+// AST-NEXT:             "identifierName": "b"
+// AST-NEXT:           },
+// AST-NEXT:           "start": 13,
+// AST-NEXT:           "end": 14,
+// AST-NEXT:           "trailingCommentUids": [
+// AST-NEXT:             2
+// AST-NEXT:           ],
+// AST-NEXT:           "scopeUid": 0,
+// AST-NEXT:           "name": "b"
+// AST-NEXT:         }
+// AST-NEXT:       }
+// AST-NEXT:     ],
+// AST-NEXT:     "directives": []
+// AST-NEXT:   },
+// AST-NEXT:   "comments": [
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 1,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 1,
+// AST-NEXT:           "column": 4
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " 1",
+// AST-NEXT:       "start": 0,
+// AST-NEXT:       "end": 4
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 3,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 3,
+// AST-NEXT:           "column": 4
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " 2",
+// AST-NEXT:       "start": 8,
+// AST-NEXT:       "end": 12
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentBlock",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 4,
+// AST-NEXT:           "column": 2
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 4,
+// AST-NEXT:           "column": 9
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " 3 ",
+// AST-NEXT:       "start": 15,
+// AST-NEXT:       "end": 22
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 5,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 5,
+// AST-NEXT:           "column": 4
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " 4",
+// AST-NEXT:       "start": 24,
+// AST-NEXT:       "end": 28
+// AST-NEXT:     }
+// AST-NEXT:   ]
+// AST-NEXT: }

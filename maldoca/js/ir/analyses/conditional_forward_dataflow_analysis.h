@@ -16,19 +16,15 @@
 #define MALDOCA_JS_IR_ANALYSES_COND_FORWARD_DATAFLOW_ANALYSIS_H_
 
 #include <cstddef>
-#include <optional>
-#include <vector>
 
 #include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/raw_ostream.h"
-#include "mlir/Analysis/DataFlow/DeadCodeAnalysis.h"
+#include "llvm/Support/Casting.h"
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/BlockSupport.h"
 #include "mlir/IR/Operation.h"
-#include "mlir/IR/Visitors.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
+#include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
 
@@ -53,9 +49,6 @@ class JsirConditionalForwardDataFlowAnalysis
   // Gets the information about whether a block is executable.
   JsirStateRef<JsirExecutable> GetIsExecutable(mlir::Block *block);
 
-  // Gets the information about whether a CFG edge is executable.
-  JsirStateRef<JsirExecutable> GetIsExecutable(mlir::dataflow::CFGEdge *edge);
-
   // Inherit the same transfer function from base class.
   virtual void VisitOp(mlir::Operation *op,
                        llvm::ArrayRef<const ValueT *> operands,
@@ -63,12 +56,7 @@ class JsirConditionalForwardDataFlowAnalysis
                        llvm::MutableArrayRef<JsirStateRef<ValueT>> results,
                        JsirStateRef<StateT> after) = 0;
 
-  // For conditional dataflow analyses, whether the successor of the basic block
-  // is executable may be updated after applying transfer functions. This
-  // virtual method checks whether the operation is a conditional branch, and
-  // returns the possibly executable successors.
-  virtual std::optional<std::vector<mlir::Block *>> InferExecutableSuccessors(
-      mlir::Operation *op, llvm::ArrayRef<const ValueT *> operands) = 0;
+  virtual bool IsCfgEdgeExecutable(JsirGeneralCfgEdge *edge) { return true; }
 
   void PrintAtBlockEntry(mlir::Block &block, size_t num_indents,
                          llvm::raw_ostream &os) override {
@@ -83,11 +71,10 @@ class JsirConditionalForwardDataFlowAnalysis
 
  private:
   // We override the three methods from base classes to add IsExecutable info.
-  using Base::GetCFGEdge;
   void VisitOp(mlir::Operation *op) override;
   void VisitBlock(mlir::Block *block) override;
   void InitializeBlockDependencies(mlir::Block *block) override;
-  using Base::VisitCFGEdge;
+  using Base::VisitCfgEdge;
 };
 
 template <typename ValueT, typename StateT>
@@ -99,17 +86,8 @@ JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::GetIsExecutable(
 }
 
 template <typename ValueT, typename StateT>
-JsirStateRef<JsirExecutable>
-JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::GetIsExecutable(
-    mlir::dataflow::CFGEdge *edge) {
-  return Base::template GetStateImpl<JsirExecutable>(edge);
-}
-
-template <typename ValueT, typename StateT>
 void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitOp(
     mlir::Operation *op) {
-  auto *block = op->getBlock();
-
   JsirStateRef<StateT> before_state_ref = DenseBase::GetStateBefore(op);
   const StateT *before = &before_state_ref.value();
 
@@ -117,27 +95,35 @@ void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitOp(
 
   auto [operands, result_state_refs] = Base::GetValueStateRefs(op);
 
-  VisitOp(op, operands, before, result_state_refs, after_state_ref);
-
-  // For terminator operations, we should also update whether the outgoing edges
-  // are still executable.
-  if (op->getNextNode() == nullptr) {
-    std::optional<std::vector<mlir::Block *>> optional_successors;
-    // Find the successors that may execute.
-    optional_successors = InferExecutableSuccessors(op, operands);
-
-    mlir::BlockRange successors = op->getSuccessors();
-    if (optional_successors.has_value()) {
-      successors = *optional_successors;
+  for (JsirGeneralCfgEdge *edge : this->op_to_cfg_edges_[op]) {
+    if (!IsCfgEdgeExecutable(edge) ||
+        !*GetIsExecutable(edge->getPred()->getBlock()).value()) {
+      continue;
     }
 
-    // Flip CFG edges as live.
-    for (mlir::Block *succ : successors) {
-      auto *edge = GetCFGEdge(block, succ);
-      JsirStateRef<JsirExecutable> edge_executable_ref = GetIsExecutable(edge);
-      edge_executable_ref.Write(JsirExecutable{true});
-    }
+    JsirStateRef<JsirExecutable> succ_executable_ref =
+        GetIsExecutable(edge->getSucc()->getBlock());
+    succ_executable_ref.Write(JsirExecutable{true});
+
+    VisitCfgEdge(edge);
   }
+
+  // Don't call the user-defined `VisitOp` if this is an op with a fixed
+  // standard visitor.
+  // TODO(b/425421947): Create MLIR trait rather than having a list of ops here.
+  if (llvm::isa<JshirBlockStatementOp>(op) ||
+      llvm::isa<JshirBreakStatementOp>(op) ||
+      llvm::isa<JshirConditionalExpressionOp>(op) ||
+      llvm::isa<JshirContinueStatementOp>(op) ||
+      llvm::isa<JshirDoWhileStatementOp>(op) ||
+      llvm::isa<JshirForStatementOp>(op) ||
+      llvm::isa<JshirLabeledStatementOp>(op) ||
+      llvm::isa<JshirLogicalExpressionOp>(op) ||
+      llvm::isa<JshirIfStatementOp>(op) || llvm::isa<JshirTryStatementOp>(op) ||
+      llvm::isa<JshirWhileStatementOp>(op)) {
+    return;
+  }
+  VisitOp(op, operands, before, result_state_refs, after_state_ref);
 }
 
 template <typename ValueT, typename StateT>
@@ -148,9 +134,10 @@ void JsirConditionalForwardDataFlowAnalysis<
   // In particular, when an incoming CFG is marked as live, the block is
   // visited.
   for (mlir::Block *pred : block->getPredecessors()) {
-    auto *edge = Base::GetCFGEdge(pred, block);
-    JsirStateRef<JsirExecutable> edge_executable_ref = GetIsExecutable(edge);
-    edge_executable_ref.AddDependent(Base::getProgramPointBefore(block));
+    mlir::ProgramPoint *after_pred = Base::getProgramPointAfter(pred);
+    JsirStateRef<StateT> after_pred_state_ref =
+        Base::template GetStateImpl<StateT>(after_pred);
+    after_pred_state_ref.AddDependent(Base::getProgramPointBefore(block));
   }
 
   // The first time the block is marked as executable, visit all ops.
@@ -161,7 +148,7 @@ void JsirConditionalForwardDataFlowAnalysis<
     block_executable_ref.AddDependent(Base::getProgramPointAfter(&op));
   }
 
-  if (block->isEntryBlock()) {
+  if (Base::IsEntryBlock(block)) {
     // Entry blocks are always executable.
     // This also triggers all ops to be visited.
     block_executable_ref.Write(JsirExecutable{true});
@@ -171,16 +158,9 @@ void JsirConditionalForwardDataFlowAnalysis<
 template <typename ValueT, typename StateT>
 void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitBlock(
     mlir::Block *block) {
-  // Iterate over the predecessors of the non-entry block.
-  for (auto pred_it = block->pred_begin(), pred_end = block->pred_end();
-       pred_it != pred_end; ++pred_it) {
-    mlir::Block *pred = *pred_it;
-
-    // If the edge from the predecessor block to the current block is not
-    // live, bail out.
-    auto *edge = GetCFGEdge(pred, block);
-    JsirStateRef<JsirExecutable> edge_executable_ref = GetIsExecutable(edge);
-    if (!*edge_executable_ref.value()) {
+  for (auto *edge : Base::block_to_cfg_edges_[block]) {
+    if (!IsCfgEdgeExecutable(edge) ||
+        !*GetIsExecutable(edge->getPred()->getBlock()).value()) {
       continue;
     }
 
@@ -188,7 +168,7 @@ void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitBlock(
     JsirStateRef<JsirExecutable> block_executable_ref = GetIsExecutable(block);
     block_executable_ref.Write(JsirExecutable{true});
 
-    VisitCFGEdge(*pred_it, pred_it.getSuccessorIndex(), block);
+    VisitCfgEdge(edge);
   }
 }
 

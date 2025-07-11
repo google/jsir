@@ -194,7 +194,7 @@ void WrapBlockContentWithBlockStatement(mlir::Block &block) {
   //    ...
   mlir::OpBuilder builder{context};
   builder.setInsertionPointToStart(&block);
-  auto block_stmt_op = builder.create<JshirBlockStatementOp>(region->getLoc());
+  auto block_stmt_op = JshirBlockStatementOp::create(builder, region->getLoc());
 
   // `directives` is empty, but we need to keep an empty block in the region.
   block_stmt_op.getDirectives().emplaceBlock();

@@ -44,14 +44,20 @@
 namespace maldoca {
 
 absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
-    const JsAnalysisOutputs &analysis_outputs, const BabelScopes *scopes,
-    JsirTransformConfig config, absl::Nullable<Babel *> babel) {
+    const BabelScopes *absl_nullable scopes, const JsirTransformConfig &config,
+    Babel *absl_nullable babel,
+    JsAnalysisOutputs *absl_nullable analysis_outputs) {
   switch (config.kind_case()) {
     case JsirTransformConfig::KIND_NOT_SET:
       LOG(FATAL) << "No transform config set";
 
-    case JsirTransformConfig::kConstantPropagation:
+    case JsirTransformConfig::kConstantPropagation: {
+      if (scopes == nullptr) {
+        return absl::InvalidArgumentError(
+            "scopes is required for dynamic constant propagation");
+      }
       return std::make_unique<JsirConstantPropagationPass>(scopes);
+    }
 
     case JsirTransformConfig::kMoveNamedFunctions:
       return std::make_unique<MoveNamedFunctionsPass>();
@@ -73,19 +79,19 @@ absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
   }
 }
 
-absl::Status TransformJsir(const JsAnalysisOutputs &analysis_outputs,
-                           JsirFileOp jsir_file, const BabelScopes &scopes,
-                           JsirTransformConfig config,
-                           absl::Nullable<Babel *> babel) {
+absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
+                           const JsirTransformConfig &config,
+                           Babel *absl_nullable babel,
+                           JsAnalysisOutputs *absl_nullable analysis_outputs) {
   std::vector<JsirTransformConfig> configs = {std::move(config)};
-  return TransformJsir(analysis_outputs, jsir_file, scopes, std::move(configs),
-                       babel);
+  return TransformJsir(jsir_file, scopes, std::move(configs), babel,
+                       analysis_outputs);
 }
 
-absl::Status TransformJsir(const JsAnalysisOutputs &analysis_outputs,
-                           JsirFileOp jsir_file, const BabelScopes &scopes,
+absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
                            std::vector<JsirTransformConfig> configs,
-                           absl::Nullable<Babel *> babel) {
+                           Babel *absl_nullable babel,
+                           JsAnalysisOutputs *absl_nullable analysis_outputs) {
   mlir::PassManager pass_manager{jsir_file.getContext()};
 
   // TODO(b/204592400): Fix the IR design so that verification passes.
@@ -93,8 +99,8 @@ absl::Status TransformJsir(const JsAnalysisOutputs &analysis_outputs,
 
   for (auto &&config : configs) {
     MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<mlir::Pass> pass,
-                             CreateJsirTransformPass(analysis_outputs, &scopes,
-                                                     std::move(config), babel));
+                             CreateJsirTransformPass(&scopes, std::move(config),
+                                                     babel, analysis_outputs));
     pass_manager.addPass(std::move(pass));
   }
 
@@ -106,14 +112,15 @@ absl::Status TransformJsir(const JsAnalysisOutputs &analysis_outputs,
 
 absl::StatusOr<std::unique_ptr<JsFile>> TransformJsAst(
     const JsFile &ast, const BabelScopes &scopes,
-    std::vector<JsirTransformConfig> configs, absl::Nullable<Babel *> babel) {
+    std::vector<JsirTransformConfig> configs, Babel *absl_nullable babel) {
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSIGN_OR_RETURN(auto jshir_file, AstToJshirFile(ast, mlir_context));
 
-  MALDOCA_RETURN_IF_ERROR(TransformJsir(
-      /*analysis_outputs=*/{}, *jshir_file, scopes, std::move(configs), babel));
+  JsAnalysisOutputs analysis_outputs;
+  MALDOCA_RETURN_IF_ERROR(TransformJsir(*jshir_file, scopes, std::move(configs),
+                                        babel, &analysis_outputs));
 
   return JshirFileToAst(*jshir_file);
 }

@@ -37,8 +37,8 @@ namespace maldoca {
 class JsConversion : public JsPass {
  public:
   static absl::StatusOr<std::unique_ptr<JsConversion>> Create(
-      const JsConversionConfig &config, absl::Nullable<Babel *> babel,
-      absl::Nullable<mlir::MLIRContext *> mlir_context);
+      const JsConversionConfig &config, Babel *absl_nullable babel,
+      mlir::MLIRContext *absl_nullable mlir_context);
 
   virtual absl::Status Convert(std::unique_ptr<JsRepr> &repr) = 0;
 
@@ -77,13 +77,13 @@ class JsConversionTmpl : public JsConversion {
 class JsSourceToAstString final
     : public JsConversionTmpl<JsSourceRepr, JsAstStringRepr> {
  public:
-  explicit JsSourceToAstString(absl::Nonnull<Babel *> babel,
+  explicit JsSourceToAstString(Babel *absl_nonnull babel,
                                BabelParseRequest request,
                                absl::Duration timeout)
       : babel_(*babel), request_(std::move(request)), timeout_(timeout) {}
 
   static absl::StatusOr<std::unique_ptr<JsSourceToAstString>> Create(
-      const JsSourceToAstStringConfig &config, absl::Nonnull<Babel *> babel);
+      const JsSourceToAstStringConfig &config, Babel *absl_nonnull babel);
 
   std::string name() const override { return "JsSourceToAstString"; }
 
@@ -106,13 +106,13 @@ class JsSourceToAstString final
 class JsAstStringToSource final
     : public JsConversionTmpl<JsAstStringRepr, JsSourceRepr> {
  public:
-  explicit JsAstStringToSource(absl::Nonnull<Babel *> babel,
+  explicit JsAstStringToSource(Babel *absl_nonnull babel,
                                BabelGenerateOptions options,
                                absl::Duration timeout)
       : babel_(*babel), options_(std::move(options)), timeout_(timeout) {}
 
   static absl::StatusOr<std::unique_ptr<JsAstStringToSource>> Create(
-      const JsAstStringToSourceConfig &config, absl::Nonnull<Babel *> babel);
+      const JsAstStringToSourceConfig &config, Babel *absl_nonnull babel);
 
   std::string name() const override { return "JsAstStringToSource"; }
 
@@ -178,7 +178,7 @@ class JsAstToAstString final
 // +------+-----------------------------+-------------------------------+
 class JsAstToHir final : public JsConversionTmpl<JsAstRepr, JsHirRepr> {
  public:
-  explicit JsAstToHir(absl::Nonnull<mlir::MLIRContext *> mlir_context)
+  explicit JsAstToHir(mlir::MLIRContext *absl_nonnull mlir_context)
       : mlir_context_(*mlir_context) {}
 
   std::string name() const override { return "JsAstToHir"; }

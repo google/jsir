@@ -14,10 +14,12 @@
 
 #include "maldoca/js/ir/analyses/analysis.h"
 
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Operation.h"
@@ -29,11 +31,11 @@
 #include "absl/status/statusor.h"
 #include "maldoca/base/ret_check.h"
 #include "maldoca/base/status_macros.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/babel.pb.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
-#include "maldoca/js/ir/analyses/scope.h"
 #include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
@@ -59,7 +61,7 @@ static absl::StatusOr<JsirAnalysisResult::DataFlow> RunJsirDataFlowAnalysis(
 
 absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
     JsirFileOp op, const BabelScopes &scopes, const JsirAnalysisConfig &config,
-    absl::Nullable<Babel *> babel) {
+    Babel *absl_nullable babel) {
   switch (config.kind_case()) {
     case JsirAnalysisConfig::KIND_NOT_SET: {
       return absl::InvalidArgumentError("JsAnalysisConfig kind not set");

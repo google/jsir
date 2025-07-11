@@ -26,7 +26,7 @@ proto_library(
     srcs = ["driver.proto"],
     deps = [
         "//maldoca/js/babel:babel_proto",
-        "@protobuf//:duration_proto",
+        "@com_google_protobuf//:duration_proto",
     ],
 )
 
@@ -68,10 +68,10 @@ cc_library(
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/time",
         "@abseil-cpp//absl/types:span",
+        "@com_google_protobuf//:duration_cc_proto",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Support",
         "@nlohmann_json//:json",
-        "@protobuf//:duration_cc_proto",
     ],
 )

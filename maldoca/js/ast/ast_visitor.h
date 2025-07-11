@@ -18,6 +18,7 @@
 #include <functional>
 #include <utility>
 
+#include "absl/log/log.h"
 #include "maldoca/js/ast/ast.generated.h"
 
 namespace maldoca {
@@ -27,7 +28,103 @@ namespace maldoca {
 // Note that JsAstVisitor only defines functions to visit the leaf nodes in the
 // type hierarchy of the AST API.
 template <typename R>
-class JsAstVisitor {
+class JsPatternVisitor {
+ public:
+  virtual ~JsPatternVisitor() = default;
+
+  R VisitPattern(const JsPattern &pattern) {
+    if (const auto *identifier = dynamic_cast<const JsIdentifier *>(&pattern)) {
+      return VisitIdentifier(*identifier);
+    }
+    if (const auto *member_expression =
+            dynamic_cast<const JsMemberExpression *>(&pattern)) {
+      return VisitMemberExpression(*member_expression);
+    }
+    if (const auto *parenthesized_expression =
+            dynamic_cast<const JsParenthesizedExpression *>(&pattern)) {
+      return VisitParenthesizedExpression(*parenthesized_expression);
+    }
+    if (const auto *rest_element =
+            dynamic_cast<const JsRestElement *>(&pattern)) {
+      return VisitRestElement(*rest_element);
+    }
+    if (const auto *object_pattern =
+            dynamic_cast<const JsObjectPattern *>(&pattern)) {
+      return VisitObjectPattern(*object_pattern);
+    }
+    if (const auto *array_pattern =
+            dynamic_cast<const JsArrayPattern *>(&pattern)) {
+      return VisitArrayPattern(*array_pattern);
+    }
+    if (const auto *assignment_pattern =
+            dynamic_cast<const JsAssignmentPattern *>(&pattern)) {
+      return VisitAssignmentPattern(*assignment_pattern);
+    }
+
+    LOG(FATAL) << "Unreachable code.";
+  }
+
+  virtual R VisitIdentifier(const JsIdentifier &node) = 0;
+  virtual R VisitMemberExpression(const JsMemberExpression &node) = 0;
+  virtual R VisitParenthesizedExpression(
+      const JsParenthesizedExpression &node) = 0;
+  virtual R VisitRestElement(const JsRestElement &node) = 0;
+  virtual R VisitObjectPattern(const JsObjectPattern &node) = 0;
+  virtual R VisitArrayPattern(const JsArrayPattern &node) = 0;
+  virtual R VisitAssignmentPattern(const JsAssignmentPattern &node) = 0;
+};
+
+template <typename R>
+class JsLValVisitor {
+ public:
+  virtual ~JsLValVisitor() = default;
+
+  R VisitLVal(const JsLVal &lval) {
+    if (const JsIdentifier *identifier =
+            dynamic_cast<const JsIdentifier *>(&lval)) {
+      return VisitIdentifier(*identifier);
+    }
+    if (const JsMemberExpression *member_expression =
+            dynamic_cast<const JsMemberExpression *>(&lval)) {
+      return VisitMemberExpression(*member_expression);
+    }
+    if (const JsParenthesizedExpression *parenthesized_expression =
+            dynamic_cast<const JsParenthesizedExpression *>(&lval)) {
+      return VisitParenthesizedExpression(*parenthesized_expression);
+    }
+    if (const JsRestElement *rest_element =
+            dynamic_cast<const JsRestElement *>(&lval)) {
+      return VisitRestElement(*rest_element);
+    }
+    if (const JsObjectPattern *object_pattern =
+            dynamic_cast<const JsObjectPattern *>(&lval)) {
+      return VisitObjectPattern(*object_pattern);
+    }
+    if (const JsArrayPattern *array_pattern =
+            dynamic_cast<const JsArrayPattern *>(&lval)) {
+      return VisitArrayPattern(*array_pattern);
+    }
+    if (const JsAssignmentPattern *assignment_pattern =
+            dynamic_cast<const JsAssignmentPattern *>(&lval)) {
+      return VisitAssignmentPattern(*assignment_pattern);
+    }
+
+    LOG(FATAL) << "Unreachable code.";
+  }
+
+  virtual R VisitIdentifier(const JsIdentifier &node) = 0;
+  virtual R VisitMemberExpression(const JsMemberExpression &node) = 0;
+  virtual R VisitParenthesizedExpression(
+      const JsParenthesizedExpression &node) = 0;
+  virtual R VisitRestElement(const JsRestElement &node) = 0;
+  virtual R VisitObjectPattern(const JsObjectPattern &node) = 0;
+  virtual R VisitArrayPattern(const JsArrayPattern &node) = 0;
+  virtual R VisitAssignmentPattern(const JsAssignmentPattern &node) = 0;
+};
+
+template <typename R>
+class JsAstVisitor : public virtual JsPatternVisitor<R>,
+                     public virtual JsLValVisitor<R> {
  public:
   virtual ~JsAstVisitor() = default;
 
@@ -43,7 +140,7 @@ class JsAstVisitor {
 
   virtual R VisitFile(const JsFile &file) = 0;
 
-  virtual R VisitIdentifier(const JsIdentifier &identifier) = 0;
+  R VisitIdentifier(const JsIdentifier &identifier) override = 0;
 
   virtual R VisitPrivateName(const JsPrivateName &private_name) = 0;
 
@@ -154,8 +251,8 @@ class JsAstVisitor {
   virtual R VisitLogicalExpression(
       const JsLogicalExpression &logical_expression) = 0;
 
-  virtual R VisitMemberExpression(
-      const JsMemberExpression &member_expression) = 0;
+  R VisitMemberExpression(
+      const JsMemberExpression &member_expression) override = 0;
 
   virtual R VisitOptionalMemberExpression(
       const JsOptionalMemberExpression &optional_member_expression) = 0;
@@ -173,8 +270,8 @@ class JsAstVisitor {
   virtual R VisitSequenceExpression(
       const JsSequenceExpression &sequence_expression) = 0;
 
-  virtual R VisitParenthesizedExpression(
-      const JsParenthesizedExpression &parenthesized_expression) = 0;
+  R VisitParenthesizedExpression(
+      const JsParenthesizedExpression &parenthesized_expression) override = 0;
 
   virtual R VisitTemplateElement(const JsTemplateElement &template_element) = 0;
 
@@ -183,14 +280,14 @@ class JsAstVisitor {
   virtual R VisitTaggedTemplateExpression(
       const JsTaggedTemplateExpression &tagged_template_expression) = 0;
 
-  virtual R VisitRestElement(const JsRestElement &rest_element) = 0;
+  R VisitRestElement(const JsRestElement &rest_element) override = 0;
 
-  virtual R VisitObjectPattern(const JsObjectPattern &object_pattern) = 0;
+  R VisitObjectPattern(const JsObjectPattern &object_pattern) override = 0;
 
-  virtual R VisitArrayPattern(const JsArrayPattern &array_pattern) = 0;
+  R VisitArrayPattern(const JsArrayPattern &array_pattern) override = 0;
 
-  virtual R VisitAssignmentPattern(
-      const JsAssignmentPattern &assignment_pattern) = 0;
+  R VisitAssignmentPattern(
+      const JsAssignmentPattern &assignment_pattern) override = 0;
 
   virtual R VisitClassMethod(const JsClassMethod &class_method) = 0;
 
@@ -442,59 +539,6 @@ class JsAstVisitor {
     } else if (const JsMetaProperty *meta_property =
                    dynamic_cast<const JsMetaProperty *>(expression_ptr)) {
       return VisitMetaProperty(*meta_property);
-    }
-  }
-
-  R VisitPattern(const JsPattern &pattern) {
-    const JsPattern *pattern_ptr = &pattern;
-    if (const JsIdentifier *identifier =
-            dynamic_cast<const JsIdentifier *>(pattern_ptr)) {
-      return VisitIdentifier(*identifier);
-    } else if (const JsMemberExpression *member_expression =
-                   dynamic_cast<const JsMemberExpression *>(pattern_ptr)) {
-      return VisitMemberExpression(*member_expression);
-    } else if (const JsParenthesizedExpression *parenthesized_expression =
-                   dynamic_cast<const JsParenthesizedExpression *>(
-                       pattern_ptr)) {
-      return VisitParenthesizedExpression(*parenthesized_expression);
-    } else if (const JsRestElement *rest_element =
-                   dynamic_cast<const JsRestElement *>(pattern_ptr)) {
-      return VisitRestElement(*rest_element);
-    } else if (const JsObjectPattern *object_pattern =
-                   dynamic_cast<const JsObjectPattern *>(pattern_ptr)) {
-      return VisitObjectPattern(*object_pattern);
-    } else if (const JsArrayPattern *array_pattern =
-                   dynamic_cast<const JsArrayPattern *>(pattern_ptr)) {
-      return VisitArrayPattern(*array_pattern);
-    } else if (const JsAssignmentPattern *assignment_pattern =
-                   dynamic_cast<const JsAssignmentPattern *>(pattern_ptr)) {
-      return VisitAssignmentPattern(*assignment_pattern);
-    }
-  }
-
-  R VisitLVal(const JsLVal &l_val) {
-    const JsLVal *l_val_ptr = &l_val;
-    if (const JsIdentifier *identifier =
-            dynamic_cast<const JsIdentifier *>(l_val_ptr)) {
-      return VisitIdentifier(*identifier);
-    } else if (const JsMemberExpression *member_expression =
-                   dynamic_cast<const JsMemberExpression *>(l_val_ptr)) {
-      return VisitMemberExpression(*member_expression);
-    } else if (const JsParenthesizedExpression *parenthesized_expression =
-                   dynamic_cast<const JsParenthesizedExpression *>(l_val_ptr)) {
-      return VisitParenthesizedExpression(*parenthesized_expression);
-    } else if (const JsRestElement *rest_element =
-                   dynamic_cast<const JsRestElement *>(l_val_ptr)) {
-      return VisitRestElement(*rest_element);
-    } else if (const JsObjectPattern *object_pattern =
-                   dynamic_cast<const JsObjectPattern *>(l_val_ptr)) {
-      return VisitObjectPattern(*object_pattern);
-    } else if (const JsArrayPattern *array_pattern =
-                   dynamic_cast<const JsArrayPattern *>(l_val_ptr)) {
-      return VisitArrayPattern(*array_pattern);
-    } else if (const JsAssignmentPattern *assignment_pattern =
-                   dynamic_cast<const JsAssignmentPattern *>(l_val_ptr)) {
-      return VisitAssignmentPattern(*assignment_pattern);
     }
   }
 };

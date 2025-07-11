@@ -1,4 +1,4 @@
-// JSLIR:      "jsir.file"() ({
+// JSLIR:      "jsir.file"() <{comments = [#jsir<comment_line  <L 9 C 0>, <L 9 C 36>, 139, 175, " TODO(b/182441574): Fix AST error.">, #jsir<comment_line  <L 10 C 0>, <L 10 C 39>, 176, 215, " export * as identifier_3 from \22foo\22;">]}> ({
 // JSLIR-NEXT:   "jsir.program"() <{source_type = "module"}> ({
 // JSLIR-NEXT:     "jsir.export_default_declaration"() ({
 // JSLIR-NEXT:       %0 = "jsir.identifier"() <{name = "arbitrary_expression"}> : () -> !jsir.any

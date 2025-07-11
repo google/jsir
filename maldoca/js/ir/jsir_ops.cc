@@ -363,10 +363,11 @@ mlir::OpFoldResult JsirMemberExpressionOp::fold(FoldAdaptor adaptor) {
   mlir::Attribute computed_property;
   if (getLiteralProperty().has_value()) {
     mlir::Attribute literal_property = getLiteralPropertyAttr();
-    if (auto identifier = literal_property.dyn_cast<JsirIdentifierAttr>()) {
+    if (auto identifier =
+            mlir::dyn_cast<JsirIdentifierAttr>(literal_property)) {
       computed_property = identifier.getName();
     } else if (auto private_name =
-                   literal_property.dyn_cast<JsirPrivateNameAttr>()) {
+                   mlir::dyn_cast<JsirPrivateNameAttr>(literal_property)) {
       emitWarning("a.#b not supported yet");
       return nullptr;
     } else {

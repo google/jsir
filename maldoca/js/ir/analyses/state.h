@@ -45,9 +45,7 @@ class JsirState {
   virtual mlir::ChangeResult Join(const T &other) = 0;
 
   virtual bool operator==(const T &rhs) const = 0;
-  virtual bool operator!=(const T &rhs) const {
-    return !(operator==(rhs));
-  }
+  virtual bool operator!=(const T &rhs) const { return !(operator==(rhs)); }
 
   virtual void print(llvm::raw_ostream &os) const = 0;
 };

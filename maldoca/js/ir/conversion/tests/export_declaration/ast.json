@@ -229,6 +229,10 @@
 // AST-NEXT:         "start": 91,
 // AST-NEXT:         "end": 115,
 // AST-NEXT:         "scopeUid": 0,
+// AST-NEXT:         "referencedSymbol": {
+// AST-NEXT:           "name": "identifier_2",
+// AST-NEXT:           "defScopeUid": 0
+// AST-NEXT:         },
 // AST-NEXT:         "declaration": {
 // AST-NEXT:           "type": "VariableDeclaration",
 // AST-NEXT:           "loc": {
@@ -260,6 +264,12 @@
 // AST-NEXT:               "start": 102,
 // AST-NEXT:               "end": 114,
 // AST-NEXT:               "scopeUid": 0,
+// AST-NEXT:               "definedSymbols": [
+// AST-NEXT:                 {
+// AST-NEXT:                   "name": "identifier_2",
+// AST-NEXT:                   "defScopeUid": 0
+// AST-NEXT:                 }
+// AST-NEXT:               ],
 // AST-NEXT:               "id": {
 // AST-NEXT:                 "type": "Identifier",
 // AST-NEXT:                 "loc": {
@@ -300,39 +310,9 @@
 // AST-NEXT:         },
 // AST-NEXT:         "start": 117,
 // AST-NEXT:         "end": 137,
-// AST-NEXT:         "trailingComments": [
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 9,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 9,
-// AST-NEXT:                 "column": 36
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " TODO(b/182441574): Fix AST error.",
-// AST-NEXT:             "start": 139,
-// AST-NEXT:             "end": 175
-// AST-NEXT:           },
-// AST-NEXT:           {
-// AST-NEXT:             "type": "CommentLine",
-// AST-NEXT:             "loc": {
-// AST-NEXT:               "start": {
-// AST-NEXT:                 "line": 10,
-// AST-NEXT:                 "column": 0
-// AST-NEXT:               },
-// AST-NEXT:               "end": {
-// AST-NEXT:                 "line": 10,
-// AST-NEXT:                 "column": 39
-// AST-NEXT:               }
-// AST-NEXT:             },
-// AST-NEXT:             "value": " export * as identifier_3 from \"foo\";",
-// AST-NEXT:             "start": 176,
-// AST-NEXT:             "end": 215
-// AST-NEXT:           }
+// AST-NEXT:         "trailingCommentUids": [
+// AST-NEXT:           0,
+// AST-NEXT:           1
 // AST-NEXT:         ],
 // AST-NEXT:         "scopeUid": 0,
 // AST-NEXT:         "source": {
@@ -359,5 +339,39 @@
 // AST-NEXT:       }
 // AST-NEXT:     ],
 // AST-NEXT:     "directives": []
-// AST-NEXT:   }
+// AST-NEXT:   },
+// AST-NEXT:   "comments": [
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 9,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 9,
+// AST-NEXT:           "column": 36
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " TODO(b/182441574): Fix AST error.",
+// AST-NEXT:       "start": 139,
+// AST-NEXT:       "end": 175
+// AST-NEXT:     },
+// AST-NEXT:     {
+// AST-NEXT:       "type": "CommentLine",
+// AST-NEXT:       "loc": {
+// AST-NEXT:         "start": {
+// AST-NEXT:           "line": 10,
+// AST-NEXT:           "column": 0
+// AST-NEXT:         },
+// AST-NEXT:         "end": {
+// AST-NEXT:           "line": 10,
+// AST-NEXT:           "column": 39
+// AST-NEXT:         }
+// AST-NEXT:       },
+// AST-NEXT:       "value": " export * as identifier_3 from \"foo\";",
+// AST-NEXT:       "start": 176,
+// AST-NEXT:       "end": 215
+// AST-NEXT:     }
+// AST-NEXT:   ]
 // AST-NEXT: }
