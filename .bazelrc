@@ -15,6 +15,11 @@
 # Required as otherwise testdata is not copied (i.e. linked) on Windows.
 startup --windows_enable_symlinks
 
+common --enable_bzlmod
+# required for hybrid bzlmod+workspace builds
+common --enable_workspace
+common --incompatible_disallow_empty_glob
+
 common --action_env=BAZEL_CXXOPTS=-std=c++17
 common --cxxopt='-std=c++17'
 
