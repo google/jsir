@@ -1,0 +1,49 @@
+// JSLIR:      "jsir.file"() <{comments = []}> ({
+// JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSLIR-NEXT:       %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSLIR-NEXT:       %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       %2 = "jsir.unary_expression"(%1) <{operator_ = "void", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSLIR-NEXT:       %3 = "jsir.variable_declarator"(%0, %2) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:       "jsir.exprs_region_end"(%3) : (!jsir.any) -> ()
+// JSLIR-NEXT:     }) : () -> ()
+// JSLIR-NEXT:   }, {
+// JSLIR-NEXT:   ^bb0:
+// JSLIR-NEXT:   }) : () -> ()
+// JSLIR-NEXT: }) : () -> ()
+// JSLIR-NEXT: jsir.file {[]} ({
+// JSLIR-NEXT:   ^bb0:
+// JSLIR-NEXT:       // <executable>
+// JSLIR-NEXT:       // State [default = <unknown>] { }
+// JSLIR-NEXT:     jsir.program {"script"} ({
+// JSLIR-NEXT:       ^bb0:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSLIR-NEXT:           ^bb0:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %0 = jsir.identifier_ref {"a"}
+// JSLIR-NEXT:               // %0 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSLIR-NEXT:               // %1 = 0.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %2 = jsir.unary_expression (%1) {"void", true}
+// JSLIR-NEXT:               // %2 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %3 = jsir.variable_declarator (%0, %2)
+// JSLIR-NEXT:               // %3 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             jsir.exprs_region_end (%3)
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:         })
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:     }, {
+// JSLIR-NEXT:       ^bb0:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:     })
+// JSLIR-NEXT:       // State [default = <unknown>] { }
+// JSLIR-NEXT: })
+// JSLIR-NEXT:   // State [default = <uninitialized>] { }

@@ -1,0 +1,163 @@
+// JSHIR:      "jsir.file"() <{comments = []}> ({
+// JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSHIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSHIR-NEXT:       %6 = "jsir.identifier_ref"() <{name = "y"}> : () -> !jsir.any
+// JSHIR-NEXT:       %7 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSHIR-NEXT:       %8 = "jsir.variable_declarator"(%6, %7) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:       "jsir.exprs_region_end"(%8) : (!jsir.any) -> ()
+// JSHIR-NEXT:     }) : () -> ()
+// JSHIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "key"}> : () -> !jsir.any
+// JSHIR-NEXT:     %1 = "jsir.identifier"() <{name = "object"}> : () -> !jsir.any
+// JSHIR-NEXT:     "jshir.for_in_statement"(%0, %1) <{left_declaration = #jsir<for_in_of_declaration   <L 2 C 5>, <L 2 C 12>, 16, 23, 1,   <L 2 C 9>, <L 2 C 12>, 20, 23, 1,  "key", 0, "var">}> ({
+// JSHIR-NEXT:       "jshir.block_statement"() ({
+// JSHIR-NEXT:         %6 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSHIR-NEXT:         %7 = "jsir.member_expression"(%6) <{literal_property = #jsir<identifier   <L 3 C 10>, <L 3 C 13>, "log", 47, 50, 2, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:         %8 = "jsir.identifier"() <{name = "key"}> : () -> !jsir.any
+// JSHIR-NEXT:         %9 = "jsir.call_expression"(%7, %8) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:         "jsir.expression_statement"(%9) : (!jsir.any) -> ()
+// JSHIR-NEXT:         %10 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSHIR-NEXT:         %11 = "jsir.member_expression"(%10) <{literal_property = #jsir<identifier   <L 4 C 10>, <L 4 C 13>, "log", 67, 70, 2, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:         %12 = "jsir.identifier"() <{name = "object"}> : () -> !jsir.any
+// JSHIR-NEXT:         %13 = "jsir.identifier"() <{name = "key"}> : () -> !jsir.any
+// JSHIR-NEXT:         %14 = "jsir.member_expression"(%12, %13) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:         %15 = "jsir.call_expression"(%11, %14) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:         "jsir.expression_statement"(%15) : (!jsir.any) -> ()
+// JSHIR-NEXT:         %16 = "jsir.identifier_ref"() <{name = "y"}> : () -> !jsir.any
+// JSHIR-NEXT:         %17 = "jsir.identifier"() <{name = "y"}> : () -> !jsir.any
+// JSHIR-NEXT:         %18 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSHIR-NEXT:         %19 = "jsir.binary_expression"(%17, %18) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:         %20 = "jsir.assignment_expression"(%16, %19) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:         "jsir.expression_statement"(%20) : (!jsir.any) -> ()
+// JSHIR-NEXT:       }, {
+// JSHIR-NEXT:       ^bb0:
+// JSHIR-NEXT:       }) : () -> ()
+// JSHIR-NEXT:     }) : (!jsir.any, !jsir.any) -> ()
+// JSHIR-NEXT:     %2 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSHIR-NEXT:     %3 = "jsir.member_expression"(%2) <{literal_property = #jsir<identifier   <L 7 C 8>, <L 7 C 11>, "log", 108, 111, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:     %4 = "jsir.identifier"() <{name = "y"}> : () -> !jsir.any
+// JSHIR-NEXT:     %5 = "jsir.call_expression"(%3, %4) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:     "jsir.expression_statement"(%5) : (!jsir.any) -> ()
+// JSHIR-NEXT:   }, {
+// JSHIR-NEXT:   ^bb0:
+// JSHIR-NEXT:   }) : () -> ()
+// JSHIR-NEXT: }) : () -> ()
+// JSHIR-NEXT: jsir.file {[]} ({
+// JSHIR-NEXT:   ^bb0:
+// JSHIR-NEXT:       // <executable>
+// JSHIR-NEXT:       // State [default = <unknown>] { }
+// JSHIR-NEXT:     jsir.program {"script"} ({
+// JSHIR-NEXT:       ^bb0:
+// JSHIR-NEXT:           // <executable>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSHIR-NEXT:           ^bb0:
+// JSHIR-NEXT:               // <executable>
+// JSHIR-NEXT:               // State [default = <unknown>] { }
+// JSHIR-NEXT:             %6 = jsir.identifier_ref {"y"}
+// JSHIR-NEXT:               // %6 = <unknown>
+// JSHIR-NEXT:               // State [default = <unknown>] { }
+// JSHIR-NEXT:             %7 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSHIR-NEXT:               // %7 = 0.000000e+00 : f64
+// JSHIR-NEXT:               // State [default = <unknown>] { }
+// JSHIR-NEXT:             %8 = jsir.variable_declarator (%6, %7)
+// JSHIR-NEXT:               // %8 = <uninitialized>
+// JSHIR-NEXT:               // State [default = <unknown>] { <y#0 : 0.000000e+00 : f64> }
+// JSHIR-NEXT:             jsir.exprs_region_end (%8)
+// JSHIR-NEXT:               // State [default = <unknown>] { <y#0 : 0.000000e+00 : f64> }
+// JSHIR-NEXT:         })
+// JSHIR-NEXT:           // State [default = <unknown>] { <y#0 : 0.000000e+00 : f64> }
+// JSHIR-NEXT:         %0 = jsir.identifier_ref {"key"}
+// JSHIR-NEXT:           // %0 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { <y#0 : 0.000000e+00 : f64> }
+// JSHIR-NEXT:         %1 = jsir.identifier {"object"}
+// JSHIR-NEXT:           // %1 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { <y#0 : 0.000000e+00 : f64> }
+// JSHIR-NEXT:         jshir.for_in_statement (%0, %1) {#jsir<for_in_of_declaration   <L 2 C 5>, <L 2 C 12>, 16, 23, 1,   <L 2 C 9>, <L 2 C 12>, 20, 23, 1,  "key", 0, "var">} ({
+// JSHIR-NEXT:           ^bb0:
+// JSHIR-NEXT:               // <executable>
+// JSHIR-NEXT:               // State [default = <unknown>] { }
+// JSHIR-NEXT:             jshir.block_statement ({
+// JSHIR-NEXT:               ^bb0:
+// JSHIR-NEXT:                   // <executable>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %6 = jsir.identifier {"console"}
+// JSHIR-NEXT:                   // %6 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %7 = jsir.member_expression (%6) {#jsir<identifier   <L 3 C 10>, <L 3 C 13>, "log", 47, 50, 2, "log">}
+// JSHIR-NEXT:                   // %7 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %8 = jsir.identifier {"key"}
+// JSHIR-NEXT:                   // %8 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %9 = jsir.call_expression (%7, %8)
+// JSHIR-NEXT:                   // %9 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 jsir.expression_statement (%9)
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %10 = jsir.identifier {"console"}
+// JSHIR-NEXT:                   // %10 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %11 = jsir.member_expression (%10) {#jsir<identifier   <L 4 C 10>, <L 4 C 13>, "log", 67, 70, 2, "log">}
+// JSHIR-NEXT:                   // %11 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %12 = jsir.identifier {"object"}
+// JSHIR-NEXT:                   // %12 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %13 = jsir.identifier {"key"}
+// JSHIR-NEXT:                   // %13 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %14 = jsir.member_expression (%12, %13)
+// JSHIR-NEXT:                   // %14 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %15 = jsir.call_expression (%11, %14)
+// JSHIR-NEXT:                   // %15 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 jsir.expression_statement (%15)
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %16 = jsir.identifier_ref {"y"}
+// JSHIR-NEXT:                   // %16 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %17 = jsir.identifier {"y"}
+// JSHIR-NEXT:                   // %17 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %18 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSHIR-NEXT:                   // %18 = 1.000000e+00 : f64
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %19 = jsir.binary_expression (%17, %18) {"+"}
+// JSHIR-NEXT:                   // %19 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 %20 = jsir.assignment_expression (%16, %19) {"="}
+// JSHIR-NEXT:                   // %20 = <unknown>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:                 jsir.expression_statement (%20)
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:             }, {
+// JSHIR-NEXT:               ^bb0:
+// JSHIR-NEXT:                   // <executable>
+// JSHIR-NEXT:                   // State [default = <unknown>] { }
+// JSHIR-NEXT:             })
+// JSHIR-NEXT:               // State [default = <unknown>] { }
+// JSHIR-NEXT:         })
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %2 = jsir.identifier {"console"}
+// JSHIR-NEXT:           // %2 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %3 = jsir.member_expression (%2) {#jsir<identifier   <L 7 C 8>, <L 7 C 11>, "log", 108, 111, 0, "log">}
+// JSHIR-NEXT:           // %3 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %4 = jsir.identifier {"y"}
+// JSHIR-NEXT:           // %4 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %5 = jsir.call_expression (%3, %4)
+// JSHIR-NEXT:           // %5 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         jsir.expression_statement (%5)
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:     }, {
+// JSHIR-NEXT:       ^bb0:
+// JSHIR-NEXT:           // <executable>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:     })
+// JSHIR-NEXT:       // State [default = <unknown>] { }
+// JSHIR-NEXT: })
+// JSHIR-NEXT:   // State [default = <uninitialized>] { }
