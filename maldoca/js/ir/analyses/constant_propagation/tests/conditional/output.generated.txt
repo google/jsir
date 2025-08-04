@@ -1,0 +1,286 @@
+// JSLIR:      "jsir.file"() <{comments = []}> ({
+// JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSLIR-NEXT:       %28 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSLIR-NEXT:       %29 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
+// JSLIR-NEXT:       %30 = "jslir.control_flow_starter"() <{kind = #jsir<cf_kind ConditionalExpression>}> : () -> !jsir.any
+// JSLIR-NEXT:       %31 = "builtin.unrealized_conversion_cast"(%29) : (!jsir.any) -> i1
+// JSLIR-NEXT:       "cf.cond_br"(%31)[^bb2, ^bb1] <{operandSegmentSizes = array<i32: 1, 0, 0>}> : (i1) -> ()
+// JSLIR-NEXT:     ^bb1:  // pred: ^bb0
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%30) <{kind = #jsir<cf_marker ConditionalExpressionAlternate>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %32 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, value = 2.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       "cf.br"(%32)[^bb3] : (!jsir.any) -> ()
+// JSLIR-NEXT:     ^bb2:  // pred: ^bb0
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%30) <{kind = #jsir<cf_marker ConditionalExpressionConsequent>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %33 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       "cf.br"(%33)[^bb3] : (!jsir.any) -> ()
+// JSLIR-NEXT:     ^bb3(%34: !jsir.any):  // 2 preds: ^bb1, ^bb2
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%30) <{kind = #jsir<cf_marker ConditionalExpressionEnd>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %35 = "jsir.variable_declarator"(%28, %34) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:       "jsir.exprs_region_end"(%35) : (!jsir.any) -> ()
+// JSLIR-NEXT:     }) : () -> ()
+// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSLIR-NEXT:       %20 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
+// JSLIR-NEXT:       %21 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
+// JSLIR-NEXT:       %22 = "jslir.control_flow_starter"() <{kind = #jsir<cf_kind ConditionalExpression>}> : () -> !jsir.any
+// JSLIR-NEXT:       %23 = "builtin.unrealized_conversion_cast"(%21) : (!jsir.any) -> i1
+// JSLIR-NEXT:       "cf.cond_br"(%23)[^bb2, ^bb1] <{operandSegmentSizes = array<i32: 1, 0, 0>}> : (i1) -> ()
+// JSLIR-NEXT:     ^bb1:  // pred: ^bb0
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%22) <{kind = #jsir<cf_marker ConditionalExpressionAlternate>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %24 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "4", 4.000000e+00 : f64>, value = 4.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       "cf.br"(%24)[^bb3] : (!jsir.any) -> ()
+// JSLIR-NEXT:     ^bb2:  // pred: ^bb0
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%22) <{kind = #jsir<cf_marker ConditionalExpressionConsequent>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %25 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, value = 3.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       "cf.br"(%25)[^bb3] : (!jsir.any) -> ()
+// JSLIR-NEXT:     ^bb3(%26: !jsir.any):  // 2 preds: ^bb1, ^bb2
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%22) <{kind = #jsir<cf_marker ConditionalExpressionEnd>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %27 = "jsir.variable_declarator"(%20, %26) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:       "jsir.exprs_region_end"(%27) : (!jsir.any) -> ()
+// JSLIR-NEXT:     }) : () -> ()
+// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSLIR-NEXT:       %12 = "jsir.identifier_ref"() <{name = "c"}> : () -> !jsir.any
+// JSLIR-NEXT:       %13 = "jsir.identifier"() <{name = "x"}> : () -> !jsir.any
+// JSLIR-NEXT:       %14 = "jslir.control_flow_starter"() <{kind = #jsir<cf_kind ConditionalExpression>}> : () -> !jsir.any
+// JSLIR-NEXT:       %15 = "builtin.unrealized_conversion_cast"(%13) : (!jsir.any) -> i1
+// JSLIR-NEXT:       "cf.cond_br"(%15)[^bb2, ^bb1] <{operandSegmentSizes = array<i32: 1, 0, 0>}> : (i1) -> ()
+// JSLIR-NEXT:     ^bb1:  // pred: ^bb0
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%14) <{kind = #jsir<cf_marker ConditionalExpressionAlternate>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "6", 6.000000e+00 : f64>, value = 6.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       "cf.br"(%16)[^bb3] : (!jsir.any) -> ()
+// JSLIR-NEXT:     ^bb2:  // pred: ^bb0
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%14) <{kind = #jsir<cf_marker ConditionalExpressionConsequent>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %17 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, value = 5.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       "cf.br"(%17)[^bb3] : (!jsir.any) -> ()
+// JSLIR-NEXT:     ^bb3(%18: !jsir.any):  // 2 preds: ^bb1, ^bb2
+// JSLIR-NEXT:       "jslir.control_flow_marker"(%14) <{kind = #jsir<cf_marker ConditionalExpressionEnd>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:       %19 = "jsir.variable_declarator"(%12, %18) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:       "jsir.exprs_region_end"(%19) : (!jsir.any) -> ()
+// JSLIR-NEXT:     }) : () -> ()
+// JSLIR-NEXT:     %0 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSLIR-NEXT:     %1 = "jsir.member_expression"(%0) <{literal_property = #jsir<identifier   <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %2 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
+// JSLIR-NEXT:     %3 = "jsir.call_expression"(%1, %2) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     "jsir.expression_statement"(%3) : (!jsir.any) -> ()
+// JSLIR-NEXT:     %4 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSLIR-NEXT:     %5 = "jsir.member_expression"(%4) <{literal_property = #jsir<identifier   <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %6 = "jsir.identifier"() <{name = "b"}> : () -> !jsir.any
+// JSLIR-NEXT:     %7 = "jsir.call_expression"(%5, %6) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     "jsir.expression_statement"(%7) : (!jsir.any) -> ()
+// JSLIR-NEXT:     %8 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSLIR-NEXT:     %9 = "jsir.member_expression"(%8) <{literal_property = #jsir<identifier   <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %10 = "jsir.identifier"() <{name = "c"}> : () -> !jsir.any
+// JSLIR-NEXT:     %11 = "jsir.call_expression"(%9, %10) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     "jsir.expression_statement"(%11) : (!jsir.any) -> ()
+// JSLIR-NEXT:   }, {
+// JSLIR-NEXT:   ^bb0:
+// JSLIR-NEXT:   }) : () -> ()
+// JSLIR-NEXT: }) : () -> ()
+// JSLIR-NEXT: jsir.file {[]} ({
+// JSLIR-NEXT:   ^bb0:
+// JSLIR-NEXT:       // <executable>
+// JSLIR-NEXT:       // State [default = <unknown>] { }
+// JSLIR-NEXT:     jsir.program {"script"} ({
+// JSLIR-NEXT:       ^bb0:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSLIR-NEXT:           ^bb0:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %28 = jsir.identifier_ref {"a"}
+// JSLIR-NEXT:               // %28 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %29 = jsir.boolean_literal {true}
+// JSLIR-NEXT:               // %29 = true
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %30 = jslir.control_flow_starter {#jsir<cf_kind ConditionalExpression>}
+// JSLIR-NEXT:               // %30 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %31 = builtin.unrealized_conversion_cast (%29)
+// JSLIR-NEXT:               // %31 = true
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             cf.cond_br (%31) {array<i32: 1, 0, 0>}
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:           ^bb1:
+// JSLIR-NEXT:               // <not executable>
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker ConditionalExpressionAlternate>}
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:             %32 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
+// JSLIR-NEXT:               // %32 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:             cf.br (%32)
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:           ^bb2:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker ConditionalExpressionConsequent>}
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %33 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSLIR-NEXT:               // %33 = 1.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             cf.br (%33)
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:           ^bb3:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker ConditionalExpressionEnd>}
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %35 = jsir.variable_declarator (%28, %34)
+// JSLIR-NEXT:               // %35 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             jsir.exprs_region_end (%35)
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         })
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSLIR-NEXT:           ^bb0:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             %20 = jsir.identifier_ref {"b"}
+// JSLIR-NEXT:               // %20 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             %21 = jsir.boolean_literal {false}
+// JSLIR-NEXT:               // %21 = false
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             %22 = jslir.control_flow_starter {#jsir<cf_kind ConditionalExpression>}
+// JSLIR-NEXT:               // %22 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             %23 = builtin.unrealized_conversion_cast (%21)
+// JSLIR-NEXT:               // %23 = false
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             cf.cond_br (%23) {array<i32: 1, 0, 0>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:           ^bb1:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             jslir.control_flow_marker (%22) {#jsir<cf_marker ConditionalExpressionAlternate>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             %24 = jsir.numeric_literal {#jsir<numeric_literal_extra "4", 4.000000e+00 : f64>, 4.000000e+00 : f64}
+// JSLIR-NEXT:               // %24 = 4.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             cf.br (%24)
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:           ^bb2:
+// JSLIR-NEXT:               // <not executable>
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:             jslir.control_flow_marker (%22) {#jsir<cf_marker ConditionalExpressionConsequent>}
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:             %25 = jsir.numeric_literal {#jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, 3.000000e+00 : f64}
+// JSLIR-NEXT:               // %25 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:             cf.br (%25)
+// JSLIR-NEXT:               // State [default = <uninitialized>] { }
+// JSLIR-NEXT:           ^bb3:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             jslir.control_flow_marker (%22) {#jsir<cf_marker ConditionalExpressionEnd>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             %27 = jsir.variable_declarator (%20, %26)
+// JSLIR-NEXT:               // %27 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             jsir.exprs_region_end (%27)
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         })
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSLIR-NEXT:           ^bb0:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %12 = jsir.identifier_ref {"c"}
+// JSLIR-NEXT:               // %12 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %13 = jsir.identifier {"x"}
+// JSLIR-NEXT:               // %13 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %14 = jslir.control_flow_starter {#jsir<cf_kind ConditionalExpression>}
+// JSLIR-NEXT:               // %14 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %15 = builtin.unrealized_conversion_cast (%13)
+// JSLIR-NEXT:               // %15 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             cf.cond_br (%15) {array<i32: 1, 0, 0>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:           ^bb1:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             jslir.control_flow_marker (%14) {#jsir<cf_marker ConditionalExpressionAlternate>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "6", 6.000000e+00 : f64>, 6.000000e+00 : f64}
+// JSLIR-NEXT:               // %16 = 6.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             cf.br (%16)
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:           ^bb2:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             jslir.control_flow_marker (%14) {#jsir<cf_marker ConditionalExpressionConsequent>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %17 = jsir.numeric_literal {#jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, 5.000000e+00 : f64}
+// JSLIR-NEXT:               // %17 = 5.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             cf.br (%17)
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:           ^bb3:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             jslir.control_flow_marker (%14) {#jsir<cf_marker ConditionalExpressionEnd>}
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             %19 = jsir.variable_declarator (%12, %18)
+// JSLIR-NEXT:               // %19 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:             jsir.exprs_region_end (%19)
+// JSLIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         })
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %0 = jsir.identifier {"console"}
+// JSLIR-NEXT:           // %0 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier   <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}
+// JSLIR-NEXT:           // %1 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %2 = jsir.identifier {"a"}
+// JSLIR-NEXT:           // %2 = 1.000000e+00 : f64
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %3 = jsir.call_expression (%1, %2)
+// JSLIR-NEXT:           // %3 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         jsir.expression_statement (%3)
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %4 = jsir.identifier {"console"}
+// JSLIR-NEXT:           // %4 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %5 = jsir.member_expression (%4) {#jsir<identifier   <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}
+// JSLIR-NEXT:           // %5 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %6 = jsir.identifier {"b"}
+// JSLIR-NEXT:           // %6 = 4.000000e+00 : f64
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %7 = jsir.call_expression (%5, %6)
+// JSLIR-NEXT:           // %7 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         jsir.expression_statement (%7)
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %8 = jsir.identifier {"console"}
+// JSLIR-NEXT:           // %8 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %9 = jsir.member_expression (%8) {#jsir<identifier   <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}
+// JSLIR-NEXT:           // %9 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %10 = jsir.identifier {"c"}
+// JSLIR-NEXT:           // %10 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         %11 = jsir.call_expression (%9, %10)
+// JSLIR-NEXT:           // %11 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:         jsir.expression_statement (%11)
+// JSLIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSLIR-NEXT:     }, {
+// JSLIR-NEXT:       ^bb0:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:     })
+// JSLIR-NEXT:       // State [default = <unknown>] { }
+// JSLIR-NEXT: })
+// JSLIR-NEXT:   // State [default = <uninitialized>] { }

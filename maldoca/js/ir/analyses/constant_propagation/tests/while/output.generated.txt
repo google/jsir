@@ -1,0 +1,184 @@
+// JSLIR:      "jsir.file"() <{comments = [#jsir<comment_line  <L 1 C 0>, <L 1 C 53>, 0, 53, " TODO(b/217662731): `is_a_const` should be a const.">]}> ({
+// JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSLIR-NEXT:       %20 = "jsir.identifier_ref"() <{name = "not_a_const"}> : () -> !jsir.any
+// JSLIR-NEXT:       %21 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       %22 = "jsir.variable_declarator"(%20, %21) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:       "jsir.exprs_region_end"(%22) : (!jsir.any) -> ()
+// JSLIR-NEXT:     }) : () -> ()
+// JSLIR-NEXT:     %0 = "jslir.control_flow_starter"() <{kind = #jsir<cf_kind WhileStatement>}> : () -> !jsir.any
+// JSLIR-NEXT:     "cf.br"()[^bb1] : () -> ()
+// JSLIR-NEXT:   ^bb1:  // 2 preds: ^bb0, ^bb2
+// JSLIR-NEXT:     "jslir.control_flow_marker"(%0) <{kind = #jsir<cf_marker WhileStatementTest>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:     %1 = "jsir.identifier"() <{name = "x"}> : () -> !jsir.any
+// JSLIR-NEXT:     %2 = "builtin.unrealized_conversion_cast"(%1) : (!jsir.any) -> i1
+// JSLIR-NEXT:     "cf.cond_br"(%2)[^bb2, ^bb3] <{operandSegmentSizes = array<i32: 1, 0, 0>}> : (i1) -> ()
+// JSLIR-NEXT:   ^bb2:  // pred: ^bb1
+// JSLIR-NEXT:     "jslir.control_flow_marker"(%0) <{kind = #jsir<cf_marker WhileStatementBody>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:     %3 = "jslir.control_flow_starter"() <{kind = #jsir<cf_kind BlockStatement>}> : () -> !jsir.any
+// JSLIR-NEXT:     "jslir.control_flow_marker"(%3) <{kind = #jsir<cf_marker BlockStatementDirectives>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:     "jslir.control_flow_marker"(%3) <{kind = #jsir<cf_marker BlockStatementBody>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:     %4 = "jsir.identifier_ref"() <{name = "not_a_const"}> : () -> !jsir.any
+// JSLIR-NEXT:     %5 = "jsir.identifier"() <{name = "not_a_const"}> : () -> !jsir.any
+// JSLIR-NEXT:     %6 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:     %7 = "jsir.binary_expression"(%5, %6) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %8 = "jsir.assignment_expression"(%4, %7) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     "jsir.expression_statement"(%8) : (!jsir.any) -> ()
+// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSLIR-NEXT:       %17 = "jsir.identifier_ref"() <{name = "is_a_const"}> : () -> !jsir.any
+// JSLIR-NEXT:       %18 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSLIR-NEXT:       %19 = "jsir.variable_declarator"(%17, %18) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:       "jsir.exprs_region_end"(%19) : (!jsir.any) -> ()
+// JSLIR-NEXT:     }) : () -> ()
+// JSLIR-NEXT:     "jslir.control_flow_marker"(%3) <{kind = #jsir<cf_marker BlockStatementEnd>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:     "cf.br"()[^bb1] : () -> ()
+// JSLIR-NEXT:   ^bb3:  // pred: ^bb1
+// JSLIR-NEXT:     "jslir.control_flow_marker"(%0) <{kind = #jsir<cf_marker WhileStatementEnd>}> : (!jsir.any) -> ()
+// JSLIR-NEXT:     %9 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSLIR-NEXT:     %10 = "jsir.member_expression"(%9) <{literal_property = #jsir<identifier   <L 8 C 8>, <L 8 C 11>, "log", 153, 156, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %11 = "jsir.identifier"() <{name = "not_a_const"}> : () -> !jsir.any
+// JSLIR-NEXT:     %12 = "jsir.call_expression"(%10, %11) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     "jsir.expression_statement"(%12) : (!jsir.any) -> ()
+// JSLIR-NEXT:     %13 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSLIR-NEXT:     %14 = "jsir.member_expression"(%13) <{literal_property = #jsir<identifier   <L 9 C 8>, <L 9 C 11>, "log", 179, 182, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSLIR-NEXT:     %15 = "jsir.identifier"() <{name = "is_a_const"}> : () -> !jsir.any
+// JSLIR-NEXT:     %16 = "jsir.call_expression"(%14, %15) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSLIR-NEXT:     "jsir.expression_statement"(%16) : (!jsir.any) -> ()
+// JSLIR-NEXT:   }, {
+// JSLIR-NEXT:   ^bb0:
+// JSLIR-NEXT:   }) : () -> ()
+// JSLIR-NEXT: }) : () -> ()
+// JSLIR-NEXT: jsir.file {[#jsir<comment_line  <L 1 C 0>, <L 1 C 53>, 0, 53, " TODO(b/217662731): `is_a_const` should be a const.">]} ({
+// JSLIR-NEXT:   ^bb0:
+// JSLIR-NEXT:       // <executable>
+// JSLIR-NEXT:       // State [default = <unknown>] { }
+// JSLIR-NEXT:     jsir.program {"script"} ({
+// JSLIR-NEXT:       ^bb0:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSLIR-NEXT:           ^bb0:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %20 = jsir.identifier_ref {"not_a_const"}
+// JSLIR-NEXT:               // %20 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %21 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSLIR-NEXT:               // %21 = 1.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %22 = jsir.variable_declarator (%20, %21)
+// JSLIR-NEXT:               // %22 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <unknown>] { <not_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             jsir.exprs_region_end (%22)
+// JSLIR-NEXT:               // State [default = <unknown>] { <not_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         })
+// JSLIR-NEXT:           // State [default = <unknown>] { <not_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         %0 = jslir.control_flow_starter {#jsir<cf_kind WhileStatement>}
+// JSLIR-NEXT:           // %0 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { <not_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         cf.br
+// JSLIR-NEXT:           // State [default = <unknown>] { <not_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:       ^bb1:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jslir.control_flow_marker (%0) {#jsir<cf_marker WhileStatementTest>}
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %1 = jsir.identifier {"x"}
+// JSLIR-NEXT:           // %1 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %2 = builtin.unrealized_conversion_cast (%1)
+// JSLIR-NEXT:           // %2 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         cf.cond_br (%2) {array<i32: 1, 0, 0>}
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:       ^bb2:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jslir.control_flow_marker (%0) {#jsir<cf_marker WhileStatementBody>}
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %3 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
+// JSLIR-NEXT:           // %3 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jslir.control_flow_marker (%3) {#jsir<cf_marker BlockStatementDirectives>}
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jslir.control_flow_marker (%3) {#jsir<cf_marker BlockStatementBody>}
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %4 = jsir.identifier_ref {"not_a_const"}
+// JSLIR-NEXT:           // %4 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %5 = jsir.identifier {"not_a_const"}
+// JSLIR-NEXT:           // %5 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %6 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSLIR-NEXT:           // %6 = 1.000000e+00 : f64
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %7 = jsir.binary_expression (%5, %6) {"+"}
+// JSLIR-NEXT:           // %7 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %8 = jsir.assignment_expression (%4, %7) {"="}
+// JSLIR-NEXT:           // %8 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.expression_statement (%8)
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSLIR-NEXT:           ^bb0:
+// JSLIR-NEXT:               // <executable>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %17 = jsir.identifier_ref {"is_a_const"}
+// JSLIR-NEXT:               // %17 = <unknown>
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %18 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSLIR-NEXT:               // %18 = 1.000000e+00 : f64
+// JSLIR-NEXT:               // State [default = <unknown>] { }
+// JSLIR-NEXT:             %19 = jsir.variable_declarator (%17, %18)
+// JSLIR-NEXT:               // %19 = <uninitialized>
+// JSLIR-NEXT:               // State [default = <unknown>] { <is_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:             jsir.exprs_region_end (%19)
+// JSLIR-NEXT:               // State [default = <unknown>] { <is_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         })
+// JSLIR-NEXT:           // State [default = <unknown>] { <is_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         jslir.control_flow_marker (%3) {#jsir<cf_marker BlockStatementEnd>}
+// JSLIR-NEXT:           // State [default = <unknown>] { <is_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:         cf.br
+// JSLIR-NEXT:           // State [default = <unknown>] { <is_a_const#0 : 1.000000e+00 : f64> }
+// JSLIR-NEXT:       ^bb3:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jslir.control_flow_marker (%0) {#jsir<cf_marker WhileStatementEnd>}
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %9 = jsir.identifier {"console"}
+// JSLIR-NEXT:           // %9 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %10 = jsir.member_expression (%9) {#jsir<identifier   <L 8 C 8>, <L 8 C 11>, "log", 153, 156, 0, "log">}
+// JSLIR-NEXT:           // %10 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %11 = jsir.identifier {"not_a_const"}
+// JSLIR-NEXT:           // %11 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %12 = jsir.call_expression (%10, %11)
+// JSLIR-NEXT:           // %12 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.expression_statement (%12)
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %13 = jsir.identifier {"console"}
+// JSLIR-NEXT:           // %13 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %14 = jsir.member_expression (%13) {#jsir<identifier   <L 9 C 8>, <L 9 C 11>, "log", 179, 182, 0, "log">}
+// JSLIR-NEXT:           // %14 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %15 = jsir.identifier {"is_a_const"}
+// JSLIR-NEXT:           // %15 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         %16 = jsir.call_expression (%14, %15)
+// JSLIR-NEXT:           // %16 = <unknown>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:         jsir.expression_statement (%16)
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:     }, {
+// JSLIR-NEXT:       ^bb0:
+// JSLIR-NEXT:           // <executable>
+// JSLIR-NEXT:           // State [default = <unknown>] { }
+// JSLIR-NEXT:     })
+// JSLIR-NEXT:       // State [default = <unknown>] { }
+// JSLIR-NEXT: })
+// JSLIR-NEXT:   // State [default = <uninitialized>] { }
