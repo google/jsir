@@ -1,8 +1,70 @@
-# JSIR - JavaScript Intermediate Representation
+# JSIR - Next Generation JavaScript Analysis Tooling
 
-JSIR is an MLIR-based JavaScript intermediate representation.
+JSIR is a next-generation JavaScript analysis tool. At its core is an
+[MLIR](https://mlir.llvm.org)-based high-level
+[intermediate representation](https://en.wikipedia.org/wiki/Intermediate_representation),
+which supports both
+[dataflow analysis](https://en.wikipedia.org/wiki/Data-flow_analysis) and
+lossless conversion back to source. This unique design makes it suitable for
+source-to-source transformation.
 
-For more information on MLIR, see the MLIR homepage.
+## Use cases at Google
+
+JSIR is used at Google for analyzing and detecting malicious JavaScript files,
+protecting products like Ads, Android, and Chrome. Some example use cases are:
+
+*   **Signal extraction**
+
+    JSIR is used for extracting syntactical and behavioral signals, which are
+    fed into downstream security systems.
+
+*   **[Taint analysis](https://en.wikipedia.org/wiki/Taint_checking)**
+
+    JSIR is used for detecting suspicious information flows, by utilizing its
+    dataflow analysis capability.
+
+*   **Decompilation**
+
+    JSIR is used for decompiling the
+    [Hermes](https://github.com/facebook/hermes) bytecode all the way to
+    JavaScript code, by utilizing its ability to be fully lifted back to source
+    code.
+
+*   **Deobfuscation**:
+
+    JSIR is used for deobfuscating JavaScript by utilizing its source-to-source
+    transformation capability.
+
+    See our latest [paper](https://arxiv.org/abs/2507.17691) on how we combine
+    the Gemini LLM and JSIR for deobfuscation.
+
+## Design highlights
+
+Driven by the diverse use cases of malicious JavaScript analysis and detection,
+JSIR needs to achieve two seemingly conflicting goals:
+
+*   It needs to be **high-level** enough to be lifted back to the AST, in order
+    to support source-to-source transformation and decompilation.
+
+*   It needs to be **low-level** enough to facilitate dataflow analysis, in
+    order to support taint analysis, constant propagation, etc..
+
+To achieve these goals, JSIR defines two dialects:
+
+*   **JSHIR:**
+
+    This is a high-level IR that uses MLIR regions to accurately model control
+    flow structures.
+
+*   **JSLIR:**
+
+    This is a low-level IR that uses CFGs to represent branching behaviors.
+    JSLIR adds extra operations to annotate the kind of original control flow
+    structures. This allows JSLIR to be fully converted back to JSHIR.
+
+See
+[intermediate_representation_design.md](docs/intermediate_representation_design.md)
+for details.
 
 ## Getting started
 
@@ -17,8 +79,8 @@ sudo apt update
 sudo apt install clang
 ```
 
-We use the `Bazel` build system.
-It is recommended to use `Bazelisk` to manage `Bazel` versions:
+We use the `Bazel` build system. It is recommended to use `Bazelisk` to manage
+`Bazel` versions:
 
 ```shell
 # Install Bazelisk through npm:
@@ -29,11 +91,11 @@ sudo npm install -g @bazel/bazelisk
 
 ### Build
 
-Note: The build takes a lot of storage space.
-If you run out of space, Bazel will return a cryptic error.
+Note: The build takes a lot of storage space. If you run out of space, Bazel
+will return a cryptic error.
 
-LLVM takes a long time to fetch and build.
-We can test if LLVM is properly included by building a part of it:
+LLVM takes a long time to fetch and build. We can test if LLVM is properly
+included by building a part of it:
 
 ```shell
 # This will fetch LLVM and build its support library:
@@ -79,22 +141,21 @@ bazelisk run //maldoca/js/ir:jsir_gen --\
     --passes=source2ast,ast2hir
 ```
 
-## Overview
+## Other links
 
-NOTE: Documentation is under construction.
+*   **Adversarial JavaScript Analysis with MLIR**
 
-JSIR comes with two dialects:
+    Talk at LLVM Developers' Meeting 2024
 
-### JSHIR
+    [YouTube](https://www.youtube.com/watch?v=SY1ft5EXI3I)
+    [Slides](https://llvm.org/devmtg/2024-10/slides/techtalk/Tan-JSIR.pdf)
 
-This is a high-level IR that uses MLIR regions to accurately model control flow
-structures.
+*   **CASCADE: LLM-Powered JavaScript Deobfuscator at Google**
 
-### JSLIR
+    Paper about combining LLM + JSIR for JavaScript deobfuscation
 
-This is a low-level IR that uses CFGs to represent branching behaviors. JSLIR
-adds extra operations to annotate the kind of original control flow structures.
-This allows JSLIR to be fully converted back to JSHIR.
+    [arXiv](https://arxiv.org/abs/2507.17691)
 
 ## DISCLAIMER
+
 This is not an official Google product.
