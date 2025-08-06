@@ -65,6 +65,9 @@ static auto *kStringToPassKind =
         {"remove_directives", maldoca::JsirPassKind::kRemoveDirectives},
         {"split_declaration_statements",
          maldoca::JsirPassKind::kSplitDeclarationStatements},
+
+        {"extract_prelude", maldoca::JsirPassKind::kExtractPrelude},
+        {"dynconstprop", maldoca::JsirPassKind::kDynamicConstantPropagation},
     };
 
 ABSL_FLAG(std::string, input_file, "", "The JavaScript file.");
@@ -80,7 +83,36 @@ ABSL_FLAG(
       return absl::StrJoin(available_passes, ", ");
     }()));
 
+ABSL_FLAG(std::string, dynamic_prelude_path, "",
+          "A piece of JavaScript code to dynamically execute before performing "
+          "constant propagation.");
+ABSL_FLAG(std::vector<std::string>, dynamic_prelude_functions, {},
+          "A list of functions to treat as builtins in the dynamic prelude.");
+
 namespace maldoca {
+
+
+static JsirAnalysisConfig::DynamicConstantPropagation
+GetJsirDynamicConstantPropagationConfig() {
+  std::string dynamic_prelude_path = absl::GetFlag(FLAGS_dynamic_prelude_path);
+  if (dynamic_prelude_path.empty()) {
+    return {};
+  }
+
+  absl::StatusOr<std::string> dynamic_prelude_source =
+      GetFileContents(dynamic_prelude_path);
+  CHECK_OK(dynamic_prelude_source);
+
+  std::vector<std::string> dynamic_prelude_functions =
+      absl::GetFlag(FLAGS_dynamic_prelude_functions);
+
+  JsirAnalysisConfig::DynamicConstantPropagation config;
+  config.set_prelude_source(*dynamic_prelude_source);
+  config.mutable_prelude_functions()->Assign(dynamic_prelude_functions.begin(),
+                                             dynamic_prelude_functions.end());
+
+  return config;
+}
 
 static std::optional<JsirAnalysisConfig::KindCase> StringToJsirAnalysisKind(
     absl::string_view kind) {
@@ -115,7 +147,12 @@ static JsirAnalysisConfig GetJsirAnalysisConfig() {
       config.mutable_constant_propagation();
       return config;
     }
-
+    case JsirAnalysisConfig::kDynamicConstantPropagation: {
+      JsirAnalysisConfig config;
+      *config.mutable_dynamic_constant_propagation() =
+          GetJsirDynamicConstantPropagationConfig();
+      return config;
+    }
     case JsirAnalysisConfig::KIND_NOT_SET:
       LOG(FATAL) << "JsirAnalysisConfig KIND_NOT_SET";
   }
@@ -150,6 +187,14 @@ int main(int argc, char *argv[]) {
       maldoca::GetJsirAnalysisConfig();
 
   std::vector<maldoca::JsirTransformConfig> transform_configs;
+
+  if (absl::c_linear_search(
+          pass_kinds, maldoca::JsirPassKind::kDynamicConstantPropagation)) {
+    maldoca::JsirTransformConfig config;
+    *config.mutable_dynamic_constant_propagation() =
+        maldoca::GetJsirDynamicConstantPropagationConfig();
+    transform_configs.push_back(std::move(config));
+  }
 
   auto output = maldoca::JsirGen(babel, *input, pass_kinds, analysis_config,
                                  transform_configs);

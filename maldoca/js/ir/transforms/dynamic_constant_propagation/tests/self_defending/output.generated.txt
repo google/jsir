@@ -1,0 +1,119 @@
+// SOURCE:      console["log"]("Hello World!");
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Prelude:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: function _0xc139(_0x3192ba, _0x74ebe0) {
+// SOURCE-NEXT:   var _0x580c2e = _0x525e();
+// SOURCE-NEXT:   return _0xc139 = function(_0x328044, _0x59e9bd) {
+// SOURCE-NEXT:     _0x328044 = _0x328044 - 0x1ce;
+// SOURCE-NEXT:     var _0x525e12 = _0x580c2e[_0x328044];
+// SOURCE-NEXT:     return _0x525e12;
+// SOURCE-NEXT:   }, _0xc139(_0x3192ba, _0x74ebe0);
+// SOURCE-NEXT: }
+// SOURCE-NEXT: var _0x4cdc8a = _0xc139;
+// SOURCE-NEXT: (function(_0xd6f5c4, _0x371e8a) {
+// SOURCE-NEXT: var _0x23cd2a = _0xc139, _0xdfbb38 = _0xd6f5c4();
+// SOURCE-NEXT: while (!![]) {
+// SOURCE-NEXT:   try {
+// SOURCE-NEXT:     var _0xea482b =
+// SOURCE-NEXT:         parseInt(_0x23cd2a(0x1d8)) / 0x1 * (-parseInt(_0x23cd2a(0x1dc)) / 0x2) +
+// SOURCE-NEXT:         -parseInt(_0x23cd2a(0x1d0)) / 0x3 + parseInt(_0x23cd2a(0x1d7)) / 0x4 +
+// SOURCE-NEXT:         parseInt(_0x23cd2a(0x1d3)) / 0x5 + parseInt(_0x23cd2a(0x1da)) / 0x6 +
+// SOURCE-NEXT:         -parseInt(_0x23cd2a(0x1d9)) / 0x7 *
+// SOURCE-NEXT:             (-parseInt(_0x23cd2a(0x1d6)) / 0x8) +
+// SOURCE-NEXT:         -parseInt(_0x23cd2a(0x1ce)) / 0x9 * (parseInt(_0x23cd2a(0x1cf)) / 0xa);
+// SOURCE-NEXT:     if (_0xea482b === _0x371e8a)
+// SOURCE-NEXT:       break;
+// SOURCE-NEXT:     else
+// SOURCE-NEXT:       _0xdfbb38['push'](_0xdfbb38['shift']());
+// SOURCE-NEXT:   } catch (_0x4b4c62) {
+// SOURCE-NEXT:     _0xdfbb38['push'](_0xdfbb38['shift']());
+// SOURCE-NEXT:   }
+// SOURCE-NEXT: }
+// SOURCE-NEXT: }(_0x525e, 0x4b1cb));
+// SOURCE-NEXT: function _0x525e() {
+// SOURCE-NEXT:   var _0x305233 = [
+// SOURCE-NEXT:     '1526247KRXxzR', '20DaDeWd', '1420761ACFajK', '(((.+)+)+)+$', 'search',
+// SOURCE-NEXT:     '1687965iuPNuT', 'toString', 'log', '4808LchUoV', '1888272wchIJJ',
+// SOURCE-NEXT:     '59197fHlAFO', '1043YwnIYF', '1682394EBJCty', 'constructor', '2TdnnhP'
+// SOURCE-NEXT:   ];
+// SOURCE-NEXT:   _0x525e = function() {
+// SOURCE-NEXT:     return _0x305233;
+// SOURCE-NEXT:   };
+// SOURCE-NEXT:   return _0x525e();
+// SOURCE-NEXT: }
+// SOURCE-NEXT: var _0x59e9bd = (function() {
+// SOURCE-NEXT:   var _0xe25903 = !![];
+// SOURCE-NEXT:   return function(_0x5639e0, _0x4e56dd) {
+// SOURCE-NEXT:     var _0x23541e = _0xe25903 ? function() {
+// SOURCE-NEXT:       if (_0x4e56dd) {
+// SOURCE-NEXT:         var _0x2418df = _0x4e56dd['apply'](_0x5639e0, arguments);
+// SOURCE-NEXT:         return _0x4e56dd = null, _0x2418df;
+// SOURCE-NEXT:       }
+// SOURCE-NEXT:     } : function() {};
+// SOURCE-NEXT:     return _0xe25903 = ![], _0x23541e;
+// SOURCE-NEXT:   };
+// SOURCE-NEXT: }());
+// SOURCE-NEXT: var _0x328044 = _0x59e9bd(this, function() {
+// SOURCE-NEXT:   var _0x1be07d = _0xc139;
+// SOURCE-NEXT:   return _0x328044[_0x1be07d(0x1d4)]()[_0x1be07d(0x1d2)](
+// SOURCE-NEXT:       _0x1be07d(0x1d1))['toString']()[_0x1be07d(0x1db)](
+// SOURCE-NEXT:       _0x328044)[_0x1be07d(0x1d2)]('(((.+)+)+)+$');
+// SOURCE-NEXT: });
+// SOURCE-NEXT: _0x328044();
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Dataflow:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: jsir.file ({
+// SOURCE-NEXT:   ^bb0:
+// SOURCE-NEXT:       // <executable>
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT:     jsir.program {"script"} ({
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %0 = jsir.identifier {"console"}
+// SOURCE-NEXT:           // %0 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %1 = jsir.identifier {"_0x4cdc8a"}
+// SOURCE-NEXT:           // %1 = #jsir_builtin<builtin_function "_0x4cdc8a">
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %2 = jsir.numeric_literal {#jsir<numeric_literal_extra "0x1d5", 4.690000e+02 : f64>, 4.690000e+02 : f64}
+// SOURCE-NEXT:           // %2 = 4.690000e+02 : f64
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %3 = jsir.call_expression (%1, %2)
+// SOURCE-NEXT:           // %3 = "log"
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %4 = jsir.member_expression (%0, %3)
+// SOURCE-NEXT:           // %4 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %5 = jsir.string_literal {#jsir<string_literal_extra "'Hello\\x20World!'", "Hello World!">, "Hello World!"}
+// SOURCE-NEXT:           // %5 = "Hello World!"
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %6 = jsir.call_expression (%4, %5)
+// SOURCE-NEXT:           // %6 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jsir.expression_statement (%6)
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:     }, {
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:     })
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT: })
+// SOURCE-NEXT:   // State [default = <uninitialized>] { }
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Bindings:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Computed constants:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: From [2475, 2491): `_0x4cdc8a(0x1d5)` -> `log`
+// SOURCE-NEXT: ================================================================

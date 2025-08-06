@@ -39,12 +39,14 @@ enum class JsirPassKind {
 
   // Transform
   kConstantPropagation,
+  kDynamicConstantPropagation,
   kMoveNamedFunctions,
   kNormalizeObjectProperties,
   kPeelParentheses,
   kSplitSequenceExpressions,
   kSplitDeclarationStatements,
   kEraseComments,
+  kExtractPrelude,
   kRemoveDirectives,
   kNormalizeMemberExpressions,
 };

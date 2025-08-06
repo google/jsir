@@ -40,6 +40,7 @@
 #include "maldoca/js/ir/transforms/remove_directives/pass.h"
 #include "maldoca/js/ir/transforms/split_declaration_statements/pass.h"
 #include "maldoca/js/ir/transforms/split_sequence_expressions/pass.h"
+#include "maldoca/js/ir/transforms/dynamic_constant_propagation/pass.h"
 
 namespace maldoca {
 
@@ -76,6 +77,35 @@ absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
 
     case JsirTransformConfig::kRemoveDirectives:
       return std::make_unique<RemoveDirectivesPass>();
+
+    case JsirTransformConfig::kDynamicConstantPropagation: {
+      if (scopes == nullptr) {
+        return absl::InvalidArgumentError(
+            "scopes is required for dynamic constant propagation");
+      }
+      if (babel == nullptr) {
+        return absl::InvalidArgumentError(
+            "babel is required for dynamic constant propagation");
+      }
+      if (analysis_outputs == nullptr) {
+        return absl::InvalidArgumentError(
+            "analysis_outputs is required for dynamic constant propagation");
+      }
+
+      JsirAnalysisConfig::DynamicConstantPropagation prelude;
+      for (const JsAnalysisOutput &output : analysis_outputs->outputs()) {
+        if (!output.has_ast_analysis()) {
+          continue;
+        }
+        if (!output.ast_analysis().has_extract_prelude()) {
+          continue;
+        }
+        prelude = output.ast_analysis().extract_prelude();
+      }
+
+      return std::make_unique<JsirDynamicConstantPropagationPass>(
+          scopes, prelude, babel, analysis_outputs);
+    }
   }
 }
 

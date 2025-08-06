@@ -35,7 +35,7 @@ def generate_test_file(name: str, output_name: str, passes: str, prefix: str):
     prefix: FileCheck prefix.
   """
   output = run_command(
-      "blaze run //third_party/maldoca/js/ir:jsir_gen --"
+      "bazel run //maldoca/js/ir:jsir_gen --"
       f" --input_file {'$(pwd)/' + name + '/input.js'}"
       f" --passes='{passes}'"
   )

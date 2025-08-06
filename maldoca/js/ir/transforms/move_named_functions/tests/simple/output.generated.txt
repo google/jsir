@@ -1,0 +1,7 @@
+// SOURCE:      function foo() {}
+// SOURCE-NEXT: function bar() {}
+// SOURCE-NEXT: 1;
+// SOURCE-NEXT: 2;
+// SOURCE-NEXT: 3;
+// SOURCE-NEXT: var x = function () {};
+// SOURCE-NEXT: var y = function baz() {};

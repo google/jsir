@@ -29,6 +29,7 @@ cc_library(
     deps = [
         "//maldoca/js/ast",
         "//maldoca/js/ast/transforms/erase_comments:pass",
+        "//maldoca/js/ast/transforms/extract_prelude:pass",
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/driver:driver_cc_proto",
         "@abseil-cpp//absl/status",

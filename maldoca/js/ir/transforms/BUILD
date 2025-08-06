@@ -34,6 +34,7 @@ cc_library(
         "//maldoca/js/ir",
         "//maldoca/js/ir/conversion:utils",
         "//maldoca/js/ir/transforms/constant_propagation:pass",
+        "//maldoca/js/ir/transforms/dynamic_constant_propagation:pass",
         "//maldoca/js/ir/transforms/move_named_functions:pass",
         "//maldoca/js/ir/transforms/normalize_object_properties:pass",
         "//maldoca/js/ir/transforms/peel_parentheses:pass",

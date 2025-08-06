@@ -1,0 +1,5 @@
+// SOURCE:      with (x) {
+// SOURCE-NEXT:   a;
+// SOURCE-NEXT:   b;
+// SOURCE-NEXT:   c;
+// SOURCE-NEXT: }

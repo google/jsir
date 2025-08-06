@@ -1,0 +1,4 @@
+// RUN: INPUT=%s && \
+// RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
+// RUN:     --passes source2ast,ast2hir,remove_directives,hir2ast,ast2source \
+// RUN:   | FileCheck --check-prefix SOURCE "$(dirname "${INPUT}")"/output.js

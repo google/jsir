@@ -75,3 +75,57 @@ cc_library(
         "@nlohmann_json//:json",
     ],
 )
+
+cc_library(
+    name = "conversion",
+    srcs = ["conversion.cc"],
+    hdrs = ["conversion.h"],
+    deps = [
+        ":driver",
+        "//maldoca/base:status",
+        "//maldoca/js/ast",
+        "//maldoca/js/ast:ast_util",
+        "//maldoca/js/babel",
+        "//maldoca/js/babel:babel_cc_proto",
+        "//maldoca/js/ir",
+        "//maldoca/js/ir/conversion:utils",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/time",
+        "@llvm-project//mlir:IR",
+    ],
+)
+
+cc_test(
+    name = "conversion_test",
+    srcs = ["conversion_test.cc"],
+    data = [
+        "test_babel_scopes.txtpb",
+        "test_hir.mlir.test",
+        "test_lir.mlir.test",
+        "test_parsed_ast.json",
+        "test_serialized_ast.json",
+        "test_source.js.test",
+    ],
+    deps = [
+        ":conversion",
+        ":driver",
+        "//maldoca/base:filesystem",
+        "//maldoca/base:get_runfiles_dir",
+        "//maldoca/base:path",
+        "//maldoca/base:status",
+        "//maldoca/base/testing:protocol-buffer-matchers",
+        "//maldoca/base/testing:status_matchers",
+        "//maldoca/js/ast",
+        "//maldoca/js/babel:babel_cc_proto",
+        "//maldoca/js/ir/conversion:utils",
+        "//maldoca/js/quickjs_babel",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/time",
+        "@googletest//:gtest_main",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:Support",
+        "@nlohmann_json//:json",
+    ],
+)

@@ -1,0 +1,3 @@
+// SOURCE:      function before_if() {}
+// SOURCE-NEXT: function after_if() {}
+// SOURCE-NEXT: if (x) function in_if() {}

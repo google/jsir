@@ -1,0 +1,1 @@
+// SOURCE:      var a = void 0;

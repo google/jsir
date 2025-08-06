@@ -1,0 +1,5 @@
+// SOURCE:      function foo() {
+// SOURCE-NEXT:   var a;
+// SOURCE-NEXT:   var b = 1;
+// SOURCE-NEXT:   var c;
+// SOURCE-NEXT: }
