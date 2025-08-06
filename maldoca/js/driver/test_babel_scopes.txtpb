@@ -1,0 +1,13 @@
+# proto-file: maldoca/js/babel/babel.proto
+# proto-message: BabelScopes
+
+scopes {
+  key: 0
+  value {
+    uid: 0
+    bindings {
+      key: "x"
+      value { kind: KIND_VAR name: "x" }
+    }
+  }
+}

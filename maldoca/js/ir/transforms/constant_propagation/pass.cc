@@ -39,6 +39,7 @@
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
+#include "maldoca/js/ir/analyses/dynamic_constant_propagation/attrs.h"
 #include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
@@ -85,6 +86,92 @@ mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
   }
 
   return PerformConstantPropagation(op, *analysis);
+}
+
+mlir::ChangeResult TransformInlineCall(
+    mlir::Operation *op, JsirConstantPropagationAnalysis &analysis,
+    mlir::OpBuilder &builder) {
+
+  // obj = {
+  //   key: (a, b) => a(b)
+  //                  ~~~~ inline_call_expr
+  //                  ~    inline_call_expr.callee
+  // }
+  //
+  // obj.key(A, B)
+  // ~~~~~~~~~~~~~ op == call_expr_op
+  // ~~~~~~~       call_expr_op.callee == member_expr == inline_func_expr
+
+  auto call_expr_op = llvm::dyn_cast<JsirCallExpressionOp>(op);
+  if (call_expr_op == nullptr) {
+    return mlir::ChangeResult::NoChange;
+  }
+
+  auto member_expr = llvm::dyn_cast_if_present<JsirMemberExpressionOp>(
+      call_expr_op.getCallee().getDefiningOp());
+  if (member_expr == nullptr) {
+    return mlir::ChangeResult::NoChange;
+  }
+
+  JsirStateRef<JsirConstantPropagationValue> state_ref =
+      analysis.GetStateAt(member_expr);
+  if (state_ref.value().IsUninitialized() || state_ref.value().IsUnknown()) {
+    return mlir::ChangeResult::NoChange;
+  }
+  mlir::Attribute constant_attr = **state_ref.value();
+
+  auto inline_func_expr =
+      llvm::dyn_cast<JsirInlineExpressionFunctionAttr>(constant_attr);
+  if (inline_func_expr == nullptr) {
+    return mlir::ChangeResult::NoChange;
+  }
+
+  auto inline_call_expr =
+      llvm::dyn_cast<JsirInlineExpressionCallAttr>(inline_func_expr.getBody());
+  if (inline_call_expr == nullptr) {
+    return mlir::ChangeResult::NoChange;
+  }
+
+  auto FindValue = [&](mlir::Attribute attr) -> mlir::Value {
+    auto symbol_id_attr = llvm::dyn_cast_if_present<JsirSymbolIdAttr>(attr);
+    if (symbol_id_attr == nullptr) {
+      return nullptr;
+    }
+
+    JsSymbolId symbol_id{symbol_id_attr.getName().str(),
+                         symbol_id_attr.getDefScopeId()};
+
+    for (auto [idx, param] : llvm::enumerate(inline_func_expr.getParams())) {
+      JsSymbolId param_symbol_id(param.getName().str(), param.getDefScopeId());
+      if (symbol_id == param_symbol_id) {
+        if (idx >= call_expr_op.getArguments().size()) {
+          return nullptr;
+        }
+        return call_expr_op.getArguments()[idx];
+      }
+    }
+
+    return nullptr;
+  };
+
+  mlir::Value callee_value = FindValue(inline_call_expr.getCallee());
+  if (callee_value == nullptr) {
+    return mlir::ChangeResult::NoChange;
+  }
+
+  std::vector<mlir::Value> param_values;
+  for (mlir::Attribute arg : inline_call_expr.getArguments()) {
+    mlir::Value param_value = FindValue(arg);
+    if (param_value == nullptr) {
+      return mlir::ChangeResult::NoChange;
+    }
+    param_values.push_back(param_value);
+  }
+
+  call_expr_op->replaceAllUsesWith(builder.create<JsirCallExpressionOp>(
+      call_expr_op.getLoc(), callee_value, param_values));
+
+  return mlir::ChangeResult::Change;
 }
 
 mlir::LogicalResult PerformConstantPropagation(
@@ -182,6 +269,11 @@ mlir::LogicalResult PerformConstantPropagation(
       if (replaced_all && mlir::wouldOpBeTriviallyDead(&op)) {
         assert(op.use_empty() && "expected all uses to be replaced");
         op.erase();
+        continue;
+      }
+
+      if (TransformInlineCall(&op, analysis, builder) ==
+          mlir::ChangeResult::Change) {
         continue;
       }
 

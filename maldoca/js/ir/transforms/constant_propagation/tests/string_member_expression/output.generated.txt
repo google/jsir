@@ -1,0 +1,2 @@
+// SOURCE:      "b";
+// SOURCE-NEXT: 3;

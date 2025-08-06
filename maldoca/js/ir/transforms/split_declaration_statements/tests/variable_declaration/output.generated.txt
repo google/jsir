@@ -1,0 +1,3 @@
+// SOURCE:      let a;
+// SOURCE-NEXT: let b = 1;
+// SOURCE-NEXT: let c;

@@ -1,0 +1,2 @@
+// SOURCE:      x = 1 + 2 + 3;
+// SOURCE-NEXT: y[1 + (2 + 3)] = 4;

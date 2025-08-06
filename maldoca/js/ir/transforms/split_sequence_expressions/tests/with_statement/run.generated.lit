@@ -1,0 +1,4 @@
+// RUN: CURRENT_FILE_BASENAME=$(basename %s .lit) && \
+// RUN: jsir_gen --input_file "$(dirname %s)"/input.js \
+// RUN:     --passes "source2ast,ast2hir,split_sequence_expressions,hir2ast,ast2source" \
+// RUN:   | FileCheck --check-prefix SOURCE "$(dirname %s)"/output.generated.txt

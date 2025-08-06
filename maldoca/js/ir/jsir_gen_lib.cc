@@ -42,7 +42,17 @@ namespace {
 
 std::string DumpJsAstAnalysisResult(absl::string_view original_source,
                                     const JsAstAnalysisResult &result) {
-  return "JsAstAnalysisResult not implemented";
+  switch (result.kind_case()) {
+    case JsAstAnalysisResult::KIND_NOT_SET:
+      return "";
+    case JsAstAnalysisResult::kExtractPrelude:
+      return absl::StrCat(
+          "================================================================\n",
+          "Prelude:\n",
+          "================================================================\n",
+          result.extract_prelude().prelude_source(),
+          "================================================================\n");
+  }
 }
 
 std::string DumpJsirAnalysisResult(absl::string_view original_source,
@@ -53,6 +63,59 @@ std::string DumpJsirAnalysisResult(absl::string_view original_source,
 
     case JsirAnalysisResult::kConstantPropagation:
       return result.constant_propagation().output();
+
+    case JsirAnalysisResult::kDynamicConstantPropagation: {
+      using ComputedConstant =
+          JsirAnalysisResult::DynamicConstantPropagation::ComputedConstant;
+
+      auto formatter = [&](std::string *out, const ComputedConstant &constant) {
+        absl::StrAppendFormat(
+            out, "From [%d, %d): `%s` -> `", constant.start_offset(),
+            constant.end_offset(),
+            original_source.substr(
+                constant.start_offset(),
+                constant.end_offset() - constant.start_offset()));
+        switch (constant.value_kind_case()) {
+          case ComputedConstant::kStringValue:
+            absl::StrAppend(out, constant.string_value());
+            break;
+          case ComputedConstant::kNumberValue:
+            absl::StrAppend(out, constant.number_value());
+            break;
+          case ComputedConstant::kBigIntValue:
+            absl::StrAppend(out, "BigInt(", constant.big_int_value(), ")");
+            break;
+          case ComputedConstant::kBoolValue:
+            absl::StrAppend(out, constant.bool_value() ? "true" : "false");
+            break;
+          default:
+            break;
+        }
+        absl::StrAppend(out, "`");
+      };
+
+      return absl::StrCat(
+          "================================================================\n",
+          "Dataflow:\n",
+          "================================================================\n",
+          result.dynamic_constant_propagation().data_flow().output(), "\n",
+          "================================================================\n",
+          "\n",
+          "================================================================\n",
+          "Bindings:\n",
+          "================================================================\n",
+          result.dynamic_constant_propagation().bindings(),
+          "================================================================\n",
+          "\n",
+          "================================================================\n",
+          "Computed constants:\n",
+          "================================================================\n",
+          absl::StrJoin(
+              result.dynamic_constant_propagation().computed_constants(), "\n",
+              formatter),
+          "\n",
+          "================================================================\n");
+    }
   }
 }
 
@@ -258,6 +321,29 @@ absl::StatusOr<JsirGenOutput> JsirGen(
         *transform.mutable_remove_directives() = {};
 
         *pass_configs.add_passes()->mutable_jsir_transform() =
+            std::move(transform);
+
+        break;
+      }
+
+      case JsirPassKind::kDynamicConstantPropagation: {
+        auto it = absl::c_find_if(transform_configs, [](const auto &config) {
+          return config.has_dynamic_constant_propagation();
+        });
+        MALDOCA_RET_CHECK(it != transform_configs.end());
+        const JsirTransformConfig &transform = *it;
+
+        *pass_configs.add_passes()->mutable_jsir_transform() =
+            std::move(transform);
+
+        break;
+      }
+
+      case JsirPassKind::kExtractPrelude: {
+        JsAstTransformConfig transform;
+        *transform.mutable_extract_prelude() = {};
+
+        *pass_configs.add_passes()->mutable_ast_transform() =
             std::move(transform);
 
         break;

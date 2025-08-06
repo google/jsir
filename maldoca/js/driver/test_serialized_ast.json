@@ -1,0 +1,117 @@
+{
+  "type": "File",
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 1,
+      "column": 10
+    }
+  },
+  "start": 0,
+  "end": 10,
+  "program": {
+    "type": "Program",
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0
+      },
+      "end": {
+        "line": 1,
+        "column": 10
+      }
+    },
+    "start": 0,
+    "end": 10,
+    "scopeUid": 0,
+    "interpreter": null,
+    "sourceType": "script",
+    "body": [
+      {
+        "type": "VariableDeclaration",
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "start": 0,
+        "end": 10,
+        "scopeUid": 0,
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 4
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "start": 4,
+            "end": 9,
+            "scopeUid": 0,
+            "definedSymbols": [
+              {
+                "name": "x",
+                "defScopeUid": 0
+              }
+            ],
+            "id": {
+              "type": "Identifier",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 4
+                },
+                "end": {
+                  "line": 1,
+                  "column": 5
+                },
+                "identifierName": "x"
+              },
+              "start": 4,
+              "end": 5,
+              "scopeUid": 0,
+              "name": "x"
+            },
+            "init": {
+              "type": "NumericLiteral",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 8
+                },
+                "end": {
+                  "line": 1,
+                  "column": 9
+                }
+              },
+              "start": 8,
+              "end": 9,
+              "scopeUid": 0,
+              "value": 1.0,
+              "extra": {
+                "raw": "1",
+                "rawValue": 1.0
+              }
+            }
+          }
+        ],
+        "kind": "var"
+      }
+    ],
+    "directives": []
+  },
+  "comments": []
+}

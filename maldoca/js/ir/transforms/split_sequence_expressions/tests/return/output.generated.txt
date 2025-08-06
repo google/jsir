@@ -1,0 +1,5 @@
+// SOURCE:      function foo() {
+// SOURCE-NEXT:   a;
+// SOURCE-NEXT:   b;
+// SOURCE-NEXT:   return c;
+// SOURCE-NEXT: }

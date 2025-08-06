@@ -1,0 +1,35 @@
+// SOURCE:      function outer_function_1() {
+// SOURCE-NEXT:   function inner_function() {}
+// SOURCE-NEXT:   1;
+// SOURCE-NEXT:   2;
+// SOURCE-NEXT:   {
+// SOURCE-NEXT:     function function_in_block() {}
+// SOURCE-NEXT:     3;
+// SOURCE-NEXT:   }
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function outer_function_2() {
+// SOURCE-NEXT:   function foo() {}
+// SOURCE-NEXT:   if (x) return;
+// SOURCE-NEXT:   foo();
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function outer_function_3() {
+// SOURCE-NEXT:   function foo() {}
+// SOURCE-NEXT:   function bar() {}
+// SOURCE-NEXT:   if (x) return;
+// SOURCE-NEXT:   foo();
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function outer_function_4() {
+// SOURCE-NEXT:   function foo() {}
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function outer_function_5() {
+// SOURCE-NEXT:   f();
+// SOURCE-NEXT:   {
+// SOURCE-NEXT:     function bar() {}
+// SOURCE-NEXT:   }
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function outer_function_6() {
+// SOURCE-NEXT:   f();
+// SOURCE-NEXT:   if (true) {
+// SOURCE-NEXT:     function bar() {}
+// SOURCE-NEXT:   }
+// SOURCE-NEXT: }

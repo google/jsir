@@ -1,0 +1,12 @@
+// SOURCE:      var a;
+// SOURCE-NEXT: var b;
+// SOURCE-NEXT: if (x) {
+// SOURCE-NEXT:   a = "a";
+// SOURCE-NEXT:   b = "b1";
+// SOURCE-NEXT: } else {
+// SOURCE-NEXT:   a = "a";
+// SOURCE-NEXT:   b = "b2";
+// SOURCE-NEXT: }
+// SOURCE-NEXT: var a_joined = "a";
+// SOURCE-NEXT: var b_joined = b;
+// SOURCE-NEXT: var batman = "Batman";

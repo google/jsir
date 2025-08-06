@@ -1,0 +1,10 @@
+// SOURCE:      // TODO(b/330592752): Fix hoisting so that we identify `is_a_const` as a
+// SOURCE-NEXT: // constant.
+// SOURCE-EMPTY:
+// SOURCE-NEXT: var not_a_const = 1;
+// SOURCE-NEXT: while (x) {
+// SOURCE-NEXT:   not_a_const = not_a_const + 1;
+// SOURCE-NEXT:   var is_a_const = 1;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: console.log(not_a_const);
+// SOURCE-NEXT: console.log(is_a_const);

@@ -22,6 +22,7 @@
 #include "absl/strings/string_view.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ast/transforms/erase_comments/pass.h"
+#include "maldoca/js/ast/transforms/extract_prelude/pass.h"
 #include "maldoca/js/babel/babel.pb.h"
 #include "maldoca/js/driver/driver.pb.h"
 
@@ -38,6 +39,23 @@ absl::Status TransformJsAst(
 
     case JsAstTransformConfig::kEraseComments: {
       EraseCommentsInAst(ast);
+      return absl::OkStatus();
+    }
+
+    case JsAstTransformConfig::kExtractPrelude: {
+      if (!original_source.has_value()) {
+        return absl::InvalidArgumentError(
+            "original_source is required for ExtractPrelude analysis");
+      }
+
+      JsirAnalysisConfig::DynamicConstantPropagation prelude =
+          ExtractPrelude(*original_source, ast);
+
+      JsAstAnalysisResult result;
+      *result.mutable_extract_prelude() = std::move(prelude);
+
+      optional_analysis_result = std::move(result);
+
       return absl::OkStatus();
     }
   }

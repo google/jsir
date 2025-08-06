@@ -1,0 +1,103 @@
+// SOURCE:      let a = "SGVsbG8gd29ybGQh";
+// SOURCE-NEXT: let b = atob;
+// SOURCE-NEXT: let c = "Hello world!";
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Prelude:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Dataflow:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: jsir.file ({
+// SOURCE-NEXT:   ^bb0:
+// SOURCE-NEXT:       // <executable>
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT:     jsir.program {"script"} ({
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { }
+// SOURCE-NEXT:             %0 = jsir.identifier_ref {"a"}
+// SOURCE-NEXT:               // %0 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { }
+// SOURCE-NEXT:             %1 = jsir.string_literal {#jsir<string_literal_extra "\22SGVsbG8gd29ybGQh\22", "SGVsbG8gd29ybGQh">, "SGVsbG8gd29ybGQh"}
+// SOURCE-NEXT:               // %1 = "SGVsbG8gd29ybGQh"
+// SOURCE-NEXT:               // State [default = <unknown>] { }
+// SOURCE-NEXT:             %2 = jsir.variable_declarator (%0, %1)
+// SOURCE-NEXT:               // %2 = <uninitialized>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> }
+// SOURCE-NEXT:             jsir.exprs_region_end (%2)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> }
+// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> }
+// SOURCE-NEXT:             %0 = jsir.identifier_ref {"b"}
+// SOURCE-NEXT:               // %0 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> }
+// SOURCE-NEXT:             %1 = jsir.identifier {"atob"}
+// SOURCE-NEXT:               // %1 = #jsir_builtin<builtin_function "atob">
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> }
+// SOURCE-NEXT:             %2 = jsir.variable_declarator (%0, %1)
+// SOURCE-NEXT:               // %2 = <uninitialized>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             jsir.exprs_region_end (%2)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %0 = jsir.identifier_ref {"c"}
+// SOURCE-NEXT:               // %0 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %1 = jsir.identifier {"b"}
+// SOURCE-NEXT:               // %1 = #jsir_builtin<builtin_function "atob">
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %2 = jsir.identifier {"a"}
+// SOURCE-NEXT:               // %2 = "SGVsbG8gd29ybGQh"
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %3 = jsir.call_expression (%1, %2)
+// SOURCE-NEXT:               // %3 = "Hello world!"
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %4 = jsir.variable_declarator (%0, %3)
+// SOURCE-NEXT:               // %4 = <uninitialized>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> <c#0 : "Hello world!"> }
+// SOURCE-NEXT:             jsir.exprs_region_end (%4)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> <c#0 : "Hello world!"> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : "SGVsbG8gd29ybGQh"> <b#0 : #jsir_builtin<builtin_function "atob">> <c#0 : "Hello world!"> }
+// SOURCE-NEXT:     }, {
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:     })
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT: })
+// SOURCE-NEXT:   // State [default = <uninitialized>] { }
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Bindings:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: a#0:
+// SOURCE-NEXT:     "SGVsbG8gd29ybGQh"
+// SOURCE-NEXT: b#0:
+// SOURCE-NEXT:     atob#undeclared
+// SOURCE-NEXT: c#0:
+// SOURCE-NEXT:     b#0(a#0)
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Computed constants:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: From [52, 53): `a` -> `SGVsbG8gd29ybGQh`
+// SOURCE-NEXT: From [50, 54): `b(a)` -> `Hello world!`
+// SOURCE-NEXT: ================================================================

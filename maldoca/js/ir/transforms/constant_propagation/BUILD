@@ -32,6 +32,7 @@ cc_library(
         "//maldoca/js/ir",
         "//maldoca/js/ir/analyses:dataflow_analysis",
         "//maldoca/js/ir/analyses/constant_propagation:analysis",
+        "//maldoca/js/ir/analyses/dynamic_constant_propagation:attrs",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:Analysis",
         "@llvm-project//mlir:IR",

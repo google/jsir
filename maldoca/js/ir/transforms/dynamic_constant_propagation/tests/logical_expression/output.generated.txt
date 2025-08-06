@@ -1,0 +1,112 @@
+// SOURCE:      (a || b).key = 1;
+// SOURCE-NEXT: (a || b)();
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Prelude:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Dataflow:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: jsir.file ({
+// SOURCE-NEXT:   ^bb0:
+// SOURCE-NEXT:       // <executable>
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT:     jsir.program {"script"} ({
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %0 = jsir.identifier {"a"}
+// SOURCE-NEXT:           // %0 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %1 = jslir.logical_expression_start (%0) {"||"}
+// SOURCE-NEXT:           // %1 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %2 = builtin.unrealized_conversion_cast (%0)
+// SOURCE-NEXT:           // %2 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         cf.cond_br (%2, %0) {array<i32: 1, 1, 0>}
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:       ^bb1:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jslir.control_flow_marker (%1) {#jsir<cf_marker LogicalExpressionRight>}
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %3 = jsir.identifier {"b"}
+// SOURCE-NEXT:           // %3 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         cf.br (%3)
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:       ^bb2:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jslir.control_flow_marker (%1) {#jsir<cf_marker LogicalExpressionEnd>}
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %5 = jsir.parenthesized_expression (%4)
+// SOURCE-NEXT:           // %5 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %6 = jsir.member_expression_ref (%5) {#jsir<identifier   <L 1 C 9>, <L 1 C 12>, "key", 9, 12, 0, "key">}
+// SOURCE-NEXT:           // %6 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %7 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:           // %7 = 1.000000e+00 : f64
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %8 = jsir.assignment_expression (%6, %7) {"="}
+// SOURCE-NEXT:           // %8 = <uninitialized>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jsir.expression_statement (%8)
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %9 = jsir.identifier {"a"}
+// SOURCE-NEXT:           // %9 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %10 = jslir.logical_expression_start (%9) {"||"}
+// SOURCE-NEXT:           // %10 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %11 = builtin.unrealized_conversion_cast (%9)
+// SOURCE-NEXT:           // %11 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         cf.cond_br (%11, %9) {array<i32: 1, 1, 0>}
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:       ^bb3:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jslir.control_flow_marker (%10) {#jsir<cf_marker LogicalExpressionRight>}
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %12 = jsir.identifier {"b"}
+// SOURCE-NEXT:           // %12 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         cf.br (%12)
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:       ^bb4:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jslir.control_flow_marker (%10) {#jsir<cf_marker LogicalExpressionEnd>}
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %14 = jsir.parenthesized_expression (%13)
+// SOURCE-NEXT:           // %14 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         %15 = jsir.call_expression (%14)
+// SOURCE-NEXT:           // %15 = <unknown>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jsir.expression_statement (%15)
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:     }, {
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:     })
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT: })
+// SOURCE-NEXT:   // State [default = <uninitialized>] { }
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Bindings:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Computed constants:
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================

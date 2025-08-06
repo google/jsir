@@ -46,6 +46,16 @@ cc_test(
 )
 
 cc_library(
+    name = "path",
+    srcs = ["path.cc"],
+    hdrs = ["path.h"],
+    deps = [
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/strings",
+    ],
+)
+
+cc_library(
     name = "filesystem",
     srcs = ["filesystem.cc"],
     hdrs = ["filesystem.h"],
@@ -59,6 +69,18 @@ cc_library(
         "@abseil-cpp//absl/strings:string_view",
         "@com_google_protobuf//:protobuf",
         "@com_google_protobuf//src/google/protobuf/io:tokenizer",
+    ],
+)
+
+cc_library(
+    name = "get_runfiles_dir",
+    srcs = ["get_runfiles_dir.cc"],
+    hdrs = ["get_runfiles_dir.h"],
+    deps = [
+        ":path",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/strings:string_view",
+        "@rules_cc//cc/runfiles",
     ],
 )
 
