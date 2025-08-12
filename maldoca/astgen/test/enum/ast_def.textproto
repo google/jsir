@@ -1,0 +1,71 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "e"
+
+# enum UnaryOperator {
+#   "-" | "+" | "!" | "~" | "typeof" | "void" | "delete" | "throw"
+# }
+enums {
+  name: "UnaryOperator"
+  members {
+    name: "Minus"
+    string_value: "-"
+  }
+  members {
+    name: "Plus"
+    string_value: "+"
+  }
+  members {
+    name: "Not"
+    string_value: "!"
+  }
+  members {
+    name: "BitwiseNot"
+    string_value: "~"
+  }
+  members {
+    name: "TypeOf"
+    string_value: "typeof"
+  }
+  members {
+    name: "Void"
+    string_value: "void"
+  }
+  members {
+    name: "Delete"
+    string_value: "delete"
+  }
+  members {
+    name: "Throw"
+    string_value: "throw"
+  }
+}
+
+enums {
+  name: "EscapedChar"
+  members: {
+    name: "Tab"
+    string_value: "\t"
+  }
+  members: {
+    name: "Backslash"
+    string_value: "\\"
+  }
+}
+
+nodes {
+  name: "Node"
+  fields {
+    name: "unaryOperator"
+    type { enum: "UnaryOperator" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "escapedChar"
+    type { enum: "EscapedChar" }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}

@@ -1,0 +1,106 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "v"
+
+# interface BaseClass {}
+nodes {
+  name: "BaseClass"
+  kinds: FIELD_KIND_RVAL
+}
+
+# interface DerivedClass1 {}
+nodes {
+  name: "DerivedClass1"
+  parents: "BaseClass"
+  type: "DerivedClass1"
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface DerivedClass2 {}
+nodes {
+  name: "DerivedClass2"
+  parents: "BaseClass"
+  type: "DerivedClass2"
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface Node {
+#   simpleVariantBuiltin: number | string
+#   nullableVariantBuiltin : number | string | null
+#   optionalVariantBuiltin? : number | string
+#   simpleVariantClass: DerivedClass1 | DerivedClass2
+#   nullableVariantClass: DerivedClass1 | DerivedClass2 | null
+#   optionalVariantClass?: DerivedClass1 | DerivedClass2
+# }
+nodes {
+  name: "Node"
+  fields {
+    name: "simpleVariantBuiltin"
+    type {
+      variant {
+        types { double {} }
+        types { string {} }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "nullableVariantBuiltin"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type {
+      variant {
+        types { double {} }
+        types { string {} }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "optionalVariantBuiltin"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      variant {
+        types { double {} }
+        types { string {} }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "simpleVariantClass"
+    type {
+      variant {
+        types { class: "DerivedClass1" }
+        types { class: "DerivedClass2" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "nullableVariantClass"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type {
+      variant {
+        types { class: "DerivedClass1" }
+        types { class: "DerivedClass2" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "optionalVariantClass"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      variant {
+        types { class: "DerivedClass1" }
+        types { class: "DerivedClass2" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}

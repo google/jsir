@@ -1,0 +1,137 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "tl"
+
+# interface Node {
+#   type: string
+# }
+nodes {
+  name: "Node"
+}
+
+# e ::= x
+#     | c
+#     | (x: T) => e
+#     | e e
+#
+# interface Expression <: Node {}
+nodes {
+  name: "Expression"
+  parents: "Node"
+}
+
+# T ::= L
+#     | T -> T
+#
+# interface Type <: Node {}
+nodes {
+  name: "Type"
+  parents: "Node"
+}
+
+# interface Literal <: Expression {
+#   type: "Literal"
+#   value: boolean | int64 | number | string
+# }
+nodes {
+  name: "Literal"
+  type: "Literal"
+  parents: "Expression"
+  fields {
+    name: "value"
+    type {
+      variant {
+        types { bool {} }
+        types { int64 {} }
+        types { double {} }
+        types { string {} }
+      }
+    }
+  }
+}
+
+# interface Variable <: Expression {
+#   type: "Variable"
+#   identifier: string
+# }
+nodes {
+  name: "Variable"
+  type: "Variable"
+  parents: "Expression"
+  fields {
+    name: "identifier"
+    type { string {} }
+  }
+}
+
+# interface FunctionDefinition <: Expression {
+#   type: "FunctionDefinition"
+#   parameter: Variable
+#   parameterType: Type
+#   body: Expression
+# }
+nodes {
+  name: "FunctionDefinition"
+  type: "FunctionDefinition"
+  parents: "Expression"
+  fields {
+    name: "parameter"
+    type { class: "Variable" }
+  }
+  fields {
+    name: "parameterType"
+    type { class: "Type" }
+  }
+  fields {
+    name: "body"
+    type { class: "Expression" }
+  }
+}
+
+# interface FunctionCall <: Expression {
+#   type: "FunctionCall"
+#   caller: Expression
+#   callee: Expression
+# }
+nodes {
+  name: "FunctionCall"
+  type: "FunctionCall"
+  parents: "Expression"
+  fields {
+    name: "caller"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "callee"
+    type { class: "Expression" }
+  }
+}
+
+# interface LiteralType <: Type {
+#   type: "LiteralType"
+# }
+nodes {
+  name: "LiteralType"
+  type: "LiteralType"
+  parents: "Type"
+}
+
+# interface FunctionType <: Type {
+#   type: "FunctionType"
+#   parameterType: Type
+#   bodyType: Type
+# }
+nodes {
+  name: "FunctionType"
+  type: "FunctionType"
+  parents: "Type"
+  fields {
+    name: "parameterType"
+    type { class: "Type" }
+  }
+  fields {
+    name: "bodyType"
+    type { class: "Type" }
+  }
+}

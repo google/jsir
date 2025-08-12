@@ -1,0 +1,95 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "r"
+
+# interface Expr {}
+nodes {
+  name: "Expr"
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface Stmt {
+#   expr: Expr
+# }
+nodes {
+  name: "Stmt"
+  fields {
+    name: "expr"
+    type {
+      class: "Expr"
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# interface Node {
+#   expr: Expr
+#   optionalExpr: Expr | null
+#   exprs: [Expr]
+#   stmt: Stmt
+#   optionalStmt: Stmt | null
+#   stmts: [Stmt]
+# }
+nodes {
+  name: "Node"
+  fields {
+    name: "expr"
+    type {
+      class: "Expr"
+    }
+    enclose_in_region: true
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "optionalExpr"
+    type {
+      class: "Expr"
+    }
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    enclose_in_region: true
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "exprs"
+    type {
+      list {
+        element_type { class: "Expr" }
+      }
+    }
+    enclose_in_region: true
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "stmt"
+    type {
+      class: "Stmt"
+    }
+    enclose_in_region: true
+    kind: FIELD_KIND_STMT
+  }
+  fields {
+    name: "optionalStmt"
+    type {
+      class: "Stmt"
+    }
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    enclose_in_region: true
+    kind: FIELD_KIND_STMT
+  }
+  fields {
+    name: "stmts"
+    type {
+      list {
+        element_type { class: "Stmt" }
+      }
+    }
+    enclose_in_region: true
+    kind: FIELD_KIND_STMT
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}

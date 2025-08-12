@@ -1,0 +1,11 @@
+interface Expression {
+}
+
+interface Identifier <: Expression {
+  name: string
+}
+
+interface Assignment <: Expression {
+  lhs: Identifier
+  rhs: Expression
+}

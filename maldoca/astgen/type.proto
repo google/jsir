@@ -1,0 +1,104 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package maldoca;
+
+option java_multiple_files = true;
+
+
+// The Type Hierarchy
+//
+// BuiltinType ::= BoolType, DoubleType, StringType
+// ScalarType  ::= BuiltinType, ClassType
+// NonListType ::= ScalarType, VariantType
+// Type        ::= NonListType, ListType
+//
+//                                  Type
+//                                    |
+//                        +-----------+-----------+
+//                        |                       |
+//                   NonListType                  |
+//                        |                       |
+//             +----------+----------+            |
+//             |                     |            |
+//         ScalarType                |            |
+//             |                     |            |
+//      +------+-------+             |            |
+//      |              |             |            |
+//  BuiltinType    ClassType    VariantType    ListType
+//
+// NOTE: For each non-leaf type, we list all the corresponding leaf types in the
+// oneof. This is to make textproto files shorter.
+
+message TypePb {
+  oneof kind {
+    BoolTypePb bool = 1;
+    Int64TypePb int64 = 2;
+    DoubleTypePb double = 3;
+    StringTypePb string = 4;
+    string enum = 5;
+    string class = 6;
+    VariantTypePb variant = 7;
+    ListTypePb list = 8;
+  }
+}
+
+message ScalarTypePb {
+  oneof kind {
+    BoolTypePb bool = 1;
+    Int64TypePb int64 = 2;
+    DoubleTypePb double = 3;
+    StringTypePb string = 4;
+    string enum = 5;
+    string class = 6;
+  }
+}
+
+message NonListTypePb {
+  oneof kind {
+    BoolTypePb bool = 1;
+    Int64TypePb int64 = 2;
+    DoubleTypePb double = 3;
+    StringTypePb string = 4;
+    string enum = 5;
+    string class = 6;
+    VariantTypePb variant = 7;
+  }
+}
+
+// Builtin types.
+//
+// NOTE: We choose to define individual empty messages instead of a enum, for
+// simpler textprotos.
+//
+// In particular, we would be able to write:
+//   "type { bool {} }"
+// instead of:
+//   "type { builtin: BUILTIN_BOOL }".
+
+message BoolTypePb {}
+message Int64TypePb {}
+message DoubleTypePb {}
+message StringTypePb {}
+
+message VariantTypePb {
+  repeated ScalarTypePb types = 1;
+}
+
+message ListTypePb {
+  optional NonListTypePb element_type = 1;
+  optional bool element_maybe_null = 2;
+}

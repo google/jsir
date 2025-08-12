@@ -1,0 +1,41 @@
+interface Class1 {
+}
+
+interface Class2 {
+}
+
+interface SimpleList {
+  strings: [ string ]
+  operations: [ Class1 ]
+}
+
+interface OptionalList {
+  strings?: [ string ]
+}
+
+interface ListOfOptional {
+  strings: [ string | null ]
+  operations: [ Class1 | null ]
+}
+
+interface ListOfVariant {
+  variants: [ boolean | string ]
+  operations: [ Class1 | Class2 ]
+}
+
+interface OptionalListOfOptional {
+  variants?: [ string | null ]
+}
+
+interface OptionalListOfVariant {
+  variants?: [ boolean | string ]
+}
+
+interface ListOfOptionalVariant {
+  variants: [ boolean | string | null ]
+  operations: [ Class1 | Class2 | null ]
+}
+
+interface OptionalListOfOptionalVariant {
+  variants?: [ boolean | string | null ]
+}

@@ -1,0 +1,352 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+package maldoca;
+
+import "maldoca/astgen/type.proto";
+
+option java_multiple_files = true;
+
+
+// =========
+// FieldKind
+// =========
+//
+// Each field in an AST node has a "kind". This is because different kinds of
+// AST nodes lead to different forms of IR ops.
+//
+// Example:
+//
+// For the assignment expression "x = y", lhs and rhs have the same AST node
+// type: Identifier.
+//
+// AST:
+// ```
+// AssignmentExpression {
+//   lhs: Identifier {"x"}
+//   rhs: Identifier {"y"}
+// }
+// ```
+//
+// However, lhs is an lvalue, but rhs is an rvalue. Therefore, they lower to
+// different IR ops:
+//
+// ```
+// %lhs = identifier_ref {"x"}
+// %rhs = identifier {"y"}
+// assignment_expression (%lhs, %rhs)
+// ```
+//
+// We can see that "x" lowers to an "identifier_ref" op, but "y" lowers to an
+// "identifier" op.
+//
+// In order to support this, we need to:
+//
+// - Specify that Assignment::lhs has an "LVAL" kind.
+// - Specify that Assignment::rhs has an "RVAL" kind.
+// - Specify that the Identifier node type can be both LVAL and RVAL.
+enum FieldKind {
+  FIELD_KIND_UNSPECIFIED = 0;
+
+  // This field is an attribute (has builtin type).
+  FIELD_KIND_ATTR = 1;
+
+  // This field is an rvalue expression. If the expression type has an LVAL
+  // kind, we need to create an additional "load" op.
+  FIELD_KIND_RVAL = 2;
+
+  // This field is an lvalue expression. The expression type must have an LVAL
+  // kind.
+  FIELD_KIND_LVAL = 3;
+
+  // This field is a statement.
+  FIELD_KIND_STMT = 4;
+}
+
+message EnumMemberDefPb {
+  optional string name = 1;
+  optional string string_value = 2;
+}
+
+message EnumDefPb {
+  optional string name = 1;
+  repeated EnumMemberDefPb members = 2;
+}
+
+// This is an unfortunate Babel-specific detail. Since Babel's AST is a JSON
+// object, maybe_null and maybe_undefined are different cases.
+//
+// - "field: string | null"
+//   This means the field must exist, but could be null.
+//
+//   Example: The specification for "AwaitExpression" is this:
+//
+//   ```
+//   interface AwaitExpression <: Expression {
+//     type: "AwaitExpression";
+//     argument: Expression | null;
+//   }
+//   ```
+//
+//   In the above example, "argument" is maybe_null, which means that in the
+//   JSON object, the entry must exist, but the value can be null:
+//
+//   ```
+//   {
+//     "type": "AwaitExpression",
+//     "argument": null  // <---- value is null.
+//   }
+//   ```
+//
+// - "field?: string"
+//   This means the field might not exist, but if it does, it must be non-null.
+//
+//   Example: The specification for "CatchClause" is this:
+//
+//   ```
+//   interface CatchClause <: Node {
+//     type: "CatchClause";
+//     param?: Pattern;
+//     body: BlockStatement;
+//   }
+//   ```
+//
+//   In the above example, "param" is maybe_undefined, which means that in the
+//   JSON object, the entry might not exist at all:
+//
+//   ```
+//   {
+//     "type": "CatchClause",
+//     // <---- "param" doesn't exist.
+//     "body": { ... }
+//   }
+//   ```
+//
+// However, it appears that in Babel's AST, there is no field that is both
+// maybe_null and maybe_undefined (in other words, there is no such thing as
+// "field?: string | null"). Therefore, both cases are represented as
+// "std::optional<std::string>".
+enum Optionalness {
+  // No semantic meaning.
+  // go/protodosdonts#do-include-an-unspecified-value-in-an-enum
+  OPTIONALNESS_UNSPECIFIED = 0;
+
+  // Field must exist and be non-null.
+  OPTIONALNESS_REQUIRED = 1;
+
+  // Field must exist, but might be null.
+  OPTIONALNESS_MAYBE_NULL = 2;
+
+  // Field might not exist, but when it exists, it must be non-null.
+  OPTIONALNESS_MAYBE_UNDEFINED = 3;
+}
+
+// Definition of a field in an AST node.
+message FieldDefPb {
+  // Name of the field.
+  //
+  // Must be camelCase.
+  optional string name = 1;
+
+  // The optionalness of a field - whether it might be null or undefined.
+  optional Optionalness optionalness = 2 [default = OPTIONALNESS_REQUIRED];
+
+  // The type of the field.
+  optional TypePb type = 3;
+
+  // The field kind. E.g. LVAL.
+  optional FieldKind kind = 4 [default = FIELD_KIND_UNSPECIFIED];
+
+  // Whether the field should be ignored in the IR op.
+  //
+  // For example, we might want to ignore the source location fields, since MLIR
+  // has builtin support for source location. In the AST <-> IR conversion, we
+  // need to supply some manually-written code to convert between source
+  // location fields and MLIR's source location attributes.
+  optional bool ignore_in_ir = 5 [default = false];
+
+  // Whether the field should be enclosed in a region.
+  //
+  // For example, if the field is a statement, we should create a nested region
+  // and enclose the field in it.
+  //
+  // Detail:
+  //
+  // Normally, an argument of an IR op is logically executed before the op
+  // itself. For example, consider the following AST:
+  //
+  // ```
+  // BinaryExpression {
+  //   operator: "+"
+  //   left: Identifier { "a" }
+  //   right: Identifier { "b" }
+  // }
+  // ```
+  //
+  // We can transform it into the following IR:
+  //
+  // ```
+  // %left = jsir.identifier {"a"}
+  // %right = jsir.identifier {"b"}
+  // %bin_expr = jsir.binary_expression (%left, %right)
+  // ```
+  //
+  // We can see that the IR is, in a sense, a post-order traversal of the AST.
+  //
+  // However, if an AST node has a statement field, we cannot model it in the IR
+  // this way. For example, consider the following AST:
+  //
+  // ```
+  // IfStatement {
+  //   test: Identifier { "a" }
+  //   body: SomeSortOfStatement {}
+  // }
+  // ```
+  //
+  // If we are to use the same approach, we would transform it into the
+  // following IR:
+  //
+  // ```
+  // %test = jsir.identifier {"a"}
+  // %body = jsir.some_sort_of_statement
+  // jsir.if_statement (%test, %body)
+  // ```
+  //
+  // This is problematic, because:
+  //
+  // 1. The semantics of the if statement is that `body` might not be executed.
+  //    However, in this IR it appears that body is always executed.
+  //
+  // 2. jsir.some_sort_of_statement shouldn't have a return value.
+  //    However, in this IR it must have one, just for the if_statement to
+  //    reference the op.
+  //
+  // Therefore, we need to put body **inside** of the if statement, like this:
+  //
+  // ```
+  // %test = jsir.identifier {"a"}
+  // jsir.if_statement (%test) {
+  //   jsir.some_sort_of_statement
+  // }
+  // ```
+  //
+  // Therefore, we define `enclose_in_region` to specify that this AST field,
+  // when converted to an IR op, should be further enclosed in a region.
+  optional bool enclose_in_region = 6 [default = false];
+}
+
+// MLIR traits.
+enum MlirTrait {
+  MLIR_TRAIT_INVALID = 0;
+  MLIR_TRAIT_PURE = 1;                 // Pure
+  MLIR_TRAIT_ISOLATED_FROM_ABOVE = 2;  // IsolatedFromAbove
+}
+
+// Definition of an AST node type.
+message NodeDefPb {
+  // Name of the node.
+  //
+  // Must be PascalCase.
+  // E.g. "BinaryExpression".
+  optional string name = 1;
+
+  // Type kind string.
+  //
+  // In the JavaScript object version of the AST, a special "type" string
+  // represents the kind of the node.
+  //
+  // interface BinaryExpression <: Expression {
+  //   type: "BinaryExpression";  <============ This field.
+  //   operator: BinaryOperator;
+  //   left: Expression | PrivateName;
+  //   right: Expression;
+  // }
+  //
+  // The "type" string only has a concrete value in leaf types.
+  //
+  // interface Expression <: Node { }  <======= No "type" value defined.
+  //
+  // The existence of a concrete "type" value suggests that this is a leaf type.
+  optional string type = 2;
+
+  // Parent nodes to inherit from.
+  repeated string parents = 3;
+
+  // Fields defined by this node.
+  // Not including fields in parents.
+  repeated FieldDefPb fields = 4;
+
+  // If true, automatically generate the corresponding op.
+  // If false, the op is expected to be manually written.
+  optional bool should_generate_ir_op = 5;
+
+  // Supported kinds. Each kind leads to a different IR op.
+  repeated FieldKind kinds = 6;
+
+  // Whether this op has control flow. If so, we will define a high-level IR op,
+  // and a low-level IR op.
+  optional bool has_control_flow = 7;
+
+  // [Optional] Custom MLIR op name.
+  //
+  // By default, each AST node corresponds to an equivalent op or interface:
+  // - JsNumericLiteral <=> JsirNumericLiteralOp
+  // - JsExpression <=> JsirExpressionOpInterface
+  //
+  // If a custom op name is specified, then the corresponding MLIR op will not
+  // be generated, and its ancestors will not have corresponding interfaces.
+  // - JsNumericLiteral <=> mlir::arith::ConstantOp
+  // - JsExpression <=> mlir::Value
+  optional string ir_op_name = 8;
+
+  // Whether this node has a fold operation
+  optional bool has_fold = 9;
+
+  // Additional MLIR traits to add to the op definition.
+  repeated MlirTrait additional_mlir_traits = 10 [packed = true];
+}
+
+// Definition of a tagged union node type.
+//
+// SWC likes to use enum types to model inheritance. This union type simplifies
+// the AST definitions by allowing us to mimic this model and implicitly add the
+// associated union type as a parent to all the enum members.
+message UnionTypePb {
+  // Name of the union node.
+  //
+  // Must be PascalCase.
+  // E.g. "BinaryExpression".
+  optional string name = 1;
+
+  // Parent nodes to inherit from.
+  repeated string parents = 2;
+
+  // Types which are members of this union.
+  repeated string types = 3;
+}
+
+// Top-level AST definition.
+message AstDefPb {
+  // The shortened language name.
+  // E.g. "js"
+  optional string lang_name = 1;
+
+  repeated EnumDefPb enums = 2;
+
+  repeated NodeDefPb nodes = 3;
+
+  repeated UnionTypePb union_types = 4;
+}

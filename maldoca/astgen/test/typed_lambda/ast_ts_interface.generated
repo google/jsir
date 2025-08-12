@@ -1,0 +1,35 @@
+interface Node {
+}
+
+interface Expression <: Node {
+}
+
+interface Type <: Node {
+}
+
+interface Literal <: Expression {
+  value: boolean | /*int64*/number | /*double*/number | string
+}
+
+interface Variable <: Expression {
+  identifier: string
+}
+
+interface FunctionDefinition <: Expression {
+  parameter: Variable
+  parameterType: Type
+  body: Expression
+}
+
+interface FunctionCall <: Expression {
+  caller: Expression
+  callee: Expression
+}
+
+interface LiteralType <: Type {
+}
+
+interface FunctionType <: Type {
+  parameterType: Type
+  bodyType: Type
+}

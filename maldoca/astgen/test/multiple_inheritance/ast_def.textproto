@@ -1,0 +1,65 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "m"
+
+# interface SourceLocation {
+#   start: number
+#   end: number
+# }
+nodes {
+  name: "SourceLocation"
+  fields {
+    name: "start"
+    type { double {} }
+  }
+  fields {
+    name: "end"
+    type { double {} }
+  }
+}
+
+# interface Node {
+#   loc: SourceLocation
+# }
+nodes {
+  name: "Node"
+  fields {
+    name: "loc"
+    type { class: "SourceLocation" }
+  }
+}
+
+# interface Function <: Node {
+#   id: string
+# }
+nodes {
+  name: "Function"
+  parents: "Node"
+  fields {
+    name: "id"
+    type { string {} }
+  }
+}
+
+# interface ObjectMember <: Node {
+#   computed: boolean
+# }
+nodes {
+  name: "ObjectMember"
+  parents: "Node"
+  fields {
+    name: "computed"
+    type { bool {} }
+  }
+}
+
+# interface ObjectMethod <: ObjectMember, Function {
+#   type: "ObjectMethod"
+# }
+nodes {
+  name: "ObjectMethod"
+  type: "ObjectMethod"
+  parents: "ObjectMember"
+  parents: "Function"
+}

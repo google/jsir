@@ -1,0 +1,19 @@
+interface SourceLocation {
+  start: /*double*/number
+  end: /*double*/number
+}
+
+interface Node {
+  loc: SourceLocation
+}
+
+interface Function <: Node {
+  id: string
+}
+
+interface ObjectMember <: Node {
+  computed: boolean
+}
+
+interface ObjectMethod <: ObjectMember, Function {
+}
