@@ -1,0 +1,18 @@
+type UnaryOperator =
+    | "-"
+    | "+"
+    | "!"
+    | "~"
+    | "typeof"
+    | "void"
+    | "delete"
+    | "throw"
+
+type EscapedChar =
+    | "\t"
+    | "\\"
+
+interface Node {
+  unaryOperator: UnaryOperator
+  escapedChar: EscapedChar
+}

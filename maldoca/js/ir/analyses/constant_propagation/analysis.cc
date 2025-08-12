@@ -270,30 +270,32 @@ bool JsirConstantPropagationAnalysis::IsCfgEdgeExecutable(
     return true;
   }
 
-  auto [liveness_source, liveness_kind] = edge->getLivenessInfo().value();
-  auto liveness_source_state_ref = GetStateAt(liveness_source);
-  if (liveness_source_state_ref.value().IsUninitialized()) {
+  auto [lhs_value, rhs, liveness_kind] = edge->getLivenessInfo().value();
+  auto lhs_state_ref = GetStateAt(lhs_value);
+  if (lhs_state_ref.value().IsUninitialized()) {
     return false;
-  } else if (liveness_source_state_ref.value().IsUnknown()) {
+  } else if (lhs_state_ref.value().IsUnknown()) {
     return true;
   }
 
-  mlir::Attribute true_attr =
-      mlir::BoolAttr::get(liveness_source.getContext(), true);
-  mlir::Attribute false_attr =
-      mlir::BoolAttr::get(liveness_source.getContext(), false);
-  mlir::Attribute null_attr =
-      JsirNullLiteralAttr::get(liveness_source.getContext());
+  if (auto rhs_attr = llvm::dyn_cast<mlir::Attribute>(rhs);
+      rhs_attr != nullptr) {
+    switch (liveness_kind) {
+      case LivenessKind::kLiveIfEqualOrUnknown:
+        return *lhs_state_ref.value() == rhs_attr;
+      case LivenessKind::kLiveIfNotEqualOrUnknown:
+        return *lhs_state_ref.value() != rhs_attr;
+    }
+  }
 
+  auto rhs_value = llvm::dyn_cast<mlir::Value>(rhs);
+  auto rhs_state_ref = GetStateAt(rhs_value);
+  std::optional<mlir::Attribute> rhs_attr = *rhs_state_ref.value();
   switch (liveness_kind) {
-    case LivenessKind::kLiveIfTrueOrUnknown:
-      return *liveness_source_state_ref.value() == true_attr;
-    case LivenessKind::kLiveIfFalseOrUnknown:
-      return *liveness_source_state_ref.value() == false_attr;
-    case LivenessKind::kLiveIfNullOrUnknown:
-      return *liveness_source_state_ref.value() == null_attr;
-    case LivenessKind::kLiveIfNonNullOrUnknown:
-      return *liveness_source_state_ref.value() != null_attr;
+    case LivenessKind::kLiveIfEqualOrUnknown:
+      return *lhs_state_ref.value() == rhs_attr;
+    case LivenessKind::kLiveIfNotEqualOrUnknown:
+      return *lhs_state_ref.value() != rhs_attr;
   }
 }
 

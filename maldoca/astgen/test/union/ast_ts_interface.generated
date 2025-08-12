@@ -1,0 +1,15 @@
+interface Node {
+  name: string
+  content: UnionType
+}
+
+interface SubNodeA <: UnionType {
+  valueA: string
+}
+
+interface SubNodeB <: UnionType {
+  valueB: string
+}
+
+interface UnionType {
+}

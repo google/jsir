@@ -1,0 +1,16 @@
+interface Expression {
+}
+
+interface Variable <: Expression {
+  identifier: string
+}
+
+interface FunctionDefinition <: Expression {
+  parameter: Variable
+  body: Expression
+}
+
+interface FunctionCall <: Expression {
+  function: Expression
+  argument: Expression
+}

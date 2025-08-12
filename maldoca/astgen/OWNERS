@@ -1,0 +1,2 @@
+# LLVM owners for API updates. (see go/mlir-sla).
+suggest-reviewers-ignore: file://depot/google3/llvm/OWNERS

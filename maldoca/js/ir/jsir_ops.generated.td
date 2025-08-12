@@ -19,12 +19,12 @@
 #ifndef MALDOCA_JS_IR_JSIR_OPS_GENERATED_TD_
 #define MALDOCA_JS_IR_JSIR_OPS_GENERATED_TD_
 
-include "mlir/IR/OpBase.td"
-include "mlir/IR/SymbolInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/LoopLikeInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/IR/OpBase.td"
+include "mlir/IR/SymbolInterfaces.td"
 include "maldoca/js/ir/interfaces.td"
 include "maldoca/js/ir/jsir_dialect.td"
 include "maldoca/js/ir/jsir_types.td"

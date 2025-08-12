@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -363,12 +363,7 @@ cc_library(
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/driver",
         "//maldoca/js/driver:driver_cc_proto",
-        "//maldoca/js/ir/analyses:analysis",
-        "//maldoca/js/ir/analyses:conditional_forward_dataflow_analysis",
-        "//maldoca/js/ir/analyses:dataflow_analysis",
-        "//maldoca/js/ir/analyses/constant_propagation:analysis",
         "//maldoca/js/ir/conversion:utils",
-        "//maldoca/js/ir/transforms:transform",
         "//maldoca/js/quickjs_babel",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/log",

@@ -1,0 +1,47 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "a"
+
+# interface Expression {}
+nodes {
+  name: "Expression"
+  kinds: FIELD_KIND_RVAL
+}
+
+# interface Identifier <: Expression {
+#   name: string
+# }
+nodes {
+  name: "Identifier"
+  type: "Identifier"
+  parents: "Expression"
+  fields {
+    name: "name"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_LVAL
+  should_generate_ir_op: true
+}
+
+# interface Assignment <: Expression {
+#   lhs: Identifier
+#   rhs: Expression
+# }
+nodes {
+  name: "Assignment"
+  type: "Assignment"
+  parents: "Expression"
+  fields {
+    name: "lhs"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_LVAL
+  }
+  fields {
+    name: "rhs"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}

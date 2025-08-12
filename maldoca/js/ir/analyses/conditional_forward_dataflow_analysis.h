@@ -41,7 +41,6 @@ class JsirConditionalForwardDataFlowAnalysis
     : public JsirForwardDataFlowAnalysis<ValueT, StateT> {
  public:
   using Base = JsirForwardDataFlowAnalysis<ValueT, StateT>;
-  using DenseBase = JsirDenseForwardDataFlowAnalysis<StateT>;
 
   explicit JsirConditionalForwardDataFlowAnalysis(mlir::DataFlowSolver &solver)
       : JsirForwardDataFlowAnalysis<ValueT, StateT>(solver) {}
@@ -88,10 +87,10 @@ JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::GetIsExecutable(
 template <typename ValueT, typename StateT>
 void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitOp(
     mlir::Operation *op) {
-  JsirStateRef<StateT> before_state_ref = DenseBase::GetStateBefore(op);
+  JsirStateRef<StateT> before_state_ref = Base::GetStateBefore(op);
   const StateT *before = &before_state_ref.value();
 
-  JsirStateRef after_state_ref = DenseBase::GetStateAfter(op);
+  JsirStateRef after_state_ref = Base::GetStateAfter(op);
 
   auto [operands, result_state_refs] = Base::GetValueStateRefs(op);
 
@@ -120,6 +119,8 @@ void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitOp(
       llvm::isa<JshirLabeledStatementOp>(op) ||
       llvm::isa<JshirLogicalExpressionOp>(op) ||
       llvm::isa<JshirIfStatementOp>(op) || llvm::isa<JshirTryStatementOp>(op) ||
+      llvm::isa<JshirSwitchStatementOp>(op) ||
+      llvm::isa<JshirSwitchCaseOp>(op) ||
       llvm::isa<JshirWhileStatementOp>(op)) {
     return;
   }

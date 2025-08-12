@@ -1,0 +1,15 @@
+interface Expr {
+}
+
+interface Stmt {
+  expr: Expr
+}
+
+interface Node {
+  expr: Expr
+  optionalExpr: Expr | null
+  exprs: [ Expr ]
+  stmt: Stmt
+  optionalStmt: Stmt | null
+  stmts: [ Stmt ]
+}

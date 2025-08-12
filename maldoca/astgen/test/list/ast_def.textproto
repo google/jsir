@@ -1,0 +1,242 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "li"
+
+# interface Class1 {}
+nodes {
+  name: "Class1"
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface Class2 {}
+nodes {
+  name: "Class2"
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface SimpleList {
+#   strings: [string]
+#   operations: [Class1]
+# }
+nodes {
+  name: "SimpleList"
+  fields {
+    name: "strings"
+    type {
+      list {
+        element_type { string {} }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "operations"
+    type {
+      list {
+        element_type { class: "Class1" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface OptionalList {
+#   strings? : [string]
+# }
+nodes {
+  name: "OptionalList"
+  fields {
+    name: "strings"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { string {} }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface ListOfOptional {
+#   strings: [ string | null ]
+#   operations: [ Class1 | null ]
+# }
+nodes {
+  name: "ListOfOptional"
+  fields {
+    name: "strings"
+    type {
+      list {
+        element_type { string {} }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "operations"
+    type {
+      list {
+        element_type { class: "Class1" }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface ListOfVariant {
+#   variants: [ bool | string ]
+#   operations: [ Class1 | Class2 ]
+# }
+nodes {
+  name: "ListOfVariant"
+  fields {
+    name: "variants"
+    type {
+      list {
+        element_type {
+          variant {
+            types { bool {} }
+            types { string {} }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "operations"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "Class1" }
+            types { class: "Class2" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface OptionalListOfOptional {
+#   variants? : [ string | null ]
+# }
+nodes {
+  name: "OptionalListOfOptional"
+  fields {
+    name: "variants"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { string {} }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface OptionalListOfVariant {
+#   variants? : [ boolean | string ]
+# }
+nodes {
+  name: "OptionalListOfVariant"
+  fields {
+    name: "variants"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type {
+          variant {
+            types { bool {} }
+            types { string {} }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface ListOfOptionalVariant {
+#   variants: [ boolean | string | null ]
+#   operations: [ Class1 | Class2 | null ]
+# }
+nodes {
+  name: "ListOfOptionalVariant"
+  fields {
+    name: "variants"
+    type {
+      list {
+        element_type {
+          variant {
+            types { bool {} }
+            types { string {} }
+          }
+        }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "operations"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "Class1" }
+            types { class: "Class2" }
+          }
+        }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface OptionalListOfOptionalVariant {
+#   variants? : [ boolean | string | null ]
+# }
+nodes {
+  name: "OptionalListOfOptionalVariant"
+  fields {
+    name: "variants"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type {
+          variant {
+            types { bool {} }
+            types { string {} }
+          }
+        }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}

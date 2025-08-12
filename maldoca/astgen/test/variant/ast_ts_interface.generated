@@ -1,0 +1,17 @@
+interface BaseClass {
+}
+
+interface DerivedClass1 <: BaseClass {
+}
+
+interface DerivedClass2 <: BaseClass {
+}
+
+interface Node {
+  simpleVariantBuiltin: /*double*/number | string
+  nullableVariantBuiltin: /*double*/number | string | null
+  optionalVariantBuiltin?: /*double*/number | string
+  simpleVariantClass: DerivedClass1 | DerivedClass2
+  nullableVariantClass: DerivedClass1 | DerivedClass2 | null
+  optionalVariantClass?: DerivedClass1 | DerivedClass2
+}

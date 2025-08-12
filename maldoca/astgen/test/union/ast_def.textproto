@@ -1,0 +1,44 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+lang_name: "e"
+
+nodes {
+  name: "Node"
+  fields {
+    name: "name"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "content"
+    type { class: "UnionType" }
+    kind: FIELD_KIND_ATTR
+  }
+}
+
+nodes {
+  name: "SubNodeA"
+  type: "SubNodeA"
+  fields {
+    name: "valueA"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+}
+
+nodes {
+  name: "SubNodeB"
+  type: "SubNodeB"
+  fields {
+    name: "valueB"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+}
+
+union_types {
+  name: "UnionType"
+  types: "SubNodeA"
+  types: "SubNodeB"
+}
