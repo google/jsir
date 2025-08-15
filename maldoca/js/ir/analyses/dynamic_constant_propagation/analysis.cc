@@ -22,6 +22,8 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <string>
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/GraphTraits.h"
@@ -174,10 +176,60 @@ std::optional<mlir::Attribute> BuiltinBtoa(
   return mlir::StringAttr::get(context, ascii_string);
 }
 
+std::set<std::string> kEncodeURIComponentReservedChars = {
+    "-", "_", ".", "!", "~", "*", "'", "(", ")", "*", ",", ";", ":", "@", "&", "=", "+", "$", "/", "?", "#"
+};
+
+std::optional<mlir::Attribute> BuiltinDecodeURIComponent(
+    mlir::MLIRContext *context, absl::Span<const mlir::Attribute> args) {
+  if (args.size() != 1) {
+    return std::nullopt;
+  }
+  std::string encoded_str =
+      llvm::dyn_cast<mlir::StringAttr>(args[0]).strref().str();
+
+  std::string decoded;
+    char hex_char;
+    for (size_t i = 0; i < encoded_str.length(); ++i) {
+        if (encoded_str[i] == '%' && i + 2 < encoded_str.length()) {
+            std::string hex_str = encoded_str.substr(i + 1, 2);
+            char decoded_char = static_cast<char>(std::stoi(hex_str, nullptr, 16));
+            decoded += decoded_char;
+            i += 2;
+        } else {
+            decoded += encoded_str[i];
+        }
+    }
+    return mlir::StringAttr::get(context, decoded);
+}
+
+std::optional<mlir::Attribute> BuiltinEncodeURIComponent(
+    mlir::MLIRContext *context, absl::Span<const mlir::Attribute> args) {
+  if (args.size() != 1) {
+    return std::nullopt;
+  }
+  std::string str =
+      llvm::dyn_cast<mlir::StringAttr>(args[0]).strref().str();
+
+  std::string encoded;
+  for (char c : str) {
+    if (isalnum(c) || kEncodeURIComponentReservedChars.count(std::string(1, c))) {
+      encoded += c;
+    } else {
+      encoded += absl::StrFormat("%%%02X", static_cast<unsigned char>(c));
+    }
+  }
+  return mlir::StringAttr::get(context, encoded);
+}
+
+
+
 static const auto *kBuiltins =
     new absl::flat_hash_map<std::string, BuiltinFunc>{
         {"atob", &BuiltinAtob},
         {"btoa", &BuiltinBtoa},
+        {"decodeURIComponent", &BuiltinDecodeURIComponent},
+        {"encodeURIComponent", &BuiltinEncodeURIComponent},
     };
 
 static std::string InlineExprToString(mlir::Attribute expr, size_t indent = 0) {
