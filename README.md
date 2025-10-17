@@ -68,6 +68,22 @@ for details.
 
 ## Getting started
 
+### Docker (Recommended)
+
+The easiest way to get started with JSIR is using Docker:
+
+```shell
+# Build the Docker image
+docker build -t jsir:latest .
+
+# Run jsir_gen
+docker run --rm jsir:latest jsir_gen --help
+
+# Analyze a JavaScript file
+docker run --rm -v $(pwd):/workspace jsir:latest jsir_gen --input_file=/workspace/yourfile.js
+```
+
+
 ### Install build tools
 
 We have only tested `clang` on Linux:
