@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@
 #include <optional>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/DenseMapInfo.h"
+#include "llvm/ADT/Hashing.h"
+#include "llvm/ADT/PointerUnion.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/SaveAndRestore.h"
@@ -76,9 +80,9 @@ class JsirStateElement : public mlir::AnalysisState {
       : AnalysisState(anchor) {}
 
   // Read-only. Please use JsirStateRef to modify the value.
-  const T &value() const { return value_; }
+  const T& value() const { return value_; }
 
-  void print(llvm::raw_ostream &os) const override { value_.print(os); }
+  void print(llvm::raw_ostream& os) const override { value_.print(os); }
 
  private:
   friend class JsirStateRef<T>;
@@ -87,31 +91,83 @@ class JsirStateElement : public mlir::AnalysisState {
 
 }  // namespace detail
 
-enum class LivenessKind { kLiveIfEqualOrUnknown, kLiveIfNotEqualOrUnknown };
+enum class LivenessKind {
+  kLiveIfTruthyOrUnknown,
+  kLiveIfFalsyOrUnknown,
+  kLiveIfEqualOrUnknown,
+  kLiveIfNotEqualOrUnknown
+};
 
-using LivenessInfo =
-    std::tuple<mlir::Value, mlir::PointerUnion<mlir::Value, mlir::Attribute>,
-               LivenessKind>;
+// TODO Can we extend an std::tuple instead of defining the DenseMapInfo below?
+struct LivenessInfo {
+  LivenessKind kind;
+  llvm::SmallVector<llvm::PointerUnion<mlir::Value, mlir::Attribute>> values;
+
+  bool operator==(const LivenessInfo& other) const {
+    return kind == other.kind && values == other.values;
+  }
+};
+
+}  // namespace maldoca
+
+namespace llvm {
+
+template <>
+struct DenseMapInfo<maldoca::LivenessInfo> {
+  using TupleInfo = llvm::DenseMapInfo<std::tuple<
+      maldoca::LivenessKind,
+      llvm::SmallVector<llvm::PointerUnion<mlir::Value, mlir::Attribute>>>>;
+  using KindInfo = llvm::DenseMapInfo<maldoca::LivenessKind>;
+  using ValueInfo =
+      llvm::DenseMapInfo<llvm::PointerUnion<mlir::Value, mlir::Attribute>>;
+
+  static maldoca::LivenessInfo getEmptyKey() {
+    auto [kind, values] = TupleInfo::getEmptyKey();
+    return maldoca::LivenessInfo{.kind = kind, .values = std::move(values)};
+  }
+
+  static maldoca::LivenessInfo getTombstoneKey() {
+    auto [kind, values] = TupleInfo::getTombstoneKey();
+    return maldoca::LivenessInfo{.kind = kind, .values = std::move(values)};
+  }
+
+  static llvm::hash_code getHashValue(maldoca::LivenessInfo info) {
+    auto kind_hash = KindInfo::getHashValue(info.kind);
+    for (auto value : info.values) {
+      kind_hash = hash_combine(kind_hash, ValueInfo::getHashValue(value));
+    }
+    return kind_hash;
+  }
+
+  static bool isEqual(const maldoca::LivenessInfo& a,
+                      const maldoca::LivenessInfo& b) {
+    return TupleInfo::isEqual({a.kind, a.values}, {b.kind, b.values});
+  }
+};
+
+}  // namespace llvm
+
+namespace maldoca {
 
 class JsirGeneralCfgEdge
     : public mlir::GenericLatticeAnchorBase<
           JsirGeneralCfgEdge,
-          std::tuple<mlir::ProgramPoint *, mlir::ProgramPoint *,
+          std::tuple<mlir::ProgramPoint*, mlir::ProgramPoint*,
                      mlir::SmallVector<mlir::Value>,
                      mlir::SmallVector<mlir::Value>,
                      std::optional<LivenessInfo>>> {
  public:
   using Base::Base;
 
-  mlir::ProgramPoint *getPred() const { return std::get<0>(getValue()); }
+  mlir::ProgramPoint* getPred() const { return std::get<0>(getValue()); }
 
-  mlir::ProgramPoint *getSucc() const { return std::get<1>(getValue()); }
+  mlir::ProgramPoint* getSucc() const { return std::get<1>(getValue()); }
 
-  const mlir::SmallVector<mlir::Value> &getPredValues() const {
+  const mlir::SmallVector<mlir::Value>& getPredValues() const {
     return std::get<2>(getValue());
   }
 
-  const mlir::SmallVector<mlir::Value> &getSuccValues() const {
+  const mlir::SmallVector<mlir::Value>& getSuccValues() const {
     return std::get<3>(getValue());
   }
 
@@ -119,7 +175,7 @@ class JsirGeneralCfgEdge
     return std::get<4>(getValue());
   }
 
-  void print(llvm::raw_ostream &os) const override {
+  void print(llvm::raw_ostream& os) const override {
     os << "JsirGeneralCfgEdge";
     os << "\n  pred: ";
     getPred()->print(os);
@@ -131,7 +187,13 @@ class JsirGeneralCfgEdge
     os << getSuccValues().size();
     if (getLivenessInfo().has_value()) {
       os << "\n  liveness kind: ";
-      switch (std::get<2>(getLivenessInfo().value())) {
+      switch (getLivenessInfo().value().kind) {
+        case LivenessKind::kLiveIfTruthyOrUnknown:
+          os << "LiveIfTruthyOrUnknown";
+          break;
+        case LivenessKind::kLiveIfFalsyOrUnknown:
+          os << "LiveIfFalsyOrUnknown";
+          break;
         case LivenessKind::kLiveIfEqualOrUnknown:
           os << "LiveIfEqualOrUnknown";
           break;
@@ -159,45 +221,45 @@ class JsirStateRef {
   explicit JsirStateRef()
       : element_(nullptr), solver_(nullptr), analysis_(nullptr) {}
 
-  explicit JsirStateRef(detail::JsirStateElement<T> *element,
-                        mlir::DataFlowSolver *solver,
-                        mlir::DataFlowAnalysis *analysis)
+  explicit JsirStateRef(detail::JsirStateElement<T>* element,
+                        mlir::DataFlowSolver* solver,
+                        mlir::DataFlowAnalysis* analysis)
       : element_(element), solver_(solver), analysis_(analysis) {}
 
   bool operator==(std::nullptr_t) const { return element_ == nullptr; }
   bool operator!=(std::nullptr_t) const { return element_ != nullptr; }
 
-  detail::JsirStateElement<T> *element() { return element_; }
+  detail::JsirStateElement<T>* element() { return element_; }
 
-  const T &value() const { return element_->value(); }
+  const T& value() const { return element_->value(); }
 
   // Marks a program point as depending on this state.
   // This means that whenever this state is updated, we trigger a visit() of
   // that program point.
-  void AddDependent(mlir::ProgramPoint *point);
+  void AddDependent(mlir::ProgramPoint* point);
 
   // Writes the state and triggers visit()s of its dependents.
-  void Write(absl::FunctionRef<mlir::ChangeResult(T *)> write_fn);
+  void Write(absl::FunctionRef<mlir::ChangeResult(T*)> write_fn);
 
   // Writes the state and triggers visit()s of its dependents.
-  void Write(T &&lattice);
-  void Write(const T &lattice);
+  void Write(T&& lattice);
+  void Write(const T& lattice);
 
   // Joins the state and triggers visit()s of its dependents.
-  void Join(const T &lattice);
+  void Join(const T& lattice);
 
  private:
   // Points to the actual data attached to the program point.
-  detail::JsirStateElement<T> *element_;
+  detail::JsirStateElement<T>* element_;
 
   // The solver that drives the worklist algorithm.
   // We need this to access the solver APIs to propagate changes.
-  mlir::DataFlowSolver *solver_;
+  mlir::DataFlowSolver* solver_;
 
   // The analysis that this state belongs to.
   // When we schedule a new program point to be visited, we need to specify the
   // analysis, hence the need of this field.
-  mlir::DataFlowAnalysis *analysis_;
+  mlir::DataFlowAnalysis* analysis_;
 };
 
 // A lattice that represents if a piece of code is executable.
@@ -206,19 +268,19 @@ class JsirExecutable : public JsirState<JsirExecutable> {
  public:
   explicit JsirExecutable(bool executable = false) : executable_(executable) {}
 
-  mlir::ChangeResult Join(const JsirExecutable &other) override;
+  mlir::ChangeResult Join(const JsirExecutable& other) override;
 
-  const bool &operator*() const { return executable_; }
+  const bool& operator*() const { return executable_; }
 
-  bool operator==(const JsirExecutable &rhs) const override {
+  bool operator==(const JsirExecutable& rhs) const override {
     return executable_ == rhs.executable_;
   }
 
-  bool operator!=(const JsirExecutable &rhs) const override {
+  bool operator!=(const JsirExecutable& rhs) const override {
     return !(operator==(rhs));
   }
 
-  void print(llvm::raw_ostream &os) const override;
+  void print(llvm::raw_ostream& os) const override;
 
  private:
   bool executable_ = false;
@@ -230,16 +292,16 @@ class JsirDenseStates {
   virtual ~JsirDenseStates() = default;
 
   // Gets the state attached before an op.
-  virtual T GetStateBefore(mlir::Operation *op) = 0;
+  virtual T GetStateBefore(mlir::Operation* op) = 0;
 
   // Gets the state attached after an op.
-  virtual T GetStateAfter(mlir::Operation *op) = 0;
+  virtual T GetStateAfter(mlir::Operation* op) = 0;
 
   // Gets the state attached at the entry of a block.
-  virtual T GetStateAtEntryOf(mlir::Block *block) = 0;
+  virtual T GetStateAtEntryOf(mlir::Block* block) = 0;
 
   // Gets the state attached at the end of a block.
-  virtual T GetStateAtEndOf(mlir::Block *block) = 0;
+  virtual T GetStateAtEndOf(mlir::Block* block) = 0;
 };
 
 template <typename T>
@@ -261,10 +323,10 @@ class JsirDataFlowAnalysisPrinter {
   //   <AtBlockEntry>%result0 = an_op (%arg0, %arg1, ...)<AfterOp>
   //   %result1 = another_op (%arg0, %arg1, ...)<AfterOp>
   //   ...
-  virtual void PrintOp(mlir::Operation *op, size_t num_indents,
-                       mlir::AsmState &asm_state, llvm::raw_ostream &os) = 0;
+  virtual void PrintOp(mlir::Operation* op, size_t num_indents,
+                       mlir::AsmState& asm_state, llvm::raw_ostream& os) = 0;
 
-  std::string PrintOp(mlir::Operation *op) {
+  std::string PrintOp(mlir::Operation* op) {
     std::string output;
     llvm::raw_string_ostream os(output);
     mlir::AsmState asm_state(op);
@@ -287,14 +349,14 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
                              public JsirDenseStates<JsirStateRef<StateT>>,
                              public JsirSparseStates<JsirStateRef<ValueT>> {
  public:
-  explicit JsirDataFlowAnalysis(mlir::DataFlowSolver &solver)
+  explicit JsirDataFlowAnalysis(mlir::DataFlowSolver& solver)
       : mlir::DataFlowAnalysis(solver), solver_(solver) {
     registerAnchorKind<JsirGeneralCfgEdge>();
   }
 
   // Set the initial state of an entry block for forward analysis or exit block
   // for backward analysis.
-  virtual void InitializeBoundaryBlock(mlir::Block *block,
+  virtual void InitializeBoundaryBlock(mlir::Block* block,
                                        JsirStateRef<StateT> boundary_state) {
     std::vector<JsirStateRef<ValueT>> arg_states;
     for (mlir::Value arg : block->getArguments()) {
@@ -312,20 +374,20 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   // an entry block for a forward analysis, or the exit state of an exit block
   // for a backward analysis.
   virtual void InitializeBoundaryBlock(
-      mlir::Block *block, JsirStateRef<StateT> boundary_state,
+      mlir::Block* block, JsirStateRef<StateT> boundary_state,
       llvm::MutableArrayRef<JsirStateRef<ValueT>> arg_states) = 0;
 
   // Gets the state attached before an op.
-  JsirStateRef<StateT> GetStateBefore(mlir::Operation *op) final;
+  JsirStateRef<StateT> GetStateBefore(mlir::Operation* op) final;
 
   // Gets the state attached after an op.
-  JsirStateRef<StateT> GetStateAfter(mlir::Operation *op) final;
+  JsirStateRef<StateT> GetStateAfter(mlir::Operation* op) final;
 
   // Gets the state attached at the entry of a block.
-  JsirStateRef<StateT> GetStateAtEntryOf(mlir::Block *block) final;
+  JsirStateRef<StateT> GetStateAtEntryOf(mlir::Block* block) final;
 
   // Gets the state attached at the end of a block.
-  JsirStateRef<StateT> GetStateAtEndOf(mlir::Block *block) final;
+  JsirStateRef<StateT> GetStateAtEndOf(mlir::Block* block) final;
 
   // This virtual method is the transfer function for an operation. It is called
   // by its overloaded protected method. Same as its version in dense analysis,
@@ -351,8 +413,8 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   // | Output |      Results      |     Operands      |
   // +--------+-------------------+-------------------+
   virtual void VisitOp(
-      mlir::Operation *op, llvm::ArrayRef<const ValueT *> sparse_input,
-      const StateT *dense_input,
+      mlir::Operation* op, llvm::ArrayRef<const ValueT*> sparse_input,
+      const StateT* dense_input,
       llvm::MutableArrayRef<JsirStateRef<ValueT>> sparse_output,
       JsirStateRef<StateT> dense_output) = 0;
 
@@ -365,46 +427,46 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   //   <AtBlockEntry>%result0 = an_op (%arg0, %arg1, ...)<AfterOp>
   //   %result1 = another_op (%arg0, %arg1, ...)<AfterOp>
   //   ...
-  void PrintOp(mlir::Operation *op, size_t num_indents,
-               mlir::AsmState &asm_state, llvm::raw_ostream &os) override;
+  void PrintOp(mlir::Operation* op, size_t num_indents,
+               mlir::AsmState& asm_state, llvm::raw_ostream& os) override;
 
   using JsirDataFlowAnalysisPrinter::PrintOp;
 
-  void PrintRegion(mlir::Region &region, size_t num_indents,
-                   mlir::AsmState &asm_state, llvm::raw_ostream &os);
+  void PrintRegion(mlir::Region& region, size_t num_indents,
+                   mlir::AsmState& asm_state, llvm::raw_ostream& os);
 
   // Callbacks for `PrintOp`. See comments of `PrintOp` for the format.
-  virtual void PrintAtBlockEntry(mlir::Block &block, size_t num_indents,
-                                 llvm::raw_ostream &os);
-  virtual void PrintAfterOp(mlir::Operation *op, size_t num_indents,
-                            mlir::AsmState &asm_state, llvm::raw_ostream &os);
+  virtual void PrintAtBlockEntry(mlir::Block& block, size_t num_indents,
+                                 llvm::raw_ostream& os);
+  virtual void PrintAfterOp(mlir::Operation* op, size_t num_indents,
+                            mlir::AsmState& asm_state, llvm::raw_ostream& os);
 
-  bool IsEntryBlock(mlir::Block *block);
+  bool IsEntryBlock(mlir::Block* block);
 
   // When we visit the op, visit all the CFG edges associated with that op.
-  absl::flat_hash_map<mlir::Operation *, std::vector<JsirGeneralCfgEdge *>>
+  absl::flat_hash_map<mlir::Operation*, std::vector<JsirGeneralCfgEdge*>>
       op_to_cfg_edges_;
 
   // TODO(b/425421947) Consider merging this with `op_to_cfg_edges_`.
-  absl::flat_hash_map<mlir::Block *, std::vector<JsirGeneralCfgEdge *>>
+  absl::flat_hash_map<mlir::Block*, std::vector<JsirGeneralCfgEdge*>>
       block_to_cfg_edges_;
 
  protected:
   struct CfgEdgeOptions {
-    llvm::SmallVector<mlir::ProgramPoint *> from;
-    llvm::SmallVector<mlir::ProgramPoint *> to;
-    mlir::Operation *owner;
+    llvm::SmallVector<mlir::ProgramPoint*> from;
+    llvm::SmallVector<mlir::ProgramPoint*> to;
+    llvm::PointerUnion<mlir::Operation*, mlir::Block*> owner;
     std::optional<LivenessInfo> liveness_info;
     std::variant<mlir::ValueRange,
-                 absl::FunctionRef<mlir::ValueRange(mlir::Block *)>>
+                 absl::FunctionRef<mlir::ValueRange(mlir::Block*)>>
         pred_values;
     mlir::ValueRange succ_values;
   };
 
   void MaybeEmplaceCfgEdges(CfgEdgeOptions options) {
-    for (auto &from : options.from) {
-      for (auto &to : options.to) {
-        for (auto &op : *from->getBlock()) {
+    for (auto& from : options.from) {
+      for (auto& to : options.to) {
+        for (auto& op : *from->getBlock()) {
           if (getProgramPointBefore(&op) == from) {
             break;
           }
@@ -419,24 +481,34 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
           pred_values = std::get<mlir::ValueRange>(options.pred_values);
         } else {
           pred_values =
-              std::get<absl::FunctionRef<mlir::ValueRange(mlir::Block *)>>(
+              std::get<absl::FunctionRef<mlir::ValueRange(mlir::Block*)>>(
                   options.pred_values)(from->getBlock());
         }
 
-        JsirGeneralCfgEdge *edge = getLatticeAnchor<JsirGeneralCfgEdge>(
+        JsirGeneralCfgEdge* edge = getLatticeAnchor<JsirGeneralCfgEdge>(
             from, to, pred_values, options.succ_values, options.liveness_info);
-        if (options.owner != nullptr) {
-          op_to_cfg_edges_[options.owner].push_back(edge);
-          auto from_state = GetStateImpl<StateT>(from);
-          from_state.AddDependent(getProgramPointAfter(options.owner));
-        } else {
-          block_to_cfg_edges_[edge->getSucc()->getBlock()].push_back(edge);
+
+        mlir::ProgramPoint* dependent = nullptr;
+        if (auto* owner_op = llvm::dyn_cast<mlir::Operation*>(options.owner)) {
+          op_to_cfg_edges_[owner_op].push_back(edge);
+          dependent = getProgramPointAfter(owner_op);
+        } else if (auto* owner_block =
+                       llvm::dyn_cast<mlir::Block*>(options.owner)) {
+          block_to_cfg_edges_[owner_block].push_back(edge);
+          dependent = getProgramPointAfter(owner_block);
+        }
+
+        auto from_state = GetStateImpl<StateT>(from);
+        from_state.AddDependent(dependent);
+        for (auto pred_value : pred_values) {
+          auto pred_state = GetStateImpl<ValueT>(pred_value);
+          pred_state.AddDependent(dependent);
         }
       }
     }
   }
 
-  void InitializeBlock(mlir::Block *block);
+  void InitializeBlock(mlir::Block* block);
 
   // Since our analysis algorithm is based on MLIR's dataflow analysis, we need
   // to set up the dependency information between basic blocks so that the
@@ -447,16 +519,16 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   // we provide a vanilla (unconditional) dependency initialization that
   // provides all successors as dependencies.
   // This method is called inside `InitializeBlock`.
-  virtual void InitializeBlockDependencies(mlir::Block *block);
+  virtual void InitializeBlockDependencies(mlir::Block* block);
 
-  virtual void VisitBlock(mlir::Block *block);
+  virtual void VisitBlock(mlir::Block* block);
 
   // This method mainly serves to "join" states from blocks. i.e., this method
   // should implement the "join" operation in a dataflow analysis. It should
   // join the states from the end of the predecessor into the entry of the
   // successor for a forward analysis, or join the states from the entry of a
   // block to the end of the predecessor for a backward analysis.
-  virtual void VisitCfgEdge(JsirGeneralCfgEdge *edge);
+  virtual void VisitCfgEdge(JsirGeneralCfgEdge* edge);
 
   // Gets the state at the program point.
   template <typename T>
@@ -467,35 +539,35 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   // should be the results. For backward analysis, the input should be the
   // results and the output should be the operands.
   struct ValueStateRefs {
-    std::vector<const ValueT *> inputs;
+    std::vector<const ValueT*> inputs;
     std::vector<JsirStateRef<ValueT>> outputs;
   };
-  ValueStateRefs GetValueStateRefs(mlir::Operation *op);
+  ValueStateRefs GetValueStateRefs(mlir::Operation* op);
 
-  llvm::SmallVector<mlir::ProgramPoint *> Before(mlir::Operation *op) {
+  llvm::SmallVector<mlir::ProgramPoint*> Before(mlir::Operation* op) {
     return {getProgramPointBefore(op)};
   }
 
-  llvm::SmallVector<mlir::ProgramPoint *> After(mlir::Operation *op) {
+  llvm::SmallVector<mlir::ProgramPoint*> After(mlir::Operation* op) {
     return {getProgramPointAfter(op)};
   }
 
-  llvm::SmallVector<mlir::ProgramPoint *> Before(mlir::Block *block) {
+  llvm::SmallVector<mlir::ProgramPoint*> Before(mlir::Block* block) {
     return {getProgramPointBefore(block)};
   }
 
-  llvm::SmallVector<mlir::ProgramPoint *> After(mlir::Block *block) {
+  llvm::SmallVector<mlir::ProgramPoint*> After(mlir::Block* block) {
     return {getProgramPointAfter(block)};
   }
 
-  llvm::SmallVector<mlir::ProgramPoint *> Before(mlir::Region &region) {
+  llvm::SmallVector<mlir::ProgramPoint*> Before(mlir::Region& region) {
     CHECK(!region.empty());
     return {getProgramPointBefore(&region.front())};
   }
 
-  llvm::SmallVector<mlir::ProgramPoint *> After(mlir::Region &region) {
-    llvm::SmallVector<mlir::ProgramPoint *> after_points;
-    for (mlir::Block &block : region) {
+  llvm::SmallVector<mlir::ProgramPoint*> After(mlir::Region& region) {
+    llvm::SmallVector<mlir::ProgramPoint*> after_points;
+    for (mlir::Block& block : region) {
       if (block.getSuccessors().empty()) {
         after_points.push_back(getProgramPointAfter(&block));
       }
@@ -503,7 +575,37 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
     return after_points;
   }
 
-  static mlir::ValueRange GetExprRegionEndValues(mlir::Block *block) {
+  LivenessInfo LiveIfTruthyOrUnknown(mlir::Value value) {
+    return {
+        .kind = LivenessKind::kLiveIfTruthyOrUnknown,
+        .values = {value},
+    };
+  }
+
+  LivenessInfo LiveIfFalsyOrUnknown(mlir::Value value) {
+    return {
+        .kind = LivenessKind::kLiveIfFalsyOrUnknown,
+        .values = {value},
+    };
+  }
+
+  LivenessInfo LiveIfEqualOrUnknown(
+      mlir::Value lhs, llvm::PointerUnion<mlir::Value, mlir::Attribute> rhs) {
+    return {
+        .kind = LivenessKind::kLiveIfEqualOrUnknown,
+        .values = {lhs, rhs},
+    };
+  }
+
+  LivenessInfo LiveIfNotEqualOrUnknown(
+      mlir::Value lhs, llvm::PointerUnion<mlir::Value, mlir::Attribute> rhs) {
+    return {
+        .kind = LivenessKind::kLiveIfNotEqualOrUnknown,
+        .values = {lhs, rhs},
+    };
+  }
+
+  static mlir::ValueRange GetExprRegionEndValues(mlir::Block* block) {
     auto term_op = block->getTerminator();
     if (auto expr_region_end_op =
             llvm::dyn_cast<JsirExprRegionEndOp>(term_op)) {
@@ -513,8 +615,8 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   }
 
   static mlir::ValueRange GetExprRegionEndValuesFromRegion(
-      mlir::Region &region) {
-    for (auto &block : region.getBlocks()) {
+      mlir::Region& region) {
+    for (auto& block : region.getBlocks()) {
       if (block.hasNoSuccessors()) {
         auto end_values = GetExprRegionEndValues(&block);
         if (!end_values.empty()) {
@@ -525,7 +627,7 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
     return {};
   }
 
-  static mlir::Region &GetForStatementContinueTargetRegion(
+  static mlir::Region& GetForStatementContinueTargetRegion(
       JshirForStatementOp for_stmt) {
     if (!for_stmt.getUpdate().empty()) {
       return for_stmt.getUpdate();
@@ -549,7 +651,7 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   }
 
   std::optional<decltype(jump_env_.WithLabel({}))> WithLabel(
-      mlir::Operation *op) {
+      mlir::Operation* op) {
     if (auto labeled_stmt = llvm::dyn_cast<JshirLabeledStatementOp>(op);
         labeled_stmt != nullptr) {
       return jump_env_.WithLabel(labeled_stmt.getLabel().getName());
@@ -557,17 +659,17 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
     return std::nullopt;
   }
 
-  mlir::LogicalResult initialize(mlir::Operation *op) override;
+  mlir::LogicalResult initialize(mlir::Operation* op) override;
 
-  void VisitOp(mlir::Operation *op, const StateT *input,
+  void VisitOp(mlir::Operation* op, const StateT* input,
                JsirStateRef<StateT> output);
 
-  virtual void VisitOp(mlir::Operation *op);
+  virtual void VisitOp(mlir::Operation* op);
 
-  mlir::DataFlowSolver &solver_;
+  mlir::DataFlowSolver& solver_;
 
   // Override `mlir::DataFlowAnalysis::visit` and redirect to `Visit{Op,Block}`.
-  mlir::LogicalResult visit(mlir::ProgramPoint *point) override;
+  mlir::LogicalResult visit(mlir::ProgramPoint* point) override;
 };
 
 template <typename ValueT, typename StateT>
@@ -583,19 +685,19 @@ using JsirBackwardDataFlowAnalysis =
 // =============================================================================
 
 template <typename T>
-void JsirStateRef<T>::AddDependent(mlir::ProgramPoint *point) {
+void JsirStateRef<T>::AddDependent(mlir::ProgramPoint* point) {
   element_->addDependency(point, analysis_);
 }
 
 template <typename T>
 void JsirStateRef<T>::Write(
-    absl::FunctionRef<mlir::ChangeResult(T *)> write_fn) {
+    absl::FunctionRef<mlir::ChangeResult(T*)> write_fn) {
   mlir::ChangeResult changed = write_fn(&element_->value_);
   solver_->propagateIfChanged(element_, changed);
 }
 
 template <typename T>
-void JsirStateRef<T>::Write(T &&lattice) {
+void JsirStateRef<T>::Write(T&& lattice) {
   if (element_->value_ == lattice) {
     return;
   }
@@ -605,13 +707,13 @@ void JsirStateRef<T>::Write(T &&lattice) {
 }
 
 template <typename T>
-void JsirStateRef<T>::Write(const T &lattice) {
+void JsirStateRef<T>::Write(const T& lattice) {
   T lattice_copy = lattice;
   Write(std::move(lattice_copy));
 }
 
 template <typename T>
-void JsirStateRef<T>::Join(const T &lattice) {
+void JsirStateRef<T>::Join(const T& lattice) {
   mlir::ChangeResult changed = element_->value_.Join(lattice);
   solver_->propagateIfChanged(element_, changed);
 }
@@ -624,7 +726,7 @@ template <typename ValueT, typename StateT, DataflowDirection direction>
 template <typename T>
 JsirStateRef<T> JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateImpl(
     mlir::LatticeAnchor anchor) {
-  auto *element =
+  auto* element =
       mlir::DataFlowAnalysis::getOrCreate<detail::JsirStateElement<T>>(anchor);
   return JsirStateRef<T>{element, &solver_, this};
 }
@@ -632,8 +734,8 @@ JsirStateRef<T> JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateImpl(
 template <typename ValueT, typename StateT, DataflowDirection direction>
 JsirStateRef<StateT>
 JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateBefore(
-    mlir::Operation *op) {
-  if (auto *prev_op = op->getPrevNode()) {
+    mlir::Operation* op) {
+  if (auto* prev_op = op->getPrevNode()) {
     return GetStateAfter(prev_op);
   } else {
     return GetStateImpl<StateT>(getProgramPointBefore(op->getBlock()));
@@ -643,21 +745,21 @@ JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateBefore(
 template <typename ValueT, typename StateT, DataflowDirection direction>
 JsirStateRef<StateT>
 JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateAfter(
-    mlir::Operation *op) {
+    mlir::Operation* op) {
   return GetStateImpl<StateT>(getProgramPointAfter(op));
 }
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 JsirStateRef<StateT>
 JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateAtEntryOf(
-    mlir::Block *block) {
+    mlir::Block* block) {
   return GetStateImpl<StateT>(getProgramPointBefore(block));
 }
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 JsirStateRef<StateT>
 JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateAtEndOf(
-    mlir::Block *block) {
+    mlir::Block* block) {
   if (block->empty()) {
     return GetStateAtEntryOf(block);
   } else {
@@ -667,8 +769,8 @@ JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateAtEndOf(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintOp(
-    mlir::Operation *op, size_t num_indents, mlir::AsmState &asm_state,
-    llvm::raw_ostream &os) {
+    mlir::Operation* op, size_t num_indents, mlir::AsmState& asm_state,
+    llvm::raw_ostream& os) {
   size_t num_results = op->getNumResults();
   size_t num_operands = op->getNumOperands();
   size_t num_attributes = op->getAttrs().size();
@@ -725,14 +827,14 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintOp(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintRegion(
-    mlir::Region &region, size_t num_indents, mlir::AsmState &asm_state,
-    llvm::raw_ostream &os) {
+    mlir::Region& region, size_t num_indents, mlir::AsmState& asm_state,
+    llvm::raw_ostream& os) {
   os << "{\n";
   {
     llvm::SaveAndRestore<size_t> num_indents_in_region{num_indents,
                                                        num_indents + 2};
 
-    for (mlir::Block &block : region.getBlocks()) {
+    for (mlir::Block& block : region.getBlocks()) {
       os.indent(num_indents);
       block.printAsOperand(os, asm_state);
       os << ":\n";
@@ -742,7 +844,7 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintRegion(
 
       PrintAtBlockEntry(block, num_indents, os);
 
-      for (mlir::Operation &op : block) {
+      for (mlir::Operation& op : block) {
         os.indent(num_indents);
         PrintOp(&op, num_indents, asm_state, os);
         os << "\n";
@@ -755,8 +857,8 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintRegion(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 bool JsirDataFlowAnalysis<ValueT, StateT, direction>::IsEntryBlock(
-    mlir::Block *block) {
-  mlir::Operation *parent_op = block->getParentOp();
+    mlir::Block* block) {
+  mlir::Operation* parent_op = block->getParentOp();
 
   if (llvm::isa<JsirProgramOp>(parent_op) || llvm::isa<JsirFileOp>(parent_op) ||
       llvm::isa<JsirFunctionDeclarationOp>(parent_op) ||
@@ -784,7 +886,7 @@ bool JsirDataFlowAnalysis<ValueT, StateT, direction>::IsEntryBlock(
 //   JsirExecutable.
 template <typename ValueT, typename StateT, DataflowDirection direction>
 mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
-    mlir::Operation *op) {
+    mlir::Operation* op) {
   // The op depends on its input operands.
   for (mlir::Value operand : op->getOperands()) {
     JsirStateRef<ValueT> operand_state_ref = GetStateAt(operand);
@@ -808,6 +910,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = After(branch),
         .to = Before(branch.getDest()),
+        .owner = branch.getDest(),
         .pred_values = branch.getDestOperands(),
         .succ_values = branch.getDest()->getArguments(),
     });
@@ -818,10 +921,8 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = After(cond_branch),
         .to = Before(cond_branch.getTrueDest()),
-        .liveness_info =
-            std::tuple{cond_branch.getCondition(),
-                       mlir::BoolAttr::get(cond_branch.getContext(), true),
-                       LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = cond_branch.getTrueDest(),
+        .liveness_info = LiveIfTruthyOrUnknown(cond_branch.getCondition()),
         .pred_values = cond_branch.getTrueDestOperands(),
         .succ_values = cond_branch.getTrueDest()->getArguments(),
     });
@@ -829,10 +930,8 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = After(cond_branch),
         .to = Before(cond_branch.getFalseDest()),
-        .liveness_info =
-            std::tuple{cond_branch.getCondition(),
-                       mlir::BoolAttr::get(cond_branch.getContext(), false),
-                       LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = cond_branch.getFalseDest(),
+        .liveness_info = LiveIfFalsyOrUnknown(cond_branch.getCondition()),
         .pred_values = cond_branch.getFalseDestOperands(),
         .succ_values = cond_branch.getFalseDest()->getArguments(),
     });
@@ -848,8 +947,8 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       llvm::isa<JsirObjectPatternRefOp>(op) ||
       llvm::isa<JsirClassPrivatePropertyOp>(op) ||
       llvm::isa<JsirClassBodyOp>(op) ||
-      llvm::isa<JsirClassDeclarationOp>(op) /* TODO Should this be here? */ ||
-      llvm::isa<JsirClassExpressionOp>(op) ||
+      llvm::isa<JsirClassDeclarationOp>(op) /* TODO Should this be here? */
+      || llvm::isa<JsirClassExpressionOp>(op) ||
       llvm::isa<JsirExportNamedDeclarationOp>(op)) {
     if (llvm::isa<JshirWithStatementOp>(op)) {
       maybe_jump_targets = {
@@ -862,18 +961,18 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       MaybeEmplaceCfgEdges({
           .from = Before(op),
           .to = Before(op->getRegion(0)),
-          .owner = op,
+          .owner = &*op,
       });
       MaybeEmplaceCfgEdges({
           .from = After(op->getRegion(0)),
           .to = After(op),
-          .owner = op,
+          .owner = &*op,
       });
     } else {
       MaybeEmplaceCfgEdges({
           .from = Before(op),
           .to = After(op),
-          .owner = op,
+          .owner = &*op,
       });
     }
   }
@@ -898,42 +997,33 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(if_stmt),
         .to = Before(if_stmt.getConsequent()),
-        .owner = if_stmt,
-        .liveness_info =
-            std::tuple{if_stmt.getTest(),
-                       mlir::BoolAttr::get(if_stmt.getContext(), true),
-                       LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*if_stmt,
+        .liveness_info = LiveIfTruthyOrUnknown(if_stmt.getTest()),
     });
     MaybeEmplaceCfgEdges({
         .from = After(if_stmt.getConsequent()),
         .to = After(if_stmt),
-        .owner = if_stmt,
+        .owner = &*if_stmt,
     });
 
     if (!if_stmt.getAlternate().empty()) {
       MaybeEmplaceCfgEdges({
           .from = Before(if_stmt),
           .to = Before(if_stmt.getAlternate()),
-          .owner = if_stmt,
-          .liveness_info =
-              std::tuple{if_stmt.getTest(),
-                         mlir::BoolAttr::get(if_stmt.getContext(), false),
-                         LivenessKind::kLiveIfEqualOrUnknown},
+          .owner = &*if_stmt,
+          .liveness_info = LiveIfFalsyOrUnknown(if_stmt.getTest()),
       });
       MaybeEmplaceCfgEdges({
           .from = After(if_stmt.getAlternate()),
           .to = After(if_stmt),
-          .owner = if_stmt,
+          .owner = &*if_stmt,
       });
     } else {
       MaybeEmplaceCfgEdges({
           .from = Before(if_stmt),
           .to = After(if_stmt),
-          .owner = if_stmt,
-          .liveness_info =
-              std::tuple{if_stmt.getTest(),
-                         mlir::BoolAttr::get(if_stmt.getContext(), false),
-                         LivenessKind::kLiveIfEqualOrUnknown},
+          .owner = &*if_stmt,
+          .liveness_info = LiveIfFalsyOrUnknown(if_stmt.getTest()),
       });
     }
   }
@@ -953,17 +1043,17 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(block_stmt),
         .to = Before(block_stmt.getDirectives()),
-        .owner = block_stmt,
+        .owner = &*block_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(block_stmt.getDirectives()),
         .to = Before(block_stmt.getBody()),
-        .owner = block_stmt,
+        .owner = &*block_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(block_stmt.getBody()),
         .to = After(block_stmt),
-        .owner = block_stmt,
+        .owner = &*block_stmt,
     });
   }
 
@@ -987,32 +1077,26 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(while_stmt),
         .to = Before(while_stmt.getTest()),
-        .owner = while_stmt,
+        .owner = &*while_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(while_stmt.getTest()),
         .to = Before(while_stmt.getBody()),
-        .owner = while_stmt,
-        .liveness_info =
-            std::tuple{
-                GetExprRegionEndValuesFromRegion(while_stmt.getTest())[0],
-                mlir::BoolAttr::get(while_stmt.getContext(), true),
-                LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*while_stmt,
+        .liveness_info = LiveIfTruthyOrUnknown(
+            GetExprRegionEndValuesFromRegion(while_stmt.getTest())[0]),
     });
     MaybeEmplaceCfgEdges({
         .from = After(while_stmt.getBody()),
         .to = Before(while_stmt.getTest()),
-        .owner = while_stmt,
+        .owner = &*while_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(while_stmt.getTest()),
         .to = After(while_stmt),
-        .owner = while_stmt,
-        .liveness_info =
-            std::tuple{
-                GetExprRegionEndValuesFromRegion(while_stmt.getTest())[0],
-                mlir::BoolAttr::get(while_stmt.getContext(), false),
-                LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*while_stmt,
+        .liveness_info = LiveIfFalsyOrUnknown(
+            GetExprRegionEndValuesFromRegion(while_stmt.getTest())[0]),
     });
   }
 
@@ -1037,32 +1121,26 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(do_while_stmt),
         .to = Before(do_while_stmt.getBody()),
-        .owner = do_while_stmt,
+        .owner = &*do_while_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(do_while_stmt.getBody()),
         .to = Before(do_while_stmt.getTest()),
-        .owner = do_while_stmt,
+        .owner = &*do_while_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(do_while_stmt.getTest()),
         .to = Before(do_while_stmt.getBody()),
-        .owner = do_while_stmt,
-        .liveness_info =
-            std::tuple{
-                GetExprRegionEndValuesFromRegion(do_while_stmt.getTest())[0],
-                mlir::BoolAttr::get(do_while_stmt.getContext(), true),
-                LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*do_while_stmt,
+        .liveness_info = LiveIfTruthyOrUnknown(
+            GetExprRegionEndValuesFromRegion(do_while_stmt.getTest())[0]),
     });
     MaybeEmplaceCfgEdges({
         .from = After(do_while_stmt.getTest()),
         .to = After(do_while_stmt),
-        .owner = do_while_stmt,
-        .liveness_info =
-            std::tuple{
-                GetExprRegionEndValuesFromRegion(do_while_stmt.getTest())[0],
-                mlir::BoolAttr::get(do_while_stmt.getContext(), false),
-                LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*do_while_stmt,
+        .liveness_info = LiveIfFalsyOrUnknown(
+            GetExprRegionEndValuesFromRegion(do_while_stmt.getTest())[0]),
     });
   }
 
@@ -1091,7 +1169,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
             &GetForStatementContinueTargetRegion(for_stmt).front()),
     };
     // Emplace an edge into the first non-empty region of the for-statement.
-    mlir::Region &first_region =
+    mlir::Region& first_region =
         !for_stmt.getInit().empty()
             ? for_stmt.getInit()
             : (!for_stmt.getTest().empty() ? for_stmt.getTest()
@@ -1099,17 +1177,17 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(for_stmt),
         .to = Before(first_region),
-        .owner = for_stmt,
+        .owner = &*for_stmt,
     });
 
     if (!for_stmt.getInit().empty()) {
-      mlir::Region &successor =
+      mlir::Region& successor =
           !for_stmt.getTest().empty() ? for_stmt.getTest() : for_stmt.getBody();
 
       MaybeEmplaceCfgEdges({
           .from = After(for_stmt.getInit()),
           .to = Before(successor),
-          .owner = for_stmt,
+          .owner = &*for_stmt,
       });
     }
 
@@ -1117,22 +1195,16 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       MaybeEmplaceCfgEdges({
           .from = After(for_stmt.getTest()),
           .to = Before(for_stmt.getBody()),
-          .owner = for_stmt,
-          .liveness_info =
-              std::tuple{
-                  GetExprRegionEndValuesFromRegion(for_stmt.getTest())[0],
-                  mlir::BoolAttr::get(for_stmt.getContext(), true),
-                  LivenessKind::kLiveIfEqualOrUnknown},
+          .owner = &*for_stmt,
+          .liveness_info = LiveIfTruthyOrUnknown(
+              GetExprRegionEndValuesFromRegion(for_stmt.getTest())[0]),
       });
       MaybeEmplaceCfgEdges({
           .from = After(for_stmt.getTest()),
           .to = After(for_stmt),
-          .owner = for_stmt,
-          .liveness_info =
-              std::tuple{
-                  GetExprRegionEndValuesFromRegion(for_stmt.getTest())[0],
-                  mlir::BoolAttr::get(for_stmt.getContext(), false),
-                  LivenessKind::kLiveIfEqualOrUnknown},
+          .owner = &*for_stmt,
+          .liveness_info = LiveIfFalsyOrUnknown(
+              GetExprRegionEndValuesFromRegion(for_stmt.getTest())[0]),
       });
     }
 
@@ -1140,18 +1212,18 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       MaybeEmplaceCfgEdges({
           .from = After(for_stmt.getBody()),
           .to = Before(GetForStatementContinueTargetRegion(for_stmt)),
-          .owner = for_stmt,
+          .owner = &*for_stmt,
       });
     }
 
     if (!for_stmt.getUpdate().empty()) {
-      mlir::Region &successor =
+      mlir::Region& successor =
           !for_stmt.getTest().empty() ? for_stmt.getTest() : for_stmt.getBody();
 
       MaybeEmplaceCfgEdges({
           .from = After(for_stmt.getUpdate()),
           .to = Before(successor),
-          .owner = for_stmt,
+          .owner = &*for_stmt,
       });
     }
   }
@@ -1174,17 +1246,17 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(for_in_stmt),
         .to = Before(for_in_stmt.getBody()),
-        .owner = for_in_stmt,
+        .owner = &*for_in_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_in_stmt.getBody()),
         .to = Before(for_in_stmt.getBody()),
-        .owner = for_in_stmt,
+        .owner = &*for_in_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_in_stmt.getBody()),
         .to = After(for_in_stmt),
-        .owner = for_in_stmt,
+        .owner = &*for_in_stmt,
     });
   }
 
@@ -1206,17 +1278,17 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(for_of_stmt),
         .to = Before(for_of_stmt.getBody()),
-        .owner = for_of_stmt,
+        .owner = &*for_of_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_of_stmt.getBody()),
         .to = Before(for_of_stmt.getBody()),
-        .owner = for_of_stmt,
+        .owner = &*for_of_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_of_stmt.getBody()),
         .to = After(for_of_stmt),
-        .owner = for_of_stmt,
+        .owner = &*for_of_stmt,
     });
   }
 
@@ -1250,23 +1322,21 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(logical_expr),
         .to = After(logical_expr),
-        .owner = logical_expr,
-        .liveness_info = std::tuple{left_value, comparison_attr,
-                                    LivenessKind::kLiveIfNotEqualOrUnknown},
+        .owner = &*logical_expr,
+        .liveness_info = LiveIfNotEqualOrUnknown(left_value, comparison_attr),
         .pred_values = mlir::ValueRange{left_value},
         .succ_values = logical_expr->getResults(),
     });
     MaybeEmplaceCfgEdges({
         .from = Before(logical_expr),
         .to = Before(logical_expr.getRight()),
-        .owner = logical_expr,
-        .liveness_info = std::tuple{left_value, comparison_attr,
-                                    LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*logical_expr,
+        .liveness_info = LiveIfEqualOrUnknown(left_value, comparison_attr),
     });
     MaybeEmplaceCfgEdges({
         .from = After(logical_expr.getRight()),
         .to = After(logical_expr),
-        .owner = logical_expr,
+        .owner = &*logical_expr,
         .pred_values = GetExprRegionEndValues,
         .succ_values = logical_expr->getResults(),
     });
@@ -1287,32 +1357,26 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(conditional_expr),
         .to = Before(conditional_expr.getConsequent()),
-        .owner = conditional_expr,
-        .liveness_info =
-            std::tuple{conditional_expr.getTest(),
-                       mlir::BoolAttr::get(conditional_expr.getContext(), true),
-                       LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*conditional_expr,
+        .liveness_info = LiveIfTruthyOrUnknown(conditional_expr.getTest()),
     });
     MaybeEmplaceCfgEdges({
         .from = Before(conditional_expr),
         .to = Before(conditional_expr.getAlternate()),
-        .owner = conditional_expr,
-        .liveness_info = std::tuple{conditional_expr.getTest(),
-                                    mlir::BoolAttr::get(
-                                        conditional_expr.getContext(), false),
-                                    LivenessKind::kLiveIfEqualOrUnknown},
+        .owner = &*conditional_expr,
+        .liveness_info = LiveIfFalsyOrUnknown(conditional_expr.getTest()),
     });
     MaybeEmplaceCfgEdges({
         .from = After(conditional_expr.getConsequent()),
         .to = After(conditional_expr),
-        .owner = conditional_expr,
+        .owner = &*conditional_expr,
         .pred_values = GetExprRegionEndValues,
         .succ_values = conditional_expr->getResults(),
     });
     MaybeEmplaceCfgEdges({
         .from = After(conditional_expr.getAlternate()),
         .to = After(conditional_expr),
-        .owner = conditional_expr,
+        .owner = &*conditional_expr,
         .pred_values = GetExprRegionEndValues,
         .succ_values = conditional_expr->getResults(),
     });
@@ -1320,7 +1384,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
 
   if (auto break_stmt = llvm::dyn_cast<JshirBreakStatementOp>(op);
       break_stmt != nullptr) {
-    absl::StatusOr<mlir::ProgramPoint *> break_target;
+    absl::StatusOr<mlir::ProgramPoint*> break_target;
 
     JsirIdentifierAttr label = break_stmt.getLabelAttr();
     if (label == nullptr) {
@@ -1333,14 +1397,14 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       MaybeEmplaceCfgEdges({
           .from = Before(break_stmt),
           .to = {break_target.value()},
-          .owner = break_stmt,
+          .owner = &*break_stmt,
       });
     }
   }
 
   if (auto continue_stmt = llvm::dyn_cast<JshirContinueStatementOp>(op);
       continue_stmt != nullptr) {
-    absl::StatusOr<mlir::ProgramPoint *> continue_target;
+    absl::StatusOr<mlir::ProgramPoint*> continue_target;
 
     JsirIdentifierAttr label = continue_stmt.getLabelAttr();
     if (label == nullptr) {
@@ -1353,7 +1417,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       MaybeEmplaceCfgEdges({
           .from = Before(continue_stmt),
           .to = {continue_target.value()},
-          .owner = continue_stmt,
+          .owner = &*continue_stmt,
       });
     }
   }
@@ -1376,24 +1440,24 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(try_stmt),
         .to = Before(try_stmt.getBlock()),
-        .owner = try_stmt,
+        .owner = &*try_stmt,
     });
     if (!try_stmt.getFinalizer().empty()) {
       MaybeEmplaceCfgEdges({
           .from = After(try_stmt.getBlock()),
           .to = Before(try_stmt.getFinalizer()),
-          .owner = try_stmt,
+          .owner = &*try_stmt,
       });
       MaybeEmplaceCfgEdges({
           .from = After(try_stmt.getFinalizer()),
           .to = After(try_stmt),
-          .owner = try_stmt,
+          .owner = &*try_stmt,
       });
     } else {
       MaybeEmplaceCfgEdges({
           .from = After(try_stmt.getBlock()),
           .to = After(try_stmt),
-          .owner = try_stmt,
+          .owner = &*try_stmt,
       });
     }
   }
@@ -1415,12 +1479,12 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     MaybeEmplaceCfgEdges({
         .from = Before(switch_stmt),
         .to = Before(switch_stmt.getCases()),
-        .owner = switch_stmt,
+        .owner = &*switch_stmt,
     });
     MaybeEmplaceCfgEdges({
         .from = After(switch_stmt.getCases()),
         .to = After(switch_stmt),
-        .owner = switch_stmt,
+        .owner = &*switch_stmt,
     });
   }
 
@@ -1440,54 +1504,50 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       MaybeEmplaceCfgEdges({
           .from = Before(switch_case),
           .to = Before(switch_case.getConsequent()),
-          .owner = switch_case,
+          .owner = &*switch_case,
       });
     } else {
       MaybeEmplaceCfgEdges({
           .from = Before(switch_case),
           .to = Before(switch_case.getTest()),
-          .owner = switch_case,
+          .owner = &*switch_case,
       });
       MaybeEmplaceCfgEdges({
           .from = After(switch_case.getTest()),
           .to = Before(switch_case.getConsequent()),
-          .owner = switch_case,
-          .liveness_info =
-              std::tuple{
-                  switch_case->getParentOfType<JshirSwitchStatementOp>()
-                      .getDiscriminant(),
-                  GetExprRegionEndValuesFromRegion(switch_case.getTest())[0],
-                  LivenessKind::kLiveIfEqualOrUnknown},
+          .owner = &*switch_case,
+          .liveness_info = LiveIfEqualOrUnknown(
+              switch_case->getParentOfType<JshirSwitchStatementOp>()
+                  .getDiscriminant(),
+              GetExprRegionEndValuesFromRegion(switch_case.getTest())[0]),
       });
 
       MaybeEmplaceCfgEdges({
           .from = After(switch_case.getTest()),
           .to = After(switch_case),
-          .owner = switch_case,
-          .liveness_info =
-              std::tuple{
-                  switch_case->getParentOfType<JshirSwitchStatementOp>()
-                      .getDiscriminant(),
-                  GetExprRegionEndValuesFromRegion(switch_case.getTest())[0],
-                  LivenessKind::kLiveIfNotEqualOrUnknown},
+          .owner = &*switch_case,
+          .liveness_info = LiveIfNotEqualOrUnknown(
+              switch_case->getParentOfType<JshirSwitchStatementOp>()
+                  .getDiscriminant(),
+              GetExprRegionEndValuesFromRegion(switch_case.getTest())[0]),
       });
     }
 
     // If this is not the last case, we need fall-through to the next case.
-    if (auto *next_node = switch_case->getNextNode(); next_node != nullptr) {
+    if (auto* next_node = switch_case->getNextNode(); next_node != nullptr) {
       if (auto successor_case = llvm::dyn_cast<JshirSwitchCaseOp>(next_node);
           successor_case != nullptr) {
         MaybeEmplaceCfgEdges({
             .from = After(switch_case.getConsequent()),
             .to = Before(successor_case.getConsequent()),
-            .owner = switch_case,
+            .owner = &*switch_case,
         });
       }
     } else {
       MaybeEmplaceCfgEdges({
           .from = After(switch_case.getConsequent()),
           .to = After(switch_case),
-          .owner = switch_case,
+          .owner = &*switch_case,
       });
     }
   }
@@ -1498,8 +1558,8 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   auto with_label = WithLabel(op);
 
   // Recursively initialize.
-  for (mlir::Region &region : op->getRegions()) {
-    for (mlir::Block &block : region.getBlocks()) {
+  for (mlir::Region& region : op->getRegions()) {
+    for (mlir::Block& block : region.getBlocks()) {
       InitializeBlock(&block);
     }
   }
@@ -1509,9 +1569,9 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::InitializeBlock(
-    mlir::Block *block) {
+    mlir::Block* block) {
   // Initialize all inner ops.
-  for (mlir::Operation &op : *block) {
+  for (mlir::Operation& op : *block) {
     initialize(&op);
   }
   InitializeBlockDependencies(block);
@@ -1525,7 +1585,7 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::InitializeBlock(
         mlir::DataFlowSolver::WorkItem{getProgramPointBefore(block), this});
   } else if constexpr (direction == DataflowDirection::kBackward) {
     // The definition below is copied from https://reviews.llvm.org/D154713.
-    auto is_exit_block = [](mlir::Block *b) {
+    auto is_exit_block = [](mlir::Block* b) {
       // Treat empty and terminator-less blocks as exit blocks.
       if (b->empty() ||
           !b->back().mightHaveTrait<mlir::OpTrait::IsTerminator>())
@@ -1534,7 +1594,7 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::InitializeBlock(
       // There may be a weird case where a terminator may be transferring
       // control either to the parent or to another block, so exit blocks and
       // successors are not mutually exclusive.
-      mlir::Operation *terminator = b->getTerminator();
+      mlir::Operation* terminator = b->getTerminator();
       return terminator && terminator->hasTrait<mlir::OpTrait::ReturnLike>();
     };
 
@@ -1550,12 +1610,12 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::InitializeBlock(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::
-    InitializeBlockDependencies(mlir::Block *block) {
+    InitializeBlockDependencies(mlir::Block* block) {
   if constexpr (direction == DataflowDirection::kForward) {
     // For each block, we should update its successor blocks when the state
     // at the end of the block updates. Thus, we enumerate each predecessor's
     // end state and link it to the block.
-    for (mlir::Block *pred : block->getPredecessors()) {
+    for (mlir::Block* pred : block->getPredecessors()) {
       JsirStateRef<StateT> pred_state_ref = GetStateAtEndOf(pred);
       pred_state_ref.AddDependent(getProgramPointBefore(block));
     }
@@ -1563,7 +1623,7 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::
     // For each block, we should update its predecessor blocks when the state
     // at the end of the block updates. Thus, we enumerate each successor's
     // end state and link it to the block.
-    for (mlir::Block *succ : block->getSuccessors()) {
+    for (mlir::Block* succ : block->getSuccessors()) {
       JsirStateRef<StateT> succ_state_ref = GetStateAtEntryOf(succ);
       succ_state_ref.AddDependent(getProgramPointBefore(block));
     }
@@ -1572,7 +1632,7 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::visit(
-    mlir::ProgramPoint *point) {
+    mlir::ProgramPoint* point) {
   if (!point->isBlockStart()) {
     VisitOp(point->getPrevOp());
   } else if (!point->isNull()) {
@@ -1583,17 +1643,17 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::visit(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::VisitOp(
-    mlir::Operation *op) {
+    mlir::Operation* op) {
   if constexpr (direction == DataflowDirection::kForward) {
     JsirStateRef<StateT> before_state_ref = GetStateBefore(op);
-    const StateT *before = &before_state_ref.value();
+    const StateT* before = &before_state_ref.value();
 
     JsirStateRef after_state_ref = GetStateAfter(op);
 
     VisitOp(op, before, after_state_ref);
   } else if constexpr (direction == DataflowDirection::kBackward) {
     JsirStateRef<StateT> after_state_ref = GetStateAfter(op);
-    const StateT *after = &after_state_ref.value();
+    const StateT* after = &after_state_ref.value();
 
     JsirStateRef before_state_ref = GetStateBefore(op);
 
@@ -1603,15 +1663,15 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::VisitOp(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::VisitBlock(
-    mlir::Block *block) {
-  for (auto *edge : block_to_cfg_edges_[block]) {
+    mlir::Block* block) {
+  for (auto* edge : block_to_cfg_edges_[block]) {
     VisitCfgEdge(edge);
   }
 }
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintAtBlockEntry(
-    mlir::Block &block, size_t num_indents, llvm::raw_ostream &os) {
+    mlir::Block& block, size_t num_indents, llvm::raw_ostream& os) {
   os.indent(num_indents + 2);
   os << "// ";
   GetStateAtEntryOf(&block).value().print(os);
@@ -1626,8 +1686,8 @@ JsirDataFlowAnalysis<ValueT, StateT, direction>::GetStateAt(mlir::Value value) {
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintAfterOp(
-    mlir::Operation *op, size_t num_indents, mlir::AsmState &asm_state,
-    llvm::raw_ostream &os) {
+    mlir::Operation* op, size_t num_indents, mlir::AsmState& asm_state,
+    llvm::raw_ostream& os) {
   for (mlir::Value result : op->getResults()) {
     auto result_state_ref = GetStateAt(result);
 
@@ -1648,9 +1708,9 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::PrintAfterOp(
 template <typename ValueT, typename StateT, DataflowDirection direction>
 typename JsirDataFlowAnalysis<ValueT, StateT, direction>::ValueStateRefs
 JsirDataFlowAnalysis<ValueT, StateT, direction>::GetValueStateRefs(
-    mlir::Operation *op) {
+    mlir::Operation* op) {
   if constexpr (direction == DataflowDirection::kForward) {
-    std::vector<const ValueT *> operands;
+    std::vector<const ValueT*> operands;
     for (mlir::Value operand : op->getOperands()) {
       auto operand_state_ref = GetStateAt(operand);
       operands.push_back(&operand_state_ref.value());
@@ -1668,7 +1728,7 @@ JsirDataFlowAnalysis<ValueT, StateT, direction>::GetValueStateRefs(
         .outputs = std::move(result_state_refs),
     };
   } else if constexpr (direction == DataflowDirection::kBackward) {
-    std::vector<const ValueT *> results;
+    std::vector<const ValueT*> results;
     for (size_t i = 0; i != op->getNumResults(); ++i) {
       mlir::Value result = op->getResult(i);
       auto result_state_ref = GetStateAt(result);
@@ -1689,7 +1749,7 @@ JsirDataFlowAnalysis<ValueT, StateT, direction>::GetValueStateRefs(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::VisitOp(
-    mlir::Operation *op, const StateT *input, JsirStateRef<StateT> output) {
+    mlir::Operation* op, const StateT* input, JsirStateRef<StateT> output) {
   if constexpr (direction == DataflowDirection::kForward) {
     auto [operands, result_state_refs] = GetValueStateRefs(op);
     return VisitOp(op, operands, input, result_state_refs, output);
@@ -1701,7 +1761,7 @@ void JsirDataFlowAnalysis<ValueT, StateT, direction>::VisitOp(
 
 template <typename ValueT, typename StateT, DataflowDirection direction>
 void JsirDataFlowAnalysis<ValueT, StateT, direction>::VisitCfgEdge(
-    JsirGeneralCfgEdge *edge) {
+    JsirGeneralCfgEdge* edge) {
   // Match arguments from the predecessor to the successor.
   for (const auto [pred_value, succ_value] :
        llvm::zip(edge->getPredValues(), edge->getSuccValues())) {

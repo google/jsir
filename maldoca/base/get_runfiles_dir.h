@@ -22,6 +22,7 @@
 namespace maldoca {
 
 std::string GetDataDependencyFilepath(absl::string_view path);
+std::string GetRunfilesDir();
 
 }  // namespace maldoca
 

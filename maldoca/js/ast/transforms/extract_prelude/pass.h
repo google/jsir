@@ -15,12 +15,38 @@
 #ifndef MALDOCA_JS_AST_ANALYSES_EXTRACT_PRELUDE_ANALYSIS_H_
 #define MALDOCA_JS_AST_ANALYSES_EXTRACT_PRELUDE_ANALYSIS_H_
 
-#include <string>
+#include <cstddef>
+
+#include "absl/container/flat_hash_set.h"
+#include "absl/functional/function_ref.h"
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/driver/driver.pb.h"
 
 namespace maldoca {
+
+absl::Status ForEachTopLevelNode(
+    const JsFile& ast, absl::FunctionRef<absl::Status(const JsNode&)> callback);
+
+// Removes parts of the code corresponding to the AST nodes at the given
+// indices from the AST, and returns those parts as a string.
+//
+// Parameters:
+// - original_source: The original source code that source ranges in the AST
+//                    refer to.
+// - indices: The indices of the AST nodes to remove.
+// - ast: The AST to transform. Note that `ast` does not need to be equivalent
+//        to `original_source`.
+//
+// Returns:
+// - The extracted prelude code.
+//
+// Modifies:
+// - ast: The AST will be modified in place.
+JsirAnalysisConfig::DynamicConstantPropagation ExtractPreludeByIndices(
+    absl::string_view original_source,
+    const absl::flat_hash_set<size_t>& indices, JsFile& ast);
 
 // Removes parts of the code wrapped with `// exec:begin` and `// exec:end`
 // comments from the AST, and returns those parts as a string.
@@ -69,8 +95,13 @@ namespace maldoca {
 //
 // Modifies:
 // - ast: The AST will be modified in place.
-JsirAnalysisConfig::DynamicConstantPropagation ExtractPrelude(
-    absl::string_view original_source, JsFile &ast);
+JsirAnalysisConfig::DynamicConstantPropagation ExtractPreludeByAnnotations(
+    absl::string_view original_source, JsFile& ast);
+
+JsirAnalysisConfig::DynamicConstantPropagation
+ExtractPreludeByIndicesAndAnnotations(
+    absl::string_view original_source,
+    const absl::flat_hash_set<size_t>& indices, JsFile& ast);
 
 }  // namespace maldoca
 

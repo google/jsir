@@ -100,20 +100,6 @@ gentbl_cc_library(
             ],
             "jshir_dialect.cc.inc",
         ),
-        (
-            [
-                "-gen-dialect-decls",
-                "-dialect=jslir",
-            ],
-            "jslir_dialect.h.inc",
-        ),
-        (
-            [
-                "-gen-dialect-defs",
-                "-dialect=jslir",
-            ],
-            "jslir_dialect.cc.inc",
-        ),
     ],
     tblgen = "@llvm-project//mlir:mlir-tblgen",
     td_file = "jsir_attrs.td",
@@ -246,20 +232,6 @@ gentbl_cc_library(
             ],
             "jshir_ops.cc.inc",
         ),
-        (
-            [
-                "-gen-op-decls",
-                "-op-include-regex=jslir",
-            ],
-            "jslir_ops.h.inc",
-        ),
-        (
-            [
-                "-gen-op-defs",
-                "-op-include-regex=jslir",
-            ],
-            "jslir_ops.cc.inc",
-        ),
     ],
     tblgen = "@llvm-project//mlir:mlir-tblgen",
     td_file = "jsir_ops.td",
@@ -274,7 +246,6 @@ cc_library(
         "ir.cc",
         "jshir_ops.cc",
         "jsir_ops.cc",
-        "jslir_ops.cc",
     ],
     hdrs = ["ir.h"],
     deps = [
@@ -338,16 +309,6 @@ cc_library(
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
-        "@llvm-project//llvm:Support",
-        "@llvm-project//mlir:IR",
-    ],
-)
-
-cc_library(
-    name = "jslir_visitor",
-    hdrs = ["jslir_visitor.h"],
-    deps = [
-        ":ir",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
     ],

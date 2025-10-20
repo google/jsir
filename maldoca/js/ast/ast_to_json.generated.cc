@@ -95,14 +95,26 @@ void JsSourceLocation::Serialize(std::ostream& os) const {
 
 void JsComment::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
-  os << "\"loc\":";
-  loc_->Serialize(os);
+  if (loc_.has_value()) {
+    os << "\"loc\":";
+    loc_.value()->Serialize(os);
+  } else {
+    os << "\"loc\":" << "null";
+  }
   MaybeAddComma(os, needs_comma);
   os << "\"value\":" << (nlohmann::json(value_)).dump();
   MaybeAddComma(os, needs_comma);
-  os << "\"start\":" << (nlohmann::json(start_)).dump();
+  if (start_.has_value()) {
+    os << "\"start\":" << (nlohmann::json(start_.value())).dump();
+  } else {
+    os << "\"start\":" << "null";
+  }
   MaybeAddComma(os, needs_comma);
-  os << "\"end\":" << (nlohmann::json(end_)).dump();
+  if (end_.has_value()) {
+    os << "\"end\":" << (nlohmann::json(end_.value())).dump();
+  } else {
+    os << "\"end\":" << "null";
+  }
 }
 
 // =============================================================================
@@ -270,17 +282,10 @@ void JsInterpreterDirective::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
-// JsStatement
+// JsProgramBodyElement
 // =============================================================================
 
-void JsStatement::SerializeFields(std::ostream& os, bool &needs_comma) const {
-}
-
-// =============================================================================
-// JsModuleDeclaration
-// =============================================================================
-
-void JsModuleDeclaration::SerializeFields(std::ostream& os, bool &needs_comma) const {
+void JsProgramBodyElement::SerializeFields(std::ostream& os, bool &needs_comma) const {
 }
 
 // =============================================================================
@@ -371,18 +376,7 @@ void JsProgram::SerializeFields(std::ostream& os, bool &needs_comma) const {
     bool needs_comma = false;
     for (const auto& element : body_) {
       MaybeAddComma(os, needs_comma);
-      switch (element.index()) {
-        case 0: {
-          std::get<0>(element)->Serialize(os);
-          break;
-        }
-        case 1: {
-          std::get<1>(element)->Serialize(os);
-          break;
-        }
-        default:
-          LOG(FATAL) << "Unreachable code.";
-      }
+      element->Serialize(os);
     }
   }
   os << "]";
@@ -783,6 +777,13 @@ void JsFunction::SerializeFields(std::ostream& os, bool &needs_comma) const {
 }
 
 // =============================================================================
+// JsStatement
+// =============================================================================
+
+void JsStatement::SerializeFields(std::ostream& os, bool &needs_comma) const {
+}
+
+// =============================================================================
 // JsBlockStatement
 // =============================================================================
 
@@ -816,6 +817,7 @@ void JsBlockStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"BlockStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsBlockStatement::SerializeFields(os, needs_comma);
   }
@@ -849,6 +851,7 @@ void JsExpressionStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ExpressionStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsExpressionStatement::SerializeFields(os, needs_comma);
   }
@@ -869,6 +872,7 @@ void JsEmptyStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"EmptyStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsEmptyStatement::SerializeFields(os, needs_comma);
   }
@@ -889,6 +893,7 @@ void JsDebuggerStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"DebuggerStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsDebuggerStatement::SerializeFields(os, needs_comma);
   }
@@ -915,6 +920,7 @@ void JsWithStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"WithStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsWithStatement::SerializeFields(os, needs_comma);
   }
@@ -942,6 +948,7 @@ void JsReturnStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ReturnStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsReturnStatement::SerializeFields(os, needs_comma);
   }
@@ -968,6 +975,7 @@ void JsLabeledStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"LabeledStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsLabeledStatement::SerializeFields(os, needs_comma);
   }
@@ -995,6 +1003,7 @@ void JsBreakStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"BreakStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsBreakStatement::SerializeFields(os, needs_comma);
   }
@@ -1022,6 +1031,7 @@ void JsContinueStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ContinueStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsContinueStatement::SerializeFields(os, needs_comma);
   }
@@ -1055,6 +1065,7 @@ void JsIfStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"IfStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsIfStatement::SerializeFields(os, needs_comma);
   }
@@ -1124,6 +1135,7 @@ void JsSwitchStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"SwitchStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsSwitchStatement::SerializeFields(os, needs_comma);
   }
@@ -1147,6 +1159,7 @@ void JsThrowStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ThrowStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsThrowStatement::SerializeFields(os, needs_comma);
   }
@@ -1213,6 +1226,7 @@ void JsTryStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"TryStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsTryStatement::SerializeFields(os, needs_comma);
   }
@@ -1239,6 +1253,7 @@ void JsWhileStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"WhileStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsWhileStatement::SerializeFields(os, needs_comma);
   }
@@ -1265,6 +1280,7 @@ void JsDoWhileStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"DoWhileStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsDoWhileStatement::SerializeFields(os, needs_comma);
   }
@@ -1333,6 +1349,7 @@ void JsVariableDeclaration::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"VariableDeclaration\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsDeclaration::SerializeFields(os, needs_comma);
     JsVariableDeclaration::SerializeFields(os, needs_comma);
@@ -1390,6 +1407,7 @@ void JsForStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ForStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsForStatement::SerializeFields(os, needs_comma);
   }
@@ -1431,6 +1449,7 @@ void JsForInStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ForInStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsForInStatement::SerializeFields(os, needs_comma);
   }
@@ -1474,6 +1493,7 @@ void JsForOfStatement::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ForOfStatement\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsForOfStatement::SerializeFields(os, needs_comma);
   }
@@ -1496,6 +1516,7 @@ void JsFunctionDeclaration::Serialize(std::ostream& os) const {
     JsNode::SerializeFields(os, needs_comma);
     JsFunction::SerializeFields(os, needs_comma);
     JsBlockStatementFunction::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsDeclaration::SerializeFields(os, needs_comma);
     JsFunctionDeclaration::SerializeFields(os, needs_comma);
@@ -2813,6 +2834,7 @@ void JsClassDeclaration::Serialize(std::ostream& os) const {
     os << "\"type\":\"ClassDeclaration\"";
     JsNode::SerializeFields(os, needs_comma);
     JsClass::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsStatement::SerializeFields(os, needs_comma);
     JsDeclaration::SerializeFields(os, needs_comma);
     JsClassDeclaration::SerializeFields(os, needs_comma);
@@ -2872,6 +2894,13 @@ void JsMetaProperty::Serialize(std::ostream& os) const {
     JsMetaProperty::SerializeFields(os, needs_comma);
   }
   os << "}";
+}
+
+// =============================================================================
+// JsModuleDeclaration
+// =============================================================================
+
+void JsModuleDeclaration::SerializeFields(std::ostream& os, bool &needs_comma) const {
 }
 
 // =============================================================================
@@ -3037,6 +3066,7 @@ void JsImportDeclaration::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ImportDeclaration\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsModuleDeclaration::SerializeFields(os, needs_comma);
     JsImportDeclaration::SerializeFields(os, needs_comma);
   }
@@ -3145,6 +3175,7 @@ void JsExportNamedDeclaration::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ExportNamedDeclaration\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsModuleDeclaration::SerializeFields(os, needs_comma);
     JsExportNamedDeclaration::SerializeFields(os, needs_comma);
   }
@@ -3185,6 +3216,7 @@ void JsExportDefaultDeclaration::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ExportDefaultDeclaration\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsModuleDeclaration::SerializeFields(os, needs_comma);
     JsExportDefaultDeclaration::SerializeFields(os, needs_comma);
   }
@@ -3220,6 +3252,7 @@ void JsExportAllDeclaration::Serialize(std::ostream& os) const {
     MaybeAddComma(os, needs_comma);
     os << "\"type\":\"ExportAllDeclaration\"";
     JsNode::SerializeFields(os, needs_comma);
+    JsProgramBodyElement::SerializeFields(os, needs_comma);
     JsModuleDeclaration::SerializeFields(os, needs_comma);
     JsExportAllDeclaration::SerializeFields(os, needs_comma);
   }

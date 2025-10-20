@@ -32,8 +32,8 @@ namespace maldoca {
 
 std::unique_ptr<JsPosition> JsirPositionAttr2JsPosition(JsirPositionAttr attr);
 
-JsirLocationAttr GetJsirLocationAttr(mlir::MLIRContext *context,
-                                     const JsSourceLocation *loc,
+JsirLocationAttr GetJsirLocationAttr(mlir::MLIRContext* context,
+                                     const JsSourceLocation* loc,
                                      std::optional<int64_t> start_index,
                                      std::optional<int64_t> end_index,
                                      std::optional<int64_t> scope_uid);
@@ -54,8 +54,10 @@ struct JsTrivia {
 
 JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr);
 
-JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext *context,
-                                 const JsNode &node);
+JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext* context,
+                                 const JsNode& node);
+
+JsirTriviaAttr GetJsirTriviaAttr(mlir::Attribute attr);
 
 JsTrivia GetJsTrivia(mlir::Operation *op);
 
@@ -64,7 +66,7 @@ JsTrivia GetJsTrivia(mlir::Attribute attr);
 template <typename NodeT,
           typename = std::enable_if_t<std::is_base_of_v<JsNode, NodeT>>,
           typename... Args>
-std::unique_ptr<NodeT> CreateJsNodeWithTrivia(JsTrivia trivia, Args &&...args) {
+std::unique_ptr<NodeT> CreateJsNodeWithTrivia(JsTrivia trivia, Args&&... args) {
   return absl::make_unique<NodeT>(
       /*loc=*/std::move(trivia.loc),
       /*start=*/trivia.start,
@@ -82,7 +84,7 @@ template <typename NodeT,
           typename = std::enable_if_t<std::is_base_of_v<JsNode, NodeT>>,
           typename... Args>
 std::unique_ptr<NodeT> CreateJsNodeWithTrivia(JsirTriviaAttr trivia_attr,
-                                              Args &&...args) {
+                                              Args&&... args) {
   JsTrivia trivia;
   if (trivia_attr != nullptr) {
     trivia = JsirTriviaAttr2JsTrivia(trivia_attr);

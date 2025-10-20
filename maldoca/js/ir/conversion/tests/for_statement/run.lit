@@ -5,17 +5,7 @@
 
 // RUN: INPUT=%s && \
 // RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
-// RUN:     --passes "source2ast,ast2hir,hir2lir" \
-// RUN:   | FileCheck --check-prefix JSLIR "$(dirname "${INPUT}")"/jslir.mlir
-
-// RUN: INPUT=%s && \
-// RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
-// RUN:     --passes "source2ast,ast2hir,hir2lir,lir2hir" \
-// RUN:   | FileCheck --check-prefix JSHIR "$(dirname "${INPUT}")"/jshir.mlir
-
-// RUN: INPUT=%s && \
-// RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
-// RUN:     --passes "source2ast,ast2hir,hir2lir,lir2hir,hir2ast,ast2source" \
+// RUN:     --passes "source2ast,ast2hir,hir2ast,ast2source" \
 // RUN:   | FileCheck --check-prefix SOURCE "$(dirname "${INPUT}")"/output.js
 
 // RUN: INPUT=%s && \
@@ -25,5 +15,5 @@
 
 // RUN: INPUT=%s && \
 // RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
-// RUN:     --passes source2ast,ast2hir,hir2lir,lir2hir,hir2ast \
+// RUN:     --passes source2ast,ast2hir,hir2ast \
 // RUN:   | FileCheck --check-prefix AST "$(dirname "${INPUT}")"/ast.json

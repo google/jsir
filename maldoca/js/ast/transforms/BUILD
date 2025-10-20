@@ -32,6 +32,7 @@ cc_library(
         "//maldoca/js/ast/transforms/extract_prelude:pass",
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/driver:driver_cc_proto",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings:string_view",
     ],

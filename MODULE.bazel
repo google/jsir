@@ -13,7 +13,7 @@ pip.parse(
 use_repo(pip, "pypi")
 
 # https://registry.bazel.build/modules/abseil-cpp
-bazel_dep(name = "abseil-cpp", version = "20250512.1")
+bazel_dep(name = "abseil-cpp", version = "20250814.1")
 
 # https://registry.bazel.build/modules/nlohmann_json
 bazel_dep(name = "nlohmann_json", version = "3.11.3")

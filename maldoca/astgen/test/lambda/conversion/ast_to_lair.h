@@ -35,7 +35,7 @@ class AstToLair {
 
   template <typename Op, typename JsNode, typename... Args>
   Op CreateStmt(const JsNode *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(), std::nullopt,
+    return builder_.create<Op>(builder_.getUnknownLoc(), mlir::TypeRange(),
                                std::forward<Args>(args)...);
   }
 

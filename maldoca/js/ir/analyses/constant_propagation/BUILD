@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,10 +37,12 @@ cc_library(
         "//maldoca/js/ir/analyses:per_var_state",
         "//maldoca/js/ir/analyses:scope",
         "//maldoca/js/ir/analyses:state",
+        "//maldoca/js/quickjs",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:Analysis",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Support",
+        "@quickjs//:libquickjs",
     ],
 )
 

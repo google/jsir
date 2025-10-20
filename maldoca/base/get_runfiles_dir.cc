@@ -32,4 +32,8 @@ std::string GetDataDependencyFilepath(absl::string_view path) {
   return runfiles->Rlocation(JoinPath("com_google_maldoca", path));
 }
 
+std::string GetRunfilesDir() {
+  return GetDataDependencyFilepath("");
+}
+
 }  // namespace maldoca

@@ -49,18 +49,7 @@ JSIR needs to achieve two seemingly conflicting goals:
 *   It needs to be **low-level** enough to facilitate dataflow analysis, in
     order to support taint analysis, constant propagation, etc..
 
-To achieve these goals, JSIR defines two dialects:
-
-*   **JSHIR:**
-
-    This is a high-level IR that uses MLIR regions to accurately model control
-    flow structures.
-
-*   **JSLIR:**
-
-    This is a low-level IR that uses CFGs to represent branching behaviors.
-    JSLIR adds extra operations to annotate the kind of original control flow
-    structures. This allows JSLIR to be fully converted back to JSHIR.
+To achieve these goals, JSIR defines a high level IR that uses MLIR regions to accurately model control flow structures.
 
 See
 [intermediate_representation_design.md](docs/intermediate_representation_design.md)

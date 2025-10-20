@@ -47,6 +47,14 @@
 
 include "mlir/IR/OpBase.td"
 
+def JsirProgramBodyElementOpInterface : OpInterface<"JsirProgramBodyElementOpInterface"> {
+  let cppNamespace = "::maldoca";
+}
+
+def JsirProgramBodyElementOpInterfaceTraits : TraitList<[
+  DeclareOpInterfaceMethods<JsirProgramBodyElementOpInterface>
+]>;
+
 def JsirExpressionOpInterface : OpInterface<"JsirExpressionOpInterface"> {
   let cppNamespace = "::maldoca";
 
@@ -110,6 +118,7 @@ def JsirStatementOpInterface : OpInterface<"JsirStatementOpInterface"> {
 }
 
 def JsirStatementOpInterfaceTraits : TraitList<[
+  DeclareOpInterfaceMethods<JsirProgramBodyElementOpInterface>,
   DeclareOpInterfaceMethods<JsirStatementOpInterface>
 ]>;
 
@@ -118,6 +127,7 @@ def JsirDeclarationOpInterface : OpInterface<"JsirDeclarationOpInterface"> {
 }
 
 def JsirDeclarationOpInterfaceTraits : TraitList<[
+  DeclareOpInterfaceMethods<JsirProgramBodyElementOpInterface>,
   DeclareOpInterfaceMethods<JsirStatementOpInterface>,
   DeclareOpInterfaceMethods<JsirDeclarationOpInterface>
 ]>;
@@ -127,6 +137,7 @@ def JsirModuleDeclarationOpInterface : OpInterface<"JsirModuleDeclarationOpInter
 }
 
 def JsirModuleDeclarationOpInterfaceTraits : TraitList<[
+  DeclareOpInterfaceMethods<JsirProgramBodyElementOpInterface>,
   DeclareOpInterfaceMethods<JsirModuleDeclarationOpInterface>
 ]>;
 

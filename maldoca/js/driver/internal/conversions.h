@@ -208,42 +208,6 @@ class JsHirToAst final : public JsConversionTmpl<JsHirRepr, JsAstRepr> {
       const JsHirRepr &from) override;
 };
 
-// +------+-------------------------------+-------------------------------+
-// |      | Type                          | Representation                |
-// +------+-------------------------------+-------------------------------+
-// | From | mlir::OwningOpRef<JsirFileOp> | JavaScript high-level IR      |
-// +------+-------------------------------+-------------------------------+
-// |  To  | mlir::OwningOpRef<JsirFileOp> | JavaScript low-level IR       |
-// +------+-------------------------------+-------------------------------+
-class JsHirToLir final : public JsConversionTmpl<JsHirRepr, JsLirRepr> {
- public:
-  explicit JsHirToLir() = default;
-
-  std::string name() const override { return "JsHirToLir"; }
-
- private:
-  absl::StatusOr<std::unique_ptr<JsLirRepr>> Convert(
-      const JsHirRepr &from) override;
-};
-
-// +------+-------------------------------+-------------------------------+
-// |      | Type                          | Representation                |
-// +------+-------------------------------+-------------------------------+
-// | From | mlir::OwningOpRef<JsirFileOp> | JavaScript low-level IR       |
-// +------+-------------------------------+-------------------------------+
-// |  To  | mlir::OwningOpRef<JsirFileOp> | JavaScript high-level IR      |
-// +------+-------------------------------+-------------------------------+
-class JsLirToHir final : public JsConversionTmpl<JsLirRepr, JsHirRepr> {
- public:
-  explicit JsLirToHir() = default;
-
-  std::string name() const override { return "JsLirToHir"; }
-
- private:
-  absl::StatusOr<std::unique_ptr<JsHirRepr>> Convert(
-      const JsLirRepr &from) override;
-};
-
 }  // namespace maldoca
 
 #endif  // MALDOCA_JS_DRIVER_INTERNAL_CONVERSIONS_H_

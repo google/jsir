@@ -27,6 +27,7 @@
 #include "llvm/ADT/GraphTraits.h"
 #include "llvm/ADT/SCCIterator.h"
 #include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/Debug.h"
@@ -40,6 +41,7 @@
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "mlir/Support/DebugStringHelper.h"
+#include "mlir/Support/WalkResult.h"
 #include "absl/algorithm/container.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/container/flat_hash_map.h"
@@ -103,16 +105,24 @@ struct JsirInlineFunctionInfo {
 
 std::optional<JsirInlineFunctionInfo> JsirInlineFunctionInfo::Create(
     const BabelScopes &scopes, mlir::Region &params, mlir::Region &body) {
-  absl::StatusOr<mlir::Block *> body_block = GetStmtsRegionBlock(body);
-  if (!body_block.ok()) {
-    return std::nullopt;
-  }
+  llvm::SmallVector<JsirReturnStatementOp> return_ops;
+  body.walk([&](mlir::Operation* op) {
+    // Skip nested functions
+    if (llvm::isa<JsirFunctionDeclarationOp, JsirFunctionExpressionOp,
+                  JsirArrowFunctionExpressionOp, JsirClassMethodOp,
+                  JsirClassPrivateMethodOp, JsirObjectMethodOp>(op)) {
+      return mlir::WalkResult::skip();
+    }
+    if (auto return_op = llvm::dyn_cast<JsirReturnStatementOp>(op)) {
+      return_ops.push_back(return_op);
+    }
+    return mlir::WalkResult::advance();
+  });
 
-  auto return_op_range = FilterBlockOps<JsirReturnStatementOp>(**body_block);
-  if (!llvm::hasNItems(return_op_range, 1)) {
+  if (return_ops.size() != 1) {
     return std::nullopt;
   }
-  JsirReturnStatementOp return_op = *return_op_range.begin();
+  JsirReturnStatementOp return_op = return_ops[0];
 
   if (return_op.getArgument() == nullptr) {
     return std::nullopt;

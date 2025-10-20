@@ -100,25 +100,26 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %30 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:               // %30 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %31 = jsir.identifier {"prelude"}
-// SOURCE-NEXT:               // %31 = #jsir_builtin<builtin_function "prelude">
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %32 = jsir.identifier {"x"}
-// SOURCE-NEXT:               // %32 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %33 = jsir.call_expression (%31, %32)
-// SOURCE-NEXT:               // %33 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.return_statement (%33)
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker BlockStatementEnd>}
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %30 = jsir.identifier {"prelude"}
+// SOURCE-NEXT:                   // %30 = #jsir_builtin<builtin_function "prelude">
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %31 = jsir.identifier {"x"}
+// SOURCE-NEXT:                   // %31 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %32 = jsir.call_expression (%30, %31)
+// SOURCE-NEXT:                   // %32 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 jsir.return_statement (%32)
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             })
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { <alias#0 : #jsir_builtin<builtin_function "prelude">> }
@@ -192,25 +193,26 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %30 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:               // %30 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %31 = jsir.identifier {"alias"}
-// SOURCE-NEXT:               // %31 = #jsir_builtin<builtin_function "prelude">
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %32 = jsir.identifier {"x"}
-// SOURCE-NEXT:               // %32 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %33 = jsir.call_expression (%31, %32)
-// SOURCE-NEXT:               // %33 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.return_statement (%33)
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%30) {#jsir<cf_marker BlockStatementEnd>}
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %30 = jsir.identifier {"alias"}
+// SOURCE-NEXT:                   // %30 = #jsir_builtin<builtin_function "prelude">
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %31 = jsir.identifier {"x"}
+// SOURCE-NEXT:                   // %31 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %32 = jsir.call_expression (%30, %31)
+// SOURCE-NEXT:                   // %32 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 jsir.return_statement (%32)
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             })
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { <alias#0 : #jsir_builtin<builtin_function "prelude">> <wrapper_alias#0 : #jsir_builtin<inline_expression_function  "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir<symbol_id "x", 2>>>> }

@@ -332,6 +332,19 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
   virtual R VisitExportAllDeclaration(
       const JsExportAllDeclaration &export_all_declaration) = 0;
 
+  R VisitProgramBodyElement(const JsProgramBodyElement& program_body_element) {
+    const JsProgramBodyElement* program_body_element_ptr =
+        &program_body_element;
+    if (const JsStatement* statement =
+            dynamic_cast<const JsStatement*>(program_body_element_ptr)) {
+      return VisitStatement(*statement);
+    } else if (const JsModuleDeclaration* declaration =
+                   dynamic_cast<const JsModuleDeclaration*>(
+                       program_body_element_ptr)) {
+      return VisitModuleDeclaration(*declaration);
+    }
+  }
+
   R VisitDeclaration(const JsDeclaration &declaration) {
     const JsDeclaration *declaration_ptr = &declaration;
     if (const JsVariableDeclaration *variable_declaration =
@@ -740,6 +753,18 @@ class MutableJsAstVisitor {
 
   virtual R VisitExportAllDeclaration(
       JsExportAllDeclaration &export_all_declaration) = 0;
+
+  R VisitProgramBodyElement(JsProgramBodyElement& program_body_element) {
+    JsProgramBodyElement* program_body_element_ptr = &program_body_element;
+    if (JsStatement* statement =
+            dynamic_cast<JsStatement*>(program_body_element_ptr)) {
+      return VisitStatement(*statement);
+    } else if (JsModuleDeclaration* declaration =
+                   dynamic_cast<JsModuleDeclaration*>(
+                       program_body_element_ptr)) {
+      return VisitModuleDeclaration(*declaration);
+    }
+  }
 
   R VisitDeclaration(JsDeclaration &declaration) {
     JsDeclaration *declaration_ptr = &declaration;

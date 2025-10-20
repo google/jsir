@@ -41,10 +41,9 @@
 //
 // - CIR_OP: Jsir<TYPE>Op
 // - HIR_OP: Jshir<TYPE>Op
-// - LIR_OP: Jslir<TYPE>Op
 // - REF_OP: Jsir<TYPE>RefOp
 // - ATTRIB: Jsir<TYPE>Attr
-#define FOR_EACH_JSIR_CLASS(CIR_OP, HIR_OP, LIR_OP, REF_OP, ATTRIB) \
+#define FOR_EACH_JSIR_CLASS(CIR_OP, HIR_OP, REF_OP, ATTRIB) \
   /* File */                                                        \
   CIR_OP(File)                                                      \
                                                                     \
@@ -74,42 +73,26 @@
   CIR_OP(Program)                                                   \
                                                                     \
   /* Statements */                                                  \
-  LIR_OP(ControlFlowStarter)                                        \
-  LIR_OP(ControlFlowMarker)                                         \
   CIR_OP(ExpressionStatement)                                       \
   HIR_OP(BlockStatement)                                            \
   CIR_OP(EmptyStatement)                                            \
   CIR_OP(DebuggerStatement)                                         \
   HIR_OP(WithStatement)                                             \
-  LIR_OP(WithStatementStart)                                        \
   CIR_OP(ReturnStatement)                                           \
   HIR_OP(LabeledStatement)                                          \
-  LIR_OP(LabeledStatementStart)                                     \
   HIR_OP(BreakStatement)                                            \
-  LIR_OP(BreakStatement)                                            \
   HIR_OP(ContinueStatement)                                         \
-  LIR_OP(ContinueStatement)                                         \
   HIR_OP(IfStatement)                                               \
   HIR_OP(SwitchStatement)                                           \
-  LIR_OP(SwitchStatementStart)                                      \
   HIR_OP(SwitchCase)                                                \
-  LIR_OP(SwitchStatementCaseStart)                                  \
-  LIR_OP(SwitchStatementDefaultStart)                               \
-  LIR_OP(SwitchStatementCaseTest)                                   \
   CIR_OP(ThrowStatement)                                            \
   HIR_OP(TryStatement)                                              \
   HIR_OP(CatchClause)                                               \
-  LIR_OP(CatchClauseStart)                                          \
   HIR_OP(WhileStatement)                                            \
   HIR_OP(DoWhileStatement)                                          \
   HIR_OP(ForStatement)                                              \
   HIR_OP(ForInStatement)                                            \
-  LIR_OP(ForInStatementStart)                                       \
   HIR_OP(ForOfStatement)                                            \
-  LIR_OP(ForOfStatementStart)                                       \
-  LIR_OP(ForInOfStatementHasNext)                                   \
-  LIR_OP(ForInOfStatementGetNext)                                   \
-  LIR_OP(ForInOfStatementEnd)                                       \
                                                                     \
   /* Declarations */                                                \
   CIR_OP(FunctionDeclaration)                                       \
@@ -140,7 +123,6 @@
   CIR_OP(BinaryExpression)                                          \
   CIR_OP(AssignmentExpression)                                      \
   HIR_OP(LogicalExpression)                                         \
-  LIR_OP(LogicalExpressionStart)                                    \
   CIR_OP(SpreadElement)                                             \
   CIR_OP(MemberExpression)                                          \
   REF_OP(MemberExpression)                                          \
@@ -337,7 +319,6 @@ QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
 // dialect.
 #include "maldoca/js/ir/jshir_dialect.h.inc"
 #include "maldoca/js/ir/jsir_dialect.h.inc"
-#include "maldoca/js/ir/jslir_dialect.h.inc"
 
 // Include the auto-generated header file containing the declarations of the
 // JSIR interfaces.
@@ -364,7 +345,5 @@ QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
 #include "maldoca/js/ir/jsir_ops.h.inc"
 #define GET_OP_CLASSES
 #include "maldoca/js/ir/jshir_ops.h.inc"
-#define GET_OP_CLASSES
-#include "maldoca/js/ir/jslir_ops.h.inc"
 
 #endif  // MALDOCA_JS_IR_IR_H_

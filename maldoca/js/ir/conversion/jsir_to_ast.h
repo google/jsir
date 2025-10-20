@@ -79,7 +79,6 @@ class JsirToAst {
 
   FOR_EACH_JSIR_CLASS(DECLARE_CIR_OP_VISIT_FUNCTION,
                       DECLARE_HIR_OP_VISIT_FUNCTION,
-                      /*LIR_OP=*/JSIR_CLASS_IGNORE,
                       DECLARE_REF_OP_VISIT_FUNCTION,
                       DECLARE_ATTRIB_VISIT_FUNCTION)
 
@@ -87,6 +86,9 @@ class JsirToAst {
 #undef DECLARE_REF_OP_VISIT_FUNCTION
 #undef DECLARE_HIR_OP_VISIT_FUNCTION
 #undef DECLARE_ATTRIB_VISIT_FUNCTION
+
+  absl::StatusOr<std::unique_ptr<JsProgramBodyElement>> VisitProgramBodyElement(
+      JsirProgramBodyElementOpInterface op);
 
   absl::StatusOr<std::unique_ptr<JsStatement>> VisitStatement(
       JsirStatementOpInterface op);

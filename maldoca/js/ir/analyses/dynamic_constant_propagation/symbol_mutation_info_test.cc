@@ -24,6 +24,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/time/time.h"
 #include "maldoca/base/testing/status_matchers.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/driver/conversion.h"
 #include "maldoca/js/driver/driver.h"
 #include "maldoca/js/driver/driver.pb.h"
@@ -56,22 +57,22 @@ TEST_P(GetLvalueRootSymbolsTest, GetLvalueRootSymbols) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsLirRepr lir_repr,
-      ToJsLirRepr::FromJsSourceRepr(
+      JsHirRepr hir_repr,
+      ToJsHirRepr::FromJsSourceRepr(
           test_case.source, request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
   mlir::Value left = nullptr;
-  lir_repr.op->walk([&](JsirAssignmentExpressionOp op) {
+  hir_repr.op->walk([&](JsirAssignmentExpressionOp op) {
     ASSERT_EQ(left, nullptr) << "Found multiple declarations or assignments.";
     left = op.getLeft();
   });
-  lir_repr.op->walk([&](JsirVariableDeclaratorOp op) {
+  hir_repr.op->walk([&](JsirVariableDeclaratorOp op) {
     ASSERT_EQ(left, nullptr) << "Found multiple declarations or assignments.";
     left = op.getId();
   });
 
-  LvalueRootSymbols root_symbols = GetLvalueRootSymbols(lir_repr.scopes, left);
+  LvalueRootSymbols root_symbols = GetLvalueRootSymbols(hir_repr.scopes, left);
 
   EXPECT_THAT(root_symbols.assignment_symbols,
               ElementsAreArray(test_case.root_symbols.assignment_symbols));
@@ -143,13 +144,13 @@ TEST_P(GetSymbolMutationInfosTest, GetSymbolMutationInfos) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsLirRepr lir_repr,
-      ToJsLirRepr::FromJsSourceRepr(
+      JsHirRepr hir_repr,
+      ToJsHirRepr::FromJsSourceRepr(
           test_case.source, request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
   absl::flat_hash_map<JsSymbolId, SymbolMutationInfo> infos =
-      GetSymbolMutationInfos(lir_repr.scopes, *lir_repr.op);
+      GetSymbolMutationInfos(hir_repr.scopes, *hir_repr.op);
 
   EXPECT_THAT(infos, UnorderedElementsAreArray(test_case.infos));
 }

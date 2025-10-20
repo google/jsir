@@ -32,8 +32,6 @@ enum class JsirPassKind {
   // Conversion
   kSourceToAst,
   kAstToJshir,
-  kJshirToJslir,
-  kJslirToJshir,
   kJshirToAst,
   kAstToSource,
 

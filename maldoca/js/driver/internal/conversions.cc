@@ -80,14 +80,6 @@ absl::StatusOr<std::unique_ptr<JsConversion>> JsConversion::Create(
     case JsConversionConfig::KindCase::kJsHirToAst: {
       return std::make_unique<JsHirToAst>();
     }
-
-    case JsConversionConfig::KindCase::kJsHirToLir: {
-      return std::make_unique<JsHirToLir>();
-    }
-
-    case JsConversionConfig::KindCase::kJsLirToHir: {
-      return std::make_unique<JsLirToHir>();
-    }
   }
 }
 
@@ -185,26 +177,6 @@ absl::StatusOr<std::unique_ptr<JsAstRepr>> JsHirToAst::Convert(
     const JsHirRepr &from) {
   MALDOCA_ASSIGN_OR_RETURN(auto ast, JshirFileToAst(*from.op));
   return std::make_unique<JsAstRepr>(std::move(ast), from.scopes);
-}
-
-// =============================================================================
-// JsHirToLir
-// =============================================================================
-
-absl::StatusOr<std::unique_ptr<JsLirRepr>> JsHirToLir::Convert(
-    const JsHirRepr &from) {
-  auto op = JshirFileToJslir(*from.op);
-  return std::make_unique<JsLirRepr>(std::move(op), from.scopes);
-}
-
-// =============================================================================
-// JsLirToHir
-// =============================================================================
-
-absl::StatusOr<std::unique_ptr<JsHirRepr>> JsLirToHir::Convert(
-    const JsLirRepr &from) {
-  auto op = JslirFileToJshir(*from.op);
-  return std::make_unique<JsHirRepr>(std::move(op), from.scopes);
 }
 
 }  // namespace maldoca

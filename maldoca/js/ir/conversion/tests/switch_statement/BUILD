@@ -24,7 +24,6 @@ glob_lit_tests(
         "ast.json",
         "input.js",
         "jshir.mlir",
-        "jslir.mlir",
         "output.js",
         "//maldoca/js/ir:lit_test_files",
     ],

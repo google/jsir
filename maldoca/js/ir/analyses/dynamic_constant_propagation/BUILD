@@ -156,6 +156,7 @@ cc_test(
     deps = [
         ":symbol_mutation_info",
         "//maldoca/base/testing:status_matchers",
+        "//maldoca/js/ast",
         "//maldoca/js/driver",
         "//maldoca/js/driver:conversion",
         "//maldoca/js/driver:driver_cc_proto",

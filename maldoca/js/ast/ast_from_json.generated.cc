@@ -176,7 +176,7 @@ JsSourceLocation::FromJson(const nlohmann::json& json) {
 // JsComment
 // =============================================================================
 
-absl::StatusOr<std::unique_ptr<JsSourceLocation>>
+absl::StatusOr<std::optional<std::unique_ptr<JsSourceLocation>>>
 JsComment::GetLoc(const nlohmann::json& json) {
   auto loc_it = json.find("loc");
   if (loc_it == json.end()) {
@@ -185,7 +185,7 @@ JsComment::GetLoc(const nlohmann::json& json) {
   const nlohmann::json& json_loc = loc_it.value();
 
   if (json_loc.is_null()) {
-    return absl::InvalidArgumentError("json_loc is null.");
+    return std::nullopt;
   }
   return JsSourceLocation::FromJson(json_loc);
 }
@@ -207,7 +207,7 @@ JsComment::GetValue(const nlohmann::json& json) {
   return json_value.get<std::string>();
 }
 
-absl::StatusOr<int64_t>
+absl::StatusOr<std::optional<int64_t>>
 JsComment::GetStart(const nlohmann::json& json) {
   auto start_it = json.find("start");
   if (start_it == json.end()) {
@@ -216,7 +216,7 @@ JsComment::GetStart(const nlohmann::json& json) {
   const nlohmann::json& json_start = start_it.value();
 
   if (json_start.is_null()) {
-    return absl::InvalidArgumentError("json_start is null.");
+    return std::nullopt;
   }
   if (!json_start.is_number_integer()) {
     return absl::InvalidArgumentError("Expecting json_start.is_number_integer().");
@@ -224,7 +224,7 @@ JsComment::GetStart(const nlohmann::json& json) {
   return json_start.get<int64_t>();
 }
 
-absl::StatusOr<int64_t>
+absl::StatusOr<std::optional<int64_t>>
 JsComment::GetEnd(const nlohmann::json& json) {
   auto end_it = json.find("end");
   if (end_it == json.end()) {
@@ -233,7 +233,7 @@ JsComment::GetEnd(const nlohmann::json& json) {
   const nlohmann::json& json_end = end_it.value();
 
   if (json_end.is_null()) {
-    return absl::InvalidArgumentError("json_end is null.");
+    return std::nullopt;
   }
   if (!json_end.is_number_integer()) {
     return absl::InvalidArgumentError("Expecting json_end.is_number_integer().");
@@ -751,6 +751,8 @@ JsNode::FromJson(const nlohmann::json& json) {
     return JsModuleSpecifier::FromJson(json);
   } else if (type == "ImportAttribute") {
     return JsImportAttribute::FromJson(json);
+  } else if (type == "ProgramBodyElement") {
+    return JsProgramBodyElement::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -807,51 +809,11 @@ JsInterpreterDirective::FromJson(const nlohmann::json& json) {
 }
 
 // =============================================================================
-// JsStatement
+// JsProgramBodyElement
 // =============================================================================
 
-static bool IsStatement(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return false;
-  }
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return false;
-  }
-  const nlohmann::json &type_json = type_it.value();
-  if (!type_json.is_string()) {
-    return false;
-  }
-  const std::string &type = type_json.get<std::string>();
-  static const auto *kTypes = new absl::flat_hash_set<std::string>{
-      "ExpressionStatement",
-      "BlockStatement",
-      "EmptyStatement",
-      "DebuggerStatement",
-      "WithStatement",
-      "ReturnStatement",
-      "LabeledStatement",
-      "BreakStatement",
-      "ContinueStatement",
-      "IfStatement",
-      "SwitchStatement",
-      "ThrowStatement",
-      "TryStatement",
-      "WhileStatement",
-      "DoWhileStatement",
-      "ForStatement",
-      "ForInStatement",
-      "ForOfStatement",
-      "FunctionDeclaration",
-      "VariableDeclaration",
-      "ClassDeclaration",
-  };
-
-  return kTypes->contains(type);
-}
-
-absl::StatusOr<std::unique_ptr<JsStatement>>
-JsStatement::FromJson(const nlohmann::json& json) {
+absl::StatusOr<std::unique_ptr<JsProgramBodyElement>>
+JsProgramBodyElement::FromJson(const nlohmann::json& json) {
   if (!json.is_object()) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
@@ -902,46 +864,9 @@ JsStatement::FromJson(const nlohmann::json& json) {
     return JsClassDeclaration::FromJson(json);
   } else if (type == "Declaration") {
     return JsDeclaration::FromJson(json);
-  }
-  return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
-}
-
-// =============================================================================
-// JsModuleDeclaration
-// =============================================================================
-
-static bool IsModuleDeclaration(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return false;
-  }
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return false;
-  }
-  const nlohmann::json &type_json = type_it.value();
-  if (!type_json.is_string()) {
-    return false;
-  }
-  const std::string &type = type_json.get<std::string>();
-  static const auto *kTypes = new absl::flat_hash_set<std::string>{
-      "ImportDeclaration",
-      "ExportNamedDeclaration",
-      "ExportDefaultDeclaration",
-      "ExportAllDeclaration",
-  };
-
-  return kTypes->contains(type);
-}
-
-absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>
-JsModuleDeclaration::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
-
-  if (type == "ImportDeclaration") {
+  } else if (type == "Statement") {
+    return JsStatement::FromJson(json);
+  } else if (type == "ImportDeclaration") {
     return JsImportDeclaration::FromJson(json);
   } else if (type == "ExportNamedDeclaration") {
     return JsExportNamedDeclaration::FromJson(json);
@@ -949,6 +874,8 @@ JsModuleDeclaration::FromJson(const nlohmann::json& json) {
     return JsExportDefaultDeclaration::FromJson(json);
   } else if (type == "ExportAllDeclaration") {
     return JsExportAllDeclaration::FromJson(json);
+  } else if (type == "ModuleDeclaration") {
+    return JsModuleDeclaration::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -1155,7 +1082,7 @@ JsProgram::GetSourceType(const nlohmann::json& json) {
   return json_source_type.get<std::string>();
 }
 
-absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsStatement>, std::unique_ptr<JsModuleDeclaration>>>>
+absl::StatusOr<std::vector<std::unique_ptr<JsProgramBodyElement>>>
 JsProgram::GetBody(const nlohmann::json& json) {
   auto body_it = json.find("body");
   if (body_it == json.end()) {
@@ -1170,22 +1097,12 @@ JsProgram::GetBody(const nlohmann::json& json) {
     return absl::InvalidArgumentError("json_body expected to be array.");
   }
 
-  std::vector<std::variant<std::unique_ptr<JsStatement>, std::unique_ptr<JsModuleDeclaration>>> body;
+  std::vector<std::unique_ptr<JsProgramBodyElement>> body;
   for (const nlohmann::json& json_body_element : json_body) {
     if (json_body_element.is_null()) {
       return absl::InvalidArgumentError("json_body_element is null.");
     }
-    std::variant<std::unique_ptr<JsStatement>, std::unique_ptr<JsModuleDeclaration>> body_element;
-    if (IsStatement(json_body_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, JsStatement::FromJson(json_body_element));
-    } else if (IsModuleDeclaration(json_body_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, JsModuleDeclaration::FromJson(json_body_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_body_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_body_element.dump()});
-      return result;
-    }
+    MALDOCA_ASSIGN_OR_RETURN(auto body_element, JsProgramBodyElement::FromJson(json_body_element));
     body.push_back(std::move(body_element));
   }
   return body;
@@ -2405,6 +2322,66 @@ JsFunction::FromJson(const nlohmann::json& json) {
     return JsBlockStatementFunction::FromJson(json);
   } else if (type == "ArrowFunctionExpression") {
     return JsArrowFunctionExpression::FromJson(json);
+  }
+  return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
+}
+
+// =============================================================================
+// JsStatement
+// =============================================================================
+
+absl::StatusOr<std::unique_ptr<JsStatement>>
+JsStatement::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+
+  if (type == "ExpressionStatement") {
+    return JsExpressionStatement::FromJson(json);
+  } else if (type == "BlockStatement") {
+    return JsBlockStatement::FromJson(json);
+  } else if (type == "EmptyStatement") {
+    return JsEmptyStatement::FromJson(json);
+  } else if (type == "DebuggerStatement") {
+    return JsDebuggerStatement::FromJson(json);
+  } else if (type == "WithStatement") {
+    return JsWithStatement::FromJson(json);
+  } else if (type == "ReturnStatement") {
+    return JsReturnStatement::FromJson(json);
+  } else if (type == "LabeledStatement") {
+    return JsLabeledStatement::FromJson(json);
+  } else if (type == "BreakStatement") {
+    return JsBreakStatement::FromJson(json);
+  } else if (type == "ContinueStatement") {
+    return JsContinueStatement::FromJson(json);
+  } else if (type == "IfStatement") {
+    return JsIfStatement::FromJson(json);
+  } else if (type == "SwitchStatement") {
+    return JsSwitchStatement::FromJson(json);
+  } else if (type == "ThrowStatement") {
+    return JsThrowStatement::FromJson(json);
+  } else if (type == "TryStatement") {
+    return JsTryStatement::FromJson(json);
+  } else if (type == "WhileStatement") {
+    return JsWhileStatement::FromJson(json);
+  } else if (type == "DoWhileStatement") {
+    return JsDoWhileStatement::FromJson(json);
+  } else if (type == "ForStatement") {
+    return JsForStatement::FromJson(json);
+  } else if (type == "ForInStatement") {
+    return JsForInStatement::FromJson(json);
+  } else if (type == "ForOfStatement") {
+    return JsForOfStatement::FromJson(json);
+  } else if (type == "FunctionDeclaration") {
+    return JsFunctionDeclaration::FromJson(json);
+  } else if (type == "VariableDeclaration") {
+    return JsVariableDeclaration::FromJson(json);
+  } else if (type == "ClassDeclaration") {
+    return JsClassDeclaration::FromJson(json);
+  } else if (type == "Declaration") {
+    return JsDeclaration::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -7259,6 +7236,30 @@ JsMetaProperty::FromJson(const nlohmann::json& json) {
       std::move(defined_symbols),
       std::move(meta),
       std::move(property));
+}
+
+// =============================================================================
+// JsModuleDeclaration
+// =============================================================================
+
+absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>
+JsModuleDeclaration::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+
+  if (type == "ImportDeclaration") {
+    return JsImportDeclaration::FromJson(json);
+  } else if (type == "ExportNamedDeclaration") {
+    return JsExportNamedDeclaration::FromJson(json);
+  } else if (type == "ExportDefaultDeclaration") {
+    return JsExportDefaultDeclaration::FromJson(json);
+  } else if (type == "ExportAllDeclaration") {
+    return JsExportAllDeclaration::FromJson(json);
+  }
+  return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
 
 // =============================================================================

@@ -61,7 +61,7 @@ enum class JsReprKind {
   kJslir,
 };
 
-std::ostream &operator<<(std::ostream &os, JsReprKind kind);
+std::ostream& operator<<(std::ostream& os, JsReprKind kind);
 
 struct JsRepr {
   const JsReprKind kind;
@@ -76,10 +76,10 @@ struct JsRepr {
   }
 
   static absl::StatusOr<std::unique_ptr<JsRepr>> FromProto(
-      const JsReprPb &proto);
+      const JsReprPb& proto);
 
   template <typename ReprT>
-  static absl::StatusOr<ReprT *> Cast(JsRepr *repr) {
+  static absl::StatusOr<ReprT*> Cast(JsRepr* repr) {
     static_assert(std::is_base_of_v<JsRepr, ReprT>,
                   "ReprT must be a subclass of JsRepr");
     if (!llvm::isa<ReprT>(repr)) {
@@ -90,7 +90,7 @@ struct JsRepr {
   }
 
   template <typename ReprT>
-  static absl::StatusOr<const ReprT *> Cast(const JsRepr *repr) {
+  static absl::StatusOr<const ReprT*> Cast(const JsRepr* repr) {
     static_assert(std::is_base_of_v<JsRepr, ReprT>,
                   "ReprT must be a subclass of JsRepr");
     if (!llvm::isa<ReprT>(repr)) {
@@ -122,7 +122,7 @@ struct JsSourceRepr : JsRepr {
   explicit JsSourceRepr(absl::string_view source)
       : JsRepr(JsReprKind::kJsSource), source(source) {}
 
-  static bool classof(const JsRepr *repr) {
+  static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJsSource;
   }
 
@@ -137,7 +137,7 @@ struct JsAstStringRepr : JsRepr {
   explicit JsAstStringRepr(BabelAstString ast_string)
       : JsRepr(JsReprKind::kAstString), ast_string(std::move(ast_string)) {}
 
-  static bool classof(const JsRepr *repr) {
+  static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kAstString;
   }
 
@@ -155,7 +155,7 @@ struct JsAstRepr : JsRepr {
         ast(std::move(ast)),
         scopes(std::move(scopes)) {}
 
-  static bool classof(const JsRepr *repr) {
+  static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kAst;
   }
 
@@ -172,7 +172,7 @@ struct JsirRepr : JsRepr {
   mlir::OwningOpRef<JsirFileOp> op;
   BabelScopes scopes;
 
-  static bool classof(const JsRepr *repr) {
+  static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJshir || repr->kind == JsReprKind::kJslir;
   }
 
@@ -188,7 +188,7 @@ struct JsHirRepr : JsirRepr {
   explicit JsHirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes)
       : JsirRepr(JsReprKind::kJshir, std::move(op), std::move(scopes)) {}
 
-  static bool classof(const JsRepr *repr) {
+  static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJshir;
   }
 
@@ -199,7 +199,7 @@ struct JsLirRepr : JsirRepr {
   explicit JsLirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes)
       : JsirRepr(JsReprKind::kJslir, std::move(op), std::move(scopes)) {}
 
-  static bool classof(const JsRepr *repr) {
+  static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJslir;
   }
 
@@ -219,27 +219,27 @@ struct JsPassContext {
 class JsPass {
  public:
   virtual ~JsPass() = default;
-  virtual absl::Status Run(JsPassContext &context) = 0;
+  virtual absl::Status Run(JsPassContext& context) = 0;
 
   virtual std::string name() const = 0;
 
   static absl::StatusOr<std::unique_ptr<JsPass>> Create(
-      const JsPassConfig &config, Babel *absl_nullable babel,
-      mlir::MLIRContext *absl_nullable mlir_context);
+      const JsPassConfig& config, Babel* absl_nullable babel,
+      mlir::MLIRContext* absl_nullable mlir_context);
 };
 
 // =============================================================================
 // RunPasses
 // =============================================================================
 
-absl::Status RunPasses(const JsPassConfigs &pass_configs,
-                       JsPassContext &context, Babel *absl_nullable babel,
-                       mlir::MLIRContext *absl_nullable mlir_context);
+absl::Status RunPasses(const JsPassConfigs& pass_configs,
+                       JsPassContext& context, Babel* absl_nullable babel,
+                       mlir::MLIRContext* absl_nullable mlir_context);
 
 absl::Status RunPasses(absl::Span<const std::unique_ptr<JsPass>> passes,
-                       JsPassContext &context);
+                       JsPassContext& context);
 
-bool PassRequiresBabel(const JsPassConfig &pass);
+bool PassRequiresBabel(const JsPassConfig& pass);
 
 class JsPassRunner {
  public:
@@ -251,21 +251,21 @@ class JsPassRunner {
   };
 
   virtual absl::StatusOr<Result> Run(absl::string_view original_source,
-                                     const JsReprPb &input_repr_pb,
-                                     const JsPassConfigs &passes) = 0;
+                                     const JsReprPb& input_repr_pb,
+                                     const JsPassConfigs& passes) = 0;
 };
 
 class UnsandboxedJsPassRunner : public JsPassRunner {
  public:
-  explicit UnsandboxedJsPassRunner(Babel *absl_nullable babel)
+  explicit UnsandboxedJsPassRunner(Babel* absl_nullable babel)
       : babel_(babel) {}
 
   absl::StatusOr<Result> Run(absl::string_view original_source,
-                             const JsReprPb &input_repr_pb,
-                             const JsPassConfigs &passes) override;
+                             const JsReprPb& input_repr_pb,
+                             const JsPassConfigs& passes) override;
 
  private:
-  Babel *absl_nullable babel_;
+  Babel* absl_nullable babel_;
 };
 
 // =============================================================================
@@ -282,11 +282,11 @@ class UnsandboxedJsPassRunner : public JsPassRunner {
 class JsAnalysis : public JsPass {
  public:
   virtual absl::Status Analyze(std::optional<absl::string_view> original_source,
-                               const JsRepr &repr,
-                               JsAnalysisOutputs &output) = 0;
+                               const JsRepr& repr,
+                               JsAnalysisOutputs& output) = 0;
 
  protected:
-  absl::Status Run(JsPassContext &context) override {
+  absl::Status Run(JsPassContext& context) override {
     return Analyze(context.original_source, *context.repr, context.outputs);
   }
 };
@@ -298,14 +298,14 @@ class JsAnalysisTmpl : public JsAnalysis {
 
  public:
   virtual absl::Status Analyze(std::optional<absl::string_view> original_source,
-                               const ReprT &repr,
-                               JsAnalysisOutputs &outputs) = 0;
+                               const ReprT& repr,
+                               JsAnalysisOutputs& outputs) = 0;
 
  protected:
   absl::Status Analyze(std::optional<absl::string_view> original_source,
-                       const JsRepr &repr,
-                       JsAnalysisOutputs &outputs) override {
-    MALDOCA_ASSIGN_OR_RETURN(const ReprT *repr_cast,
+                       const JsRepr& repr,
+                       JsAnalysisOutputs& outputs) override {
+    MALDOCA_ASSIGN_OR_RETURN(const ReprT* repr_cast,
                              JsRepr::Cast<ReprT>(&repr));
     return Analyze(original_source, *repr_cast, outputs);
   }
@@ -313,7 +313,7 @@ class JsAnalysisTmpl : public JsAnalysis {
 
 class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
  public:
-  explicit JsirAnalysis(JsirAnalysisConfig config, Babel *absl_nullable babel)
+  explicit JsirAnalysis(JsirAnalysisConfig config, Babel* absl_nullable babel)
       : config_(std::move(config)), babel_(babel) {}
 
   std::string name() const override {
@@ -321,18 +321,18 @@ class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
   }
 
   absl::Status Analyze(std::optional<absl::string_view> original_source,
-                       const JsirRepr &repr,
-                       JsAnalysisOutputs &outputs) override {
-    MALDOCA_ASSIGN_OR_RETURN(
-        JsirAnalysisResult result,
-        RunJsirAnalysis(*repr.op, repr.scopes, config_, babel_));
+                       const JsirRepr& repr,
+                       JsAnalysisOutputs& outputs) override {
+    MALDOCA_ASSIGN_OR_RETURN(JsirAnalysisResult result,
+                             RunJsirAnalysis(*repr.op, original_source,
+                                             repr.scopes, config_, babel_));
     *outputs.add_outputs()->mutable_jsir_analysis() = std::move(result);
     return absl::OkStatus();
   }
 
  private:
   JsirAnalysisConfig config_;
-  Babel *absl_nullable babel_;
+  Babel* absl_nullable babel_;
 };
 
 // =============================================================================
@@ -342,11 +342,11 @@ class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
 class JsTransform : public JsPass {
  public:
   virtual absl::Status Transform(
-      std::optional<absl::string_view> original_source, JsRepr &repr,
-      JsAnalysisOutputs &outputs) = 0;
+      std::optional<absl::string_view> original_source, JsRepr& repr,
+      JsAnalysisOutputs& outputs) = 0;
 
  protected:
-  absl::Status Run(JsPassContext &context) override {
+  absl::Status Run(JsPassContext& context) override {
     return Transform(context.original_source, *context.repr, context.outputs);
   }
 };
@@ -358,12 +358,12 @@ class JsTransformTmpl : public JsTransform {
 
  public:
   virtual absl::Status Transform(
-      std::optional<absl::string_view> original_source, ReprT &repr,
-      JsAnalysisOutputs &outputs) = 0;
+      std::optional<absl::string_view> original_source, ReprT& repr,
+      JsAnalysisOutputs& outputs) = 0;
 
  protected:
   absl::Status Transform(std::optional<absl::string_view> original_source,
-                         JsRepr &repr, JsAnalysisOutputs &outputs) override {
+                         JsRepr& repr, JsAnalysisOutputs& outputs) override {
     MALDOCA_ASSIGN_OR_RETURN(ReprT * repr_cast, JsRepr::Cast<ReprT>(&repr));
     return Transform(original_source, *repr_cast, outputs);
   }
@@ -379,7 +379,7 @@ class JsAstTransform : public JsTransformTmpl<JsAstRepr> {
   }
 
   absl::Status Transform(std::optional<absl::string_view> original_source,
-                         JsAstRepr &repr, JsAnalysisOutputs &outputs) override {
+                         JsAstRepr& repr, JsAnalysisOutputs& outputs) override {
     std::optional<JsAstAnalysisResult> optional_analysis_result;
     MALDOCA_RETURN_IF_ERROR(TransformJsAst(original_source, repr.scopes,
                                            config_, *repr.ast,
@@ -396,7 +396,7 @@ class JsAstTransform : public JsTransformTmpl<JsAstRepr> {
 
 class JsirTransform : public JsTransformTmpl<JsirRepr> {
  public:
-  explicit JsirTransform(JsirTransformConfig config, Babel *absl_nullable babel)
+  explicit JsirTransform(JsirTransformConfig config, Babel* absl_nullable babel)
       : config_(std::move(config)), babel_(babel) {}
 
   std::string name() const override {
@@ -405,12 +405,12 @@ class JsirTransform : public JsTransformTmpl<JsirRepr> {
 
  private:
   absl::Status Transform(std::optional<absl::string_view> original_source,
-                         JsirRepr &repr, JsAnalysisOutputs &outputs) override {
+                         JsirRepr& repr, JsAnalysisOutputs& outputs) override {
     return TransformJsir(*repr.op, repr.scopes, config_, babel_, &outputs);
   }
 
   JsirTransformConfig config_;
-  Babel *absl_nullable babel_;
+  Babel* absl_nullable babel_;
 };
 
 }  // namespace maldoca

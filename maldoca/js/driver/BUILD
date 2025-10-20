@@ -102,7 +102,6 @@ cc_test(
     data = [
         "test_babel_scopes.txtpb",
         "test_hir.mlir.test",
-        "test_lir.mlir.test",
         "test_parsed_ast.json",
         "test_serialized_ast.json",
         "test_source.js.test",

@@ -14,6 +14,7 @@
 
 #include "maldoca/js/ir/analyses/analysis.h"
 
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -29,6 +30,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "maldoca/base/ret_check.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
@@ -42,13 +44,13 @@ namespace maldoca {
 
 template <typename AnalysisT, typename... Args>
 static absl::StatusOr<JsirAnalysisResult::DataFlow> RunJsirDataFlowAnalysis(
-    mlir::Operation *op, Args &&...args) {
+    mlir::Operation* op, Args&&... args) {
   static_assert(std::is_base_of_v<JsirDataFlowAnalysisPrinter, AnalysisT>,
                 "The analysis must inherit JsirDataFlowAnalysisPrinter.");
 
   mlir::DataFlowSolver solver;
 
-  JsirDataFlowAnalysisPrinter *analysis =
+  JsirDataFlowAnalysisPrinter* analysis =
       solver.load<AnalysisT>(std::forward<Args>(args)...);
 
   mlir::LogicalResult mlir_result = solver.initializeAndRun(op);
@@ -60,8 +62,9 @@ static absl::StatusOr<JsirAnalysisResult::DataFlow> RunJsirDataFlowAnalysis(
 }
 
 absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
-    JsirFileOp op, const BabelScopes &scopes, const JsirAnalysisConfig &config,
-    Babel *absl_nullable babel) {
+    JsirFileOp op, std::optional<absl::string_view> source_code,
+    const BabelScopes& scopes, const JsirAnalysisConfig& config,
+    Babel* absl_nullable babel) {
   switch (config.kind_case()) {
     case JsirAnalysisConfig::KIND_NOT_SET: {
       return absl::InvalidArgumentError("JsAnalysisConfig kind not set");

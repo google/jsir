@@ -75,8 +75,8 @@ absl::StatusOr<OpT> GetExprRegionOp(mlir::Region &region) {
 
 template <typename OpT>
 auto FilterBlockOps(mlir::Block &block) {
-  auto filter_range =
-      llvm::make_filter_range(block, llvm::isa<OpT, mlir::Operation &>);
+  auto filter_range = llvm::make_filter_range(
+      block, [](mlir::Operation& op) { return llvm::isa<OpT>(op); });
 
   return llvm::map_range(std::move(filter_range), [](mlir::Operation &op) {
     return llvm::cast<OpT>(op);

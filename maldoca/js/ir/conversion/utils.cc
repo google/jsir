@@ -18,7 +18,6 @@
 
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/IR/Block.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/OwningOpRef.h"
@@ -27,9 +26,7 @@
 #include "maldoca/base/ret_check.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/conversion/ast_to_jsir.h"
-#include "maldoca/js/ir/conversion/jshir_to_jslir.h"
 #include "maldoca/js/ir/conversion/jsir_to_ast.h"
-#include "maldoca/js/ir/conversion/jslir_to_jshir.h"
 #include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
@@ -39,7 +36,6 @@ absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
   // Check for all the dialects
   MALDOCA_RET_CHECK_NE(context.getLoadedDialect<JsirDialect>(), nullptr);
   MALDOCA_RET_CHECK_NE(context.getLoadedDialect<JshirDialect>(), nullptr);
-  MALDOCA_RET_CHECK_NE(context.getLoadedDialect<JslirDialect>(), nullptr);
   MALDOCA_RET_CHECK_NE(context.getLoadedDialect<mlir::func::FuncDialect>(),
                        nullptr);
 
@@ -52,43 +48,6 @@ absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
   return hir_file;
 }
 
-mlir::OwningOpRef<JsirFileOp> JshirFileToJslir(JsirFileOp hir_file) {
-  mlir::OpBuilder builder(hir_file.getContext());
-  JshirToJslir jshir_to_jslir(builder);
-
-  mlir::OwningOpRef<JsirFileOp> lir_file =
-      builder.cloneWithoutRegions(hir_file);
-  jshir_to_jslir.VisitRegion(&hir_file.getProgram(), &lir_file->getProgram());
-
-  return lir_file;
-}
-
-mlir::OwningOpRef<JsirFileOp> JslirFileToJshir(JsirFileOp lir_file) {
-  mlir::OpBuilder builder(lir_file->getContext());
-  JslirToJshir jslir_to_jshir(&builder);
-
-  mlir::OwningOpRef<JsirFileOp> hir_file =
-      builder.cloneWithoutRegions(lir_file);
-
-  if (lir_file.getProgram().empty()) {
-    return hir_file;
-  }
-  mlir::Block &lir_program_block = lir_file.getProgram().front();
-  mlir::Block &hir_program_block = hir_file->getProgram().emplaceBlock();
-
-  if (lir_program_block.empty()) {
-    return hir_file;
-  }
-  mlir::Operation *lir_first_op = &lir_program_block.front();
-
-  builder.setInsertionPointToStart(&hir_program_block);
-  for (mlir::Operation *lir_op = lir_first_op; lir_op != nullptr;) {
-    lir_op = jslir_to_jshir.VisitOperation(lir_op);
-  }
-
-  return hir_file;
-}
-
 absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file) {
   JsirToAst jsir_to_ast;
   return jsir_to_ast.VisitFile(hir_file);
@@ -97,7 +56,6 @@ absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file) {
 void LoadNecessaryDialects(mlir::MLIRContext &context) {
   context.getOrLoadDialect<maldoca::JsirDialect>();
   context.getOrLoadDialect<maldoca::JshirDialect>();
-  context.getOrLoadDialect<maldoca::JslirDialect>();
   context.getOrLoadDialect<mlir::cf::ControlFlowDialect>();
   context.getOrLoadDialect<mlir::func::FuncDialect>();
 }

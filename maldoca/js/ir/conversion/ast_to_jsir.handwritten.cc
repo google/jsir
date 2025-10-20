@@ -42,9 +42,13 @@
 namespace maldoca {
 
 JsirCommentAttrInterface AstToJsir::VisitCommentAttr(const JsComment *node) {
-  auto loc =
-      GetJsirLocationAttr(builder_.getContext(), node->loc(), node->start(),
-                          node->end(), /*scope_uid=*/std::nullopt);
+  JsirLocationAttr loc = nullptr;
+  if (node->loc().has_value()) {
+    loc = GetJsirLocationAttr(builder_.getContext(), node->loc().value(),
+                              node->start(), node->end(),
+                              /*scope_uid=*/std::nullopt);
+  }
+
   switch (node->comment_type()) {
     case JsCommentType::kCommentLine:
       return JsirCommentLineAttr::get(
