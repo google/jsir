@@ -17,7 +17,6 @@
 
 #include <memory>
 
-#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/OwningOpRef.h"
 #include "absl/status/statusor.h"
@@ -29,14 +28,9 @@ namespace maldoca {
 // context must contain the dialects
 //  - JsirDialect
 //  - JshirDialect
-//  - JslirDialect
 //  - mlir::func::FuncDialect
 absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
     const JsFile &ast, mlir::MLIRContext &context);
-
-mlir::OwningOpRef<JsirFileOp> JshirFileToJslir(JsirFileOp hir_file);
-
-mlir::OwningOpRef<JsirFileOp> JslirFileToJshir(JsirFileOp lir_file);
 
 absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file);
 

@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
 
 #include <cassert>
+#include <memory>
 #include <optional>
+#include <vector>
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/STLExtras.h"
@@ -36,6 +38,8 @@
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/analyses/scope.h"
 #include "maldoca/js/ir/ir.h"
+#include "maldoca/js/quickjs/quickjs.h"
+#include "quickjs/quickjs.h"
 
 namespace maldoca {
 
@@ -270,32 +274,68 @@ bool JsirConstantPropagationAnalysis::IsCfgEdgeExecutable(
     return true;
   }
 
-  auto [lhs_value, rhs, liveness_kind] = edge->getLivenessInfo().value();
-  auto lhs_state_ref = GetStateAt(lhs_value);
-  if (lhs_state_ref.value().IsUninitialized()) {
-    return false;
-  } else if (lhs_state_ref.value().IsUnknown()) {
-    return true;
-  }
+  auto [liveness_kind, liveness_values] = edge->getLivenessInfo().value();
 
-  if (auto rhs_attr = llvm::dyn_cast<mlir::Attribute>(rhs);
-      rhs_attr != nullptr) {
-    switch (liveness_kind) {
-      case LivenessKind::kLiveIfEqualOrUnknown:
-        return *lhs_state_ref.value() == rhs_attr;
-      case LivenessKind::kLiveIfNotEqualOrUnknown:
-        return *lhs_state_ref.value() != rhs_attr;
+  std::unique_ptr<JSRuntime, QjsRuntimeDeleter> qjs_runtime{JS_NewRuntime()};
+  std::unique_ptr<JSContext, QjsContextDeleter> qjs_context{
+      JS_NewContext(qjs_runtime.get())};
+
+  std::vector<std::optional<QjsValue>> qjs_values;
+  for (auto arg : liveness_values) {
+    std::optional<mlir::Attribute> opt_attr;
+    if (arg.isNull()) {
+      // Do nothing.
+    } else if (auto attr = llvm::dyn_cast<mlir::Attribute>(arg)) {
+      opt_attr = attr;
+    } else if (auto value = llvm::dyn_cast<mlir::Value>(arg)) {
+      JsirConstantPropagationValue const_prop_value = GetStateAt(value).value();
+      if (const_prop_value.IsUninitialized()) {
+        return false;
+      } else if (const_prop_value.IsUnknown()) {
+        return true;
+      }
+      opt_attr = *const_prop_value;
     }
+
+    std::optional<QjsValue> qjs_value;
+    if (opt_attr.has_value()) {
+      qjs_value =
+          MlirAttributeToQuickJsValue(qjs_context.get(), opt_attr.value());
+    }
+    qjs_values.push_back(qjs_value);
   }
 
-  auto rhs_value = llvm::dyn_cast<mlir::Value>(rhs);
-  auto rhs_state_ref = GetStateAt(rhs_value);
-  std::optional<mlir::Attribute> rhs_attr = *rhs_state_ref.value();
   switch (liveness_kind) {
-    case LivenessKind::kLiveIfEqualOrUnknown:
-      return *lhs_state_ref.value() == rhs_attr;
-    case LivenessKind::kLiveIfNotEqualOrUnknown:
-      return *lhs_state_ref.value() != rhs_attr;
+    case LivenessKind::kLiveIfTruthyOrUnknown: {
+      if (qjs_values.size() != 1 || !qjs_values[0].has_value()) {
+        return true;
+      }
+      return JS_ToBool(qjs_context.get(), qjs_values[0].value().get());
+    }
+    case LivenessKind::kLiveIfFalsyOrUnknown: {
+      if (qjs_values.size() != 1 || !qjs_values[0].has_value()) {
+        return true;
+      }
+      return !JS_ToBool(qjs_context.get(), qjs_values[0].value().get());
+    }
+    case LivenessKind::kLiveIfEqualOrUnknown: {
+      if (qjs_values.size() != 2 || !qjs_values[0].has_value() ||
+          !qjs_values[1].has_value()) {
+        return true;
+      }
+      auto result = EmulateBinOp(qjs_context.get(), "==", qjs_values[0].value(),
+                                 qjs_values[1].value());
+      return JS_ToBool(qjs_context.get(), result.get());
+    }
+    case LivenessKind::kLiveIfNotEqualOrUnknown: {
+      if (qjs_values.size() != 2 || !qjs_values[0].has_value() ||
+          !qjs_values[1].has_value()) {
+        return true;
+      }
+      auto result = EmulateBinOp(qjs_context.get(), "!=", qjs_values[0].value(),
+                                 qjs_values[1].value());
+      return JS_ToBool(qjs_context.get(), result.get());
+    }
   }
 }
 

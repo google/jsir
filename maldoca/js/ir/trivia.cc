@@ -38,17 +38,19 @@
 namespace maldoca {
 namespace {
 
-JsirPositionAttr JsPosition2JsirPositionAttr(mlir::MLIRContext *context,
-                                             const JsPosition &pos) {
+JsirPositionAttr JsPosition2JsirPositionAttr(mlir::MLIRContext* context,
+                                             const JsPosition& pos) {
   return JsirPositionAttr::get(context, pos.line(), pos.column());
 }
 
-JsirSymbolIdAttr GetJsirSymbolIdAttr(mlir::MLIRContext *context,
-                                     const JsSymbolId &symbol_id) {
+JsirSymbolIdAttr GetJsirSymbolIdAttr(mlir::MLIRContext* context,
+                                     const JsSymbolId& symbol_id) {
   return JsirSymbolIdAttr::get(context,
                                mlir::StringAttr::get(context, symbol_id.name()),
                                symbol_id.def_scope_uid());
 }
+
+}  // namespace
 
 JsirTriviaAttr GetJsirTriviaAttr(mlir::Attribute attr) {
   return llvm::TypeSwitch<mlir::Attribute, JsirTriviaAttr>(attr)
@@ -69,16 +71,14 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::Attribute attr) {
       });
 }
 
-}  // namespace
-
 std::unique_ptr<JsPosition> JsirPositionAttr2JsPosition(JsirPositionAttr attr) {
   const auto loc_start_line = attr.getLine();
   const auto loc_start_column = attr.getColumn();
   return absl::make_unique<JsPosition>(loc_start_line, loc_start_column);
 }
 
-JsirLocationAttr GetJsirLocationAttr(mlir::MLIRContext *context,
-                                     const JsSourceLocation *loc,
+JsirLocationAttr GetJsirLocationAttr(mlir::MLIRContext* context,
+                                     const JsSourceLocation* loc,
                                      std::optional<int64_t> start_index,
                                      std::optional<int64_t> end_index,
                                      std::optional<int64_t> scope_uid) {
@@ -94,8 +94,8 @@ JsirLocationAttr GetJsirLocationAttr(mlir::MLIRContext *context,
                                start_index, end_index, scope_uid);
 }
 
-JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext *context,
-                                 const JsNode &node) {
+JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext* context,
+                                 const JsNode& node) {
   JsirLocationAttr jsir_location = nullptr;
   if (node.loc().has_value()) {
     jsir_location =
@@ -126,7 +126,7 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext *context,
 
   std::vector<JsirSymbolIdAttr> mlir_defined_symbols;
   if (node.defined_symbols().has_value()) {
-    for (const auto &defined_symbol : **node.defined_symbols()) {
+    for (const auto& defined_symbol : **node.defined_symbols()) {
       mlir_defined_symbols.push_back(
           GetJsirSymbolIdAttr(context, *defined_symbol));
     }
@@ -137,7 +137,7 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext *context,
                              mlir_referenced_symbol, mlir_defined_symbols);
 }
 
-JsTrivia GetJsTrivia(mlir::Operation *op) {
+JsTrivia GetJsTrivia(mlir::Operation* op) {
   const auto mlir_trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
   if (mlir_trivia == nullptr) {
     return JsTrivia{};

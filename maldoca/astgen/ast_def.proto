@@ -20,7 +20,6 @@ import "maldoca/astgen/type.proto";
 
 option java_multiple_files = true;
 
-
 // =========
 // FieldKind
 // =========
@@ -336,6 +335,13 @@ message UnionTypePb {
 
   // Types which are members of this union.
   repeated string types = 3;
+
+  // If true, automatically generate the corresponding op.
+  // If false, the op is expected to be manually written.
+  optional bool should_generate_ir_op = 4;
+
+  // Supported kinds. Each kind leads to a different IR op.
+  repeated FieldKind kinds = 5;
 }
 
 // Top-level AST definition.

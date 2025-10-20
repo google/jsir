@@ -41,7 +41,6 @@
 
 #include "maldoca/js/ir/jshir_dialect.cc.inc"
 #include "maldoca/js/ir/jsir_dialect.cc.inc"
-#include "maldoca/js/ir/jslir_dialect.cc.inc"
 
 // Dialect initialization, the instance will be owned by the context. This is
 // the point of registration of types and operations for the dialect.
@@ -64,13 +63,6 @@ void maldoca::JshirDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
 #include "maldoca/js/ir/jshir_ops.cc.inc"
-      >();
-}
-
-void maldoca::JslirDialect::initialize() {
-  addOperations<
-#define GET_OP_LIST
-#include "maldoca/js/ir/jslir_ops.cc.inc"
       >();
 }
 

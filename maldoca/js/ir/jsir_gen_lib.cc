@@ -192,26 +192,6 @@ absl::StatusOr<JsirGenOutput> JsirGen(
         break;
       }
 
-      case JsirPassKind::kJshirToJslir: {
-        JsConversionConfig conversion;
-        *conversion.mutable_js_hir_to_lir() = {};
-
-        *pass_configs.add_passes()->mutable_conversion() =
-            std::move(conversion);
-
-        break;
-      }
-
-      case JsirPassKind::kJslirToJshir: {
-        JsConversionConfig conversion;
-        *conversion.mutable_js_lir_to_hir() = {};
-
-        *pass_configs.add_passes()->mutable_conversion() =
-            std::move(conversion);
-
-        break;
-      }
-
       case JsirPassKind::kJshirToAst: {
         JsConversionConfig conversion;
         *conversion.mutable_js_hir_to_ast() = {};

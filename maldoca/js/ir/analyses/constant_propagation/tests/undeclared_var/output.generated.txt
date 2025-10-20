@@ -1,60 +1,60 @@
-// JSLIR:      "jsir.file"() <{comments = []}> ({
-// JSLIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
-// JSLIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
-// JSLIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
-// JSLIR-NEXT:     %2 = "jsir.assignment_expression"(%0, %1) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSLIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
-// JSLIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
-// JSLIR-NEXT:       %3 = "jsir.identifier_ref"() <{name = "c"}> : () -> !jsir.any
-// JSLIR-NEXT:       %4 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
-// JSLIR-NEXT:       %5 = "jsir.variable_declarator"(%3, %4) : (!jsir.any, !jsir.any) -> !jsir.any
-// JSLIR-NEXT:       "jsir.exprs_region_end"(%5) : (!jsir.any) -> ()
-// JSLIR-NEXT:     }) : () -> ()
-// JSLIR-NEXT:   }, {
-// JSLIR-NEXT:   ^bb0:
-// JSLIR-NEXT:   }) : () -> ()
-// JSLIR-NEXT: }) : () -> ()
-// JSLIR-NEXT: jsir.file {[]} ({
-// JSLIR-NEXT:   ^bb0:
-// JSLIR-NEXT:       // <executable>
-// JSLIR-NEXT:       // State [default = <unknown>] { }
-// JSLIR-NEXT:     jsir.program {"script"} ({
-// JSLIR-NEXT:       ^bb0:
-// JSLIR-NEXT:           // <executable>
-// JSLIR-NEXT:           // State [default = <unknown>] { }
-// JSLIR-NEXT:         %0 = jsir.identifier_ref {"a"}
-// JSLIR-NEXT:           // %0 = <unknown>
-// JSLIR-NEXT:           // State [default = <unknown>] { }
-// JSLIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
-// JSLIR-NEXT:           // %1 = 1.000000e+00 : f64
-// JSLIR-NEXT:           // State [default = <unknown>] { }
-// JSLIR-NEXT:         %2 = jsir.assignment_expression (%0, %1) {"="}
-// JSLIR-NEXT:           // %2 = <unknown>
-// JSLIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSLIR-NEXT:         jsir.expression_statement (%2)
-// JSLIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSLIR-NEXT:         jsir.variable_declaration {"var"} ({
-// JSLIR-NEXT:           ^bb0:
-// JSLIR-NEXT:               // <executable>
-// JSLIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSLIR-NEXT:             %3 = jsir.identifier_ref {"c"}
-// JSLIR-NEXT:               // %3 = <unknown>
-// JSLIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSLIR-NEXT:             %4 = jsir.identifier {"a"}
-// JSLIR-NEXT:               // %4 = 1.000000e+00 : f64
-// JSLIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSLIR-NEXT:             %5 = jsir.variable_declarator (%3, %4)
-// JSLIR-NEXT:               // %5 = <uninitialized>
-// JSLIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
-// JSLIR-NEXT:             jsir.exprs_region_end (%5)
-// JSLIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
-// JSLIR-NEXT:         })
-// JSLIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
-// JSLIR-NEXT:     }, {
-// JSLIR-NEXT:       ^bb0:
-// JSLIR-NEXT:           // <executable>
-// JSLIR-NEXT:           // State [default = <unknown>] { }
-// JSLIR-NEXT:     })
-// JSLIR-NEXT:       // State [default = <unknown>] { }
-// JSLIR-NEXT: })
-// JSLIR-NEXT:   // State [default = <uninitialized>] { }
+// JSHIR:      "jsir.file"() <{comments = []}> ({
+// JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSHIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSHIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSHIR-NEXT:     %2 = "jsir.assignment_expression"(%0, %1) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
+// JSHIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
+// JSHIR-NEXT:       %3 = "jsir.identifier_ref"() <{name = "c"}> : () -> !jsir.any
+// JSHIR-NEXT:       %4 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
+// JSHIR-NEXT:       %5 = "jsir.variable_declarator"(%3, %4) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSHIR-NEXT:       "jsir.exprs_region_end"(%5) : (!jsir.any) -> ()
+// JSHIR-NEXT:     }) : () -> ()
+// JSHIR-NEXT:   }, {
+// JSHIR-NEXT:   ^bb0:
+// JSHIR-NEXT:   }) : () -> ()
+// JSHIR-NEXT: }) : () -> ()
+// JSHIR-NEXT: jsir.file {[]} ({
+// JSHIR-NEXT:   ^bb0:
+// JSHIR-NEXT:       // <executable>
+// JSHIR-NEXT:       // State [default = <unknown>] { }
+// JSHIR-NEXT:     jsir.program {"script"} ({
+// JSHIR-NEXT:       ^bb0:
+// JSHIR-NEXT:           // <executable>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %0 = jsir.identifier_ref {"a"}
+// JSHIR-NEXT:           // %0 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSHIR-NEXT:           // %1 = 1.000000e+00 : f64
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:         %2 = jsir.assignment_expression (%0, %1) {"="}
+// JSHIR-NEXT:           // %2 = <unknown>
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSHIR-NEXT:         jsir.expression_statement (%2)
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSHIR-NEXT:         jsir.variable_declaration {"var"} ({
+// JSHIR-NEXT:           ^bb0:
+// JSHIR-NEXT:               // <executable>
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSHIR-NEXT:             %3 = jsir.identifier_ref {"c"}
+// JSHIR-NEXT:               // %3 = <unknown>
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSHIR-NEXT:             %4 = jsir.identifier {"a"}
+// JSHIR-NEXT:               // %4 = 1.000000e+00 : f64
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSHIR-NEXT:             %5 = jsir.variable_declarator (%3, %4)
+// JSHIR-NEXT:               // %5 = <uninitialized>
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:             jsir.exprs_region_end (%5)
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:         })
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:     }, {
+// JSHIR-NEXT:       ^bb0:
+// JSHIR-NEXT:           // <executable>
+// JSHIR-NEXT:           // State [default = <unknown>] { }
+// JSHIR-NEXT:     })
+// JSHIR-NEXT:       // State [default = <unknown>] { }
+// JSHIR-NEXT: })
+// JSHIR-NEXT:   // State [default = <uninitialized>] { }

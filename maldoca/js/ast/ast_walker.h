@@ -72,19 +72,9 @@ class JsAstWalker : public JsAstVisitor<void> {
       VisitInterpreterDirective(*program.interpreter().value());
     }
 
-    for (const std::variant<std::unique_ptr<JsStatement>,
-                            std::unique_ptr<JsModuleDeclaration>>
-             &body_element : *program.body()) {
-      switch (body_element.index()) {
-        case 0:
-          VisitStatement(*std::get<0>(body_element));
-          break;
-        case 1:
-          VisitModuleDeclaration(*std::get<1>(body_element));
-          break;
-        default:
-          LOG(FATAL) << "Unreachable code.";
-      }
+    for (const std::unique_ptr<JsProgramBodyElement>& body_element :
+         *program.body()) {
+      VisitProgramBodyElement(*body_element);
     }
 
     for (const std::unique_ptr<JsDirective> &directive :
@@ -1581,19 +1571,9 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
       VisitInterpreterDirective(*program.interpreter().value());
     }
 
-    for (std::variant<std::unique_ptr<JsStatement>,
-                      std::unique_ptr<JsModuleDeclaration>> &body_element :
+    for (std::unique_ptr<JsProgramBodyElement>& body_element :
          *program.body()) {
-      switch (body_element.index()) {
-        case 0:
-          VisitStatement(*std::get<0>(body_element));
-          break;
-        case 1:
-          VisitModuleDeclaration(*std::get<1>(body_element));
-          break;
-        default:
-          LOG(FATAL) << "Unreachable code.";
-      }
+      VisitProgramBodyElement(*body_element);
     }
 
     for (std::unique_ptr<JsDirective> &directive : *program.directives()) {

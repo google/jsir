@@ -18,7 +18,6 @@ package maldoca;
 
 option java_multiple_files = true;
 
-
 // The Type Hierarchy
 //
 // BuiltinType ::= BoolType, DoubleType, StringType

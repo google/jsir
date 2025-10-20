@@ -72,17 +72,4 @@ def Jshir_Dialect : Dialect {
 class Jshir_Op<string mnemonic, list<Trait> traits = []> :
     Op<Jshir_Dialect, mnemonic, traits>;
 
-def Jslir_Dialect : Dialect {
-  let name = "jslir";
-  let cppNamespace = "::maldoca";
-}
-
-// Base class for JSLIR dialect operations.
-// This operation inherits from the base `Op` class in OpBase.td, and provides:
-// - The parent dialect of the operation.
-// - The mnemonic for the operation, or the name without the dialect prefix.
-// - A list of traits for the operation.
-class Jslir_Op<string mnemonic, list<Trait> traits = []> :
-    Op<Jslir_Dialect, mnemonic, traits>;
-
 #endif  // MALDOCA_JS_IR_JSIR_DIALECT_TD_

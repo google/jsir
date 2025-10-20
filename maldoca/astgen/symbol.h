@@ -43,13 +43,13 @@ class Symbol {
 
   // Concatenation.
   // E.g. "one_two" + "three_four" => "one_two_three_four"
-  Symbol &operator+=(const Symbol &other);
-  Symbol &operator+=(Symbol &&other);
+  Symbol& operator+=(const Symbol& other);
+  Symbol& operator+=(Symbol&& other);
 
-  Symbol &operator+=(absl::string_view other);
+  Symbol& operator+=(absl::string_view other);
 
   template <typename T>
-  Symbol operator+(T &&other) const {
+  Symbol operator+(T&& other) const {
     Symbol words = *this;
     words += other;
     return words;

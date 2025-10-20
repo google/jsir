@@ -25,8 +25,9 @@
 namespace maldoca {
 
 absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
-    JsirFileOp op, const BabelScopes &scopes, const JsirAnalysisConfig &config,
-    Babel *absl_nullable babel);
+    JsirFileOp op, std::optional<absl::string_view> source_code,
+    const BabelScopes& scopes, const JsirAnalysisConfig& config,
+    Babel* absl_nullable babel);
 
 }  // namespace maldoca
 

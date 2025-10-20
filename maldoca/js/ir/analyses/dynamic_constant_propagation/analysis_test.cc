@@ -23,7 +23,6 @@
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/Support/LLVM.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
@@ -75,8 +74,8 @@ void RunTest(const JsirAnalysisConfig::DynamicConstantPropagation &config,
   LoadNecessaryDialects(mlir_context);
   mlir_context.loadDialect<JsirBuiltinDialect>();
 
-  MALDOCA_ASSERT_OK_AND_ASSIGN(JsLirRepr repr,
-                       ToJsLirRepr::FromJsAstRepr(ast, scopes, mlir_context));
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      JsHirRepr repr, ToJsHirRepr::FromJsAstRepr(ast, scopes, mlir_context));
 
   // Get the const bindings.
   absl::flat_hash_map<JsSymbolId, mlir::Attribute> const_bindings =
@@ -153,7 +152,7 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, CombinedSource) {
 
   // Extract the prelude from the AST.
   JsirAnalysisConfig::DynamicConstantPropagation prelude_config =
-      ExtractPrelude(kCombined, *ast_repr.ast);
+      ExtractPreludeByAnnotations(kCombined, *ast_repr.ast);
 
   EXPECT_EQ(
       PrettyPrintSourceFromSourceString(babel, prelude_config.prelude_source(),
@@ -176,7 +175,8 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, BabelReuse) {
 
   // Use the Babel instance so that its internal scope uid counter is
   // incremented.
-  MALDOCA_ASSERT_OK(babel.Parse(kSource, parse_request, absl::InfiniteDuration()));
+  MALDOCA_ASSERT_OK(
+      babel.Parse(kSource, parse_request, absl::InfiniteDuration()));
 
   // Convert the **combined** source to AST.
   MALDOCA_ASSERT_OK_AND_ASSIGN(JsAstRepr ast_repr,
@@ -186,7 +186,7 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, BabelReuse) {
 
   // Extract the prelude from the AST.
   JsirAnalysisConfig::DynamicConstantPropagation prelude_config =
-      ExtractPrelude(kCombined, *ast_repr.ast);
+      ExtractPreludeByAnnotations(kCombined, *ast_repr.ast);
 
   EXPECT_EQ(
       PrettyPrintSourceFromSourceString(babel, prelude_config.prelude_source(),

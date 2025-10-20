@@ -39,51 +39,52 @@
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         jsir.expression_statement (%5)
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %6 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:           // %6 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         jslir.control_flow_marker (%6) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         jslir.control_flow_marker (%6) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:         jshir.block_statement ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %13 = jsir.identifier_ref {"btoa"}
-// SOURCE-NEXT:               // %13 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %14 = jsir.identifier {"atob"}
-// SOURCE-NEXT:               // %14 = #jsir_builtin<builtin_function "atob">
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %15 = jsir.variable_declarator (%13, %14)
-// SOURCE-NEXT:               // %15 = <uninitialized>
+// SOURCE-NEXT:             jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %12 = jsir.identifier_ref {"btoa"}
+// SOURCE-NEXT:                   // %12 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %13 = jsir.identifier {"atob"}
+// SOURCE-NEXT:                   // %13 = #jsir_builtin<builtin_function "atob">
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %14 = jsir.variable_declarator (%12, %13)
+// SOURCE-NEXT:                   // %14 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%14)
+// SOURCE-NEXT:                   // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             })
 // SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:             jsir.exprs_region_end (%15)
+// SOURCE-NEXT:             %6 = jsir.identifier {"console"}
+// SOURCE-NEXT:               // %6 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %7 = jsir.member_expression (%6) {#jsir<identifier   <L 4 C 10>, <L 4 C 13>, "log", 58, 61, 1, "log">}
+// SOURCE-NEXT:               // %7 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %8 = jsir.identifier {"btoa"}
+// SOURCE-NEXT:               // %8 = #jsir_builtin<builtin_function "atob">
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %9 = jsir.string_literal {#jsir<string_literal_extra "'aGk='", "aGk=">, "aGk="}
+// SOURCE-NEXT:               // %9 = "aGk="
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %10 = jsir.call_expression (%8, %9)
+// SOURCE-NEXT:               // %10 = "hi"
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             %11 = jsir.call_expression (%7, %10)
+// SOURCE-NEXT:               // %11 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:             jsir.expression_statement (%11)
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         %7 = jsir.identifier {"console"}
-// SOURCE-NEXT:           // %7 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         %8 = jsir.member_expression (%7) {#jsir<identifier   <L 4 C 10>, <L 4 C 13>, "log", 58, 61, 1, "log">}
-// SOURCE-NEXT:           // %8 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         %9 = jsir.identifier {"btoa"}
-// SOURCE-NEXT:           // %9 = #jsir_builtin<builtin_function "atob">
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         %10 = jsir.string_literal {#jsir<string_literal_extra "'aGk='", "aGk=">, "aGk="}
-// SOURCE-NEXT:           // %10 = "aGk="
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         %11 = jsir.call_expression (%9, %10)
-// SOURCE-NEXT:           // %11 = "hi"
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         %12 = jsir.call_expression (%8, %11)
-// SOURCE-NEXT:           // %12 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         jsir.expression_statement (%12)
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%6) {#jsir<cf_marker BlockStatementEnd>}
 // SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:     }, {
 // SOURCE-NEXT:       ^bb0:

@@ -45,7 +45,7 @@
 
 namespace maldoca {
 
-JsirStatementOpInterface AstToJsir::VisitStatement(const JsStatement *node) {
+JsirProgramBodyElementOpInterface AstToJsir::VisitProgramBodyElement(const JsProgramBodyElement *node) {
   if (auto *expression_statement = dynamic_cast<const JsExpressionStatement *>(node)) {
     return VisitExpressionStatement(expression_statement);
   }
@@ -109,10 +109,6 @@ JsirStatementOpInterface AstToJsir::VisitStatement(const JsStatement *node) {
   if (auto *class_declaration = dynamic_cast<const JsClassDeclaration *>(node)) {
     return VisitClassDeclaration(class_declaration);
   }
-  LOG(FATAL) << "Unreachable code.";
-}
-
-JsirModuleDeclarationOpInterface AstToJsir::VisitModuleDeclaration(const JsModuleDeclaration *node) {
   if (auto *import_declaration = dynamic_cast<const JsImportDeclaration *>(node)) {
     return VisitImportDeclaration(import_declaration);
   }
@@ -152,18 +148,7 @@ JsirProgramOp AstToJsir::VisitProgram(const JsProgram *node) {
   mlir::Region &mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(mlir_body_region, [&] {
     for (const auto &element : *node->body()) {
-      switch (element.index()) {
-        case 0: {
-          VisitStatement(std::get<0>(element).get());
-          break;
-        }
-        case 1: {
-          VisitModuleDeclaration(std::get<1>(element).get());
-          break;
-        }
-        default:
-          LOG(FATAL) << "Unreachable code.";
-      }
+      VisitProgramBodyElement(element.get());
     }
   });
   mlir::Region &mlir_directives_region = op.getDirectives();
@@ -421,6 +406,73 @@ JsirBigIntLiteralOp AstToJsir::VisitBigIntLiteral(const JsBigIntLiteral *node) {
     mlir_extra = VisitBigIntLiteralExtraAttr(node->extra().value());
   }
   return CreateExpr<JsirBigIntLiteralOp>(node, mlir_value, mlir_extra);
+}
+
+JsirStatementOpInterface AstToJsir::VisitStatement(const JsStatement *node) {
+  if (auto *expression_statement = dynamic_cast<const JsExpressionStatement *>(node)) {
+    return VisitExpressionStatement(expression_statement);
+  }
+  if (auto *block_statement = dynamic_cast<const JsBlockStatement *>(node)) {
+    return VisitBlockStatement(block_statement);
+  }
+  if (auto *empty_statement = dynamic_cast<const JsEmptyStatement *>(node)) {
+    return VisitEmptyStatement(empty_statement);
+  }
+  if (auto *debugger_statement = dynamic_cast<const JsDebuggerStatement *>(node)) {
+    return VisitDebuggerStatement(debugger_statement);
+  }
+  if (auto *with_statement = dynamic_cast<const JsWithStatement *>(node)) {
+    return VisitWithStatement(with_statement);
+  }
+  if (auto *return_statement = dynamic_cast<const JsReturnStatement *>(node)) {
+    return VisitReturnStatement(return_statement);
+  }
+  if (auto *labeled_statement = dynamic_cast<const JsLabeledStatement *>(node)) {
+    return VisitLabeledStatement(labeled_statement);
+  }
+  if (auto *break_statement = dynamic_cast<const JsBreakStatement *>(node)) {
+    return VisitBreakStatement(break_statement);
+  }
+  if (auto *continue_statement = dynamic_cast<const JsContinueStatement *>(node)) {
+    return VisitContinueStatement(continue_statement);
+  }
+  if (auto *if_statement = dynamic_cast<const JsIfStatement *>(node)) {
+    return VisitIfStatement(if_statement);
+  }
+  if (auto *switch_statement = dynamic_cast<const JsSwitchStatement *>(node)) {
+    return VisitSwitchStatement(switch_statement);
+  }
+  if (auto *throw_statement = dynamic_cast<const JsThrowStatement *>(node)) {
+    return VisitThrowStatement(throw_statement);
+  }
+  if (auto *try_statement = dynamic_cast<const JsTryStatement *>(node)) {
+    return VisitTryStatement(try_statement);
+  }
+  if (auto *while_statement = dynamic_cast<const JsWhileStatement *>(node)) {
+    return VisitWhileStatement(while_statement);
+  }
+  if (auto *do_while_statement = dynamic_cast<const JsDoWhileStatement *>(node)) {
+    return VisitDoWhileStatement(do_while_statement);
+  }
+  if (auto *for_statement = dynamic_cast<const JsForStatement *>(node)) {
+    return VisitForStatement(for_statement);
+  }
+  if (auto *for_in_statement = dynamic_cast<const JsForInStatement *>(node)) {
+    return VisitForInStatement(for_in_statement);
+  }
+  if (auto *for_of_statement = dynamic_cast<const JsForOfStatement *>(node)) {
+    return VisitForOfStatement(for_of_statement);
+  }
+  if (auto *function_declaration = dynamic_cast<const JsFunctionDeclaration *>(node)) {
+    return VisitFunctionDeclaration(function_declaration);
+  }
+  if (auto *variable_declaration = dynamic_cast<const JsVariableDeclaration *>(node)) {
+    return VisitVariableDeclaration(variable_declaration);
+  }
+  if (auto *class_declaration = dynamic_cast<const JsClassDeclaration *>(node)) {
+    return VisitClassDeclaration(class_declaration);
+  }
+  LOG(FATAL) << "Unreachable code.";
 }
 
 JshirBlockStatementOp AstToJsir::VisitBlockStatement(const JsBlockStatement *node) {
@@ -1082,6 +1134,22 @@ JsirMetaPropertyOp AstToJsir::VisitMetaProperty(const JsMetaProperty *node) {
   JsirIdentifierAttr mlir_meta = VisitIdentifierAttr(node->meta());
   JsirIdentifierAttr mlir_property = VisitIdentifierAttr(node->property());
   return CreateExpr<JsirMetaPropertyOp>(node, mlir_meta, mlir_property);
+}
+
+JsirModuleDeclarationOpInterface AstToJsir::VisitModuleDeclaration(const JsModuleDeclaration *node) {
+  if (auto *import_declaration = dynamic_cast<const JsImportDeclaration *>(node)) {
+    return VisitImportDeclaration(import_declaration);
+  }
+  if (auto *export_named_declaration = dynamic_cast<const JsExportNamedDeclaration *>(node)) {
+    return VisitExportNamedDeclaration(export_named_declaration);
+  }
+  if (auto *export_default_declaration = dynamic_cast<const JsExportDefaultDeclaration *>(node)) {
+    return VisitExportDefaultDeclaration(export_default_declaration);
+  }
+  if (auto *export_all_declaration = dynamic_cast<const JsExportAllDeclaration *>(node)) {
+    return VisitExportAllDeclaration(export_all_declaration);
+  }
+  LOG(FATAL) << "Unreachable code.";
 }
 
 JsirModuleSpecifierAttrInterface AstToJsir::VisitModuleSpecifierAttr(const JsModuleSpecifier *node) {

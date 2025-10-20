@@ -50,10 +50,6 @@ struct ToJsSourceRepr {
   static absl::StatusOr<JsSourceRepr> FromJsHirRepr(
       const JsHirRepr &hir_repr, BabelGenerateOptions generate_options,
       absl::Duration timeout, Babel &babel);
-
-  static absl::StatusOr<JsSourceRepr> FromJsLirRepr(
-      const JsLirRepr &lir_repr, BabelGenerateOptions generate_options,
-      absl::Duration timeout, Babel &babel);
 };
 
 struct ToJsAstStringRepr {
@@ -66,9 +62,6 @@ struct ToJsAstStringRepr {
 
   static absl::StatusOr<JsAstStringRepr> FromJsHirRepr(
       const JsHirRepr &hir_repr);
-
-  static absl::StatusOr<JsAstStringRepr> FromJsLirRepr(
-      const JsLirRepr &lir_repr);
 };
 
 struct ToJsAstRepr {
@@ -82,8 +75,6 @@ struct ToJsAstRepr {
       std::optional<int> recursion_depth_limit);
 
   static absl::StatusOr<JsAstRepr> FromJsHirRepr(const JsHirRepr &hir_repr);
-
-  static absl::StatusOr<JsAstRepr> FromJsLirRepr(const JsLirRepr &lir_repr);
 };
 
 struct ToJsHirRepr {
@@ -100,8 +91,6 @@ struct ToJsHirRepr {
   static absl::StatusOr<JsHirRepr> FromJsAstRepr(
       const maldoca::JsFile &ast, const BabelScopes &scopes,
       mlir::MLIRContext &mlir_context);
-
-  static JsHirRepr FromJsLirRepr(const JsLirRepr &lir_repr);
 };
 
 struct ToJsLirRepr {
@@ -118,8 +107,6 @@ struct ToJsLirRepr {
   static absl::StatusOr<JsLirRepr> FromJsAstRepr(
       const JsFile &ast, const BabelScopes &scopes,
       mlir::MLIRContext &mlir_context);
-
-  static JsLirRepr FromJsHirRepr(const JsHirRepr &hir_repr);
 };
 
 }  // namespace maldoca

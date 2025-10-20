@@ -54,9 +54,9 @@
 
 namespace maldoca {
 
-absl::StatusOr<std::unique_ptr<JsStatement>>
-JsirToAst::VisitStatement(JsirStatementOpInterface op) {
-  using Ret = absl::StatusOr<std::unique_ptr<JsStatement>>;
+absl::StatusOr<std::unique_ptr<JsProgramBodyElement>>
+JsirToAst::VisitProgramBodyElement(JsirProgramBodyElementOpInterface op) {
+  using Ret = absl::StatusOr<std::unique_ptr<JsProgramBodyElement>>;
   return llvm::TypeSwitch<mlir::Operation*, Ret>(op)
     .Case([&](JsirExpressionStatementOp op) {
       return VisitExpressionStatement(op);
@@ -121,15 +121,6 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
     .Case([&](JsirClassDeclarationOp op) {
       return VisitClassDeclaration(op);
     })
-    .Default([&](mlir::Operation* op) {
-      return absl::InvalidArgumentError("Unrecognized op");
-    });
-}
-
-absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>
-JsirToAst::VisitModuleDeclaration(JsirModuleDeclarationOpInterface op) {
-  using Ret = absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>;
-  return llvm::TypeSwitch<mlir::Operation*, Ret>(op)
     .Case([&](JsirImportDeclarationOp op) {
       return VisitImportDeclaration(op);
     })
@@ -182,16 +173,13 @@ JsirToAst::VisitProgram(JsirProgramOp op) {
   }
   std::string source_type = op.getSourceTypeAttr().str();
   MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_block, GetStmtsRegionBlock(op.getBody()));
-  std::vector<std::variant<std::unique_ptr<JsStatement>, std::unique_ptr<JsModuleDeclaration>>> body;
+  std::vector<std::unique_ptr<JsProgramBodyElement>> body;
   for (mlir::Operation& mlir_body_element_unchecked : *mlir_body_block) {
-    std::variant<std::unique_ptr<JsStatement>, std::unique_ptr<JsModuleDeclaration>> body_element;
-    if (auto mlir_body_element = llvm::dyn_cast<JsirStatementOpInterface>(mlir_body_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, VisitStatement(mlir_body_element));
-    } else if (auto mlir_body_element = llvm::dyn_cast<JsirModuleDeclarationOpInterface>(mlir_body_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, VisitModuleDeclaration(mlir_body_element));
-    } else {
+    auto body_element_op = llvm::dyn_cast<JsirProgramBodyElementOpInterface>(mlir_body_element_unchecked);
+    if (body_element_op == nullptr) {
       continue;
     }
+    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsProgramBodyElement> body_element, VisitProgramBodyElement(body_element_op));
     body.push_back(std::move(body_element));
   }
   MALDOCA_ASSIGN_OR_RETURN(auto mlir_directives_block, GetStmtsRegionBlock(op.getDirectives()));
@@ -520,6 +508,78 @@ JsirToAst::VisitBigIntLiteral(JsirBigIntLiteralOp op) {
       op,
       std::move(value),
       std::move(extra));
+}
+
+absl::StatusOr<std::unique_ptr<JsStatement>>
+JsirToAst::VisitStatement(JsirStatementOpInterface op) {
+  using Ret = absl::StatusOr<std::unique_ptr<JsStatement>>;
+  return llvm::TypeSwitch<mlir::Operation*, Ret>(op)
+    .Case([&](JsirExpressionStatementOp op) {
+      return VisitExpressionStatement(op);
+    })
+    .Case([&](JshirBlockStatementOp op) {
+      return VisitBlockStatement(op);
+    })
+    .Case([&](JsirEmptyStatementOp op) {
+      return VisitEmptyStatement(op);
+    })
+    .Case([&](JsirDebuggerStatementOp op) {
+      return VisitDebuggerStatement(op);
+    })
+    .Case([&](JshirWithStatementOp op) {
+      return VisitWithStatement(op);
+    })
+    .Case([&](JsirReturnStatementOp op) {
+      return VisitReturnStatement(op);
+    })
+    .Case([&](JshirLabeledStatementOp op) {
+      return VisitLabeledStatement(op);
+    })
+    .Case([&](JshirBreakStatementOp op) {
+      return VisitBreakStatement(op);
+    })
+    .Case([&](JshirContinueStatementOp op) {
+      return VisitContinueStatement(op);
+    })
+    .Case([&](JshirIfStatementOp op) {
+      return VisitIfStatement(op);
+    })
+    .Case([&](JshirSwitchStatementOp op) {
+      return VisitSwitchStatement(op);
+    })
+    .Case([&](JsirThrowStatementOp op) {
+      return VisitThrowStatement(op);
+    })
+    .Case([&](JshirTryStatementOp op) {
+      return VisitTryStatement(op);
+    })
+    .Case([&](JshirWhileStatementOp op) {
+      return VisitWhileStatement(op);
+    })
+    .Case([&](JshirDoWhileStatementOp op) {
+      return VisitDoWhileStatement(op);
+    })
+    .Case([&](JshirForStatementOp op) {
+      return VisitForStatement(op);
+    })
+    .Case([&](JshirForInStatementOp op) {
+      return VisitForInStatement(op);
+    })
+    .Case([&](JshirForOfStatementOp op) {
+      return VisitForOfStatement(op);
+    })
+    .Case([&](JsirFunctionDeclarationOp op) {
+      return VisitFunctionDeclaration(op);
+    })
+    .Case([&](JsirVariableDeclarationOp op) {
+      return VisitVariableDeclaration(op);
+    })
+    .Case([&](JsirClassDeclarationOp op) {
+      return VisitClassDeclaration(op);
+    })
+    .Default([&](mlir::Operation* op) {
+      return absl::InvalidArgumentError("Unrecognized op");
+    });
 }
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
@@ -1599,6 +1659,27 @@ JsirToAst::VisitMetaProperty(JsirMetaPropertyOp op) {
       op,
       std::move(meta),
       std::move(property));
+}
+
+absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>
+JsirToAst::VisitModuleDeclaration(JsirModuleDeclarationOpInterface op) {
+  using Ret = absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>;
+  return llvm::TypeSwitch<mlir::Operation*, Ret>(op)
+    .Case([&](JsirImportDeclarationOp op) {
+      return VisitImportDeclaration(op);
+    })
+    .Case([&](JsirExportNamedDeclarationOp op) {
+      return VisitExportNamedDeclaration(op);
+    })
+    .Case([&](JsirExportDefaultDeclarationOp op) {
+      return VisitExportDefaultDeclaration(op);
+    })
+    .Case([&](JsirExportAllDeclarationOp op) {
+      return VisitExportAllDeclaration(op);
+    })
+    .Default([&](mlir::Operation* op) {
+      return absl::InvalidArgumentError("Unrecognized op");
+    });
 }
 
 absl::StatusOr<std::unique_ptr<JsModuleSpecifier>>

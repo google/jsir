@@ -41,13 +41,13 @@ absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
     Babel *absl_nullable babel,
     JsAnalysisOutputs *absl_nullable analysis_outputs);
 
-// Performs a single transform on a JSHIR or JSLIR module.
+// Performs a single transform on a JSHIR module.
 absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
                            const JsirTransformConfig &config,
                            Babel *absl_nullable babel,
                            JsAnalysisOutputs *absl_nullable analysis_outputs);
 
-// Performs the given list of transforms on a JSHIR or JSLIR module.
+// Performs the given list of transforms on a JSHIR module.
 absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
                            std::vector<JsirTransformConfig> configs,
                            Babel *absl_nullable babel,

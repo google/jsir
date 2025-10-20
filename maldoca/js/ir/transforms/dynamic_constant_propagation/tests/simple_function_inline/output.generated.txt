@@ -43,25 +43,26 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %21 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:               // %21 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %22 = jsir.identifier {"a"}
-// SOURCE-NEXT:               // %22 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %23 = jsir.identifier {"b"}
-// SOURCE-NEXT:               // %23 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %24 = jsir.binary_expression (%22, %23) {"+"}
-// SOURCE-NEXT:               // %24 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.return_statement (%24)
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementEnd>}
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %21 = jsir.identifier {"a"}
+// SOURCE-NEXT:                   // %21 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %22 = jsir.identifier {"b"}
+// SOURCE-NEXT:                   // %22 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 %23 = jsir.binary_expression (%21, %22) {"+"}
+// SOURCE-NEXT:                   // %23 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 jsir.return_statement (%23)
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             })
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { }
@@ -81,42 +82,43 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %21 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:               // %21 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:             jshir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %23 = jsir.identifier_ref {"c"}
-// SOURCE-NEXT:                   // %23 = <unknown>
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %22 = jsir.identifier_ref {"c"}
+// SOURCE-NEXT:                       // %22 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %23 = jsir.identifier {"a"}
+// SOURCE-NEXT:                       // %23 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %24 = jsir.identifier {"b"}
+// SOURCE-NEXT:                       // %24 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %25 = jsir.binary_expression (%23, %24) {"+"}
+// SOURCE-NEXT:                       // %25 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %26 = jsir.variable_declarator (%22, %25)
+// SOURCE-NEXT:                       // %26 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%26)
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                 })
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %24 = jsir.identifier {"a"}
-// SOURCE-NEXT:                   // %24 = <unknown>
+// SOURCE-NEXT:                 %21 = jsir.identifier {"c"}
+// SOURCE-NEXT:                   // %21 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %25 = jsir.identifier {"b"}
-// SOURCE-NEXT:                   // %25 = <unknown>
+// SOURCE-NEXT:                 jsir.return_statement (%21)
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %26 = jsir.binary_expression (%24, %25) {"+"}
-// SOURCE-NEXT:                   // %26 = <unknown>
-// SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %27 = jsir.variable_declarator (%23, %26)
-// SOURCE-NEXT:                   // %27 = <uninitialized>
-// SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 jsir.exprs_region_end (%27)
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:             })
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %22 = jsir.identifier {"c"}
-// SOURCE-NEXT:               // %22 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.return_statement (%22)
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementEnd>}
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { }
@@ -136,16 +138,17 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %21 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:               // %21 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.return_statement
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%21) {#jsir<cf_marker BlockStatementEnd>}
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:                 jsir.return_statement
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
+// SOURCE-NEXT:             })
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { }

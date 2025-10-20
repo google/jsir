@@ -65,7 +65,6 @@ class AstToJsir {
 
   FOR_EACH_JSIR_CLASS(DECLARE_CIR_OP_VISIT_FUNCTION,
                       DECLARE_HIR_OP_VISIT_FUNCTION,
-                      /*LIR_OP=*/JSIR_CLASS_IGNORE,
                       DECLARE_REF_OP_VISIT_FUNCTION,
                       DECLARE_ATTRIB_VISIT_FUNCTION)
 
@@ -73,6 +72,9 @@ class AstToJsir {
 #undef DECLARE_REF_OP_VISIT_FUNCTION
 #undef DECLARE_HIR_OP_VISIT_FUNCTION
 #undef DECLARE_ATTRIB_VISIT_FUNCTION
+
+  JsirProgramBodyElementOpInterface VisitProgramBodyElement(
+      const JsProgramBodyElement* node);
 
   JsirLiteralOpInterface VisitLiteral(const JsLiteral *node);
 
@@ -116,8 +118,8 @@ class AstToJsir {
   T CreateStmt(const JsNode *node, Args &&...args) {
     CHECK(node != nullptr) << "Node cannot be null.";
     mlir::MLIRContext *context = builder_.getContext();
-    return builder_.create<T>(GetJsirTriviaAttr(context, *node), std::nullopt,
-                              std::forward<Args>(args)...);
+    return builder_.create<T>(GetJsirTriviaAttr(context, *node),
+                              mlir::TypeRange(), std::forward<Args>(args)...);
   }
 
   void AppendNewBlockAndPopulate(mlir::Region &region,

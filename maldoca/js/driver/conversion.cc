@@ -75,15 +75,6 @@ absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstRepr(
 }
 
 // -----------------------------------------------------------------------------
-// HIR -> LIR
-// -----------------------------------------------------------------------------
-
-JsLirRepr ToJsLirRepr::FromJsHirRepr(const JsHirRepr &hir_repr) {
-  mlir::OwningOpRef<JsirFileOp> lir_op = JshirFileToJslir(hir_repr.op.get());
-  return JsLirRepr{std::move(lir_op), hir_repr.scopes};
-}
-
-// -----------------------------------------------------------------------------
 // Source -> AST string -> AST
 // -----------------------------------------------------------------------------
 
@@ -113,21 +104,6 @@ absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsSourceRepr(
 }
 
 // -----------------------------------------------------------------------------
-// Source -> AST string -> AST -> HIR -> LIR
-// -----------------------------------------------------------------------------
-
-absl::StatusOr<JsLirRepr> ToJsLirRepr::FromJsSourceRepr(
-    absl::string_view source, BabelParseRequest parse_request,
-    absl::Duration timeout, std::optional<int> recursion_depth_limit,
-    Babel &babel, mlir::MLIRContext &mlir_context) {
-  MALDOCA_ASSIGN_OR_RETURN(
-      JsHirRepr hir, ToJsHirRepr::FromJsSourceRepr(
-                         source, parse_request, timeout, recursion_depth_limit,
-                         babel, mlir_context));
-  return ToJsLirRepr::FromJsHirRepr(hir);
-}
-
-// -----------------------------------------------------------------------------
 // AST string -> AST -> HIR
 // -----------------------------------------------------------------------------
 
@@ -140,43 +116,9 @@ absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstStringRepr(
   return ToJsHirRepr::FromJsAstRepr(*ast.ast, ast.scopes, mlir_context);
 }
 
-// ----------------------------------------------------------------------------
-// AST string -> AST -> HIR -> LIR
-// -----------------------------------------------------------------------------
-
-absl::StatusOr<JsLirRepr> ToJsLirRepr::FromJsAstStringRepr(
-    const BabelAstString &ast_string, std::optional<int> recursion_depth_limit,
-    mlir::MLIRContext &mlir_context) {
-  MALDOCA_ASSIGN_OR_RETURN(
-      JsHirRepr hir, ToJsHirRepr::FromJsAstStringRepr(
-                         ast_string, recursion_depth_limit, mlir_context));
-  return ToJsLirRepr::FromJsHirRepr(hir);
-}
-
-// ----------------------------------------------------------------------------
-// AST -> HIR -> LIR
-// -----------------------------------------------------------------------------
-
-absl::StatusOr<JsLirRepr> ToJsLirRepr::FromJsAstRepr(
-    const JsFile &ast, const BabelScopes &scopes,
-    mlir::MLIRContext &mlir_context) {
-  MALDOCA_ASSIGN_OR_RETURN(
-      JsHirRepr hir, ToJsHirRepr::FromJsAstRepr(ast, scopes, mlir_context));
-  return ToJsLirRepr::FromJsHirRepr(hir);
-}
-
 // =============================================================================
 // Lifting conversions
 // =============================================================================
-
-// -----------------------------------------------------------------------------
-// LIR -> HIR
-// -----------------------------------------------------------------------------
-
-JsHirRepr ToJsHirRepr::FromJsLirRepr(const JsLirRepr &lir_repr) {
-  mlir::OwningOpRef<JsirFileOp> hir_op = JslirFileToJshir(lir_repr.op.get());
-  return JsHirRepr{std::move(hir_op), lir_repr.scopes};
-}
 
 // -----------------------------------------------------------------------------
 // HIR -> AST
@@ -211,39 +153,6 @@ absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsAstStringRepr(
       BabelGenerateResult generate_result,
       babel.Generate(ast_string, generate_options, timeout));
   return JsSourceRepr{std::move(generate_result.source_code)};
-}
-
-// -----------------------------------------------------------------------------
-// LIR -> HIR -> AST
-// -----------------------------------------------------------------------------
-
-absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsLirRepr(
-    const JsLirRepr &lir_repr) {
-  JsHirRepr hir = ToJsHirRepr::FromJsLirRepr(lir_repr);
-  return ToJsAstRepr::FromJsHirRepr(hir);
-}
-
-// -----------------------------------------------------------------------------
-// LIR -> HIR -> AST -> AST string
-// -----------------------------------------------------------------------------
-
-absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsLirRepr(
-    const JsLirRepr &lir_repr) {
-  MALDOCA_ASSIGN_OR_RETURN(JsAstRepr ast, ToJsAstRepr::FromJsLirRepr(lir_repr));
-  return ToJsAstStringRepr::FromJsAstRepr(*ast.ast, ast.scopes);
-}
-
-// -----------------------------------------------------------------------------
-// LIR -> HIR -> AST -> AST string -> Source
-// -----------------------------------------------------------------------------
-
-absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsLirRepr(
-    const JsLirRepr &lir_repr, BabelGenerateOptions generate_options,
-    absl::Duration timeout, Babel &babel) {
-  MALDOCA_ASSIGN_OR_RETURN(JsAstStringRepr ast_string,
-                   ToJsAstStringRepr::FromJsLirRepr(lir_repr));
-  return ToJsSourceRepr::FromJsAstStringRepr(ast_string.ast_string,
-                                             generate_options, timeout, babel);
 }
 
 // -----------------------------------------------------------------------------

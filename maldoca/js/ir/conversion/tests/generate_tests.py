@@ -83,13 +83,6 @@ if __name__ == "__main__":
 
     generate_test_file(
         entry,
-        output_name="jslir.mlir",
-        passes="source2ast,ast2hir,hir2lir",
-        prefix="JSLIR",
-    )
-
-    generate_test_file(
-        entry,
         output_name="output.js",
         passes="source2ast,ast2source",
         prefix="SOURCE",

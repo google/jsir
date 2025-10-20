@@ -35,27 +35,6 @@ message JsReprPb {
 }
 
 // =============================================================================
-// JsPassConfig
-// =============================================================================
-
-message JsPassConfig {
-  oneof kind {
-    JsConversionConfig conversion = 1;
-
-    // Analysis
-    JsirAnalysisConfig jsir_analysis = 3;
-
-    // Transform
-    JsAstTransformConfig ast_transform = 4;
-    JsirTransformConfig jsir_transform = 5;
-  }
-}
-
-message JsPassConfigs {
-  repeated JsPassConfig passes = 1;
-}
-
-// =============================================================================
 // JsConversionConfig
 // =============================================================================
 
@@ -72,10 +51,6 @@ message JsConversionConfig {
     // ast <=> hir
     JsAstToHirConfig js_ast_to_hir = 5;
     JsHirToAstConfig js_hir_to_ast = 6;
-
-    // hir <=> lir
-    JsHirToLirConfig js_hir_to_lir = 7;
-    JsLirToHirConfig js_lir_to_hir = 8;
   }
 }
 
@@ -106,14 +81,6 @@ message JsLirToHirConfig {}
 // =============================================================================
 // Analysis
 // =============================================================================
-
-message JsAstAnalysisResult {
-
-  oneof kind {
-    // Added by JsAstTransformConfig.ExtractPrelude
-    JsirAnalysisConfig.DynamicConstantPropagation extract_prelude = 2;
-  }
-}
 
 message JsirAnalysisConfig {
   reserved 3, 4;
@@ -160,8 +127,20 @@ message JsirAnalysisConfig {
   }
 }
 
+message JsAstAnalysisResult {
+
+  oneof kind {
+    // Added by JsAstTransformConfig.ExtractPrelude
+    JsirAnalysisConfig.DynamicConstantPropagation extract_prelude = 2;
+  }
+}
+
 message JsirAnalysisResult {
   reserved 3, 4;
+
+  message DataFlow {
+    optional string output = 1;
+  }
 
   oneof kind {
     DataFlow constant_propagation = 5;
@@ -185,10 +164,6 @@ message JsirAnalysisResult {
       }
     }
     repeated ComputedConstant computed_constants = 3;
-  }
-
-  message DataFlow {
-    optional string output = 1;
   }
 }
 
@@ -214,7 +189,11 @@ message JsAstTransformConfig {
   }
 
   message EraseComments {}
-  message ExtractPrelude {}
+
+  message ExtractPrelude {
+    // The indices of the top-level statements to extract.
+    repeated int64 prelude_indices = 1;
+  }
 }
 
 message JsirTransformConfig {
@@ -243,4 +222,25 @@ message JsirTransformConfig {
   message RemoveDirectives {}
 
   message SplitDeclarationStatements {}
+}
+
+// =============================================================================
+// JsPassConfig
+// =============================================================================
+
+message JsPassConfig {
+  oneof kind {
+    JsConversionConfig conversion = 1;
+
+    // Analysis
+    JsirAnalysisConfig jsir_analysis = 3;
+
+    // Transform
+    JsAstTransformConfig ast_transform = 4;
+    JsirTransformConfig jsir_transform = 5;
+  }
+}
+
+message JsPassConfigs {
+  repeated JsPassConfig passes = 1;
 }

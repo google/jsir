@@ -355,6 +355,11 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   for (const UnionTypePb &union_type_pb : pb.union_types()) {
     auto union_type_node = absl::WrapUnique(new NodeDef());
     union_type_node->name_ = union_type_pb.name();
+    union_type_node->should_generate_ir_op_ =
+        union_type_pb.should_generate_ir_op();
+    for (auto kind : union_type_pb.kinds()) {
+      union_type_node->kinds_.push_back(static_cast<FieldKind>(kind));
+    }
     if (nodes.contains(union_type_pb.name())) {
       return absl::InvalidArgumentError(
           absl::StrCat(union_type_pb.name(), " already exists!"));

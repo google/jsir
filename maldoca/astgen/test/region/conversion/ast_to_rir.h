@@ -45,7 +45,7 @@ class AstToRir {
 
   template <typename Op, typename RNode, typename... Args>
   Op CreateStmt(const RNode *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(), std::nullopt,
+    return builder_.create<Op>(builder_.getUnknownLoc(), mlir::TypeRange(),
                                std::forward<Args>(args)...);
   }
 

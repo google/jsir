@@ -17,12 +17,7 @@ load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 licenses(["notice"])
 
-package(
-    default_applicable_licenses = ["//:license"],
-    default_visibility = [
-        "//maldoca/astgen:__subpackages__",
-    ],
-)
+package(default_applicable_licenses = ["//:license"])
 
 cc_test(
     name = "ast_gen_test",

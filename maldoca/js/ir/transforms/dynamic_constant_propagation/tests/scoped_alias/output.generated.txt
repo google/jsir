@@ -58,16 +58,16 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %22 = jsir.identifier_ref {"wrapper"}
-// SOURCE-NEXT:               // %22 = <unknown>
+// SOURCE-NEXT:             %10 = jsir.identifier_ref {"wrapper"}
+// SOURCE-NEXT:               // %10 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %23 = jsir.identifier {"prelude_1"}
-// SOURCE-NEXT:               // %23 = #jsir_builtin<builtin_function "prelude_1">
+// SOURCE-NEXT:             %11 = jsir.identifier {"prelude_1"}
+// SOURCE-NEXT:               // %11 = #jsir_builtin<builtin_function "prelude_1">
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %24 = jsir.variable_declarator (%22, %23)
-// SOURCE-NEXT:               // %24 = <uninitialized>
+// SOURCE-NEXT:             %12 = jsir.variable_declarator (%10, %11)
+// SOURCE-NEXT:               // %12 = <uninitialized>
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:             jsir.exprs_region_end (%24)
+// SOURCE-NEXT:             jsir.exprs_region_end (%12)
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
@@ -88,74 +88,76 @@
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
 // SOURCE-NEXT:         jsir.expression_statement (%9)
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:         %10 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:           // %10 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%10) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%10) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:         jshir.block_statement ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:             %22 = jsir.identifier_ref {"wrapper"}
-// SOURCE-NEXT:               // %22 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:             %23 = jsir.identifier {"prelude_2"}
-// SOURCE-NEXT:               // %23 = #jsir_builtin<builtin_function "prelude_2">
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:             %24 = jsir.variable_declarator (%22, %23)
-// SOURCE-NEXT:               // %24 = <uninitialized>
+// SOURCE-NEXT:             jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
+// SOURCE-NEXT:                 %15 = jsir.identifier_ref {"wrapper"}
+// SOURCE-NEXT:                   // %15 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
+// SOURCE-NEXT:                 %16 = jsir.identifier {"prelude_2"}
+// SOURCE-NEXT:                   // %16 = #jsir_builtin<builtin_function "prelude_2">
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
+// SOURCE-NEXT:                 %17 = jsir.variable_declarator (%15, %16)
+// SOURCE-NEXT:                   // %17 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%17)
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             })
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:             jsir.exprs_region_end (%24)
+// SOURCE-NEXT:             %10 = jsir.identifier {"console"}
+// SOURCE-NEXT:               // %10 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             %11 = jsir.member_expression (%10) {#jsir<identifier   <L 20 C 10>, <L 20 C 13>, "log", 284, 287, 4, "log">}
+// SOURCE-NEXT:               // %11 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             %12 = jsir.identifier {"wrapper"}
+// SOURCE-NEXT:               // %12 = #jsir_builtin<builtin_function "prelude_2">
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             %13 = jsir.call_expression (%12)
+// SOURCE-NEXT:               // %13 = "prelude_2"
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             %14 = jsir.call_expression (%11, %13)
+// SOURCE-NEXT:               // %14 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             jsir.expression_statement (%14)
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 %15 = jsir.identifier {"console"}
+// SOURCE-NEXT:                   // %15 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 %16 = jsir.member_expression (%15) {#jsir<identifier   <L 22 C 12>, <L 22 C 15>, "log", 316, 319, 5, "log">}
+// SOURCE-NEXT:                   // %16 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 %17 = jsir.identifier {"wrapper"}
+// SOURCE-NEXT:                   // %17 = #jsir_builtin<builtin_function "prelude_2">
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 %18 = jsir.call_expression (%17)
+// SOURCE-NEXT:                   // %18 = "prelude_2"
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 %19 = jsir.call_expression (%16, %18)
+// SOURCE-NEXT:                   // %19 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:                 jsir.expression_statement (%19)
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
 // SOURCE-NEXT:         })
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %11 = jsir.identifier {"console"}
-// SOURCE-NEXT:           // %11 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %12 = jsir.member_expression (%11) {#jsir<identifier   <L 20 C 10>, <L 20 C 13>, "log", 284, 287, 4, "log">}
-// SOURCE-NEXT:           // %12 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %13 = jsir.identifier {"wrapper"}
-// SOURCE-NEXT:           // %13 = #jsir_builtin<builtin_function "prelude_2">
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %14 = jsir.call_expression (%13)
-// SOURCE-NEXT:           // %14 = "prelude_2"
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %15 = jsir.call_expression (%12, %14)
-// SOURCE-NEXT:           // %15 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jsir.expression_statement (%15)
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %16 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:           // %16 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%16) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%16) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %17 = jsir.identifier {"console"}
-// SOURCE-NEXT:           // %17 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %18 = jsir.member_expression (%17) {#jsir<identifier   <L 22 C 12>, <L 22 C 15>, "log", 316, 319, 5, "log">}
-// SOURCE-NEXT:           // %18 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %19 = jsir.identifier {"wrapper"}
-// SOURCE-NEXT:           // %19 = #jsir_builtin<builtin_function "prelude_2">
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %20 = jsir.call_expression (%19)
-// SOURCE-NEXT:           // %20 = "prelude_2"
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         %21 = jsir.call_expression (%18, %20)
-// SOURCE-NEXT:           // %21 = <unknown>
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jsir.expression_statement (%21)
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%16) {#jsir<cf_marker BlockStatementEnd>}
-// SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jslir.control_flow_marker (%10) {#jsir<cf_marker BlockStatementEnd>}
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
 // SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier   <L 26 C 9>, <L 26 C 12>, "foo", 348, 351, 6, "foo">} ({
 // SOURCE-NEXT:           ^bb0:
@@ -167,48 +169,49 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %22 = jslir.control_flow_starter {#jsir<cf_kind BlockStatement>}
-// SOURCE-NEXT:               // %22 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%22) {#jsir<cf_marker BlockStatementDirectives>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jslir.control_flow_marker (%22) {#jsir<cf_marker BlockStatementBody>}
-// SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:             jshir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %28 = jsir.identifier_ref {"wrapper"}
-// SOURCE-NEXT:                   // %28 = <unknown>
-// SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %29 = jsir.identifier {"prelude_3"}
-// SOURCE-NEXT:                   // %29 = #jsir_builtin<builtin_function "prelude_3">
-// SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %30 = jsir.variable_declarator (%28, %29)
-// SOURCE-NEXT:                   // %30 = <uninitialized>
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %15 = jsir.identifier_ref {"wrapper"}
+// SOURCE-NEXT:                       // %15 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %16 = jsir.identifier {"prelude_3"}
+// SOURCE-NEXT:                       // %16 = #jsir_builtin<builtin_function "prelude_3">
+// SOURCE-NEXT:                       // State [default = <unknown>] { }
+// SOURCE-NEXT:                     %17 = jsir.variable_declarator (%15, %16)
+// SOURCE-NEXT:                       // %17 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%17)
+// SOURCE-NEXT:                       // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                 })
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:                 jsir.exprs_region_end (%30)
+// SOURCE-NEXT:                 %10 = jsir.identifier {"console"}
+// SOURCE-NEXT:                   // %10 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                 %11 = jsir.member_expression (%10) {#jsir<identifier   <L 28 C 10>, <L 28 C 13>, "log", 393, 396, 6, "log">}
+// SOURCE-NEXT:                   // %11 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                 %12 = jsir.identifier {"wrapper"}
+// SOURCE-NEXT:                   // %12 = #jsir_builtin<builtin_function "prelude_3">
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                 %13 = jsir.call_expression (%12)
+// SOURCE-NEXT:                   // %13 = "prelude_3"
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                 %14 = jsir.call_expression (%11, %13)
+// SOURCE-NEXT:                   // %14 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:                 jsir.expression_statement (%14)
+// SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:             })
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             %23 = jsir.identifier {"console"}
-// SOURCE-NEXT:               // %23 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             %24 = jsir.member_expression (%23) {#jsir<identifier   <L 28 C 10>, <L 28 C 13>, "log", 393, 396, 6, "log">}
-// SOURCE-NEXT:               // %24 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             %25 = jsir.identifier {"wrapper"}
-// SOURCE-NEXT:               // %25 = #jsir_builtin<builtin_function "prelude_3">
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             %26 = jsir.call_expression (%25)
-// SOURCE-NEXT:               // %26 = "prelude_3"
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             %27 = jsir.call_expression (%24, %26)
-// SOURCE-NEXT:               // %27 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             jsir.expression_statement (%27)
-// SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:             jslir.control_flow_marker (%22) {#jsir<cf_marker BlockStatementEnd>}
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }

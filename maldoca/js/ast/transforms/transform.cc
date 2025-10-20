@@ -14,10 +14,12 @@
 
 #include "maldoca/js/ast/transforms/transform.h"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <utility>
 
+#include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/js/ast/ast.generated.h"
@@ -48,8 +50,14 @@ absl::Status TransformJsAst(
             "original_source is required for ExtractPrelude analysis");
       }
 
+      absl::flat_hash_set<size_t> prelude_indices;
+      for (size_t prelude_index : config.extract_prelude().prelude_indices()) {
+        prelude_indices.insert(prelude_index);
+      }
+
       JsirAnalysisConfig::DynamicConstantPropagation prelude =
-          ExtractPrelude(*original_source, ast);
+          ExtractPreludeByIndicesAndAnnotations(*original_source,
+                                                prelude_indices, ast);
 
       JsAstAnalysisResult result;
       *result.mutable_extract_prelude() = std::move(prelude);

@@ -144,6 +144,7 @@ cc_test(
         "//maldoca/base:filesystem",
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/status",
         "@googletest//:gtest_main",
     ],
 )
