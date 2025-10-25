@@ -31,6 +31,7 @@ def JsirNoneOp : Jsir_Op<"none", [Pure]> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 // BreakStatement-Related Ops
@@ -44,6 +45,7 @@ def JshirBreakStatementOp : Jshir_Op<
   let arguments = (ins
     OptionalAttr<JsirIdentifierAttr>: $label
   );
+  let assemblyFormat = "attr-dict";
 }
 
 // ContinueStatement-Related Ops
@@ -57,6 +59,7 @@ def JshirContinueStatementOp : Jshir_Op<
   let arguments = (ins
     OptionalAttr<JsirIdentifierAttr>: $label
   );
+  let assemblyFormat = "attr-dict";
 }
 
 // ForStatement-Related Ops
@@ -85,6 +88,7 @@ def JshirForStatementOp : Jshir_Op<
     OptionalRegion<ExprRegion>: $update,
     StmtRegion: $body
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $init `,` $test `,` $update `,` $body `)`";
 }
 
 // For{In,Of}Statement-Related Ops
@@ -113,6 +117,7 @@ def JshirForInStatementOp : Jshir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "`(` $left_lval `,` $right `)` attr-dict $body";
 }
 
 def JshirForOfStatementOp : Jshir_Op<
@@ -130,6 +135,7 @@ def JshirForOfStatementOp : Jshir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "`(` $left_lval `,` $right `)` attr-dict $body";
 }
 
 def JsirArrowFunctionExpressionOp : Jsir_Op<
@@ -152,6 +158,7 @@ def JsirArrowFunctionExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $id `,` $params `)` attr-dict $body";
 }
 
 def JsirObjectLiteralKeyType : OptionalAttr<AnyAttrOf<[
@@ -172,6 +179,7 @@ def JsirObjectPropertyOp : Jsir_Op<"object_property", []> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $computed_key `,` $value `)` attr-dict";
 }
 
 def JsirObjectPropertyRefOp : Jsir_Op<"object_property_ref", []> {
@@ -185,6 +193,7 @@ def JsirObjectPropertyRefOp : Jsir_Op<"object_property_ref", []> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $computed_key `,` $value `)` attr-dict";
 }
 
 def JsirObjectMethodOp : Jsir_Op<
@@ -209,6 +218,7 @@ def JsirObjectMethodOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $computed_key `,` $params `)` attr-dict $body";
 }
 
 def JsirObjectExpressionOp : Jsir_Op<
@@ -223,6 +233,7 @@ def JsirObjectExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict $region";
 }
 
 // - If `computed` is `true`, the op corresponds to a computed (`a[b]`) member
@@ -248,6 +259,7 @@ def JsirMemberExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $object `,` $computed_property `)` attr-dict";
 }
 
 def JsirMemberExpressionRefOp : Jsir_Op<
@@ -264,6 +276,7 @@ def JsirMemberExpressionRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $object `,` $computed_property `)` attr-dict";
 }
 
 def JsirOptionalMemberExpressionOp : Jsir_Op<
@@ -280,6 +293,7 @@ def JsirOptionalMemberExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $object `,` $computed_property `)` attr-dict";
 }
 
 def JsirParenthesizedExpressionOp : Jsir_Op<
@@ -296,6 +310,7 @@ def JsirParenthesizedExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $expression `)` attr-dict";
 }
 
 def JsirParenthesizedExpressionRefOp : Jsir_Op<
@@ -313,6 +328,7 @@ def JsirParenthesizedExpressionRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $expression `)` attr-dict";
 }
 
 def JsirClassMethodOp : Jsir_Op<
@@ -334,6 +350,7 @@ def JsirClassMethodOp : Jsir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "`(` $params `,` $computed_key `)` attr-dict $body";
 }
 
 def JsirClassPrivateMethodOp : Jsir_Op<
@@ -353,6 +370,7 @@ def JsirClassPrivateMethodOp : Jsir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "`(` $params `)` attr-dict $body";
 }
 
 def JsirClassPropertyOp : Jsir_Op<"class_property", [NoTerminator]> {
@@ -365,6 +383,7 @@ def JsirClassPropertyOp : Jsir_Op<"class_property", [NoTerminator]> {
   let regions = (region
     OptionalRegion<ExprRegion>: $value
   );
+  let assemblyFormat = "`(` $computed_key `)` attr-dict $value";
 }
 
 def JsirExportDefaultDeclarationOp : Jsir_Op<
@@ -375,6 +394,7 @@ def JsirExportDefaultDeclarationOp : Jsir_Op<
   let regions = (region
     UnknownRegion: $declaration
   );
+  let assemblyFormat = "attr-dict $declaration";
 }
 
 #endif  // MALDOCA_JS_IR_JSIR_HANDWRITTEN_TD_

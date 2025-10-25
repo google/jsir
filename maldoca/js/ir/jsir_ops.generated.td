@@ -103,12 +103,14 @@ def JsirExprRegionEndOp : Jsir_Op<"expr_region_end", [Terminator]> {
   let arguments = (ins
     AnyType: $argument
   );
+  let assemblyFormat = "`(` $argument `)` attr-dict";
 }
 
 def JsirExprsRegionEndOp : Jsir_Op<"exprs_region_end", [Terminator]> {
   let arguments = (ins
     Variadic<AnyType>: $arguments
   );
+  let assemblyFormat = "`(` $arguments `)` attr-dict";
 }
 
 def JsirDirectiveLiteralOp : Jsir_Op<
@@ -123,12 +125,14 @@ def JsirDirectiveLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirDirectiveOp : Jsir_Op<"directive", []> {
   let arguments = (ins
     AnyType: $value
   );
+  let assemblyFormat = "`(` $value `)` attr-dict";
 }
 
 def JsirProgramOp : Jsir_Op<
@@ -144,6 +148,7 @@ def JsirProgramOp : Jsir_Op<
     StmtsRegion: $body,
     StmtsRegion: $directives
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $body `,` $directives `)`";
 }
 
 def JsirFileOp : Jsir_Op<
@@ -158,6 +163,7 @@ def JsirFileOp : Jsir_Op<
   let regions = (region
     StmtRegion: $program
   );
+  let assemblyFormat = "attr-dict $program";
 }
 
 def JsirIdentifierOp : Jsir_Op<
@@ -172,6 +178,7 @@ def JsirIdentifierOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirIdentifierRefOp : Jsir_Op<
@@ -187,6 +194,7 @@ def JsirIdentifierRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirPrivateNameOp : Jsir_Op<"private_name", []> {
@@ -197,6 +205,7 @@ def JsirPrivateNameOp : Jsir_Op<"private_name", []> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirRegExpLiteralOp : Jsir_Op<
@@ -215,6 +224,7 @@ def JsirRegExpLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirNullLiteralOp : Jsir_Op<
@@ -227,6 +237,7 @@ def JsirNullLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirStringLiteralOp : Jsir_Op<
@@ -244,6 +255,7 @@ def JsirStringLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirBooleanLiteralOp : Jsir_Op<
@@ -260,6 +272,7 @@ def JsirBooleanLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirNumericLiteralOp : Jsir_Op<
@@ -277,6 +290,7 @@ def JsirNumericLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirBigIntLiteralOp : Jsir_Op<
@@ -294,6 +308,7 @@ def JsirBigIntLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JshirBlockStatementOp : Jshir_Op<
@@ -305,6 +320,7 @@ def JshirBlockStatementOp : Jshir_Op<
     StmtsRegion: $body,
     StmtsRegion: $directives
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $body `,` $directives `)`";
 }
 
 def JsirExpressionStatementOp : Jsir_Op<
@@ -314,18 +330,21 @@ def JsirExpressionStatementOp : Jsir_Op<
   let arguments = (ins
     AnyType: $expression
   );
+  let assemblyFormat = "`(` $expression `)` attr-dict";
 }
 
 def JsirEmptyStatementOp : Jsir_Op<
     "empty_statement", [
         JsirStatementOpInterfaceTraits
     ]> {
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirDebuggerStatementOp : Jsir_Op<
     "debugger_statement", [
         JsirStatementOpInterfaceTraits
     ]> {
+  let assemblyFormat = "attr-dict";
 }
 
 def JshirWithStatementOp : Jshir_Op<
@@ -340,6 +359,7 @@ def JshirWithStatementOp : Jshir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "`(` $object `)` attr-dict $body";
 }
 
 def JsirReturnStatementOp : Jsir_Op<
@@ -349,6 +369,7 @@ def JsirReturnStatementOp : Jsir_Op<
   let arguments = (ins
     Optional<AnyType>: $argument
   );
+  let assemblyFormat = "(`(` $argument^ `)`)? attr-dict";
 }
 
 def JshirLabeledStatementOp : Jshir_Op<
@@ -363,6 +384,7 @@ def JshirLabeledStatementOp : Jshir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "attr-dict $body";
 }
 
 def JshirIfStatementOp : Jshir_Op<
@@ -378,6 +400,7 @@ def JshirIfStatementOp : Jshir_Op<
     StmtRegion: $consequent,
     OptionalRegion<StmtRegion>: $alternate
   );
+  let assemblyFormat = "`(` $test `)` attr-dict-with-keyword `(` $consequent `,` $alternate `)`";
 }
 
 def JshirSwitchCaseOp : Jshir_Op<
@@ -388,6 +411,7 @@ def JshirSwitchCaseOp : Jshir_Op<
     OptionalRegion<ExprRegion>: $test,
     StmtsRegion: $consequent
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $test `,` $consequent `)`";
 }
 
 def JshirSwitchStatementOp : Jshir_Op<
@@ -402,6 +426,7 @@ def JshirSwitchStatementOp : Jshir_Op<
   let regions = (region
     StmtsRegion: $cases
   );
+  let assemblyFormat = "`(` $discriminant `)` attr-dict $cases";
 }
 
 def JsirThrowStatementOp : Jsir_Op<
@@ -411,6 +436,7 @@ def JsirThrowStatementOp : Jsir_Op<
   let arguments = (ins
     AnyType: $argument
   );
+  let assemblyFormat = "`(` $argument `)` attr-dict";
 }
 
 def JshirCatchClauseOp : Jshir_Op<
@@ -424,6 +450,7 @@ def JshirCatchClauseOp : Jshir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "(`(` $param^ `)`)? attr-dict $body";
 }
 
 def JshirTryStatementOp : Jshir_Op<
@@ -436,6 +463,7 @@ def JshirTryStatementOp : Jshir_Op<
     OptionalRegion<StmtRegion>: $handler,
     OptionalRegion<StmtRegion>: $finalizer
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $block `,` $handler `,` $finalizer `)`";
 }
 
 def JshirWhileStatementOp : Jshir_Op<
@@ -447,6 +475,7 @@ def JshirWhileStatementOp : Jshir_Op<
     ExprRegion: $test,
     StmtRegion: $body
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $test `,` $body `)`";
 }
 
 def JshirDoWhileStatementOp : Jshir_Op<
@@ -458,6 +487,7 @@ def JshirDoWhileStatementOp : Jshir_Op<
     StmtRegion: $body,
     ExprRegion: $test
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $body `,` $test `)`";
 }
 
 def JsirVariableDeclaratorOp : Jsir_Op<"variable_declarator", []> {
@@ -469,6 +499,7 @@ def JsirVariableDeclaratorOp : Jsir_Op<"variable_declarator", []> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $id `,` $init `)` attr-dict";
 }
 
 def JsirVariableDeclarationOp : Jsir_Op<
@@ -483,6 +514,7 @@ def JsirVariableDeclarationOp : Jsir_Op<
   let regions = (region
     ExprsRegion: $declarations
   );
+  let assemblyFormat = "attr-dict $declarations";
 }
 
 def JsirFunctionDeclarationOp : Jsir_Op<
@@ -500,6 +532,7 @@ def JsirFunctionDeclarationOp : Jsir_Op<
     ExprsRegion: $params,
     StmtRegion: $body
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $params `,` $body `)`";
 }
 
 def JsirSuperOp : Jsir_Op<
@@ -509,12 +542,14 @@ def JsirSuperOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirImportOp : Jsir_Op<"import", []> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirThisExpressionOp : Jsir_Op<
@@ -525,6 +560,7 @@ def JsirThisExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirYieldExpressionOp : Jsir_Op<
@@ -539,6 +575,7 @@ def JsirYieldExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "(`(` $argument^ `)`)? attr-dict";
 }
 
 def JsirAwaitExpressionOp : Jsir_Op<
@@ -552,6 +589,7 @@ def JsirAwaitExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "(`(` $argument^ `)`)? attr-dict";
 }
 
 def JsirSpreadElementOp : Jsir_Op<
@@ -565,6 +603,7 @@ def JsirSpreadElementOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $argument `)` attr-dict";
 }
 
 def JsirArrayExpressionOp : Jsir_Op<
@@ -579,6 +618,7 @@ def JsirArrayExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $elements `)` attr-dict";
 }
 
 def JsirFunctionExpressionOp : Jsir_Op<
@@ -600,6 +640,7 @@ def JsirFunctionExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict-with-keyword `(` $params `,` $body `)`";
 }
 
 def JsirUnaryExpressionOp : Jsir_Op<
@@ -617,6 +658,7 @@ def JsirUnaryExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $argument `)` attr-dict";
 }
 
 def JsirUpdateExpressionOp : Jsir_Op<
@@ -632,6 +674,7 @@ def JsirUpdateExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $argument `)` attr-dict";
 }
 
 def JsirBinaryExpressionOp : Jsir_Op<
@@ -650,6 +693,7 @@ def JsirBinaryExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $left `,` $right `)` attr-dict";
 }
 
 def JsirAssignmentExpressionOp : Jsir_Op<
@@ -665,6 +709,7 @@ def JsirAssignmentExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $left `,` $right `)` attr-dict";
 }
 
 def JshirLogicalExpressionOp : Jshir_Op<
@@ -685,6 +730,7 @@ def JshirLogicalExpressionOp : Jshir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $left `)` attr-dict $right";
 }
 
 def JshirConditionalExpressionOp : Jshir_Op<
@@ -704,6 +750,7 @@ def JshirConditionalExpressionOp : Jshir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $test `)` attr-dict-with-keyword `(` $alternate `,` $consequent `)`";
 }
 
 def JsirCallExpressionOp : Jsir_Op<
@@ -718,6 +765,7 @@ def JsirCallExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $callee `,` $arguments `)` attr-dict";
 }
 
 def JsirOptionalCallExpressionOp : Jsir_Op<
@@ -733,6 +781,7 @@ def JsirOptionalCallExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $callee `,` $arguments `)` attr-dict";
 }
 
 def JsirNewExpressionOp : Jsir_Op<
@@ -747,6 +796,7 @@ def JsirNewExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $callee `,` $arguments `)` attr-dict";
 }
 
 def JsirSequenceExpressionOp : Jsir_Op<
@@ -761,6 +811,7 @@ def JsirSequenceExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $expressions `)` attr-dict";
 }
 
 def JsirTemplateElementValueOp : Jsir_Op<"template_element_value", []> {
@@ -772,6 +823,7 @@ def JsirTemplateElementValueOp : Jsir_Op<"template_element_value", []> {
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirTemplateElementOp : Jsir_Op<
@@ -786,6 +838,7 @@ def JsirTemplateElementOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $value `)` attr-dict";
 }
 
 def JsirTemplateLiteralOp : Jsir_Op<
@@ -802,6 +855,7 @@ def JsirTemplateLiteralOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $quasis `,` $expressions `)` attr-dict";
 }
 
 def JsirTaggedTemplateExpressionOp : Jsir_Op<
@@ -817,6 +871,7 @@ def JsirTaggedTemplateExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $tag `,` $quasi `)` attr-dict";
 }
 
 def JsirRestElementRefOp : Jsir_Op<
@@ -832,6 +887,7 @@ def JsirRestElementRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $argument `)` attr-dict";
 }
 
 def JsirObjectPatternRefOp : Jsir_Op<
@@ -848,6 +904,7 @@ def JsirObjectPatternRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict $properties_";
 }
 
 def JsirArrayPatternRefOp : Jsir_Op<
@@ -863,6 +920,7 @@ def JsirArrayPatternRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $elements `)` attr-dict";
 }
 
 def JsirAssignmentPatternRefOp : Jsir_Op<
@@ -879,6 +937,7 @@ def JsirAssignmentPatternRefOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "`(` $left `,` $right `)` attr-dict";
 }
 
 def JsirClassPrivatePropertyOp : Jsir_Op<
@@ -893,6 +952,7 @@ def JsirClassPrivatePropertyOp : Jsir_Op<
   let regions = (region
     OptionalRegion<ExprRegion>: $value
   );
+  let assemblyFormat = "attr-dict $value";
 }
 
 def JsirClassBodyOp : Jsir_Op<
@@ -902,6 +962,7 @@ def JsirClassBodyOp : Jsir_Op<
   let regions = (region
     StmtsRegion: $body
   );
+  let assemblyFormat = "attr-dict $body";
 }
 
 def JsirClassDeclarationOp : Jsir_Op<
@@ -917,6 +978,7 @@ def JsirClassDeclarationOp : Jsir_Op<
   let regions = (region
     StmtRegion: $body
   );
+  let assemblyFormat = "(`(` $super_class^ `)`)? attr-dict $body";
 }
 
 def JsirClassExpressionOp : Jsir_Op<
@@ -936,6 +998,7 @@ def JsirClassExpressionOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "(`(` $super_class^ `)`)? attr-dict $body";
 }
 
 def JsirMetaPropertyOp : Jsir_Op<
@@ -950,6 +1013,7 @@ def JsirMetaPropertyOp : Jsir_Op<
   let results = (outs
     JsirAnyType
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirImportDeclarationOp : Jsir_Op<
@@ -961,6 +1025,7 @@ def JsirImportDeclarationOp : Jsir_Op<
     JsirStringLiteralAttr: $source,
     OptionalAttr<JsirImportAttributeAttr>: $assertions
   );
+  let assemblyFormat = "attr-dict";
 }
 
 def JsirExportNamedDeclarationOp : Jsir_Op<
@@ -977,6 +1042,7 @@ def JsirExportNamedDeclarationOp : Jsir_Op<
   let regions = (region
     OptionalRegion<StmtRegion>: $declaration
   );
+  let assemblyFormat = "attr-dict $declaration";
 }
 
 def JsirExportAllDeclarationOp : Jsir_Op<
@@ -987,6 +1053,7 @@ def JsirExportAllDeclarationOp : Jsir_Op<
     JsirStringLiteralAttr: $source,
     OptionalAttr<TypedArrayAttrBase<JsirImportAttributeAttr, "">>: $assertions
   );
+  let assemblyFormat = "attr-dict";
 }
 
 #endif  // MALDOCA_JS_IR_JSIR_OPS_GENERATED_TD_
