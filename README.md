@@ -10,27 +10,16 @@ source-to-source transformation.
 
 ## Use cases at Google
 
-JSIR is used at Google for analyzing and detecting malicious JavaScript files,
-protecting products like Ads, Android, and Chrome. Some example use cases are:
+JSIR is used at Google for code analysis and transform use cases. For example:
 
-*   **Signal extraction**
-
-    JSIR is used for extracting syntactical and behavioral signals, which are
-    fed into downstream security systems.
-
-*   **[Taint analysis](https://en.wikipedia.org/wiki/Taint_checking)**
-
-    JSIR is used for detecting suspicious information flows, by utilizing its
-    dataflow analysis capability.
-
-*   **Decompilation**
+  * **Decompilation**
 
     JSIR is used for decompiling the
     [Hermes](https://github.com/facebook/hermes) bytecode all the way to
     JavaScript code, by utilizing its ability to be fully lifted back to source
     code.
 
-*   **Deobfuscation**:
+  * **Deobfuscation**:
 
     JSIR is used for deobfuscating JavaScript by utilizing its source-to-source
     transformation capability.
@@ -40,7 +29,7 @@ protecting products like Ads, Android, and Chrome. Some example use cases are:
 
 ## Design highlights
 
-Driven by the diverse use cases of malicious JavaScript analysis and detection,
+Driven by the diverse use cases of JavaScript analyses and transformations,
 JSIR needs to achieve two seemingly conflicting goals:
 
 *   It needs to be **high-level** enough to be lifted back to the AST, in order
