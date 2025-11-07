@@ -46,6 +46,7 @@ enum class JsirPassKind {
   kEraseComments,
   kExtractPrelude,
   kRemoveDirectives,
+  kDeadCodeElimination,
   kNormalizeMemberExpressions,
 };
 

@@ -207,9 +207,12 @@ message JsirTransformConfig {
     RemoveDirectives remove_directives = 7;
     JsirAnalysisConfig.DynamicConstantPropagation dynamic_constant_propagation =
         2;
+    DeadCodeElimination dead_code_elimination = 9;
   }
 
   message ConstantPropagation {}
+
+  message DeadCodeElimination {}
 
   message MoveNamedFunctions {}
 

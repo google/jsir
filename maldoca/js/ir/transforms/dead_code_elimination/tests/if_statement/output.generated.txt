@@ -1,0 +1,626 @@
+// SOURCE:      let a = 0;
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   let b = 1;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   {
+// SOURCE-NEXT:     let c = 2;
+// SOURCE-NEXT:   }
+// SOURCE-NEXT:   let d = 3;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   let e = 4;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: let f = 5;
+// SOURCE-NEXT: f = 6;
+// SOURCE-NEXT: f = 7;
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   let g = 6;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: var h = 7;
+// SOURCE-NEXT: var i = 8;
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Prelude:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Dataflow:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: jsir.file ({
+// SOURCE-NEXT:   ^bb0:
+// SOURCE-NEXT:       // <executable>
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT:     jsir.program {"script"} ({
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { }
+// SOURCE-NEXT:             %9 = jsir.identifier_ref {"a"}
+// SOURCE-NEXT:               // %9 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { }
+// SOURCE-NEXT:             %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:               // %10 = 0.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { }
+// SOURCE-NEXT:             %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:               // %11 = <uninitialized>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:             jsir.exprs_region_end (%11)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:         %0 = jsir.boolean_literal {true}
+// SOURCE-NEXT:           // %0 = true
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%0) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:                     %9 = jsir.identifier_ref {"b"}
+// SOURCE-NEXT:                       // %9 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:                     %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:                       // %10 = 1.000000e+00 : f64
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:                     %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                       // %11 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <not executable>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %9 = jsir.identifier_ref {"dead_1"}
+// SOURCE-NEXT:                       // %9 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                       // %10 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                       // %11 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:         %1 = jsir.boolean_literal {true}
+// SOURCE-NEXT:           // %1 = true
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%1) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                 %9 = jsir.boolean_literal {false}
+// SOURCE-NEXT:                   // %9 = false
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                 jshir.if_statement (%9) ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <not executable>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     jshir.block_statement ({
+// SOURCE-NEXT:                       ^bb0:
+// SOURCE-NEXT:                           // <not executable>
+// SOURCE-NEXT:                           // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                           ^bb0:
+// SOURCE-NEXT:                               // <not executable>
+// SOURCE-NEXT:                               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                             %10 = jsir.identifier_ref {"nested_dead_2"}
+// SOURCE-NEXT:                               // %10 = <uninitialized>
+// SOURCE-NEXT:                               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                             %11 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:                               // %11 = <uninitialized>
+// SOURCE-NEXT:                               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                             %12 = jsir.variable_declarator (%10, %11)
+// SOURCE-NEXT:                               // %12 = <uninitialized>
+// SOURCE-NEXT:                               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                             jsir.exprs_region_end (%12)
+// SOURCE-NEXT:                               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                         })
+// SOURCE-NEXT:                           // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     }, {
+// SOURCE-NEXT:                       ^bb0:
+// SOURCE-NEXT:                           // <not executable>
+// SOURCE-NEXT:                           // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     })
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 }, {
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                     jshir.block_statement ({
+// SOURCE-NEXT:                       ^bb0:
+// SOURCE-NEXT:                           // <executable>
+// SOURCE-NEXT:                           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                           ^bb0:
+// SOURCE-NEXT:                               // <executable>
+// SOURCE-NEXT:                               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                             %10 = jsir.identifier_ref {"c"}
+// SOURCE-NEXT:                               // %10 = <unknown>
+// SOURCE-NEXT:                               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                             %11 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
+// SOURCE-NEXT:                               // %11 = 2.000000e+00 : f64
+// SOURCE-NEXT:                               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                             %12 = jsir.variable_declarator (%10, %11)
+// SOURCE-NEXT:                               // %12 = <uninitialized>
+// SOURCE-NEXT:                               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                             jsir.exprs_region_end (%12)
+// SOURCE-NEXT:                               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                         })
+// SOURCE-NEXT:                           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     }, {
+// SOURCE-NEXT:                       ^bb0:
+// SOURCE-NEXT:                           // <executable>
+// SOURCE-NEXT:                           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:                     })
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     %10 = jsir.identifier_ref {"d"}
+// SOURCE-NEXT:                       // %10 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     %11 = jsir.numeric_literal {#jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, 3.000000e+00 : f64}
+// SOURCE-NEXT:                       // %11 = 3.000000e+00 : f64
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     %12 = jsir.variable_declarator (%10, %11)
+// SOURCE-NEXT:                       // %12 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%12)
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:         %2 = jsir.boolean_literal {false}
+// SOURCE-NEXT:           // %2 = false
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%2) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <not executable>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %9 = jsir.identifier_ref {"dead_3"}
+// SOURCE-NEXT:                       // %9 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                       // %10 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                       // %11 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     %9 = jsir.identifier_ref {"e"}
+// SOURCE-NEXT:                       // %9 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "4", 4.000000e+00 : f64>, 4.000000e+00 : f64}
+// SOURCE-NEXT:                       // %10 = 4.000000e+00 : f64
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:                     %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                       // %11 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %9 = jsir.identifier_ref {"f"}
+// SOURCE-NEXT:               // %9 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, 5.000000e+00 : f64}
+// SOURCE-NEXT:               // %10 = 5.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:               // %11 = <uninitialized>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             jsir.exprs_region_end (%11)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         %3 = jsir.boolean_literal {true}
+// SOURCE-NEXT:           // %3 = true
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%3) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %9 = jsir.identifier_ref {"f"}
+// SOURCE-NEXT:               // %9 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %10 = jsir.identifier {"f"}
+// SOURCE-NEXT:               // %10 = 5.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %11 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:               // %11 = 1.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %12 = jsir.binary_expression (%10, %11) {"+"}
+// SOURCE-NEXT:               // %12 = 6.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 5.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %13 = jsir.assignment_expression (%9, %12) {"="}
+// SOURCE-NEXT:               // %13 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             jsir.expression_statement (%13)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jsir.variable_declaration {"var"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %9 = jsir.identifier_ref {"dead_7"}
+// SOURCE-NEXT:                   // %9 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                   // %10 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                   // %11 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         %4 = jsir.boolean_literal {false}
+// SOURCE-NEXT:           // %4 = false
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%4) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jsir.variable_declaration {"var"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %9 = jsir.identifier_ref {"dead_8"}
+// SOURCE-NEXT:                   // %9 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                   // %10 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                   // %11 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %9 = jsir.identifier_ref {"f"}
+// SOURCE-NEXT:               // %9 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %10 = jsir.identifier {"f"}
+// SOURCE-NEXT:               // %10 = 6.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %11 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:               // %11 = 1.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %12 = jsir.binary_expression (%10, %11) {"+"}
+// SOURCE-NEXT:               // %12 = 7.000000e+00 : f64
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 6.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             %13 = jsir.assignment_expression (%9, %12) {"="}
+// SOURCE-NEXT:               // %13 = <unknown>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             jsir.expression_statement (%13)
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         %5 = jsir.boolean_literal {true}
+// SOURCE-NEXT:           // %5 = true
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%5) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <executable>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:                     %9 = jsir.identifier_ref {"g"}
+// SOURCE-NEXT:                       // %9 = <unknown>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:                     %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "6", 6.000000e+00 : f64>, 6.000000e+00 : f64}
+// SOURCE-NEXT:                       // %10 = 6.000000e+00 : f64
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:                     %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                       // %11 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                       // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         %6 = jsir.boolean_literal {false}
+// SOURCE-NEXT:           // %6 = false
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%6) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.variable_declaration {"let"} ({
+// SOURCE-NEXT:                   ^bb0:
+// SOURCE-NEXT:                       // <not executable>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %9 = jsir.identifier_ref {"dead_4"}
+// SOURCE-NEXT:                       // %9 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                       // %10 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                       // %11 = <uninitialized>
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                     jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                       // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 })
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             }, {
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         %7 = jsir.boolean_literal {true}
+// SOURCE-NEXT:           // %7 = true
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%7) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:             jsir.variable_declaration {"var"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 %9 = jsir.identifier_ref {"h"}
+// SOURCE-NEXT:                   // %9 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "7", 7.000000e+00 : f64>, 7.000000e+00 : f64}
+// SOURCE-NEXT:                   // %10 = 7.000000e+00 : f64
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                   // %11 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jsir.variable_declaration {"var"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %9 = jsir.identifier_ref {"dead_5"}
+// SOURCE-NEXT:                   // %9 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                   // %10 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                   // %11 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         %8 = jsir.boolean_literal {false}
+// SOURCE-NEXT:           // %8 = false
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         jshir.if_statement (%8) ({
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <not executable>
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             jsir.variable_declaration {"var"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <not executable>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %9 = jsir.identifier_ref {"dead_6"}
+// SOURCE-NEXT:                   // %9 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                   // %10 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                   // %11 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                   // State [default = <uninitialized>] { }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <uninitialized>] { }
+// SOURCE-NEXT:         }, {
+// SOURCE-NEXT:           ^bb0:
+// SOURCE-NEXT:               // <executable>
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:             jsir.variable_declaration {"var"} ({
+// SOURCE-NEXT:               ^bb0:
+// SOURCE-NEXT:                   // <executable>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 %9 = jsir.identifier_ref {"i"}
+// SOURCE-NEXT:                   // %9 = <unknown>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "8", 8.000000e+00 : f64>, 8.000000e+00 : f64}
+// SOURCE-NEXT:                   // %10 = 8.000000e+00 : f64
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 %11 = jsir.variable_declarator (%9, %10)
+// SOURCE-NEXT:                   // %11 = <uninitialized>
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <i#0 : 8.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:                 jsir.exprs_region_end (%11)
+// SOURCE-NEXT:                   // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <i#0 : 8.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:             })
+// SOURCE-NEXT:               // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <i#0 : 8.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:         })
+// SOURCE-NEXT:           // State [default = <unknown>] { <a#0 : 0.000000e+00 : f64> <f#0 : 7.000000e+00 : f64> <h#0 : 7.000000e+00 : f64> <i#0 : 8.000000e+00 : f64> <b#1 : 1.000000e+00 : f64> <d#3 : 3.000000e+00 : f64> <c#5 : 2.000000e+00 : f64> <e#7 : 4.000000e+00 : f64> <g#8 : 6.000000e+00 : f64> }
+// SOURCE-NEXT:     }, {
+// SOURCE-NEXT:       ^bb0:
+// SOURCE-NEXT:           // <executable>
+// SOURCE-NEXT:           // State [default = <unknown>] { }
+// SOURCE-NEXT:     })
+// SOURCE-NEXT:       // State [default = <unknown>] { }
+// SOURCE-NEXT: })
+// SOURCE-NEXT:   // State [default = <uninitialized>] { }
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Bindings:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: a#0:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: dead_5#0:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: dead_6#0:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: dead_7#0:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: dead_8#0:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: h#0:
+// SOURCE-NEXT:     7
+// SOURCE-NEXT: i#0:
+// SOURCE-NEXT:     8
+// SOURCE-NEXT: b#1:
+// SOURCE-NEXT:     1
+// SOURCE-NEXT: dead_1#2:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: d#3:
+// SOURCE-NEXT:     3
+// SOURCE-NEXT: nested_dead_2#4:
+// SOURCE-NEXT:     1
+// SOURCE-NEXT: c#5:
+// SOURCE-NEXT:     2
+// SOURCE-NEXT: dead_3#6:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: e#7:
+// SOURCE-NEXT:     4
+// SOURCE-NEXT: g#8:
+// SOURCE-NEXT:     6
+// SOURCE-NEXT: dead_4#9:
+// SOURCE-NEXT:     0
+// SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: Computed constants:
+// SOURCE-NEXT: ================================================================
+// SOURCE-NEXT: From [251, 252): `f` -> `5`
+// SOURCE-NEXT: From [251, 256): `f + 1` -> `6`
+// SOURCE-NEXT: From [322, 323): `f` -> `6`
+// SOURCE-NEXT: From [322, 327): `f + 1` -> `7`
+// SOURCE-NEXT: ================================================================
