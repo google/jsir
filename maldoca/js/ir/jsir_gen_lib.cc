@@ -328,6 +328,16 @@ absl::StatusOr<JsirGenOutput> JsirGen(
 
         break;
       }
+
+      case JsirPassKind::kDeadCodeElimination: {
+        JsirTransformConfig transform;
+        *transform.mutable_dead_code_elimination() = {};
+
+        *pass_configs.add_passes()->mutable_jsir_transform() =
+            std::move(transform);
+
+        break;
+      }
     }
   }
 
