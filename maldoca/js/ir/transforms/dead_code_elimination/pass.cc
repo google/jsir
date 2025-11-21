@@ -14,14 +14,14 @@
 
 #include "maldoca/js/ir/transforms/dead_code_elimination/pass.h"
 
-#include "llvm/ADT/STLExtras.h"
+#include "maldoca/js/ir/ir.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Value.h"
-#include "maldoca/js/ir/ir.h"
+#include "llvm/ADT/STLExtras.h"
 
 namespace maldoca {
-void IfStatementElimination(mlir::Operation* root_op) {
+void IfStatementElimination(mlir::Operation *root_op) {
   root_op->walk([&](JshirIfStatementOp op) {
     auto condition = op.getTest().getDefiningOp<JsirBooleanLiteralOp>();
     if (condition == nullptr) {
@@ -30,24 +30,24 @@ void IfStatementElimination(mlir::Operation* root_op) {
 
     if (condition.getValue()) {
       // Use the consequent block to replace the if statement.
-      mlir::Region* consequent_region = &op.getConsequent();
-      mlir::Block& consequent_block = consequent_region->front();
+      mlir::Region *consequent_region = &op.getConsequent();
+      mlir::Block &consequent_block = consequent_region->front();
 
-      for (mlir::Operation& op_to_move :
+      for (mlir::Operation &op_to_move :
            llvm::make_early_inc_range(consequent_block.getOperations())) {
         op_to_move.moveBefore(op);
       }
       op.erase();
     } else {
       // Use the alternate block to replace the if statement.
-      mlir::Region* alternate_region = &op.getAlternate();
+      mlir::Region *alternate_region = &op.getAlternate();
       if (alternate_region->empty()) {
         op.erase();
         return;
       }
 
-      mlir::Block& alternate_block = alternate_region->front();
-      for (mlir::Operation& op_to_move :
+      mlir::Block &alternate_block = alternate_region->front();
+      for (mlir::Operation &op_to_move :
            llvm::make_early_inc_range(alternate_block.getOperations())) {
         op_to_move.moveBefore(op);
       }
@@ -56,7 +56,36 @@ void IfStatementElimination(mlir::Operation* root_op) {
   });
 }
 
-void DeadCodeElimination(mlir::Operation* root_op) {
-  IfStatementElimination(root_op);
+void WhileStatementElimination(mlir::Operation *root_op) {
+  root_op->walk([&](JshirWhileStatementOp op) {
+    mlir::Region &test_region = op.getTest();
+    if (test_region.empty()) {
+      return;
+    }
+
+    auto expr_region_end_op =
+        llvm::dyn_cast<JsirExprRegionEndOp>(&test_region.front().back());
+    if (expr_region_end_op == nullptr) {
+      return;
+    }
+
+    auto condition_op =
+        expr_region_end_op.getOperand().getDefiningOp<JsirBooleanLiteralOp>();
+    if (condition_op == nullptr) {
+      return;
+    }
+
+    if (!condition_op.getValue()) {
+      // Condition is constantly false, eliminate the entire loop.
+      op.erase();
+    }
+
+    // If condition is true, it's an infinite loop. For now, we leave it.
+  });
 }
-}  // namespace maldoca
+
+void DeadCodeElimination(mlir::Operation *root_op) {
+  IfStatementElimination(root_op);
+  WhileStatementElimination(root_op);
+}
+} // namespace maldoca
