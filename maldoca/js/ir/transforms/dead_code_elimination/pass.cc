@@ -14,14 +14,20 @@
 
 #include "maldoca/js/ir/transforms/dead_code_elimination/pass.h"
 
+#include <tuple>
+#include <vector>
+
+#include "absl/container/flat_hash_map.h"
+#include "llvm/ADT/STLExtras.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Value.h"
-#include "llvm/ADT/STLExtras.h"
 
 namespace maldoca {
-void IfStatementElimination(mlir::Operation *root_op) {
+
+void IfStatementElimination(mlir::Operation* root_op) {
   root_op->walk([&](JshirIfStatementOp op) {
     auto condition = op.getTest().getDefiningOp<JsirBooleanLiteralOp>();
     if (condition == nullptr) {
@@ -30,24 +36,24 @@ void IfStatementElimination(mlir::Operation *root_op) {
 
     if (condition.getValue()) {
       // Use the consequent block to replace the if statement.
-      mlir::Region *consequent_region = &op.getConsequent();
-      mlir::Block &consequent_block = consequent_region->front();
+      mlir::Region* consequent_region = &op.getConsequent();
+      mlir::Block& consequent_block = consequent_region->front();
 
-      for (mlir::Operation &op_to_move :
+      for (mlir::Operation& op_to_move :
            llvm::make_early_inc_range(consequent_block.getOperations())) {
         op_to_move.moveBefore(op);
       }
       op.erase();
     } else {
       // Use the alternate block to replace the if statement.
-      mlir::Region *alternate_region = &op.getAlternate();
+      mlir::Region* alternate_region = &op.getAlternate();
       if (alternate_region->empty()) {
         op.erase();
         return;
       }
 
-      mlir::Block &alternate_block = alternate_region->front();
-      for (mlir::Operation &op_to_move :
+      mlir::Block& alternate_block = alternate_region->front();
+      for (mlir::Operation& op_to_move :
            llvm::make_early_inc_range(alternate_block.getOperations())) {
         op_to_move.moveBefore(op);
       }
@@ -56,9 +62,9 @@ void IfStatementElimination(mlir::Operation *root_op) {
   });
 }
 
-void WhileStatementElimination(mlir::Operation *root_op) {
+void WhileStatementElimination(mlir::Operation* root_op) {
   root_op->walk([&](JshirWhileStatementOp op) {
-    mlir::Region &test_region = op.getTest();
+    mlir::Region& test_region = op.getTest();
     if (test_region.empty()) {
       return;
     }
@@ -84,8 +90,62 @@ void WhileStatementElimination(mlir::Operation *root_op) {
   });
 }
 
-void DeadCodeElimination(mlir::Operation *root_op) {
+struct SymbolInfo {
+  std::vector<mlir::Operation*> definitions;
+  std::vector<mlir::Operation*> references;
+};
+
+bool operator==(const JsSymbolId& lhs, const JsSymbolId& rhs) {
+  return std::forward_as_tuple(lhs.name(), lhs.def_scope_uid()) ==
+         std::forward_as_tuple(rhs.name(), rhs.def_scope_uid());
+}
+
+template <typename H>
+H AbslHashValue(H h, const JsSymbolId& m) {
+  return H::combine(std::move(h), m.name(), m.def_scope_uid());
+}
+
+JsSymbolId GetSymbolIdFromAttr(JsirSymbolIdAttr symbol_attr) {
+  std::string name = symbol_attr.getName().str();
+  std::optional<int64_t> scope_uid = symbol_attr.getDefScopeId();
+  return JsSymbolId{name, scope_uid};
+}
+
+void UnusedFunctionElimination(mlir::Operation* root_op) {
+  absl::flat_hash_map<JsSymbolId, SymbolInfo> symbol_infos;
+
+  root_op->walk([&](mlir::Operation* op) {
+    auto trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
+    if (trivia == nullptr) {
+      return;
+    }
+    JsirSymbolIdAttr symbol = trivia.getReferencedSymbol();
+    if (symbol != nullptr) {
+      symbol_infos[GetSymbolIdFromAttr(symbol)].references.push_back(op);
+    }
+
+    llvm::ArrayRef<JsirSymbolIdAttr> mlir_defined_symbols =
+        trivia.getDefinedSymbols();
+    for (JsirSymbolIdAttr defined_symbol : mlir_defined_symbols) {
+      symbol_infos[GetSymbolIdFromAttr(defined_symbol)].definitions.push_back(
+          op);
+    }
+  });
+
+  for (const auto& [symbol, info] : symbol_infos) {
+    if (info.references.empty()) {
+      for (mlir::Operation* def_op : info.definitions) {
+        if (llvm::isa<JsirFunctionDeclarationOp>(def_op)) {
+          def_op->erase();
+        }
+      }
+    }
+  }
+}
+
+void DeadCodeElimination(mlir::Operation* root_op) {
   IfStatementElimination(root_op);
   WhileStatementElimination(root_op);
+  UnusedFunctionElimination(root_op);
 }
-} // namespace maldoca
+}  // namespace maldoca
