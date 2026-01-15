@@ -30,6 +30,7 @@ cc_library(
     deps = [
         "//maldoca/js/ir",
         "//maldoca/js/ast",
+        "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",

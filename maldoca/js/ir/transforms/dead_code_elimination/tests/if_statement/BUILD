@@ -23,7 +23,7 @@ glob_lit_tests(
     data = [
         "input.js",
         "output.generated.txt",
-        "//maldoca/js/ir:lit_test_files",
+        "//third_party/maldoca/js/ir:lit_test_files",
     ],
     test_file_exts = [
         "lit",
