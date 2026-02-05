@@ -34,22 +34,22 @@
 // JSHIR-NEXT:               // State [default = <unknown>] { }
 // JSHIR-NEXT:             %5 = jsir.variable_declarator (%3, %4)
 // JSHIR-NEXT:               // %5 = <uninitialized>
-// JSHIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:             jsir.exprs_region_end (%5)
-// JSHIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         })
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         %0 = jsir.identifier {"a"}
 // JSHIR-NEXT:           // %0 = 1.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
 // JSHIR-NEXT:           // %1 = 1.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         %2 = jsir.binary_expression (%0, %1) {"+"}
 // JSHIR-NEXT:           // %2 = 2.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         jsir.expression_statement (%2)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:     }, {
 // JSHIR-NEXT:       ^bb0:
 // JSHIR-NEXT:           // <executable>

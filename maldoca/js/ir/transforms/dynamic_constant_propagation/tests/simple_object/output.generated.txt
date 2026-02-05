@@ -221,7 +221,7 @@
 // SOURCE-NEXT: ================================================================
 // SOURCE-NEXT: Bindings:
 // SOURCE-NEXT: ================================================================
-// SOURCE-NEXT: object#0:
+// SOURCE-NEXT: object#s0:
 // SOURCE-NEXT:     /* 4 properties */ {
 // SOURCE-NEXT:         ["a"]: "a",
 // SOURCE-NEXT:         ["b"]: ("" + "b"),
@@ -243,3 +243,4 @@
 // SOURCE-NEXT: From [198, 206): `object.c` -> `c`
 // SOURCE-NEXT: From [221, 229): `object.d` -> `d`
 // SOURCE-NEXT: ================================================================
+// SOURCE-EMPTY:

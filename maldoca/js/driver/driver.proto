@@ -164,6 +164,8 @@ message JsirAnalysisResult {
     }
     repeated ComputedConstant computed_constants = 3;
   }
+
+  // Represents maldoca::JsSymbolId
 }
 
 message JsAnalysisOutput {

@@ -45,11 +45,11 @@
 // JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
 // JSHIR-NEXT:             %5 = jsir.variable_declarator (%3, %4)
 // JSHIR-NEXT:               // %5 = <uninitialized>
-// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:             jsir.exprs_region_end (%5)
-// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:               // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         })
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#0 : 1.000000e+00 : f64> }
+// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <c#s0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:     }, {
 // JSHIR-NEXT:       ^bb0:
 // JSHIR-NEXT:           // <executable>

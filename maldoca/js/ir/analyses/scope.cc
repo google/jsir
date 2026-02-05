@@ -28,8 +28,9 @@
 
 namespace maldoca {
 
-std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
-                                  mlir::Operation *op, absl::string_view name) {
+std::optional<int64_t> FindSymbol(const BabelScopes& scopes,
+                                  mlir::Operation* op, absl::string_view name,
+                                  bool is_var_declaration) {
   auto trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
   if (trivia == nullptr) {
     return std::nullopt;
@@ -40,23 +41,30 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
     return std::nullopt;
   }
 
-  return FindSymbol(scopes, *use_scope_uid, name);
+  return FindSymbol(scopes, *use_scope_uid, name, is_var_declaration);
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
-                       absl::string_view name) {
-  return JsSymbolId{std::string(name), FindSymbol(scopes, op, name)};
+JsSymbolId GetSymbolId(const BabelScopes& scopes, mlir::Operation* op,
+                       absl::string_view name, bool is_var_declaration) {
+  auto use_scope_uid = FindSymbol(scopes, op, name, is_var_declaration);
+  if (!use_scope_uid.has_value()) {
+    return JsSymbolId{std::string(name), std::nullopt, std::nullopt};
+  }
+  return GetSymbolId(scopes, *use_scope_uid, name, is_var_declaration);
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op) {
-  return GetSymbolId(scopes, op, op.getName());
+JsSymbolId GetSymbolId(const BabelScopes& scopes, JsirIdentifierOp op,
+                       bool is_var_declaration) {
+  return GetSymbolId(scopes, op, op.getName(), is_var_declaration);
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierRefOp op) {
-  return GetSymbolId(scopes, op, op.getName());
+JsSymbolId GetSymbolId(const BabelScopes& scopes, JsirIdentifierRefOp op,
+                       bool is_var_declaration) {
+  return GetSymbolId(scopes, op, op.getName(), is_var_declaration);
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr) {
+JsSymbolId GetSymbolId(const BabelScopes& scopes, JsirIdentifierAttr attr,
+                       bool is_var_declaration) {
   absl::string_view name = attr.getName().strref();
 
   std::optional<int64_t> use_scope_uid = [&]() -> std::optional<int64_t> {
@@ -68,9 +76,9 @@ JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr) {
   }();
 
   if (!use_scope_uid.has_value()) {
-    return JsSymbolId{std::string(name), std::nullopt};
+    return JsSymbolId{std::string(name), std::nullopt, std::nullopt};
   }
-  return GetSymbolId(scopes, *use_scope_uid, name);
+  return GetSymbolId(scopes, *use_scope_uid, name, is_var_declaration);
 }
 
 }  // namespace maldoca

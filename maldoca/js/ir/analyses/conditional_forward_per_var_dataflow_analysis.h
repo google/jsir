@@ -89,7 +89,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
   void WriteDenseAfterState(mlir::Operation *op, llvm::StringRef name,
                             const ValueT &value, const StateT *before,
                             JsirStateRef<StateT> after) {
-    JsSymbolId target_symbol{std::string(name), FindSymbol(scopes_, op, name)};
+    JsSymbolId target_symbol = GetSymbolId(scopes_, op, name);
 
     after.Join(*before);
     after.Write([&](StateT *after) {
@@ -112,8 +112,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
   void VisitIdentifier(JsirIdentifierOp op,
                        OperandStates<JsirIdentifierOp> operands,
                        const StateT *before, JsirStateRef<ValueT> result) {
-    absl::string_view name = op.getName();
-    JsSymbolId symbol{std::string(name), FindSymbol(scopes_, op, name)};
+    JsSymbolId symbol = GetSymbolId(scopes_, op);
     ValueT value = before->Get(symbol);
     result.Join(value);
   }
@@ -124,7 +123,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
                             llvm::MutableArrayRef<JsirStateRef<ValueT>> results,
                             JsirStateRef<StateT> after) {
     absl::string_view name = op.getId().getName().strref();
-    JsSymbolId symbol{std::string(name), FindSymbol(scopes_, op, name)};
+    JsSymbolId symbol = GetSymbolId(scopes_, op, name);
     ValueT value = before->Get(symbol);
 
     assert(results.size() == 1);
