@@ -29,8 +29,8 @@ cc_library(
     hdrs = ["pass.h"],
     deps = [
         "//maldoca/js/ir",
+        "//maldoca/js/ir:jsir_utils",
         "//maldoca/js/ast",
-        "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
