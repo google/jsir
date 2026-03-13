@@ -1,7 +1,7 @@
-while(false){
+while (false) {
   console.log("To be eliminated");
 }
 
-while(true){
+while (true) {
   console.log("Should not be eliminated");   
 }
