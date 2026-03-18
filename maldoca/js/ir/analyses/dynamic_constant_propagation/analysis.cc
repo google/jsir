@@ -86,25 +86,25 @@ namespace maldoca {
 // We only support inlining of functions with a single return statement.
 struct JsirInlineFunctionInfo {
   std::vector<JsSymbolId> param_symbols;
-  mlir::Operation *return_value;
+  mlir::Operation* return_value;
 
-  static std::optional<JsirInlineFunctionInfo> Create(const BabelScopes &scopes,
-                                                      mlir::Region &params,
-                                                      mlir::Region &body);
+  static std::optional<JsirInlineFunctionInfo> Create(const BabelScopes& scopes,
+                                                      mlir::Region& params,
+                                                      mlir::Region& body);
 
   static std::optional<JsirInlineFunctionInfo> Create(
-      const BabelScopes &scopes, JsirFunctionExpressionOp op) {
+      const BabelScopes& scopes, JsirFunctionExpressionOp op) {
     return Create(scopes, op.getParams(), op.getBody());
   }
 
   static std::optional<JsirInlineFunctionInfo> Create(
-      const BabelScopes &scopes, JsirFunctionDeclarationOp op) {
+      const BabelScopes& scopes, JsirFunctionDeclarationOp op) {
     return Create(scopes, op.getParams(), op.getBody());
   }
 };
 
 std::optional<JsirInlineFunctionInfo> JsirInlineFunctionInfo::Create(
-    const BabelScopes &scopes, mlir::Region &params, mlir::Region &body) {
+    const BabelScopes& scopes, mlir::Region& params, mlir::Region& body) {
   llvm::SmallVector<JsirReturnStatementOp> return_ops;
   body.walk([&](mlir::Operation* op) {
     // Skip nested functions
@@ -128,7 +128,7 @@ std::optional<JsirInlineFunctionInfo> JsirInlineFunctionInfo::Create(
     return std::nullopt;
   }
 
-  mlir::Operation *return_value = return_op.getArgument().getDefiningOp();
+  mlir::Operation* return_value = return_op.getArgument().getDefiningOp();
   if (return_value == nullptr) {
     return std::nullopt;
   }
@@ -154,10 +154,10 @@ std::optional<JsirInlineFunctionInfo> JsirInlineFunctionInfo::Create(
 }
 
 typedef std::optional<mlir::Attribute> (*BuiltinFunc)(
-    mlir::MLIRContext *context, absl::Span<const mlir::Attribute> args);
+    mlir::MLIRContext* context, absl::Span<const mlir::Attribute> args);
 
 std::optional<mlir::Attribute> BuiltinAtob(
-    mlir::MLIRContext *context, absl::Span<const mlir::Attribute> args) {
+    mlir::MLIRContext* context, absl::Span<const mlir::Attribute> args) {
   if (args.size() != 1) {
     return std::nullopt;
   }
@@ -171,7 +171,7 @@ std::optional<mlir::Attribute> BuiltinAtob(
 }
 
 std::optional<mlir::Attribute> BuiltinBtoa(
-    mlir::MLIRContext *context, absl::Span<const mlir::Attribute> args) {
+    mlir::MLIRContext* context, absl::Span<const mlir::Attribute> args) {
   if (args.size() != 1) {
     return std::nullopt;
   }
@@ -184,7 +184,7 @@ std::optional<mlir::Attribute> BuiltinBtoa(
   return mlir::StringAttr::get(context, ascii_string);
 }
 
-static const auto *kBuiltins =
+static const auto* kBuiltins =
     new absl::flat_hash_map<std::string, BuiltinFunc>{
         {"atob", &BuiltinAtob},
         {"btoa", &BuiltinBtoa},
@@ -201,7 +201,8 @@ static std::string InlineExprToString(mlir::Attribute expr, size_t indent = 0) {
                             InlineExprToString(attr.getRight()), ")");
       })
       .Case([&](JsirSymbolIdAttr attr) {
-        JsSymbolId symbol{attr.getName().str(), attr.getDefScopeId()};
+        JsSymbolId symbol{attr.getName().str(), attr.getDefScopeId(),
+                          attr.getBindingUid()};
         return absl::StrCat(symbol);
       })
       .Case([&](JsirInlineExpressionMemberExpressionAttr attr) {
@@ -255,15 +256,15 @@ static std::string InlineExprToString(mlir::Attribute expr, size_t indent = 0) {
 }
 
 void PrintBindings(
-    llvm::raw_ostream &os,
-    const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings) {
+    llvm::raw_ostream& os,
+    const absl::flat_hash_map<JsSymbolId, mlir::Attribute>& bindings) {
   std::vector<JsSymbolId> sorted_symbols;
-  for (const auto &[symbol, value] : bindings) {
+  for (const auto& [symbol, value] : bindings) {
     sorted_symbols.push_back(symbol);
   }
   absl::c_sort(sorted_symbols);
 
-  for (const JsSymbolId &symbol : sorted_symbols) {
+  for (const JsSymbolId& symbol : sorted_symbols) {
     os << symbol << ":\n";
     os << "    " << InlineExprToString(bindings.at(symbol), /*indent=*/4);
     os << "\n";
@@ -324,63 +325,63 @@ void PrintBindings(
 // Then, when evaluating the `CallExpression`, since we have access to the
 // lookup table, we will get the result `NumericLiteral{2}`.
 
-std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
+std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes& scopes,
                                              mlir::Value value);
 
-std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
-                                             mlir::Operation *op);
+std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes& scopes,
+                                             mlir::Operation* op);
 
-std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
+std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes& scopes,
                                              JsirIdentifierOp op);
 
 std::optional<JsirInlineExpressionPropertyAttr> GetInlineExpr(
-    const BabelScopes &scopes, JsirObjectPropertyOp op);
+    const BabelScopes& scopes, JsirObjectPropertyOp op);
 
 std::optional<JsirInlineExpressionFunctionAttr> GetInlineExpr(
-    const BabelScopes &scopes, const JsirInlineFunctionInfo &func_info);
+    const BabelScopes& scopes, const JsirInlineFunctionInfo& func_info);
 
 void GetSymbolDependencies(mlir::Attribute attr,
-                           absl::flat_hash_set<JsSymbolId> &dependencies);
+                           absl::flat_hash_set<JsSymbolId>& dependencies);
 
 struct SymbolDependencyNode {
   JsSymbolId symbol;
-  std::vector<SymbolDependencyNode *> dependencies;
+  std::vector<SymbolDependencyNode*> dependencies;
 
   explicit SymbolDependencyNode(JsSymbolId symbol) : symbol(symbol) {}
 };
 
 struct SymbolDependencyGraph {
   std::vector<SymbolDependencyNode> nodes_vector;
-  absl::flat_hash_map<JsSymbolId, SymbolDependencyNode *> nodes_map;
+  absl::flat_hash_map<JsSymbolId, SymbolDependencyNode*> nodes_map;
 
-  SymbolDependencyNode *getEntryNode() { return &nodes_vector.back(); }
+  SymbolDependencyNode* getEntryNode() { return &nodes_vector.back(); }
 
   static SymbolDependencyGraph Create(
-      const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings);
+      const absl::flat_hash_map<JsSymbolId, mlir::Attribute>& bindings);
 };
 
 SymbolDependencyGraph SymbolDependencyGraph::Create(
-    const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings) {
+    const absl::flat_hash_map<JsSymbolId, mlir::Attribute>& bindings) {
   std::vector<SymbolDependencyNode> nodes_vec;
-  for (const auto &[symbol_id, _] : bindings) {
+  for (const auto& [symbol_id, _] : bindings) {
     nodes_vec.push_back(SymbolDependencyNode(symbol_id));
   }
-  nodes_vec.push_back(SymbolDependencyNode(JsSymbolId{"", 0}));
+  nodes_vec.push_back(SymbolDependencyNode(JsSymbolId{"", 0, std::nullopt}));
 
-  absl::flat_hash_map<JsSymbolId, SymbolDependencyNode *> nodes_map;
-  for (SymbolDependencyNode &node : nodes_vec) {
+  absl::flat_hash_map<JsSymbolId, SymbolDependencyNode*> nodes_map;
+  for (SymbolDependencyNode& node : nodes_vec) {
     nodes_map[node.symbol] = &node;
   }
 
-  for (const auto &[symbol_id, _] : bindings) {
+  for (const auto& [symbol_id, _] : bindings) {
     nodes_vec.back().dependencies.push_back(nodes_map.at(symbol_id));
   }
 
-  for (const auto &[symbol_id, attribute] : bindings) {
+  for (const auto& [symbol_id, attribute] : bindings) {
     absl::flat_hash_set<JsSymbolId> dependencies;
     GetSymbolDependencies(attribute, dependencies);
 
-    for (const JsSymbolId &dependency : dependencies) {
+    for (const JsSymbolId& dependency : dependencies) {
       if (auto it = nodes_map.find(dependency); it != nodes_map.end()) {
         nodes_map[symbol_id]->dependencies.push_back(it->second);
       }
@@ -397,11 +398,11 @@ SymbolDependencyGraph SymbolDependencyGraph::Create(
 
 namespace llvm {
 template <>
-struct GraphTraits<maldoca::SymbolDependencyNode *> {
-  using NodeRef = maldoca::SymbolDependencyNode *;
+struct GraphTraits<maldoca::SymbolDependencyNode*> {
+  using NodeRef = maldoca::SymbolDependencyNode*;
 
   using ChildIteratorType =
-      std::vector<maldoca::SymbolDependencyNode *>::iterator;
+      std::vector<maldoca::SymbolDependencyNode*>::iterator;
 
   static ChildIteratorType child_begin(NodeRef N) {
     return N->dependencies.begin();
@@ -413,19 +414,19 @@ struct GraphTraits<maldoca::SymbolDependencyNode *> {
 };
 
 template <>
-struct GraphTraits<maldoca::SymbolDependencyGraph *>
-    : public GraphTraits<maldoca::SymbolDependencyNode *> {
+struct GraphTraits<maldoca::SymbolDependencyGraph*>
+    : public GraphTraits<maldoca::SymbolDependencyNode*> {
   using nodes_iterator = std::vector<maldoca::SymbolDependencyNode>::iterator;
 
-  static nodes_iterator nodes_begin(maldoca::SymbolDependencyGraph *G) {
+  static nodes_iterator nodes_begin(maldoca::SymbolDependencyGraph* G) {
     return G->nodes_vector.begin();
   }
 
-  static nodes_iterator nodes_end(maldoca::SymbolDependencyGraph *G) {
+  static nodes_iterator nodes_end(maldoca::SymbolDependencyGraph* G) {
     return G->nodes_vector.end();
   }
 
-  static NodeRef getEntryNode(maldoca::SymbolDependencyGraph *G) {
+  static NodeRef getEntryNode(maldoca::SymbolDependencyGraph* G) {
     return G->getEntryNode();
   }
 };
@@ -435,7 +436,7 @@ struct GraphTraits<maldoca::SymbolDependencyGraph *>
 namespace maldoca {
 
 absl::flat_hash_map<JsSymbolId, mlir::Attribute> GetConstBindings(
-    const BabelScopes &scopes, mlir::Operation *root) {
+    const BabelScopes& scopes, mlir::Operation* root) {
   absl::flat_hash_map<JsSymbolId, mlir::Attribute> bindings;
 
   root->walk([&](JsirFunctionDeclarationOp op) {
@@ -481,7 +482,7 @@ absl::flat_hash_map<JsSymbolId, mlir::Attribute> GetConstBindings(
   absl::flat_hash_map<JsSymbolId, SymbolMutationInfo> infos =
       GetSymbolMutationInfos(scopes, root);
 
-  for (const auto &[symbol, info] : infos) {
+  for (const auto& [symbol, info] : infos) {
     if (info.num_assignments + info.num_mutations != 1) {
       bindings.erase(symbol);
     }
@@ -493,7 +494,7 @@ absl::flat_hash_map<JsSymbolId, mlir::Attribute> GetConstBindings(
   for (auto it = llvm::scc_begin(&symbol_dependency_graph);
        it != ::llvm::scc_end(&symbol_dependency_graph); ++it) {
     if (it.hasCycle()) {
-      for (SymbolDependencyNode *node : *it) {
+      for (SymbolDependencyNode* node : *it) {
         bindings.erase(node->symbol);
       }
     }
@@ -503,15 +504,15 @@ absl::flat_hash_map<JsSymbolId, mlir::Attribute> GetConstBindings(
 }
 
 void GetSymbolDependencies(mlir::Attribute attr,
-                           absl::flat_hash_set<JsSymbolId> &dependencies) {
+                           absl::flat_hash_set<JsSymbolId>& dependencies) {
   llvm::TypeSwitch<mlir::Attribute, void>(attr)
       .Case([&](JsirInlineExpressionBinaryExpressionAttr attr) {
         GetSymbolDependencies(attr.getLeft(), dependencies);
         GetSymbolDependencies(attr.getRight(), dependencies);
       })
       .Case([&](JsirSymbolIdAttr attr) {
-        dependencies.insert(
-            JsSymbolId{attr.getName().str(), attr.getDefScopeId()});
+        dependencies.insert(JsSymbolId{
+            attr.getName().str(), attr.getDefScopeId(), attr.getBindingUid()});
       })
       .Case([&](JsirInlineExpressionMemberExpressionAttr attr) {
         GetSymbolDependencies(attr.getObject(), dependencies);
@@ -549,7 +550,7 @@ std::optional<mlir::StringAttr> NormalizeLiteralKey(mlir::Attribute attr) {
   return llvm::TypeSwitch<mlir::Attribute, Ret>(attr)
       .Case([&](mlir::StringAttr attr) { return attr; })
       .Case([&](mlir::FloatAttr attr) {
-        mlir::MLIRContext *context = attr.getContext();
+        mlir::MLIRContext* context = attr.getContext();
         return mlir::StringAttr::get(context,
                                      absl::StrCat(attr.getValueAsDouble()));
       })
@@ -562,7 +563,7 @@ std::optional<mlir::StringAttr> NormalizeLiteralKey(mlir::Attribute attr) {
       .Default([&](mlir::Attribute attr) { return std::nullopt; });
 }
 
-std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
+std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes& scopes,
                                              mlir::Value value) {
   CHECK(value != nullptr);
   if (value.getDefiningOp() == nullptr) {
@@ -571,12 +572,12 @@ std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
   return GetInlineExpr(scopes, value.getDefiningOp());
 }
 
-std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
-                                             mlir::Operation *op) {
-  mlir::MLIRContext *mlir_context = op->getContext();
+std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes& scopes,
+                                             mlir::Operation* op) {
+  mlir::MLIRContext* mlir_context = op->getContext();
   using Ret = std::optional<mlir::Attribute>;
 
-  return llvm::TypeSwitch<mlir::Operation *, Ret>(op)
+  return llvm::TypeSwitch<mlir::Operation*, Ret>(op)
       .Case([&](JsirBinaryExpressionOp op) -> Ret {
         OPT_ASSIGN_OR_RETURN(mlir::Attribute left,
                              GetInlineExpr(scopes, op.getLeft()));
@@ -681,42 +682,42 @@ std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
             mlir_context, argument, op.getOperator_Attr());
       })
 
-      .Default([&](mlir::Operation *op) -> Ret { return std::nullopt; });
+      .Default([&](mlir::Operation* op) -> Ret { return std::nullopt; });
 }
 
-std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
+std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes& scopes,
                                              JsirIdentifierOp op) {
-  mlir::MLIRContext *mlir_context = op.getContext();
+  mlir::MLIRContext* mlir_context = op.getContext();
 
   JsSymbolId symbol = GetSymbolId(scopes, op);
 
   return JsirSymbolIdAttr::get(mlir_context, op.getNameAttr(),
-                               symbol.def_scope_uid());
+                               symbol.def_scope_uid(), symbol.binding_uid());
 }
 
 std::optional<mlir::StringAttr> GetInlineExprFromKey(
     mlir::Value computed_key, mlir::Attribute literal_key) {
   using Ret = std::optional<mlir::StringAttr>;
   if (computed_key != nullptr) {
-    mlir::Operation *computed_key_op = computed_key.getDefiningOp();
+    mlir::Operation* computed_key_op = computed_key.getDefiningOp();
 
-    return llvm::TypeSwitch<mlir::Operation *, Ret>(computed_key_op)
+    return llvm::TypeSwitch<mlir::Operation*, Ret>(computed_key_op)
         .Case([&](JsirStringLiteralOp op) { return op.getValueAttr(); })
         .Case([&](JsirNumericLiteralOp op) {
-          mlir::MLIRContext *context = op.getContext();
+          mlir::MLIRContext* context = op.getContext();
           mlir::FloatAttr value = op.getValueAttr();
           return mlir::StringAttr::get(context,
                                        absl::StrCat(value.getValueAsDouble()));
         })
         .Case([&](JsirBigIntLiteralOp op) { return op.getValueAttr(); })
-        .Default([&](mlir::Operation *op) { return std::nullopt; });
+        .Default([&](mlir::Operation* op) { return std::nullopt; });
   }
 
   return NormalizeLiteralKey(literal_key);
 }
 
 std::optional<JsirInlineExpressionPropertyAttr> GetInlineExpr(
-    const BabelScopes &scopes, JsirObjectPropertyOp op) {
+    const BabelScopes& scopes, JsirObjectPropertyOp op) {
   OPT_ASSIGN_OR_RETURN(
       mlir::StringAttr key,
       GetInlineExprFromKey(op.getComputedKey(), op.getLiteralKeyAttr()));
@@ -728,17 +729,17 @@ std::optional<JsirInlineExpressionPropertyAttr> GetInlineExpr(
 }
 
 std::optional<JsirInlineExpressionFunctionAttr> GetInlineExpr(
-    const BabelScopes &scopes, const JsirInlineFunctionInfo &func_info) {
+    const BabelScopes& scopes, const JsirInlineFunctionInfo& func_info) {
   OPT_ASSIGN_OR_RETURN(mlir::Attribute return_value,
                        GetInlineExpr(scopes, func_info.return_value));
 
-  mlir::MLIRContext *context = func_info.return_value->getContext();
+  mlir::MLIRContext* context = func_info.return_value->getContext();
   std::vector<JsirSymbolIdAttr> params;
   params.reserve(func_info.param_symbols.size());
-  for (const JsSymbolId &symbol : func_info.param_symbols) {
+  for (const JsSymbolId& param_symbol : func_info.param_symbols) {
     auto param = JsirSymbolIdAttr::get(
-        context, mlir::StringAttr::get(context, symbol.name()),
-        symbol.def_scope_uid());
+        context, mlir::StringAttr::get(context, param_symbol.name()),
+        param_symbol.def_scope_uid(), param_symbol.binding_uid());
     params.push_back(param);
   }
 
@@ -746,17 +747,17 @@ std::optional<JsirInlineExpressionFunctionAttr> GetInlineExpr(
 }
 
 void JsirDynamicConstantPropagationAnalysis::VisitOp(
-    mlir::Operation *op,
-    llvm::ArrayRef<const JsirConstantPropagationValue *> operands,
-    const JsirConstantPropagationState *before,
+    mlir::Operation* op,
+    llvm::ArrayRef<const JsirConstantPropagationValue*> operands,
+    const JsirConstantPropagationState* before,
     llvm::MutableArrayRef<JsirStateRef<JsirConstantPropagationValue>> results,
     JsirStateRef<JsirConstantPropagationState> after) {
   op->getContext()->getOrLoadDialect<JsirBuiltinDialect>();
 
-  llvm::TypeSwitch<mlir::Operation *, void>(op)
+  llvm::TypeSwitch<mlir::Operation*, void>(op)
       .Case([&](JsirIdentifierOp op) {
         assert(results.size() == 1);
-        auto &result = results[0];
+        auto& result = results[0];
         VisitIdentifier(op, operands, before, result);
         after.Join(*before);
       })
@@ -766,7 +767,7 @@ void JsirDynamicConstantPropagationAnalysis::VisitOp(
       .Case([&](JsirMemberExpressionOp op) {
         return VisitMemberExpression(op, operands, before, results, after);
       })
-      .Default([&](mlir::Operation *op) {
+      .Default([&](mlir::Operation* op) {
         return JsirConstantPropagationAnalysis::VisitOp(op, operands, before,
                                                         results, after);
       });
@@ -776,18 +777,18 @@ void JsirDynamicConstantPropagationAnalysis::VisitOp(
 
 void JsirDynamicConstantPropagationAnalysis::VisitIdentifier(
     JsirIdentifierOp op, OperandStates<JsirIdentifierOp> operands,
-    const JsirConstantPropagationState *before,
+    const JsirConstantPropagationState* before,
     JsirStateRef<JsirConstantPropagationValue> result) {
   JsSymbolId symbol_id = GetSymbolId(scopes_, op);
 
-  const JsirConstantPropagationValue &const_prop_value = before->Get(symbol_id);
+  const JsirConstantPropagationValue& const_prop_value = before->Get(symbol_id);
   if (!const_prop_value.IsUninitialized() && !const_prop_value.IsUnknown()) {
     result.Join(const_prop_value);
     return;
   }
 
-  std::optional<mlir::Attribute> inline_result =
-      EvalIdentifier(op.getNameAttr(), symbol_id.def_scope_uid(), {});
+  std::optional<mlir::Attribute> inline_result = EvalIdentifier(
+      op.getNameAttr(), symbol_id.def_scope_uid(), symbol_id.binding_uid(), {});
 
   if (!symbol_id.def_scope_uid().has_value() &&
       kBuiltins->contains(op.getNameAttr().str())) {
@@ -806,8 +807,9 @@ void JsirDynamicConstantPropagationAnalysis::VisitIdentifier(
 std::optional<mlir::Attribute>
 JsirDynamicConstantPropagationAnalysis::EvalIdentifier(
     mlir::StringAttr name, std::optional<int64_t> def_scope_id,
-    const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings) {
-  JsSymbolId symbol_id{name.str(), def_scope_id};
+    std::optional<int64_t> binding_uid,
+    const absl::flat_hash_map<JsSymbolId, mlir::Attribute>& bindings) {
+  JsSymbolId symbol_id{name.str(), def_scope_id, binding_uid};
 
   if (dynamic_prelude_->GetFunction(symbol_id).has_value()) {
     return JsirBuiltinFunctionAttr::get(name.getContext(), name);
@@ -827,8 +829,8 @@ JsirDynamicConstantPropagationAnalysis::EvalIdentifier(
 std::optional<mlir::Attribute>
 JsirDynamicConstantPropagationAnalysis::EvalCallExpression(
     mlir::Attribute callee, std::vector<mlir::Attribute> arguments) {
-  JSContext *qjs_context = dynamic_prelude_->GetQjsContext();
-  mlir::MLIRContext *mlir_context = callee.getContext();
+  JSContext* qjs_context = dynamic_prelude_->GetQjsContext();
+  mlir::MLIRContext* mlir_context = callee.getContext();
 
   using Ret = std::optional<mlir::Attribute>;
 
@@ -848,7 +850,7 @@ JsirDynamicConstantPropagationAnalysis::EvalCallExpression(
         std::vector<JSValue> qjs_argument_refs;
         qjs_arguments.reserve(arguments.size());
         qjs_argument_refs.reserve(arguments.size());
-        for (const auto &argument : arguments) {
+        for (const auto& argument : arguments) {
           OPT_ASSIGN_OR_RETURN(
               QjsValue qjs_argument,
               MlirAttributeToQuickJsValue(qjs_context, argument));
@@ -876,7 +878,8 @@ JsirDynamicConstantPropagationAnalysis::EvalCallExpression(
         absl::flat_hash_map<JsSymbolId, mlir::Attribute> bindings;
         for (auto [param, argument] :
              llvm::zip(callee.getParams(), arguments)) {
-          JsSymbolId symbol_id{param.getName().str(), param.getDefScopeId()};
+          JsSymbolId symbol_id{param.getName().str(), param.getDefScopeId(),
+                               std::nullopt};
           bindings[symbol_id] = argument;
         }
 
@@ -889,9 +892,9 @@ JsirDynamicConstantPropagationAnalysis::EvalCallExpression(
 
 std::optional<mlir::Attribute> JsirDynamicConstantPropagationAnalysis::Eval(
     mlir::Attribute expr,
-    const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings) {
-  JSContext *qjs_context = dynamic_prelude_->GetQjsContext();
-  mlir::MLIRContext *mlir_context = expr.getContext();
+    const absl::flat_hash_map<JsSymbolId, mlir::Attribute>& bindings) {
+  JSContext* qjs_context = dynamic_prelude_->GetQjsContext();
+  mlir::MLIRContext* mlir_context = expr.getContext();
 
   using Ret = std::optional<mlir::Attribute>;
 
@@ -919,7 +922,8 @@ std::optional<mlir::Attribute> JsirDynamicConstantPropagationAnalysis::Eval(
       })
 
       .Case([&](JsirSymbolIdAttr expr) -> Ret {
-        return EvalIdentifier(expr.getName(), expr.getDefScopeId(), bindings);
+        return EvalIdentifier(expr.getName(), expr.getDefScopeId(),
+                              expr.getBindingUid(), bindings);
       })
 
       .Case([&](JsirInlineExpressionMemberExpressionAttr expr) -> Ret {
@@ -992,11 +996,11 @@ std::optional<mlir::Attribute> JsirDynamicConstantPropagationAnalysis::Eval(
 
 void JsirDynamicConstantPropagationAnalysis::VisitCallExpression(
     JsirCallExpressionOp op, OperandStates<JsirCallExpressionOp> operands,
-    const JsirConstantPropagationState *before,
+    const JsirConstantPropagationState* before,
     llvm::MutableArrayRef<JsirStateRef<JsirConstantPropagationValue>> results,
     JsirStateRef<JsirConstantPropagationState> after) {
   assert(results.size() == 1);
-  auto &result = results[0];
+  auto& result = results[0];
 
   // Propagate dense state.
   after.Join(*before);
@@ -1004,11 +1008,11 @@ void JsirDynamicConstantPropagationAnalysis::VisitCallExpression(
   // If any of the arguments is uninitialized, that means states haven't
   // "flowed" into this CallExpression yet, and we are visiting it during
   // initialization, so we will leave the result as Uninitialized.
-  const JsirConstantPropagationValue &callee_lattice = *operands.getCallee();
+  const JsirConstantPropagationValue& callee_lattice = *operands.getCallee();
   if (callee_lattice.IsUninitialized()) {
     return;
   }
-  for (const auto *argument_lattice : operands.getArguments()) {
+  for (const auto* argument_lattice : operands.getArguments()) {
     if (argument_lattice->IsUninitialized()) {
       return;
     }
@@ -1022,7 +1026,7 @@ void JsirDynamicConstantPropagationAnalysis::VisitCallExpression(
 
   // If any of the arguments is unknown, the result must be unknown too.
   std::vector<mlir::Attribute> arguments;
-  for (auto *argument_lattice : operands.getArguments()) {
+  for (auto* argument_lattice : operands.getArguments()) {
     if (argument_lattice->IsUnknown()) {
       return;
     }
@@ -1053,11 +1057,11 @@ void JsirDynamicConstantPropagationAnalysis::VisitCallExpression(
 // VisitCallExpression.
 void JsirDynamicConstantPropagationAnalysis::VisitMemberExpression(
     JsirMemberExpressionOp op, OperandStates<JsirMemberExpressionOp> operands,
-    const JsirConstantPropagationState *before,
+    const JsirConstantPropagationState* before,
     llvm::MutableArrayRef<JsirStateRef<JsirConstantPropagationValue>> results,
     JsirStateRef<JsirConstantPropagationState> after) {
   assert(results.size() == 1);
-  auto &result = results[0];
+  auto& result = results[0];
 
   // Propagate dense state.
   after.Join(*before);
@@ -1068,7 +1072,7 @@ void JsirDynamicConstantPropagationAnalysis::VisitMemberExpression(
                                                     before, results, after);
   };
 
-  const JsirConstantPropagationValue *object_lattice = operands.getObject();
+  const JsirConstantPropagationValue* object_lattice = operands.getObject();
   if (object_lattice->IsUninitialized() || object_lattice->IsUnknown()) {
     return;
   }
@@ -1081,7 +1085,7 @@ void JsirDynamicConstantPropagationAnalysis::VisitMemberExpression(
 
   auto target_key_attr = [&]() -> std::optional<mlir::Attribute> {
     if (mlir::Value property = op.getComputedProperty(); property != nullptr) {
-      const JsirConstantPropagationValue *key_lattice =
+      const JsirConstantPropagationValue* key_lattice =
           operands.getComputedProperty();
       if (key_lattice->IsUninitialized() || key_lattice->IsUnknown()) {
         return std::nullopt;

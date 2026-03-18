@@ -31,25 +31,31 @@ namespace maldoca {
 
 template <typename H>
 H AbslHashValue(H h, const JsSymbolId& s) {
-  return H::combine(std::move(h), s.name(), s.def_scope_uid());
+  return H::combine(std::move(h), s.name(), s.def_scope_uid(),
+                    s.binding_uid().value_or(-1));
 }
 
 inline bool operator==(const JsSymbolId& lhs, const JsSymbolId& rhs) {
-  return std::forward_as_tuple(lhs.name(), lhs.def_scope_uid()) ==
-         std::forward_as_tuple(rhs.name(), rhs.def_scope_uid());
+  return lhs.name() == rhs.name() &&
+         lhs.def_scope_uid() == rhs.def_scope_uid() &&
+         lhs.binding_uid().value_or(-1) == rhs.binding_uid().value_or(-1);
 }
 
 inline bool operator<(const JsSymbolId& lhs, const JsSymbolId& rhs) {
-  return std::forward_as_tuple(lhs.def_scope_uid(), lhs.name()) <
-         std::forward_as_tuple(rhs.def_scope_uid(), rhs.name());
+  return std::make_tuple(lhs.binding_uid().value_or(-1),
+                               lhs.def_scope_uid(), lhs.name()) <
+         std::make_tuple(rhs.binding_uid().value_or(-1),
+                               rhs.def_scope_uid(), rhs.name());
 }
 
 template <typename Sink>
 void AbslStringify(Sink& sink, const JsSymbolId& s) {
-  std::string def_scope_uid = s.def_scope_uid().has_value()
-                                  ? absl::StrCat(*s.def_scope_uid())
-                                  : "undeclared";
-  absl::Format(&sink, "%s#%s", s.name(), def_scope_uid);
+  std::string id = s.binding_uid().has_value()
+                       ? absl::StrCat("b", *s.binding_uid())
+                       : (s.def_scope_uid().has_value()
+                              ? absl::StrCat("s", *s.def_scope_uid())
+                              : "undeclared");
+  absl::Format(&sink, "%s#%s", s.name(), id);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const JsSymbolId& s) {

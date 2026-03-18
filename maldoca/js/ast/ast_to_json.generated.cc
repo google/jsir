@@ -166,6 +166,10 @@ void JsSymbolId::SerializeFields(std::ostream& os, bool &needs_comma) const {
     MaybeAddComma(os, needs_comma);
     os << "\"defScopeUid\":" << (nlohmann::json(def_scope_uid_.value())).dump();
   }
+  if (binding_uid_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"bindingUid\":" << (nlohmann::json(binding_uid_.value())).dump();
+  }
 }
 
 void JsSymbolId::Serialize(std::ostream& os) const {
