@@ -51,30 +51,32 @@ class JsirToAst {
 // Example:
 //
 // absl::StatusOr<std::unique_ptr<JsFile>> VisitFile(JsirFileOp op);
-#define DECLARE_CIR_OP_VISIT_FUNCTION(TYPE) \
-  absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE(Jsir##TYPE##Op op);
+#define DECLARE_CIR_OP_VISIT_FUNCTION(TYPE)                     \
+  static absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE( \
+      Jsir##TYPE##Op op);
 
 // Example:
 //
 // absl::StatusOr<std::unique_ptr<JsBlockStatement>>
 // VisitBlockStatement(JshirBlockStatementOp op);
-#define DECLARE_HIR_OP_VISIT_FUNCTION(TYPE) \
-  absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE(Jshir##TYPE##Op op);
+#define DECLARE_HIR_OP_VISIT_FUNCTION(TYPE)                     \
+  static absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE( \
+      Jshir##TYPE##Op op);
 
 // Example:
 //
 // absl::StatusOr<std::unique_ptr<JsIdentifier>>
 // VisitIdentifierRef(JsirIdentifierRefOp op);
-#define DECLARE_REF_OP_VISIT_FUNCTION(TYPE)                   \
-  absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE##Ref( \
+#define DECLARE_REF_OP_VISIT_FUNCTION(TYPE)                          \
+  static absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE##Ref( \
       Jsir##TYPE##RefOp op);
 
 // Example:
 //
 // absl::StatusOr<std::unique_ptr<JsIdentifier>>
 // VisitIdentifierAttr(JsirIdentifierAttr attr);
-#define DECLARE_ATTRIB_VISIT_FUNCTION(TYPE)                    \
-  absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE##Attr( \
+#define DECLARE_ATTRIB_VISIT_FUNCTION(TYPE)                           \
+  static absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE##Attr( \
       Jsir##TYPE##Attr attr);
 
   FOR_EACH_JSIR_CLASS(DECLARE_CIR_OP_VISIT_FUNCTION,
@@ -87,28 +89,28 @@ class JsirToAst {
 #undef DECLARE_HIR_OP_VISIT_FUNCTION
 #undef DECLARE_ATTRIB_VISIT_FUNCTION
 
-  absl::StatusOr<std::unique_ptr<JsProgramBodyElement>> VisitProgramBodyElement(
-      JsirProgramBodyElementOpInterface op);
+  static absl::StatusOr<std::unique_ptr<JsProgramBodyElement>>
+  VisitProgramBodyElement(JsirProgramBodyElementOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsStatement>> VisitStatement(
+  static absl::StatusOr<std::unique_ptr<JsStatement>> VisitStatement(
       JsirStatementOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsModuleDeclaration>> VisitModuleDeclaration(
-      JsirModuleDeclarationOpInterface op);
+  static absl::StatusOr<std::unique_ptr<JsModuleDeclaration>>
+  VisitModuleDeclaration(JsirModuleDeclarationOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsExpression>> VisitExpression(
+  static absl::StatusOr<std::unique_ptr<JsExpression>> VisitExpression(
       JsirExpressionOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsPattern>> VisitPatternRef(
+  static absl::StatusOr<std::unique_ptr<JsPattern>> VisitPatternRef(
       JsirPatternRefOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsLVal>> VisitLValRef(
+  static absl::StatusOr<std::unique_ptr<JsLVal>> VisitLValRef(
       JsirLValRefOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsLiteral>> VisitLiteral(
+  static absl::StatusOr<std::unique_ptr<JsLiteral>> VisitLiteral(
       JsirLiteralOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<JsDeclaration>> VisitDeclaration(
+  static absl::StatusOr<std::unique_ptr<JsDeclaration>> VisitDeclaration(
       JsirDeclarationOpInterface op);
 
   struct JsForInOfStatementFields {
@@ -119,21 +121,21 @@ class JsirToAst {
     std::unique_ptr<JsStatement> body;
   };
 
-  absl::StatusOr<JsForInOfStatementFields> VisitForInOfStatement(
+  static absl::StatusOr<JsForInOfStatementFields> VisitForInOfStatement(
       std::optional<JsirForInOfDeclarationAttr> left_declaration,
-      mlir::Value left_lval, mlir::Value right, mlir::Region &body_region);
+      mlir::Value left_lval, mlir::Value right, mlir::Region& body_region);
 
-  absl::StatusOr<std::unique_ptr<JsModuleSpecifier>> VisitModuleSpecifierAttr(
-      JsirModuleSpecifierAttrInterface attr);
+  static absl::StatusOr<std::unique_ptr<JsModuleSpecifier>>
+  VisitModuleSpecifierAttr(JsirModuleSpecifierAttrInterface attr);
 
-  absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
+  static absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
       JsirCommentAttrInterface attr);
 
  private:
   template <typename NodeT, typename IrT,
             typename = std::enable_if_t<std::is_base_of_v<JsNode, NodeT>>,
             typename... Args>
-  std::unique_ptr<NodeT> Create(IrT op, Args &&...args) {
+  static std::unique_ptr<NodeT> Create(IrT op, Args&&... args) {
     CHECK(op != nullptr) << "Op cannot be null.";
     JsTrivia trivia = GetJsTrivia(op);
     return CreateJsNodeWithTrivia<NodeT>(std::move(trivia),
@@ -144,21 +146,21 @@ class JsirToAst {
             typename = std::enable_if_t<!std::is_base_of_v<JsNode, NodeT>>,
             typename = void,  // deduplication
             typename... Args>
-  std::unique_ptr<NodeT> Create(IrT op, Args &&...args) {
+  static std::unique_ptr<NodeT> Create(IrT op, Args&&... args) {
     CHECK(op != nullptr) << "Op cannot be null.";
     return absl::make_unique<NodeT>(std::forward<Args>(args)...);
   }
 
-  absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>>
-  VisitStatementRegion(mlir::Region &region) {
+  static absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>>
+  VisitStatementRegion(mlir::Region& region) {
     if (!region.hasOneBlock()) {
       return absl::InvalidArgumentError(
           "Region should have exactly one block.");
     }
 
-    mlir::Block &block = region.getBlocks().front();
+    mlir::Block& block = region.getBlocks().front();
     std::vector<std::unique_ptr<JsStatement>> statements;
-    for (mlir::Operation &op : block) {
+    for (mlir::Operation& op : block) {
       if (!llvm::isa<JsirStatementOpInterface>(op)) {
         continue;
       }
@@ -175,7 +177,7 @@ class JsirToAst {
     bool computed;
   };
 
-  absl::StatusOr<ObjectPropertyKey> GetObjectPropertyKey(
+  static absl::StatusOr<ObjectPropertyKey> GetObjectPropertyKey(
       mlir::Value computed_key, std::optional<mlir::Attribute> literal_key);
 
   struct MemberExpressionProperty {
@@ -184,25 +186,24 @@ class JsirToAst {
     bool computed;
   };
 
-  absl::StatusOr<MemberExpressionProperty> GetMemberExpressionProperty(
+  static absl::StatusOr<MemberExpressionProperty> GetMemberExpressionProperty(
       mlir::Value computed_property,
       std::optional<mlir::Attribute> literal_property);
 
-  absl::StatusOr<
+  static absl::StatusOr<
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>>>
       GetMemberExpressionObject(mlir::Value);
 
-  absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>,
-                              std::unique_ptr<JsStringLiteral>>>
+  static absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>,
+                                     std::unique_ptr<JsStringLiteral>>>
   GetIdentifierOrStringLiteral(mlir::Attribute attr);
 
   template <typename NodeType, typename OpType>
-  using VisitFunc =
-      absl::StatusOr<std::unique_ptr<NodeType>> (JsirToAst::*)(OpType);
+  using VisitFunc = absl::StatusOr<std::unique_ptr<NodeType>> (*)(OpType);
 
   template <typename NodeT, typename OpT>
-  absl::StatusOr<std::unique_ptr<NodeT>> VisitExprRegion(
-      mlir::Region &region, VisitFunc<NodeT, OpT> visit) {
+  static absl::StatusOr<std::unique_ptr<NodeT>> VisitExprRegion(
+      mlir::Region& region, VisitFunc<NodeT, OpT> visit) {
     MALDOCA_ASSIGN_OR_RETURN(mlir::Value mlir_value,
                              GetExprRegionValue(region));
     auto mlir_op = llvm::dyn_cast<OpT>(mlir_value.getDefiningOp());
@@ -210,15 +211,15 @@ class JsirToAst {
       return absl::InvalidArgumentError(
           absl::StrCat("Must be ", __PRETTY_FUNCTION__));
     }
-    return (this->*visit)(mlir_op);
+    return visit(mlir_op);
   }
 
-  absl::StatusOr<mlir::Value> GetExprRegionValue(mlir::Region &region) {
+  static absl::StatusOr<mlir::Value> GetExprRegionValue(mlir::Region& region) {
     if (!region.hasOneBlock()) {
       return absl::InvalidArgumentError(
           "Region should have exactly one block.");
     }
-    mlir::Block &block = region.front();
+    mlir::Block& block = region.front();
     if (block.empty()) {
       return absl::InvalidArgumentError("Block cannot be empty.");
     }
@@ -230,12 +231,13 @@ class JsirToAst {
     return expr_region_end.getArgument();
   }
 
-  absl::StatusOr<mlir::ValueRange> GetExprsRegionValues(mlir::Region &region) {
+  static absl::StatusOr<mlir::ValueRange> GetExprsRegionValues(
+      mlir::Region& region) {
     if (!region.hasOneBlock()) {
       return absl::InvalidArgumentError(
           "Region should have exactly one block.");
     }
-    mlir::Block &block = region.front();
+    mlir::Block& block = region.front();
     if (block.empty()) {
       return absl::InvalidArgumentError("Block cannot be empty.");
     }
@@ -247,13 +249,13 @@ class JsirToAst {
     return exprs_region_end.getArguments();
   }
 
-  absl::StatusOr<mlir::Operation *> GetStmtRegionOperation(
-      mlir::Region &region) {
+  static absl::StatusOr<mlir::Operation*> GetStmtRegionOperation(
+      mlir::Region& region) {
     if (!region.hasOneBlock()) {
       return absl::InvalidArgumentError(
           "Region should have exactly one block.");
     }
-    mlir::Block &block = region.front();
+    mlir::Block& block = region.front();
     if (block.empty()) {
       return absl::InvalidArgumentError("Block cannot be empty.");
     }
@@ -261,8 +263,8 @@ class JsirToAst {
   }
 
   template <typename NodeT, typename OpT>
-  absl::StatusOr<std::unique_ptr<NodeT>> VisitStmtRegion(
-      mlir::Region &region, VisitFunc<NodeT, OpT> visit) {
+  static absl::StatusOr<std::unique_ptr<NodeT>> VisitStmtRegion(
+      mlir::Region& region, VisitFunc<NodeT, OpT> visit) {
     MALDOCA_ASSIGN_OR_RETURN(mlir::Operation * mlir_operation,
                              GetStmtRegionOperation(region));
     auto mlir_op = llvm::dyn_cast<OpT>(mlir_operation);
@@ -270,32 +272,34 @@ class JsirToAst {
       return absl::InvalidArgumentError(
           absl::StrCat("Must be ", __PRETTY_FUNCTION__));
     }
-    return (this->*visit)(mlir_op);
+    return visit(mlir_op);
   }
 
-  absl::StatusOr<mlir::Block *> GetStmtsRegionBlock(mlir::Region &region) {
+  static absl::StatusOr<mlir::Block*> GetStmtsRegionBlock(
+      mlir::Region& region) {
     if (!region.hasOneBlock()) {
       return absl::InvalidArgumentError(
           "Region should have exactly one block.");
     }
-    mlir::Block &block = region.front();
+    mlir::Block& block = region.front();
     return &block;
   }
 
   template <typename Stmt, typename StmtOp, typename Expr, typename ExprOp>
-  absl::StatusOr<std::variant<std::unique_ptr<Stmt>, std::unique_ptr<Expr>>>
-  VisitStmtOrExprRegion(mlir::Region &region,
+  static absl::StatusOr<
+      std::variant<std::unique_ptr<Stmt>, std::unique_ptr<Expr>>>
+  VisitStmtOrExprRegion(mlir::Region& region,
                         VisitFunc<Stmt, StmtOp> visit_stmt,
                         VisitFunc<Expr, ExprOp> visit_expr) {
     MALDOCA_ASSIGN_OR_RETURN(auto mlir_end, GetStmtRegionOperation(region));
     if (auto mlir_stmt_op = llvm::dyn_cast<StmtOp>(mlir_end)) {
-      return (this->*visit_stmt)(mlir_stmt_op);
+      return visit_stmt(mlir_stmt_op);
     } else if (auto mlir_end_op =
                    llvm::dyn_cast<JsirExprRegionEndOp>(mlir_end)) {
       auto mlir_expr_value = mlir_end_op.getArgument();
       auto mlir_expr_op =
           llvm::dyn_cast<ExprOp>(mlir_expr_value.getDefiningOp());
-      return (this->*visit_expr)(mlir_expr_op);
+      return visit_expr(mlir_expr_op);
     } else {
       return absl::InvalidArgumentError("Invalid op type.");
     }

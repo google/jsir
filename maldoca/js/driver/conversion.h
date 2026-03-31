@@ -93,22 +93,6 @@ struct ToJsHirRepr {
       mlir::MLIRContext &mlir_context);
 };
 
-struct ToJsLirRepr {
-  static absl::StatusOr<JsLirRepr> FromJsSourceRepr(
-      absl::string_view source, BabelParseRequest parse_request,
-      absl::Duration timeout, std::optional<int> recursion_depth_limit,
-      Babel &babel, mlir::MLIRContext &mlir_context);
-
-  static absl::StatusOr<JsLirRepr> FromJsAstStringRepr(
-      const BabelAstString &ast_string,
-      std::optional<int> recursion_depth_limit,
-      mlir::MLIRContext &mlir_context);
-
-  static absl::StatusOr<JsLirRepr> FromJsAstRepr(
-      const JsFile &ast, const BabelScopes &scopes,
-      mlir::MLIRContext &mlir_context);
-};
-
 }  // namespace maldoca
 
 #endif  // MALDOCA_JS_DRIVER_CONVERSION_H_

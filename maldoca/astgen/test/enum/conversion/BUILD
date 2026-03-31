@@ -46,6 +46,7 @@ cc_library(
     srcs = ["eir_to_ast.generated.cc"],
     hdrs = ["eir_to_ast.h"],
     deps = [
+        "//maldoca/astgen:ir_to_ast_util",
         "//maldoca/astgen/test/enum:ast",
         "//maldoca/astgen/test/enum:ir",
         "//maldoca/base:status",

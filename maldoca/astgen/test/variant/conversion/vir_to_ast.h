@@ -26,20 +26,20 @@ namespace maldoca {
 
 class VirToAst {
  public:
-  absl::StatusOr<std::unique_ptr<VBaseClass>> VisitBaseClass(
+  static absl::StatusOr<std::unique_ptr<VBaseClass>> VisitBaseClass(
       VirBaseClassOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<VDerivedClass1>> VisitDerivedClass1(
+  static absl::StatusOr<std::unique_ptr<VDerivedClass1>> VisitDerivedClass1(
       VirDerivedClass1Op op);
 
-  absl::StatusOr<std::unique_ptr<VDerivedClass2>> VisitDerivedClass2(
+  static absl::StatusOr<std::unique_ptr<VDerivedClass2>> VisitDerivedClass2(
       VirDerivedClass2Op op);
 
-  absl::StatusOr<std::unique_ptr<VNode>> VisitNode(VirNodeOp op);
+  static absl::StatusOr<std::unique_ptr<VNode>> VisitNode(VirNodeOp op);
 
  private:
   template <typename T, typename... Args>
-  std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
+  static std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
     return absl::make_unique<T>(std::forward<Args>(args)...);
   }
 };

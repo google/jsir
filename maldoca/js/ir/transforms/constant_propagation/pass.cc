@@ -168,8 +168,8 @@ mlir::ChangeResult TransformInlineCall(
     param_values.push_back(param_value);
   }
 
-  call_expr_op->replaceAllUsesWith(builder.create<JsirCallExpressionOp>(
-      call_expr_op.getLoc(), callee_value, param_values));
+  call_expr_op->replaceAllUsesWith(JsirCallExpressionOp::create(
+      builder, call_expr_op.getLoc(), callee_value, param_values));
 
   return mlir::ChangeResult::Change;
 }

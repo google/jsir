@@ -54,6 +54,7 @@ cc_library(
     ],
     hdrs = ["ast.generated.h"],
     deps = [
+        "//maldoca/astgen:ast_from_json_utils",
         "//maldoca/base:status",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",
@@ -173,12 +174,7 @@ cc_library(
         ":air_types_inc_gen",
         ":interfaces_inc_gen",
         "@llvm-project//llvm:Support",
-        "@llvm-project//mlir:Analysis",
-        "@llvm-project//mlir:ControlFlowInterfaces",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:InferTypeOpInterface",
-        "@llvm-project//mlir:Parser",
-        "@llvm-project//mlir:SideEffectInterfaces",
-        "@llvm-project//mlir:Support",
     ],
 )

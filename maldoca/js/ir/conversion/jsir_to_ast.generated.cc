@@ -48,6 +48,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
+#include "maldoca/astgen/ir_to_ast_util.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
@@ -140,11 +141,22 @@ JsirToAst::VisitProgramBodyElement(JsirProgramBodyElementOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsDirectiveLiteral>>
 JsirToAst::VisitDirectiveLiteral(JsirDirectiveLiteralOp op) {
-  std::string value = op.getValueAttr().str();
-  std::optional<std::unique_ptr<JsDirectiveLiteralExtra>> extra;
-  if (op.getExtraAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(extra, VisitDirectiveLiteralExtraAttr(op.getExtraAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValueAttr(),
+          ToString()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto extra,
+      Convert(
+          op.getExtraAttr(),
+          Nullable(
+              ToAttrConverter(VisitDirectiveLiteralExtraAttr)
+          )
+      )
+  );
   return Create<JsDirectiveLiteral>(
       op,
       std::move(value),
@@ -153,13 +165,13 @@ JsirToAst::VisitDirectiveLiteral(JsirDirectiveLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsDirective>>
 JsirToAst::VisitDirective(JsirDirectiveOp op) {
-  auto value_op = llvm::dyn_cast<JsirDirectiveLiteralOp>(op.getValue().getDefiningOp());
-  if (value_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirDirectiveLiteralOp, got ",
-                     op.getValue().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsDirectiveLiteral> value, VisitDirectiveLiteral(value_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValue(),
+          ToOpConverter(VisitDirectiveLiteral)
+      )
+  );
   return Create<JsDirective>(
       op,
       std::move(value));
@@ -167,31 +179,44 @@ JsirToAst::VisitDirective(JsirDirectiveOp op) {
 
 absl::StatusOr<std::unique_ptr<JsProgram>>
 JsirToAst::VisitProgram(JsirProgramOp op) {
-  std::optional<std::unique_ptr<JsInterpreterDirective>> interpreter;
-  if (op.getInterpreterAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(interpreter, VisitInterpreterDirectiveAttr(op.getInterpreterAttr()));
-  }
-  std::string source_type = op.getSourceTypeAttr().str();
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_block, GetStmtsRegionBlock(op.getBody()));
-  std::vector<std::unique_ptr<JsProgramBodyElement>> body;
-  for (mlir::Operation& mlir_body_element_unchecked : *mlir_body_block) {
-    auto body_element_op = llvm::dyn_cast<JsirProgramBodyElementOpInterface>(mlir_body_element_unchecked);
-    if (body_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsProgramBodyElement> body_element, VisitProgramBodyElement(body_element_op));
-    body.push_back(std::move(body_element));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_directives_block, GetStmtsRegionBlock(op.getDirectives()));
-  std::vector<std::unique_ptr<JsDirective>> directives;
-  for (mlir::Operation& mlir_directives_element_unchecked : *mlir_directives_block) {
-    auto directives_element_op = llvm::dyn_cast<JsirDirectiveOp>(mlir_directives_element_unchecked);
-    if (directives_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsDirective> directives_element, VisitDirective(directives_element_op));
-    directives.push_back(std::move(directives_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto interpreter,
+      Convert(
+          op.getInterpreterAttr(),
+          Nullable(
+              ToAttrConverter(VisitInterpreterDirectiveAttr)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto source_type,
+      Convert(
+          op.getSourceTypeAttr(),
+          ToString()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitProgramBodyElement)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto directives,
+      Convert(
+          op.getDirectives(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitDirective)
+              )
+          )
+      )
+  );
   return Create<JsProgram>(
       op,
       std::move(interpreter),
@@ -202,27 +227,26 @@ JsirToAst::VisitProgram(JsirProgramOp op) {
 
 absl::StatusOr<std::unique_ptr<JsFile>>
 JsirToAst::VisitFile(JsirFileOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_program_operation, GetStmtRegionOperation(op.getProgram()));
-  auto program_op = llvm::dyn_cast<JsirProgramOp>(mlir_program_operation);
-  if (program_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirProgramOp, got ",
-                     mlir_program_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsProgram> program, VisitProgram(program_op));
-  std::optional<std::vector<std::unique_ptr<JsComment>>> comments;
-  if (op.getCommentsAttr() != nullptr) {
-    std::vector<std::unique_ptr<JsComment>> comments_value;
-    for (mlir::Attribute mlir_comments_element_unchecked : op.getCommentsAttr().getValue()) {
-      auto comments_element_attr = llvm::dyn_cast<JsirCommentAttrInterface>(mlir_comments_element_unchecked);
-      if (comments_element_attr == nullptr) {
-        return absl::InvalidArgumentError("Invalid attribute.");
-      }
-      MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsComment> comments_element, VisitCommentAttr(comments_element_attr));
-      comments_value.push_back(std::move(comments_element));
-    }
-    comments = std::move(comments_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto program,
+      Convert(
+          op.getProgram(),
+          StmtRegion(
+              ToOpConverter(VisitProgram)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto comments,
+      Convert(
+          op.getCommentsAttr(),
+          Nullable(
+              List(
+                  ToAttrConverter(VisitCommentAttr)
+              )
+          )
+      )
+  );
   return Create<JsFile>(
       op,
       std::move(program),
@@ -393,7 +417,13 @@ JsirToAst::VisitLValRef(JsirLValRefOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsirToAst::VisitIdentifier(JsirIdentifierOp op) {
-  std::string name = op.getNameAttr().str();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto name,
+      Convert(
+          op.getNameAttr(),
+          ToString()
+      )
+  );
   return Create<JsIdentifier>(
       op,
       std::move(name));
@@ -401,7 +431,13 @@ JsirToAst::VisitIdentifier(JsirIdentifierOp op) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsirToAst::VisitIdentifierRef(JsirIdentifierRefOp op) {
-  std::string name = op.getNameAttr().str();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto name,
+      Convert(
+          op.getNameAttr(),
+          ToString()
+      )
+  );
   return Create<JsIdentifier>(
       op,
       std::move(name));
@@ -409,7 +445,13 @@ JsirToAst::VisitIdentifierRef(JsirIdentifierRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsPrivateName>>
 JsirToAst::VisitPrivateName(JsirPrivateNameOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsIdentifier> id, VisitIdentifierAttr(op.getIdAttr()));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          ToAttrConverter(VisitIdentifierAttr)
+      )
+  );
   return Create<JsPrivateName>(
       op,
       std::move(id));
@@ -444,12 +486,29 @@ JsirToAst::VisitLiteral(JsirLiteralOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsRegExpLiteral>>
 JsirToAst::VisitRegExpLiteral(JsirRegExpLiteralOp op) {
-  std::string pattern = op.getPatternAttr().str();
-  std::string flags = op.getFlagsAttr().str();
-  std::optional<std::unique_ptr<JsRegExpLiteralExtra>> extra;
-  if (op.getExtraAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(extra, VisitRegExpLiteralExtraAttr(op.getExtraAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto pattern,
+      Convert(
+          op.getPatternAttr(),
+          ToString()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto flags,
+      Convert(
+          op.getFlagsAttr(),
+          ToString()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto extra,
+      Convert(
+          op.getExtraAttr(),
+          Nullable(
+              ToAttrConverter(VisitRegExpLiteralExtraAttr)
+          )
+      )
+  );
   return Create<JsRegExpLiteral>(
       op,
       std::move(pattern),
@@ -465,11 +524,22 @@ JsirToAst::VisitNullLiteral(JsirNullLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsirToAst::VisitStringLiteral(JsirStringLiteralOp op) {
-  std::string value = op.getValueAttr().str();
-  std::optional<std::unique_ptr<JsStringLiteralExtra>> extra;
-  if (op.getExtraAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(extra, VisitStringLiteralExtraAttr(op.getExtraAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValueAttr(),
+          ToString()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto extra,
+      Convert(
+          op.getExtraAttr(),
+          Nullable(
+              ToAttrConverter(VisitStringLiteralExtraAttr)
+          )
+      )
+  );
   return Create<JsStringLiteral>(
       op,
       std::move(value),
@@ -478,7 +548,13 @@ JsirToAst::VisitStringLiteral(JsirStringLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsBooleanLiteral>>
 JsirToAst::VisitBooleanLiteral(JsirBooleanLiteralOp op) {
-  bool value = op.getValueAttr().getValue();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValueAttr(),
+          ToBool()
+      )
+  );
   return Create<JsBooleanLiteral>(
       op,
       std::move(value));
@@ -486,11 +562,22 @@ JsirToAst::VisitBooleanLiteral(JsirBooleanLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsNumericLiteral>>
 JsirToAst::VisitNumericLiteral(JsirNumericLiteralOp op) {
-  double value = op.getValueAttr().getValueAsDouble();
-  std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra;
-  if (op.getExtraAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(extra, VisitNumericLiteralExtraAttr(op.getExtraAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValueAttr(),
+          ToDouble()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto extra,
+      Convert(
+          op.getExtraAttr(),
+          Nullable(
+              ToAttrConverter(VisitNumericLiteralExtraAttr)
+          )
+      )
+  );
   return Create<JsNumericLiteral>(
       op,
       std::move(value),
@@ -499,11 +586,22 @@ JsirToAst::VisitNumericLiteral(JsirNumericLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteral>>
 JsirToAst::VisitBigIntLiteral(JsirBigIntLiteralOp op) {
-  std::string value = op.getValueAttr().str();
-  std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra;
-  if (op.getExtraAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(extra, VisitBigIntLiteralExtraAttr(op.getExtraAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValueAttr(),
+          ToString()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto extra,
+      Convert(
+          op.getExtraAttr(),
+          Nullable(
+              ToAttrConverter(VisitBigIntLiteralExtraAttr)
+          )
+      )
+  );
   return Create<JsBigIntLiteral>(
       op,
       std::move(value),
@@ -584,26 +682,28 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
 JsirToAst::VisitBlockStatement(JshirBlockStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_block, GetStmtsRegionBlock(op.getBody()));
-  std::vector<std::unique_ptr<JsStatement>> body;
-  for (mlir::Operation& mlir_body_element_unchecked : *mlir_body_block) {
-    auto body_element_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_body_element_unchecked);
-    if (body_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> body_element, VisitStatement(body_element_op));
-    body.push_back(std::move(body_element));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_directives_block, GetStmtsRegionBlock(op.getDirectives()));
-  std::vector<std::unique_ptr<JsDirective>> directives;
-  for (mlir::Operation& mlir_directives_element_unchecked : *mlir_directives_block) {
-    auto directives_element_op = llvm::dyn_cast<JsirDirectiveOp>(mlir_directives_element_unchecked);
-    if (directives_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsDirective> directives_element, VisitDirective(directives_element_op));
-    directives.push_back(std::move(directives_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitStatement)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto directives,
+      Convert(
+          op.getDirectives(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitDirective)
+              )
+          )
+      )
+  );
   return Create<JsBlockStatement>(
       op,
       std::move(body),
@@ -612,13 +712,13 @@ JsirToAst::VisitBlockStatement(JshirBlockStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExpressionStatement>>
 JsirToAst::VisitExpressionStatement(JsirExpressionStatementOp op) {
-  auto expression_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getExpression().getDefiningOp());
-  if (expression_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getExpression().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> expression, VisitExpression(expression_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto expression,
+      Convert(
+          op.getExpression(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsExpressionStatement>(
       op,
       std::move(expression));
@@ -638,21 +738,22 @@ JsirToAst::VisitDebuggerStatement(JsirDebuggerStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsWithStatement>>
 JsirToAst::VisitWithStatement(JshirWithStatementOp op) {
-  auto object_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getObject().getDefiningOp());
-  if (object_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getObject().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> object, VisitExpression(object_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirStatementOpInterface, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> body, VisitStatement(body_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto object,
+      Convert(
+          op.getObject(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
   return Create<JsWithStatement>(
       op,
       std::move(object),
@@ -661,16 +762,15 @@ JsirToAst::VisitWithStatement(JshirWithStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsReturnStatement>>
 JsirToAst::VisitReturnStatement(JsirReturnStatementOp op) {
-  std::optional<std::unique_ptr<JsExpression>> argument;
-  if (op.getArgument() != nullptr) {
-    auto argument_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getArgument().getDefiningOp());
-    if (argument_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(argument, VisitExpression(argument_op));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsReturnStatement>(
       op,
       std::move(argument));
@@ -678,15 +778,22 @@ JsirToAst::VisitReturnStatement(JsirReturnStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsLabeledStatement>>
 JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsIdentifier> label, VisitIdentifierAttr(op.getLabelAttr()));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirStatementOpInterface, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> body, VisitStatement(body_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto label,
+      Convert(
+          op.getLabelAttr(),
+          ToAttrConverter(VisitIdentifierAttr)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
   return Create<JsLabeledStatement>(
       op,
       std::move(label),
@@ -695,32 +802,33 @@ JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsIfStatement>>
 JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
-  auto test_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getTest().getDefiningOp());
-  if (test_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getTest().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> test, VisitExpression(test_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_consequent_operation, GetStmtRegionOperation(op.getConsequent()));
-  auto consequent_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_consequent_operation);
-  if (consequent_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirStatementOpInterface, got ",
-                     mlir_consequent_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> consequent, VisitStatement(consequent_op));
-  std::optional<std::unique_ptr<JsStatement>> alternate;
-  if (!op.getAlternate().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_alternate_operation, GetStmtRegionOperation(op.getAlternate()));
-    auto alternate_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_alternate_operation);
-    if (alternate_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirStatementOpInterface, got ",
-                       mlir_alternate_operation->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(alternate, VisitStatement(alternate_op));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto test,
+      Convert(
+          op.getTest(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto consequent,
+      Convert(
+          op.getConsequent(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto alternate,
+      Convert(
+          op.getAlternate(),
+          Nullable(
+              StmtRegion(
+                  ToOpConverter(VisitStatement)
+              )
+          )
+      )
+  );
   return Create<JsIfStatement>(
       op,
       std::move(test),
@@ -730,27 +838,28 @@ JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSwitchCase>>
 JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
-  std::optional<std::unique_ptr<JsExpression>> test;
-  if (!op.getTest().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_test_value, GetExprRegionValue(op.getTest()));
-    auto test_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_test_value.getDefiningOp());
-    if (test_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       mlir_test_value.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(test, VisitExpression(test_op));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_consequent_block, GetStmtsRegionBlock(op.getConsequent()));
-  std::vector<std::unique_ptr<JsStatement>> consequent;
-  for (mlir::Operation& mlir_consequent_element_unchecked : *mlir_consequent_block) {
-    auto consequent_element_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_consequent_element_unchecked);
-    if (consequent_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> consequent_element, VisitStatement(consequent_element_op));
-    consequent.push_back(std::move(consequent_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto test,
+      Convert(
+          op.getTest(),
+          Nullable(
+              ExprRegion<JsirExprRegionEndOp>(
+                  ToOpConverter(VisitExpression)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto consequent,
+      Convert(
+          op.getConsequent(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitStatement)
+              )
+          )
+      )
+  );
   return Create<JsSwitchCase>(
       op,
       std::move(test),
@@ -759,23 +868,24 @@ JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSwitchStatement>>
 JsirToAst::VisitSwitchStatement(JshirSwitchStatementOp op) {
-  auto discriminant_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getDiscriminant().getDefiningOp());
-  if (discriminant_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getDiscriminant().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> discriminant, VisitExpression(discriminant_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_cases_block, GetStmtsRegionBlock(op.getCases()));
-  std::vector<std::unique_ptr<JsSwitchCase>> cases;
-  for (mlir::Operation& mlir_cases_element_unchecked : *mlir_cases_block) {
-    auto cases_element_op = llvm::dyn_cast<JshirSwitchCaseOp>(mlir_cases_element_unchecked);
-    if (cases_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsSwitchCase> cases_element, VisitSwitchCase(cases_element_op));
-    cases.push_back(std::move(cases_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto discriminant,
+      Convert(
+          op.getDiscriminant(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto cases,
+      Convert(
+          op.getCases(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitSwitchCase)
+              )
+          )
+      )
+  );
   return Create<JsSwitchStatement>(
       op,
       std::move(discriminant),
@@ -784,13 +894,13 @@ JsirToAst::VisitSwitchStatement(JshirSwitchStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsThrowStatement>>
 JsirToAst::VisitThrowStatement(JsirThrowStatementOp op) {
-  auto argument_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getArgument().getDefiningOp());
-  if (argument_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> argument, VisitExpression(argument_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsThrowStatement>(
       op,
       std::move(argument));
@@ -798,24 +908,24 @@ JsirToAst::VisitThrowStatement(JsirThrowStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsCatchClause>>
 JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
-  std::optional<std::unique_ptr<JsPattern>> param;
-  if (op.getParam() != nullptr) {
-    auto param_op = llvm::dyn_cast<JsirPatternRefOpInterface>(op.getParam().getDefiningOp());
-    if (param_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirPatternRefOpInterface, got ",
-                       op.getParam().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(param, VisitPatternRef(param_op));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JshirBlockStatementOp>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JshirBlockStatementOp, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsBlockStatement> body, VisitBlockStatement(body_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto param,
+      Convert(
+          op.getParam(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitPatternRef)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
   return Create<JsCatchClause>(
       op,
       std::move(param),
@@ -824,36 +934,37 @@ JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTryStatement>>
 JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_block_operation, GetStmtRegionOperation(op.getBlock()));
-  auto block_op = llvm::dyn_cast<JshirBlockStatementOp>(mlir_block_operation);
-  if (block_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JshirBlockStatementOp, got ",
-                     mlir_block_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsBlockStatement> block, VisitBlockStatement(block_op));
-  std::optional<std::unique_ptr<JsCatchClause>> handler;
-  if (!op.getHandler().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_handler_operation, GetStmtRegionOperation(op.getHandler()));
-    auto handler_op = llvm::dyn_cast<JshirCatchClauseOp>(mlir_handler_operation);
-    if (handler_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JshirCatchClauseOp, got ",
-                       mlir_handler_operation->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(handler, VisitCatchClause(handler_op));
-  }
-  std::optional<std::unique_ptr<JsBlockStatement>> finalizer;
-  if (!op.getFinalizer().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_finalizer_operation, GetStmtRegionOperation(op.getFinalizer()));
-    auto finalizer_op = llvm::dyn_cast<JshirBlockStatementOp>(mlir_finalizer_operation);
-    if (finalizer_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JshirBlockStatementOp, got ",
-                       mlir_finalizer_operation->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(finalizer, VisitBlockStatement(finalizer_op));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto block,
+      Convert(
+          op.getBlock(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto handler,
+      Convert(
+          op.getHandler(),
+          Nullable(
+              StmtRegion(
+                  ToOpConverter(VisitCatchClause)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto finalizer,
+      Convert(
+          op.getFinalizer(),
+          Nullable(
+              StmtRegion(
+                  ToOpConverter(VisitBlockStatement)
+              )
+          )
+      )
+  );
   return Create<JsTryStatement>(
       op,
       std::move(block),
@@ -863,22 +974,24 @@ JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsWhileStatement>>
 JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_test_value, GetExprRegionValue(op.getTest()));
-  auto test_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_test_value.getDefiningOp());
-  if (test_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     mlir_test_value.getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> test, VisitExpression(test_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirStatementOpInterface, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> body, VisitStatement(body_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto test,
+      Convert(
+          op.getTest(),
+          ExprRegion<JsirExprRegionEndOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
   return Create<JsWhileStatement>(
       op,
       std::move(test),
@@ -887,22 +1000,24 @@ JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsDoWhileStatement>>
 JsirToAst::VisitDoWhileStatement(JshirDoWhileStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JsirStatementOpInterface>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirStatementOpInterface, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStatement> body, VisitStatement(body_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_test_value, GetExprRegionValue(op.getTest()));
-  auto test_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_test_value.getDefiningOp());
-  if (test_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     mlir_test_value.getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> test, VisitExpression(test_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto test,
+      Convert(
+          op.getTest(),
+          ExprRegion<JsirExprRegionEndOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsDoWhileStatement>(
       op,
       std::move(body),
@@ -929,23 +1044,22 @@ JsirToAst::VisitDeclaration(JsirDeclarationOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsVariableDeclarator>>
 JsirToAst::VisitVariableDeclarator(JsirVariableDeclaratorOp op) {
-  auto id_op = llvm::dyn_cast<JsirLValRefOpInterface>(op.getId().getDefiningOp());
-  if (id_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirLValRefOpInterface, got ",
-                     op.getId().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsLVal> id, VisitLValRef(id_op));
-  std::optional<std::unique_ptr<JsExpression>> init;
-  if (op.getInit() != nullptr) {
-    auto init_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getInit().getDefiningOp());
-    if (init_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       op.getInit().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(init, VisitExpression(init_op));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getId(),
+          ToOpConverter(VisitLValRef)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto init,
+      Convert(
+          op.getInit(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsVariableDeclarator>(
       op,
       std::move(id),
@@ -954,19 +1068,24 @@ JsirToAst::VisitVariableDeclarator(JsirVariableDeclaratorOp op) {
 
 absl::StatusOr<std::unique_ptr<JsVariableDeclaration>>
 JsirToAst::VisitVariableDeclaration(JsirVariableDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_declarations_values, GetExprsRegionValues(op.getDeclarations()));
-  std::vector<std::unique_ptr<JsVariableDeclarator>> declarations;
-  for (mlir::Value mlir_declarations_element_unchecked : mlir_declarations_values) {
-    auto declarations_element_op = llvm::dyn_cast<JsirVariableDeclaratorOp>(mlir_declarations_element_unchecked.getDefiningOp());
-    if (declarations_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirVariableDeclaratorOp, got ",
-                       mlir_declarations_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsVariableDeclarator> declarations_element, VisitVariableDeclarator(declarations_element_op));
-    declarations.push_back(std::move(declarations_element));
-  }
-  std::string kind = op.getKindAttr().str();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto declarations,
+      Convert(
+          op.getDeclarations(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitVariableDeclarator)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto kind,
+      Convert(
+          op.getKindAttr(),
+          ToString()
+      )
+  );
   return Create<JsVariableDeclaration>(
       op,
       std::move(declarations),
@@ -975,32 +1094,49 @@ JsirToAst::VisitVariableDeclaration(JsirVariableDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsFunctionDeclaration>>
 JsirToAst::VisitFunctionDeclaration(JsirFunctionDeclarationOp op) {
-  std::optional<std::unique_ptr<JsIdentifier>> id;
-  if (op.getIdAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(id, VisitIdentifierAttr(op.getIdAttr()));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_params_values, GetExprsRegionValues(op.getParams()));
-  std::vector<std::unique_ptr<JsPattern>> params;
-  for (mlir::Value mlir_params_element_unchecked : mlir_params_values) {
-    auto params_element_op = llvm::dyn_cast<JsirPatternRefOpInterface>(mlir_params_element_unchecked.getDefiningOp());
-    if (params_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirPatternRefOpInterface, got ",
-                       mlir_params_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsPattern> params_element, VisitPatternRef(params_element_op));
-    params.push_back(std::move(params_element));
-  }
-  bool generator = op.getGeneratorAttr().getValue();
-  bool async = op.getAsyncAttr().getValue();
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JshirBlockStatementOp>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JshirBlockStatementOp, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsBlockStatement> body, VisitBlockStatement(body_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto params,
+      Convert(
+          op.getParams(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto generator,
+      Convert(
+          op.getGeneratorAttr(),
+          ToBool()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto async,
+      Convert(
+          op.getAsyncAttr(),
+          ToBool()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
   return Create<JsFunctionDeclaration>(
       op,
       std::move(id),
@@ -1030,17 +1166,22 @@ JsirToAst::VisitThisExpression(JsirThisExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsYieldExpression>>
 JsirToAst::VisitYieldExpression(JsirYieldExpressionOp op) {
-  std::optional<std::unique_ptr<JsExpression>> argument;
-  if (op.getArgument() != nullptr) {
-    auto argument_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getArgument().getDefiningOp());
-    if (argument_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(argument, VisitExpression(argument_op));
-  }
-  bool delegate = op.getDelegateAttr().getValue();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto delegate,
+      Convert(
+          op.getDelegateAttr(),
+          ToBool()
+      )
+  );
   return Create<JsYieldExpression>(
       op,
       std::move(argument),
@@ -1049,16 +1190,15 @@ JsirToAst::VisitYieldExpression(JsirYieldExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsAwaitExpression>>
 JsirToAst::VisitAwaitExpression(JsirAwaitExpressionOp op) {
-  std::optional<std::unique_ptr<JsExpression>> argument;
-  if (op.getArgument() != nullptr) {
-    auto argument_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getArgument().getDefiningOp());
-    if (argument_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(argument, VisitExpression(argument_op));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsAwaitExpression>(
       op,
       std::move(argument));
@@ -1066,13 +1206,13 @@ JsirToAst::VisitAwaitExpression(JsirAwaitExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSpreadElement>>
 JsirToAst::VisitSpreadElement(JsirSpreadElementOp op) {
-  auto argument_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getArgument().getDefiningOp());
-  if (argument_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> argument, VisitExpression(argument_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsSpreadElement>(
       op,
       std::move(argument));
@@ -1080,20 +1220,20 @@ JsirToAst::VisitSpreadElement(JsirSpreadElementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsArrayExpression>>
 JsirToAst::VisitArrayExpression(JsirArrayExpressionOp op) {
-  std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>> elements;
-  for (mlir::Value mlir_elements_element_unchecked : op.getElements()) {
-    std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> elements_element;
-    if (!llvm::isa<JsirNoneOp>(mlir_elements_element_unchecked.getDefiningOp())) {
-      if (auto mlir_elements_element = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_elements_element_unchecked.getDefiningOp())) {
-        MALDOCA_ASSIGN_OR_RETURN(elements_element, VisitExpression(mlir_elements_element));
-      } else if (auto mlir_elements_element = llvm::dyn_cast<JsirSpreadElementOp>(mlir_elements_element_unchecked.getDefiningOp())) {
-        MALDOCA_ASSIGN_OR_RETURN(elements_element, VisitSpreadElement(mlir_elements_element));
-      } else {
-        return absl::InvalidArgumentError("mlir_elements_element_unchecked.getDefiningOp() has invalid type.");
-      }
-    }
-    elements.push_back(std::move(elements_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto elements,
+      Convert(
+          op.getElements(),
+          List(
+              Nullable<JsirNoneOp>(
+                  OpVariant(
+                      ToOpConverter(VisitExpression),
+                      ToOpConverter(VisitSpreadElement)
+                  )
+              )
+          )
+      )
+  );
   return Create<JsArrayExpression>(
       op,
       std::move(elements));
@@ -1101,32 +1241,49 @@ JsirToAst::VisitArrayExpression(JsirArrayExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsFunctionExpression>>
 JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
-  std::optional<std::unique_ptr<JsIdentifier>> id;
-  if (op.getIdAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(id, VisitIdentifierAttr(op.getIdAttr()));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_params_values, GetExprsRegionValues(op.getParams()));
-  std::vector<std::unique_ptr<JsPattern>> params;
-  for (mlir::Value mlir_params_element_unchecked : mlir_params_values) {
-    auto params_element_op = llvm::dyn_cast<JsirPatternRefOpInterface>(mlir_params_element_unchecked.getDefiningOp());
-    if (params_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirPatternRefOpInterface, got ",
-                       mlir_params_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsPattern> params_element, VisitPatternRef(params_element_op));
-    params.push_back(std::move(params_element));
-  }
-  bool generator = op.getGeneratorAttr().getValue();
-  bool async = op.getAsyncAttr().getValue();
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JshirBlockStatementOp>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JshirBlockStatementOp, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsBlockStatement> body, VisitBlockStatement(body_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto params,
+      Convert(
+          op.getParams(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto generator,
+      Convert(
+          op.getGeneratorAttr(),
+          ToBool()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto async,
+      Convert(
+          op.getAsyncAttr(),
+          ToBool()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
   return Create<JsFunctionExpression>(
       op,
       std::move(id),
@@ -1138,15 +1295,27 @@ JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsUnaryExpression>>
 JsirToAst::VisitUnaryExpression(JsirUnaryExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(JsUnaryOperator operator_, StringToJsUnaryOperator(op.getOperator_Attr().str()));
-  bool prefix = op.getPrefixAttr().getValue();
-  auto argument_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getArgument().getDefiningOp());
-  if (argument_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> argument, VisitExpression(argument_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operator_,
+      Convert(
+          op.getOperator_Attr(),
+          Enum<JsUnaryOperator>(StringToJsUnaryOperator)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto prefix,
+      Convert(
+          op.getPrefixAttr(),
+          ToBool()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsUnaryExpression>(
       op,
       std::move(operator_),
@@ -1156,15 +1325,27 @@ JsirToAst::VisitUnaryExpression(JsirUnaryExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsUpdateExpression>>
 JsirToAst::VisitUpdateExpression(JsirUpdateExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(JsUpdateOperator operator_, StringToJsUpdateOperator(op.getOperator_Attr().str()));
-  auto argument_op = llvm::dyn_cast<JsirLValRefOpInterface>(op.getArgument().getDefiningOp());
-  if (argument_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirLValRefOpInterface, got ",
-                     op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsLVal> argument, VisitLValRef(argument_op));
-  bool prefix = op.getPrefixAttr().getValue();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operator_,
+      Convert(
+          op.getOperator_Attr(),
+          Enum<JsUpdateOperator>(StringToJsUpdateOperator)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          ToOpConverter(VisitLValRef)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto prefix,
+      Convert(
+          op.getPrefixAttr(),
+          ToBool()
+      )
+  );
   return Create<JsUpdateExpression>(
       op,
       std::move(operator_),
@@ -1174,22 +1355,30 @@ JsirToAst::VisitUpdateExpression(JsirUpdateExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsBinaryExpression>>
 JsirToAst::VisitBinaryExpression(JsirBinaryExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(JsBinaryOperator operator_, StringToJsBinaryOperator(op.getOperator_Attr().str()));
-  std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> left;
-  if (auto mlir_left = llvm::dyn_cast<JsirExpressionOpInterface>(op.getLeft().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(left, VisitExpression(mlir_left));
-  } else if (auto mlir_left = llvm::dyn_cast<JsirPrivateNameOp>(op.getLeft().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(left, VisitPrivateName(mlir_left));
-  } else {
-    return absl::InvalidArgumentError("op.getLeft().getDefiningOp() has invalid type.");
-  }
-  auto right_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getRight().getDefiningOp());
-  if (right_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getRight().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> right, VisitExpression(right_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operator_,
+      Convert(
+          op.getOperator_Attr(),
+          Enum<JsBinaryOperator>(StringToJsBinaryOperator)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto left,
+      Convert(
+          op.getLeft(),
+          OpVariant(
+              ToOpConverter(VisitExpression),
+              ToOpConverter(VisitPrivateName)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto right,
+      Convert(
+          op.getRight(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsBinaryExpression>(
       op,
       std::move(operator_),
@@ -1199,21 +1388,27 @@ JsirToAst::VisitBinaryExpression(JsirBinaryExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsAssignmentExpression>>
 JsirToAst::VisitAssignmentExpression(JsirAssignmentExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(JsAssignmentOperator operator_, StringToJsAssignmentOperator(op.getOperator_Attr().str()));
-  auto left_op = llvm::dyn_cast<JsirLValRefOpInterface>(op.getLeft().getDefiningOp());
-  if (left_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirLValRefOpInterface, got ",
-                     op.getLeft().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsLVal> left, VisitLValRef(left_op));
-  auto right_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getRight().getDefiningOp());
-  if (right_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getRight().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> right, VisitExpression(right_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operator_,
+      Convert(
+          op.getOperator_Attr(),
+          Enum<JsAssignmentOperator>(StringToJsAssignmentOperator)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto left,
+      Convert(
+          op.getLeft(),
+          ToOpConverter(VisitLValRef)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto right,
+      Convert(
+          op.getRight(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsAssignmentExpression>(
       op,
       std::move(operator_),
@@ -1223,22 +1418,29 @@ JsirToAst::VisitAssignmentExpression(JsirAssignmentExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsLogicalExpression>>
 JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(JsLogicalOperator operator_, StringToJsLogicalOperator(op.getOperator_Attr().str()));
-  auto left_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getLeft().getDefiningOp());
-  if (left_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getLeft().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> left, VisitExpression(left_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_right_value, GetExprRegionValue(op.getRight()));
-  auto right_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_right_value.getDefiningOp());
-  if (right_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     mlir_right_value.getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> right, VisitExpression(right_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operator_,
+      Convert(
+          op.getOperator_Attr(),
+          Enum<JsLogicalOperator>(StringToJsLogicalOperator)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto left,
+      Convert(
+          op.getLeft(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto right,
+      Convert(
+          op.getRight(),
+          ExprRegion<JsirExprRegionEndOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsLogicalExpression>(
       op,
       std::move(operator_),
@@ -1248,29 +1450,31 @@ JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsConditionalExpression>>
 JsirToAst::VisitConditionalExpression(JshirConditionalExpressionOp op) {
-  auto test_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getTest().getDefiningOp());
-  if (test_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getTest().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> test, VisitExpression(test_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_alternate_value, GetExprRegionValue(op.getAlternate()));
-  auto alternate_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_alternate_value.getDefiningOp());
-  if (alternate_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     mlir_alternate_value.getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> alternate, VisitExpression(alternate_op));
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_consequent_value, GetExprRegionValue(op.getConsequent()));
-  auto consequent_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_consequent_value.getDefiningOp());
-  if (consequent_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     mlir_consequent_value.getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> consequent, VisitExpression(consequent_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto test,
+      Convert(
+          op.getTest(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto alternate,
+      Convert(
+          op.getAlternate(),
+          ExprRegion<JsirExprRegionEndOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto consequent,
+      Convert(
+          op.getConsequent(),
+          ExprRegion<JsirExprRegionEndOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsConditionalExpression>(
       op,
       std::move(test),
@@ -1280,28 +1484,29 @@ JsirToAst::VisitConditionalExpression(JshirConditionalExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsCallExpression>>
 JsirToAst::VisitCallExpression(JsirCallExpressionOp op) {
-  std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>> callee;
-  if (auto mlir_callee = llvm::dyn_cast<JsirExpressionOpInterface>(op.getCallee().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(callee, VisitExpression(mlir_callee));
-  } else if (auto mlir_callee = llvm::dyn_cast<JsirSuperOp>(op.getCallee().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(callee, VisitSuper(mlir_callee));
-  } else if (auto mlir_callee = llvm::dyn_cast<JsirImportOp>(op.getCallee().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(callee, VisitImport(mlir_callee));
-  } else {
-    return absl::InvalidArgumentError("op.getCallee().getDefiningOp() has invalid type.");
-  }
-  std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments;
-  for (mlir::Value mlir_arguments_element_unchecked : op.getArguments()) {
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>> arguments_element;
-    if (auto mlir_arguments_element = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_arguments_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, VisitExpression(mlir_arguments_element));
-    } else if (auto mlir_arguments_element = llvm::dyn_cast<JsirSpreadElementOp>(mlir_arguments_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, VisitSpreadElement(mlir_arguments_element));
-    } else {
-      return absl::InvalidArgumentError("mlir_arguments_element_unchecked.getDefiningOp() has invalid type.");
-    }
-    arguments.push_back(std::move(arguments_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto callee,
+      Convert(
+          op.getCallee(),
+          OpVariant(
+              ToOpConverter(VisitExpression),
+              ToOpConverter(VisitSuper),
+              ToOpConverter(VisitImport)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto arguments,
+      Convert(
+          op.getArguments(),
+          List(
+              OpVariant(
+                  ToOpConverter(VisitExpression),
+                  ToOpConverter(VisitSpreadElement)
+              )
+          )
+      )
+  );
   return Create<JsCallExpression>(
       op,
       std::move(callee),
@@ -1310,26 +1515,32 @@ JsirToAst::VisitCallExpression(JsirCallExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsOptionalCallExpression>>
 JsirToAst::VisitOptionalCallExpression(JsirOptionalCallExpressionOp op) {
-  auto callee_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getCallee().getDefiningOp());
-  if (callee_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getCallee().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> callee, VisitExpression(callee_op));
-  std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments;
-  for (mlir::Value mlir_arguments_element_unchecked : op.getArguments()) {
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>> arguments_element;
-    if (auto mlir_arguments_element = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_arguments_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, VisitExpression(mlir_arguments_element));
-    } else if (auto mlir_arguments_element = llvm::dyn_cast<JsirSpreadElementOp>(mlir_arguments_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, VisitSpreadElement(mlir_arguments_element));
-    } else {
-      return absl::InvalidArgumentError("mlir_arguments_element_unchecked.getDefiningOp() has invalid type.");
-    }
-    arguments.push_back(std::move(arguments_element));
-  }
-  bool optional = op.getOptionalAttr().getValue();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto callee,
+      Convert(
+          op.getCallee(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto arguments,
+      Convert(
+          op.getArguments(),
+          List(
+              OpVariant(
+                  ToOpConverter(VisitExpression),
+                  ToOpConverter(VisitSpreadElement)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto optional,
+      Convert(
+          op.getOptionalAttr(),
+          ToBool()
+      )
+  );
   return Create<JsOptionalCallExpression>(
       op,
       std::move(callee),
@@ -1339,28 +1550,29 @@ JsirToAst::VisitOptionalCallExpression(JsirOptionalCallExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsNewExpression>>
 JsirToAst::VisitNewExpression(JsirNewExpressionOp op) {
-  std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>> callee;
-  if (auto mlir_callee = llvm::dyn_cast<JsirExpressionOpInterface>(op.getCallee().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(callee, VisitExpression(mlir_callee));
-  } else if (auto mlir_callee = llvm::dyn_cast<JsirSuperOp>(op.getCallee().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(callee, VisitSuper(mlir_callee));
-  } else if (auto mlir_callee = llvm::dyn_cast<JsirImportOp>(op.getCallee().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(callee, VisitImport(mlir_callee));
-  } else {
-    return absl::InvalidArgumentError("op.getCallee().getDefiningOp() has invalid type.");
-  }
-  std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments;
-  for (mlir::Value mlir_arguments_element_unchecked : op.getArguments()) {
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>> arguments_element;
-    if (auto mlir_arguments_element = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_arguments_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, VisitExpression(mlir_arguments_element));
-    } else if (auto mlir_arguments_element = llvm::dyn_cast<JsirSpreadElementOp>(mlir_arguments_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, VisitSpreadElement(mlir_arguments_element));
-    } else {
-      return absl::InvalidArgumentError("mlir_arguments_element_unchecked.getDefiningOp() has invalid type.");
-    }
-    arguments.push_back(std::move(arguments_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto callee,
+      Convert(
+          op.getCallee(),
+          OpVariant(
+              ToOpConverter(VisitExpression),
+              ToOpConverter(VisitSuper),
+              ToOpConverter(VisitImport)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto arguments,
+      Convert(
+          op.getArguments(),
+          List(
+              OpVariant(
+                  ToOpConverter(VisitExpression),
+                  ToOpConverter(VisitSpreadElement)
+              )
+          )
+      )
+  );
   return Create<JsNewExpression>(
       op,
       std::move(callee),
@@ -1369,17 +1581,15 @@ JsirToAst::VisitNewExpression(JsirNewExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSequenceExpression>>
 JsirToAst::VisitSequenceExpression(JsirSequenceExpressionOp op) {
-  std::vector<std::unique_ptr<JsExpression>> expressions;
-  for (mlir::Value mlir_expressions_element_unchecked : op.getExpressions()) {
-    auto expressions_element_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_expressions_element_unchecked.getDefiningOp());
-    if (expressions_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       mlir_expressions_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> expressions_element, VisitExpression(expressions_element_op));
-    expressions.push_back(std::move(expressions_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto expressions,
+      Convert(
+          op.getExpressions(),
+          List(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsSequenceExpression>(
       op,
       std::move(expressions));
@@ -1387,11 +1597,22 @@ JsirToAst::VisitSequenceExpression(JsirSequenceExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTemplateElementValue>>
 JsirToAst::VisitTemplateElementValue(JsirTemplateElementValueOp op) {
-  std::optional<std::string> cooked;
-  if (op.getCookedAttr() != nullptr) {
-    cooked = op.getCookedAttr().str();
-  }
-  std::string raw = op.getRawAttr().str();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto cooked,
+      Convert(
+          op.getCookedAttr(),
+          Nullable(
+              ToString()
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto raw,
+      Convert(
+          op.getRawAttr(),
+          ToString()
+      )
+  );
   return Create<JsTemplateElementValue>(
       op,
       std::move(cooked),
@@ -1400,14 +1621,20 @@ JsirToAst::VisitTemplateElementValue(JsirTemplateElementValueOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTemplateElement>>
 JsirToAst::VisitTemplateElement(JsirTemplateElementOp op) {
-  bool tail = op.getTailAttr().getValue();
-  auto value_op = llvm::dyn_cast<JsirTemplateElementValueOp>(op.getValue().getDefiningOp());
-  if (value_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirTemplateElementValueOp, got ",
-                     op.getValue().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsTemplateElementValue> value, VisitTemplateElementValue(value_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto tail,
+      Convert(
+          op.getTailAttr(),
+          ToBool()
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValue(),
+          ToOpConverter(VisitTemplateElementValue)
+      )
+  );
   return Create<JsTemplateElement>(
       op,
       std::move(tail),
@@ -1416,28 +1643,24 @@ JsirToAst::VisitTemplateElement(JsirTemplateElementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTemplateLiteral>>
 JsirToAst::VisitTemplateLiteral(JsirTemplateLiteralOp op) {
-  std::vector<std::unique_ptr<JsTemplateElement>> quasis;
-  for (mlir::Value mlir_quasis_element_unchecked : op.getQuasis()) {
-    auto quasis_element_op = llvm::dyn_cast<JsirTemplateElementOp>(mlir_quasis_element_unchecked.getDefiningOp());
-    if (quasis_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirTemplateElementOp, got ",
-                       mlir_quasis_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsTemplateElement> quasis_element, VisitTemplateElement(quasis_element_op));
-    quasis.push_back(std::move(quasis_element));
-  }
-  std::vector<std::unique_ptr<JsExpression>> expressions;
-  for (mlir::Value mlir_expressions_element_unchecked : op.getExpressions()) {
-    auto expressions_element_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_expressions_element_unchecked.getDefiningOp());
-    if (expressions_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       mlir_expressions_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> expressions_element, VisitExpression(expressions_element_op));
-    expressions.push_back(std::move(expressions_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto quasis,
+      Convert(
+          op.getQuasis(),
+          List(
+              ToOpConverter(VisitTemplateElement)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto expressions,
+      Convert(
+          op.getExpressions(),
+          List(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
   return Create<JsTemplateLiteral>(
       op,
       std::move(quasis),
@@ -1446,20 +1669,20 @@ JsirToAst::VisitTemplateLiteral(JsirTemplateLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTaggedTemplateExpression>>
 JsirToAst::VisitTaggedTemplateExpression(JsirTaggedTemplateExpressionOp op) {
-  auto tag_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getTag().getDefiningOp());
-  if (tag_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getTag().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> tag, VisitExpression(tag_op));
-  auto quasi_op = llvm::dyn_cast<JsirTemplateLiteralOp>(op.getQuasi().getDefiningOp());
-  if (quasi_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirTemplateLiteralOp, got ",
-                     op.getQuasi().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsTemplateLiteral> quasi, VisitTemplateLiteral(quasi_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto tag,
+      Convert(
+          op.getTag(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto quasi,
+      Convert(
+          op.getQuasi(),
+          ToOpConverter(VisitTemplateLiteral)
+      )
+  );
   return Create<JsTaggedTemplateExpression>(
       op,
       std::move(tag),
@@ -1468,13 +1691,13 @@ JsirToAst::VisitTaggedTemplateExpression(JsirTaggedTemplateExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsRestElement>>
 JsirToAst::VisitRestElementRef(JsirRestElementRefOp op) {
-  auto argument_op = llvm::dyn_cast<JsirLValRefOpInterface>(op.getArgument().getDefiningOp());
-  if (argument_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirLValRefOpInterface, got ",
-                     op.getArgument().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsLVal> argument, VisitLValRef(argument_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto argument,
+      Convert(
+          op.getArgument(),
+          ToOpConverter(VisitLValRef)
+      )
+  );
   return Create<JsRestElement>(
       op,
       std::move(argument));
@@ -1482,19 +1705,20 @@ JsirToAst::VisitRestElementRef(JsirRestElementRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsObjectPattern>>
 JsirToAst::VisitObjectPatternRef(JsirObjectPatternRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_properties_values, GetExprsRegionValues(op.getProperties_()));
-  std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>> properties_;
-  for (mlir::Value mlir_properties_element_unchecked : mlir_properties_values) {
-    std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>> properties_element;
-    if (auto mlir_properties_element = llvm::dyn_cast<JsirObjectPropertyRefOp>(mlir_properties_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, VisitObjectPropertyRef(mlir_properties_element));
-    } else if (auto mlir_properties_element = llvm::dyn_cast<JsirRestElementRefOp>(mlir_properties_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, VisitRestElementRef(mlir_properties_element));
-    } else {
-      return absl::InvalidArgumentError("mlir_properties_element_unchecked.getDefiningOp() has invalid type.");
-    }
-    properties_.push_back(std::move(properties_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto properties_,
+      Convert(
+          op.getProperties_(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  OpVariant(
+                      ToOpConverter(VisitObjectPropertyRef),
+                      ToOpConverter(VisitRestElementRef)
+                  )
+              )
+          )
+      )
+  );
   return Create<JsObjectPattern>(
       op,
       std::move(properties_));
@@ -1502,20 +1726,17 @@ JsirToAst::VisitObjectPatternRef(JsirObjectPatternRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsArrayPattern>>
 JsirToAst::VisitArrayPatternRef(JsirArrayPatternRefOp op) {
-  std::vector<std::optional<std::unique_ptr<JsPattern>>> elements;
-  for (mlir::Value mlir_elements_element_unchecked : op.getElements()) {
-    std::optional<std::unique_ptr<JsPattern>> elements_element;
-    if (!llvm::isa<JsirNoneOp>(mlir_elements_element_unchecked.getDefiningOp())) {
-      auto elements_element_op = llvm::dyn_cast<JsirPatternRefOpInterface>(mlir_elements_element_unchecked.getDefiningOp());
-      if (elements_element_op == nullptr) {
-        return absl::InvalidArgumentError(
-            absl::StrCat("Expected JsirPatternRefOpInterface, got ",
-                         mlir_elements_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-      }
-      MALDOCA_ASSIGN_OR_RETURN(elements_element, VisitPatternRef(elements_element_op));
-    }
-    elements.push_back(std::move(elements_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto elements,
+      Convert(
+          op.getElements(),
+          List(
+              Nullable<JsirNoneOp>(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
   return Create<JsArrayPattern>(
       op,
       std::move(elements));
@@ -1523,20 +1744,20 @@ JsirToAst::VisitArrayPatternRef(JsirArrayPatternRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsAssignmentPattern>>
 JsirToAst::VisitAssignmentPatternRef(JsirAssignmentPatternRefOp op) {
-  auto left_op = llvm::dyn_cast<JsirPatternRefOpInterface>(op.getLeft().getDefiningOp());
-  if (left_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirPatternRefOpInterface, got ",
-                     op.getLeft().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsPattern> left, VisitPatternRef(left_op));
-  auto right_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getRight().getDefiningOp());
-  if (right_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                     op.getRight().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExpression> right, VisitExpression(right_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto left,
+      Convert(
+          op.getLeft(),
+          ToOpConverter(VisitPatternRef)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto right,
+      Convert(
+          op.getRight(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<JsAssignmentPattern>(
       op,
       std::move(left),
@@ -1545,19 +1766,31 @@ JsirToAst::VisitAssignmentPatternRef(JsirAssignmentPatternRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassPrivateProperty>>
 JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsPrivateName> key, VisitPrivateNameAttr(op.getKeyAttr()));
-  std::optional<std::unique_ptr<JsExpression>> value;
-  if (!op.getValue().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_value_value, GetExprRegionValue(op.getValue()));
-    auto value_op = llvm::dyn_cast<JsirExpressionOpInterface>(mlir_value_value.getDefiningOp());
-    if (value_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       mlir_value_value.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(value, VisitExpression(value_op));
-  }
-  bool static_ = op.getStatic_Attr().getValue();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto key,
+      Convert(
+          op.getKeyAttr(),
+          ToAttrConverter(VisitPrivateNameAttr)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValue(),
+          Nullable(
+              ExprRegion<JsirExprRegionEndOp>(
+                  ToOpConverter(VisitExpression)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto static_,
+      Convert(
+          op.getStatic_Attr(),
+          ToBool()
+      )
+  );
   return Create<JsClassPrivateProperty>(
       op,
       std::move(key),
@@ -1567,23 +1800,22 @@ JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassBody>>
 JsirToAst::VisitClassBody(JsirClassBodyOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_block, GetStmtsRegionBlock(op.getBody()));
-  std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body;
-  for (mlir::Operation& mlir_body_element_unchecked : *mlir_body_block) {
-    std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>> body_element;
-    if (auto mlir_body_element = llvm::dyn_cast<JsirClassMethodOp>(mlir_body_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, VisitClassMethod(mlir_body_element));
-    } else if (auto mlir_body_element = llvm::dyn_cast<JsirClassPrivateMethodOp>(mlir_body_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, VisitClassPrivateMethod(mlir_body_element));
-    } else if (auto mlir_body_element = llvm::dyn_cast<JsirClassPropertyOp>(mlir_body_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, VisitClassProperty(mlir_body_element));
-    } else if (auto mlir_body_element = llvm::dyn_cast<JsirClassPrivatePropertyOp>(mlir_body_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, VisitClassPrivateProperty(mlir_body_element));
-    } else {
-      continue;
-    }
-    body.push_back(std::move(body_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtsRegion(
+              List(
+                  OpVariant(
+                      ToOpConverter(VisitClassMethod),
+                      ToOpConverter(VisitClassPrivateMethod),
+                      ToOpConverter(VisitClassProperty),
+                      ToOpConverter(VisitClassPrivateProperty)
+                  )
+              )
+          )
+      )
+  );
   return Create<JsClassBody>(
       op,
       std::move(body));
@@ -1591,28 +1823,33 @@ JsirToAst::VisitClassBody(JsirClassBodyOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassDeclaration>>
 JsirToAst::VisitClassDeclaration(JsirClassDeclarationOp op) {
-  std::optional<std::unique_ptr<JsExpression>> super_class;
-  if (op.getSuperClass() != nullptr) {
-    auto super_class_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getSuperClass().getDefiningOp());
-    if (super_class_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       op.getSuperClass().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(super_class, VisitExpression(super_class_op));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JsirClassBodyOp>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirClassBodyOp, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsClassBody> body, VisitClassBody(body_op));
-  std::optional<std::unique_ptr<JsIdentifier>> id;
-  if (op.getIdAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(id, VisitIdentifierAttr(op.getIdAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto super_class,
+      Convert(
+          op.getSuperClass(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitClassBody)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
   return Create<JsClassDeclaration>(
       op,
       std::move(super_class),
@@ -1622,28 +1859,33 @@ JsirToAst::VisitClassDeclaration(JsirClassDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassExpression>>
 JsirToAst::VisitClassExpression(JsirClassExpressionOp op) {
-  std::optional<std::unique_ptr<JsExpression>> super_class;
-  if (op.getSuperClass() != nullptr) {
-    auto super_class_op = llvm::dyn_cast<JsirExpressionOpInterface>(op.getSuperClass().getDefiningOp());
-    if (super_class_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirExpressionOpInterface, got ",
-                       op.getSuperClass().getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(super_class, VisitExpression(super_class_op));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_body_operation, GetStmtRegionOperation(op.getBody()));
-  auto body_op = llvm::dyn_cast<JsirClassBodyOp>(mlir_body_operation);
-  if (body_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected JsirClassBodyOp, got ",
-                     mlir_body_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsClassBody> body, VisitClassBody(body_op));
-  std::optional<std::unique_ptr<JsIdentifier>> id;
-  if (op.getIdAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(id, VisitIdentifierAttr(op.getIdAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto super_class,
+      Convert(
+          op.getSuperClass(),
+          Nullable<JsirNoneOp>(
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitClassBody)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
   return Create<JsClassExpression>(
       op,
       std::move(super_class),
@@ -1653,8 +1895,20 @@ JsirToAst::VisitClassExpression(JsirClassExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsMetaProperty>>
 JsirToAst::VisitMetaProperty(JsirMetaPropertyOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsIdentifier> meta, VisitIdentifierAttr(op.getMetaAttr()));
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsIdentifier> property, VisitIdentifierAttr(op.getPropertyAttr()));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto meta,
+      Convert(
+          op.getMetaAttr(),
+          ToAttrConverter(VisitIdentifierAttr)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto property,
+      Convert(
+          op.getPropertyAttr(),
+          ToAttrConverter(VisitIdentifierAttr)
+      )
+  );
   return Create<JsMetaProperty>(
       op,
       std::move(meta),
@@ -1705,25 +1959,35 @@ JsirToAst::VisitModuleSpecifierAttr(JsirModuleSpecifierAttrInterface attr) {
 
 absl::StatusOr<std::unique_ptr<JsImportDeclaration>>
 JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
-  std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>> specifiers;
-  for (mlir::Attribute mlir_specifiers_element_unchecked : op.getSpecifiersAttr().getValue()) {
-    std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>> specifiers_element;
-    if (auto mlir_specifiers_element = llvm::dyn_cast<JsirImportSpecifierAttr>(mlir_specifiers_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(specifiers_element, VisitImportSpecifierAttr(mlir_specifiers_element));
-    } else if (auto mlir_specifiers_element = llvm::dyn_cast<JsirImportDefaultSpecifierAttr>(mlir_specifiers_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(specifiers_element, VisitImportDefaultSpecifierAttr(mlir_specifiers_element));
-    } else if (auto mlir_specifiers_element = llvm::dyn_cast<JsirImportNamespaceSpecifierAttr>(mlir_specifiers_element_unchecked)) {
-      MALDOCA_ASSIGN_OR_RETURN(specifiers_element, VisitImportNamespaceSpecifierAttr(mlir_specifiers_element));
-    } else {
-      return absl::InvalidArgumentError("mlir_specifiers_element_unchecked has invalid type.");
-    }
-    specifiers.push_back(std::move(specifiers_element));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStringLiteral> source, VisitStringLiteralAttr(op.getSourceAttr()));
-  std::optional<std::unique_ptr<JsImportAttribute>> assertions;
-  if (op.getAssertionsAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(assertions, VisitImportAttributeAttr(op.getAssertionsAttr()));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto specifiers,
+      Convert(
+          op.getSpecifiersAttr(),
+          List(
+              AttrVariant(
+                  ToAttrConverter(VisitImportSpecifierAttr),
+                  ToAttrConverter(VisitImportDefaultSpecifierAttr),
+                  ToAttrConverter(VisitImportNamespaceSpecifierAttr)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto source,
+      Convert(
+          op.getSourceAttr(),
+          ToAttrConverter(VisitStringLiteralAttr)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto assertions,
+      Convert(
+          op.getAssertionsAttr(),
+          Nullable(
+              ToAttrConverter(VisitImportAttributeAttr)
+          )
+      )
+  );
   return Create<JsImportDeclaration>(
       op,
       std::move(specifiers),
@@ -1733,43 +1997,46 @@ JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExportNamedDeclaration>>
 JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
-  std::optional<std::unique_ptr<JsDeclaration>> declaration;
-  if (!op.getDeclaration().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_declaration_operation, GetStmtRegionOperation(op.getDeclaration()));
-    auto declaration_op = llvm::dyn_cast<JsirDeclarationOpInterface>(mlir_declaration_operation);
-    if (declaration_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected JsirDeclarationOpInterface, got ",
-                       mlir_declaration_operation->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(declaration, VisitDeclaration(declaration_op));
-  }
-  std::vector<std::unique_ptr<JsExportSpecifier>> specifiers;
-  for (mlir::Attribute mlir_specifiers_element_unchecked : op.getSpecifiersAttr().getValue()) {
-    auto specifiers_element_attr = llvm::dyn_cast<JsirExportSpecifierAttr>(mlir_specifiers_element_unchecked);
-    if (specifiers_element_attr == nullptr) {
-      return absl::InvalidArgumentError("Invalid attribute.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsExportSpecifier> specifiers_element, VisitExportSpecifierAttr(specifiers_element_attr));
-    specifiers.push_back(std::move(specifiers_element));
-  }
-  std::optional<std::unique_ptr<JsStringLiteral>> source;
-  if (op.getSourceAttr() != nullptr) {
-    MALDOCA_ASSIGN_OR_RETURN(source, VisitStringLiteralAttr(op.getSourceAttr()));
-  }
-  std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions;
-  if (op.getAssertionsAttr() != nullptr) {
-    std::vector<std::unique_ptr<JsImportAttribute>> assertions_value;
-    for (mlir::Attribute mlir_assertions_element_unchecked : op.getAssertionsAttr().getValue()) {
-      auto assertions_element_attr = llvm::dyn_cast<JsirImportAttributeAttr>(mlir_assertions_element_unchecked);
-      if (assertions_element_attr == nullptr) {
-        return absl::InvalidArgumentError("Invalid attribute.");
-      }
-      MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsImportAttribute> assertions_element, VisitImportAttributeAttr(assertions_element_attr));
-      assertions_value.push_back(std::move(assertions_element));
-    }
-    assertions = std::move(assertions_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto declaration,
+      Convert(
+          op.getDeclaration(),
+          Nullable(
+              StmtRegion(
+                  ToOpConverter(VisitDeclaration)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto specifiers,
+      Convert(
+          op.getSpecifiersAttr(),
+          List(
+              ToAttrConverter(VisitExportSpecifierAttr)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto source,
+      Convert(
+          op.getSourceAttr(),
+          Nullable(
+              ToAttrConverter(VisitStringLiteralAttr)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto assertions,
+      Convert(
+          op.getAssertionsAttr(),
+          Nullable(
+              List(
+                  ToAttrConverter(VisitImportAttributeAttr)
+              )
+          )
+      )
+  );
   return Create<JsExportNamedDeclaration>(
       op,
       std::move(declaration),
@@ -1780,20 +2047,24 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExportAllDeclaration>>
 JsirToAst::VisitExportAllDeclaration(JsirExportAllDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsStringLiteral> source, VisitStringLiteralAttr(op.getSourceAttr()));
-  std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions;
-  if (op.getAssertionsAttr() != nullptr) {
-    std::vector<std::unique_ptr<JsImportAttribute>> assertions_value;
-    for (mlir::Attribute mlir_assertions_element_unchecked : op.getAssertionsAttr().getValue()) {
-      auto assertions_element_attr = llvm::dyn_cast<JsirImportAttributeAttr>(mlir_assertions_element_unchecked);
-      if (assertions_element_attr == nullptr) {
-        return absl::InvalidArgumentError("Invalid attribute.");
-      }
-      MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsImportAttribute> assertions_element, VisitImportAttributeAttr(assertions_element_attr));
-      assertions_value.push_back(std::move(assertions_element));
-    }
-    assertions = std::move(assertions_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto source,
+      Convert(
+          op.getSourceAttr(),
+          ToAttrConverter(VisitStringLiteralAttr)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto assertions,
+      Convert(
+          op.getAssertionsAttr(),
+          Nullable(
+              List(
+                  ToAttrConverter(VisitImportAttributeAttr)
+              )
+          )
+      )
+  );
   return Create<JsExportAllDeclaration>(
       op,
       std::move(source),

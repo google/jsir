@@ -26,11 +26,12 @@ option java_multiple_files = true;
 // =============================================================================
 
 message JsReprPb {
+  reserved 4;
+
   oneof kind {
     string js_source = 1;
     BabelAstString babel_ast_string = 2;
     string js_hir = 3;
-    string js_lir = 4;
   }
 }
 
@@ -73,10 +74,6 @@ message JsAstToAstStringConfig {}
 message JsAstToHirConfig {}
 
 message JsHirToAstConfig {}
-
-message JsHirToLirConfig {}
-
-message JsLirToHirConfig {}
 
 // =============================================================================
 // Analysis

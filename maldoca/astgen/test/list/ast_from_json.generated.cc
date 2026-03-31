@@ -35,6 +35,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
@@ -90,57 +91,24 @@ LiClass2::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::string>>
 LiSimpleList::GetStrings(const nlohmann::json& json) {
-  auto strings_it = json.find("strings");
-  if (strings_it == json.end()) {
-    return absl::InvalidArgumentError("`strings` is undefined.");
-  }
-  const nlohmann::json& json_strings = strings_it.value();
-
-  if (json_strings.is_null()) {
-    return absl::InvalidArgumentError("json_strings is null.");
-  }
-  if (!json_strings.is_array()) {
-    return absl::InvalidArgumentError("json_strings expected to be array.");
-  }
-
-  std::vector<std::string> strings;
-  for (const nlohmann::json& json_strings_element : json_strings) {
-    if (json_strings_element.is_null()) {
-      return absl::InvalidArgumentError("json_strings_element is null.");
-    }
-    if (!json_strings_element.is_string()) {
-      return absl::InvalidArgumentError("Expecting json_strings_element.is_string().");
-    }
-    auto strings_element = json_strings_element.get<std::string>();
-    strings.push_back(std::move(strings_element));
-  }
-  return strings;
+  return GetRequiredField<std::vector<std::string>>(
+      json,
+      "strings",
+      List<std::string>(
+          JsonToString
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<LiClass1>>>
 LiSimpleList::GetOperations(const nlohmann::json& json) {
-  auto operations_it = json.find("operations");
-  if (operations_it == json.end()) {
-    return absl::InvalidArgumentError("`operations` is undefined.");
-  }
-  const nlohmann::json& json_operations = operations_it.value();
-
-  if (json_operations.is_null()) {
-    return absl::InvalidArgumentError("json_operations is null.");
-  }
-  if (!json_operations.is_array()) {
-    return absl::InvalidArgumentError("json_operations expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<LiClass1>> operations;
-  for (const nlohmann::json& json_operations_element : json_operations) {
-    if (json_operations_element.is_null()) {
-      return absl::InvalidArgumentError("json_operations_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto operations_element, LiClass1::FromJson(json_operations_element));
-    operations.push_back(std::move(operations_element));
-  }
-  return operations;
+  return GetRequiredField<std::vector<std::unique_ptr<LiClass1>>>(
+      json,
+      "operations",
+      List<std::unique_ptr<LiClass1>>(
+          LiClass1::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiSimpleList>>
@@ -163,31 +131,13 @@ LiSimpleList::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::vector<std::string>>>
 LiOptionalList::GetStrings(const nlohmann::json& json) {
-  auto strings_it = json.find("strings");
-  if (strings_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_strings = strings_it.value();
-
-  if (json_strings.is_null()) {
-    return absl::InvalidArgumentError("json_strings is null.");
-  }
-  if (!json_strings.is_array()) {
-    return absl::InvalidArgumentError("json_strings expected to be array.");
-  }
-
-  std::vector<std::string> strings;
-  for (const nlohmann::json& json_strings_element : json_strings) {
-    if (json_strings_element.is_null()) {
-      return absl::InvalidArgumentError("json_strings_element is null.");
-    }
-    if (!json_strings_element.is_string()) {
-      return absl::InvalidArgumentError("Expecting json_strings_element.is_string().");
-    }
-    auto strings_element = json_strings_element.get<std::string>();
-    strings.push_back(std::move(strings_element));
-  }
-  return strings;
+  return GetOptionalField<std::vector<std::string>>(
+      json,
+      "strings",
+      List<std::string>(
+          JsonToString
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiOptionalList>>
@@ -208,57 +158,28 @@ LiOptionalList::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::optional<std::string>>>
 LiListOfOptional::GetStrings(const nlohmann::json& json) {
-  auto strings_it = json.find("strings");
-  if (strings_it == json.end()) {
-    return absl::InvalidArgumentError("`strings` is undefined.");
-  }
-  const nlohmann::json& json_strings = strings_it.value();
-
-  if (json_strings.is_null()) {
-    return absl::InvalidArgumentError("json_strings is null.");
-  }
-  if (!json_strings.is_array()) {
-    return absl::InvalidArgumentError("json_strings expected to be array.");
-  }
-
-  std::vector<std::optional<std::string>> strings;
-  for (const nlohmann::json& json_strings_element : json_strings) {
-    std::optional<std::string> strings_element;
-    if (!json_strings_element.is_null()) {
-      if (!json_strings_element.is_string()) {
-        return absl::InvalidArgumentError("Expecting json_strings_element.is_string().");
-      }
-      strings_element = json_strings_element.get<std::string>();
-    }
-    strings.push_back(std::move(strings_element));
-  }
-  return strings;
+  return GetRequiredField<std::vector<std::optional<std::string>>>(
+      json,
+      "strings",
+      List<std::optional<std::string>>(
+          Nullable<std::string>(
+              JsonToString
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::optional<std::unique_ptr<LiClass1>>>>
 LiListOfOptional::GetOperations(const nlohmann::json& json) {
-  auto operations_it = json.find("operations");
-  if (operations_it == json.end()) {
-    return absl::InvalidArgumentError("`operations` is undefined.");
-  }
-  const nlohmann::json& json_operations = operations_it.value();
-
-  if (json_operations.is_null()) {
-    return absl::InvalidArgumentError("json_operations is null.");
-  }
-  if (!json_operations.is_array()) {
-    return absl::InvalidArgumentError("json_operations expected to be array.");
-  }
-
-  std::vector<std::optional<std::unique_ptr<LiClass1>>> operations;
-  for (const nlohmann::json& json_operations_element : json_operations) {
-    std::optional<std::unique_ptr<LiClass1>> operations_element;
-    if (!json_operations_element.is_null()) {
-      MALDOCA_ASSIGN_OR_RETURN(operations_element, LiClass1::FromJson(json_operations_element));
-    }
-    operations.push_back(std::move(operations_element));
-  }
-  return operations;
+  return GetRequiredField<std::vector<std::optional<std::unique_ptr<LiClass1>>>>(
+      json,
+      "operations",
+      List<std::optional<std::unique_ptr<LiClass1>>>(
+          Nullable<std::unique_ptr<LiClass1>>(
+              LiClass1::FromJson
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiListOfOptional>>
@@ -281,74 +202,40 @@ LiListOfOptional::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::variant<bool, std::string>>>
 LiListOfVariant::GetVariants(const nlohmann::json& json) {
-  auto variants_it = json.find("variants");
-  if (variants_it == json.end()) {
-    return absl::InvalidArgumentError("`variants` is undefined.");
-  }
-  const nlohmann::json& json_variants = variants_it.value();
-
-  if (json_variants.is_null()) {
-    return absl::InvalidArgumentError("json_variants is null.");
-  }
-  if (!json_variants.is_array()) {
-    return absl::InvalidArgumentError("json_variants expected to be array.");
-  }
-
-  std::vector<std::variant<bool, std::string>> variants;
-  for (const nlohmann::json& json_variants_element : json_variants) {
-    if (json_variants_element.is_null()) {
-      return absl::InvalidArgumentError("json_variants_element is null.");
-    }
-    std::variant<bool, std::string> variants_element;
-    if (json_variants_element.is_boolean()) {
-      variants_element = json_variants_element.get<bool>();
-    } else if (json_variants_element.is_string()) {
-      variants_element = json_variants_element.get<std::string>();
-    } else {
-      auto result = absl::InvalidArgumentError("json_variants_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_variants_element.dump()});
-      return result;
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  return variants;
+  return GetRequiredField<std::vector<std::variant<bool, std::string>>>(
+      json,
+      "variants",
+      List<std::variant<bool, std::string>>(
+          Variant(
+              VariantOption<bool>{
+                  .predicate = IsBool,
+                  .converter = JsonToBool,
+              },
+              VariantOption<std::string>{
+                  .predicate = IsString,
+                  .converter = JsonToString,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>>
 LiListOfVariant::GetOperations(const nlohmann::json& json) {
-  auto operations_it = json.find("operations");
-  if (operations_it == json.end()) {
-    return absl::InvalidArgumentError("`operations` is undefined.");
-  }
-  const nlohmann::json& json_operations = operations_it.value();
-
-  if (json_operations.is_null()) {
-    return absl::InvalidArgumentError("json_operations is null.");
-  }
-  if (!json_operations.is_array()) {
-    return absl::InvalidArgumentError("json_operations expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>> operations;
-  for (const nlohmann::json& json_operations_element : json_operations) {
-    if (json_operations_element.is_null()) {
-      return absl::InvalidArgumentError("json_operations_element is null.");
-    }
-    std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>> operations_element;
-    if (IsClass1(json_operations_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(operations_element, LiClass1::FromJson(json_operations_element));
-    } else if (IsClass2(json_operations_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(operations_element, LiClass2::FromJson(json_operations_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_operations_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_operations_element.dump()});
-      return result;
-    }
-    operations.push_back(std::move(operations_element));
-  }
-  return operations;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>>(
+      json,
+      "operations",
+      List<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>(
+          Variant(
+              VariantOption<std::unique_ptr<LiClass1>>{
+                  .predicate = IsClass1,
+                  .converter = LiClass1::FromJson,
+              },
+              VariantOption<std::unique_ptr<LiClass2>>{
+                  .predicate = IsClass2,
+                  .converter = LiClass2::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiListOfVariant>>
@@ -371,31 +258,15 @@ LiListOfVariant::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::vector<std::optional<std::string>>>>
 LiOptionalListOfOptional::GetVariants(const nlohmann::json& json) {
-  auto variants_it = json.find("variants");
-  if (variants_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_variants = variants_it.value();
-
-  if (json_variants.is_null()) {
-    return absl::InvalidArgumentError("json_variants is null.");
-  }
-  if (!json_variants.is_array()) {
-    return absl::InvalidArgumentError("json_variants expected to be array.");
-  }
-
-  std::vector<std::optional<std::string>> variants;
-  for (const nlohmann::json& json_variants_element : json_variants) {
-    std::optional<std::string> variants_element;
-    if (!json_variants_element.is_null()) {
-      if (!json_variants_element.is_string()) {
-        return absl::InvalidArgumentError("Expecting json_variants_element.is_string().");
-      }
-      variants_element = json_variants_element.get<std::string>();
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  return variants;
+  return GetOptionalField<std::vector<std::optional<std::string>>>(
+      json,
+      "variants",
+      List<std::optional<std::string>>(
+          Nullable<std::string>(
+              JsonToString
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfOptional>>
@@ -416,38 +287,21 @@ LiOptionalListOfOptional::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::vector<std::variant<bool, std::string>>>>
 LiOptionalListOfVariant::GetVariants(const nlohmann::json& json) {
-  auto variants_it = json.find("variants");
-  if (variants_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_variants = variants_it.value();
-
-  if (json_variants.is_null()) {
-    return absl::InvalidArgumentError("json_variants is null.");
-  }
-  if (!json_variants.is_array()) {
-    return absl::InvalidArgumentError("json_variants expected to be array.");
-  }
-
-  std::vector<std::variant<bool, std::string>> variants;
-  for (const nlohmann::json& json_variants_element : json_variants) {
-    if (json_variants_element.is_null()) {
-      return absl::InvalidArgumentError("json_variants_element is null.");
-    }
-    std::variant<bool, std::string> variants_element;
-    if (json_variants_element.is_boolean()) {
-      variants_element = json_variants_element.get<bool>();
-    } else if (json_variants_element.is_string()) {
-      variants_element = json_variants_element.get<std::string>();
-    } else {
-      auto result = absl::InvalidArgumentError("json_variants_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_variants_element.dump()});
-      return result;
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  return variants;
+  return GetOptionalField<std::vector<std::variant<bool, std::string>>>(
+      json,
+      "variants",
+      List<std::variant<bool, std::string>>(
+          Variant(
+              VariantOption<bool>{
+                  .predicate = IsBool,
+                  .converter = JsonToBool,
+              },
+              VariantOption<std::string>{
+                  .predicate = IsString,
+                  .converter = JsonToString,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfVariant>>
@@ -468,72 +322,44 @@ LiOptionalListOfVariant::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::optional<std::variant<bool, std::string>>>>
 LiListOfOptionalVariant::GetVariants(const nlohmann::json& json) {
-  auto variants_it = json.find("variants");
-  if (variants_it == json.end()) {
-    return absl::InvalidArgumentError("`variants` is undefined.");
-  }
-  const nlohmann::json& json_variants = variants_it.value();
-
-  if (json_variants.is_null()) {
-    return absl::InvalidArgumentError("json_variants is null.");
-  }
-  if (!json_variants.is_array()) {
-    return absl::InvalidArgumentError("json_variants expected to be array.");
-  }
-
-  std::vector<std::optional<std::variant<bool, std::string>>> variants;
-  for (const nlohmann::json& json_variants_element : json_variants) {
-    std::optional<std::variant<bool, std::string>> variants_element;
-    if (!json_variants_element.is_null()) {
-      if (json_variants_element.is_boolean()) {
-        variants_element = json_variants_element.get<bool>();
-      } else if (json_variants_element.is_string()) {
-        variants_element = json_variants_element.get<std::string>();
-      } else {
-        auto result = absl::InvalidArgumentError("json_variants_element has invalid type.");
-        result.SetPayload("json", absl::Cord{json.dump()});
-        result.SetPayload("json_element", absl::Cord{json_variants_element.dump()});
-        return result;
-      }
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  return variants;
+  return GetRequiredField<std::vector<std::optional<std::variant<bool, std::string>>>>(
+      json,
+      "variants",
+      List<std::optional<std::variant<bool, std::string>>>(
+          Nullable<std::variant<bool, std::string>>(
+              Variant(
+                  VariantOption<bool>{
+                      .predicate = IsBool,
+                      .converter = JsonToBool,
+                  },
+                  VariantOption<std::string>{
+                      .predicate = IsString,
+                      .converter = JsonToString,
+                  })
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>>>
 LiListOfOptionalVariant::GetOperations(const nlohmann::json& json) {
-  auto operations_it = json.find("operations");
-  if (operations_it == json.end()) {
-    return absl::InvalidArgumentError("`operations` is undefined.");
-  }
-  const nlohmann::json& json_operations = operations_it.value();
-
-  if (json_operations.is_null()) {
-    return absl::InvalidArgumentError("json_operations is null.");
-  }
-  if (!json_operations.is_array()) {
-    return absl::InvalidArgumentError("json_operations expected to be array.");
-  }
-
-  std::vector<std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>> operations;
-  for (const nlohmann::json& json_operations_element : json_operations) {
-    std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>> operations_element;
-    if (!json_operations_element.is_null()) {
-      if (IsClass1(json_operations_element)) {
-        MALDOCA_ASSIGN_OR_RETURN(operations_element, LiClass1::FromJson(json_operations_element));
-      } else if (IsClass2(json_operations_element)) {
-        MALDOCA_ASSIGN_OR_RETURN(operations_element, LiClass2::FromJson(json_operations_element));
-      } else {
-        auto result = absl::InvalidArgumentError("json_operations_element has invalid type.");
-        result.SetPayload("json", absl::Cord{json.dump()});
-        result.SetPayload("json_element", absl::Cord{json_operations_element.dump()});
-        return result;
-      }
-    }
-    operations.push_back(std::move(operations_element));
-  }
-  return operations;
+  return GetRequiredField<std::vector<std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>>>(
+      json,
+      "operations",
+      List<std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>>(
+          Nullable<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>(
+              Variant(
+                  VariantOption<std::unique_ptr<LiClass1>>{
+                      .predicate = IsClass1,
+                      .converter = LiClass1::FromJson,
+                  },
+                  VariantOption<std::unique_ptr<LiClass2>>{
+                      .predicate = IsClass2,
+                      .converter = LiClass2::FromJson,
+                  })
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiListOfOptionalVariant>>
@@ -556,37 +382,23 @@ LiListOfOptionalVariant::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::vector<std::optional<std::variant<bool, std::string>>>>>
 LiOptionalListOfOptionalVariant::GetVariants(const nlohmann::json& json) {
-  auto variants_it = json.find("variants");
-  if (variants_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_variants = variants_it.value();
-
-  if (json_variants.is_null()) {
-    return absl::InvalidArgumentError("json_variants is null.");
-  }
-  if (!json_variants.is_array()) {
-    return absl::InvalidArgumentError("json_variants expected to be array.");
-  }
-
-  std::vector<std::optional<std::variant<bool, std::string>>> variants;
-  for (const nlohmann::json& json_variants_element : json_variants) {
-    std::optional<std::variant<bool, std::string>> variants_element;
-    if (!json_variants_element.is_null()) {
-      if (json_variants_element.is_boolean()) {
-        variants_element = json_variants_element.get<bool>();
-      } else if (json_variants_element.is_string()) {
-        variants_element = json_variants_element.get<std::string>();
-      } else {
-        auto result = absl::InvalidArgumentError("json_variants_element has invalid type.");
-        result.SetPayload("json", absl::Cord{json.dump()});
-        result.SetPayload("json_element", absl::Cord{json_variants_element.dump()});
-        return result;
-      }
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  return variants;
+  return GetOptionalField<std::vector<std::optional<std::variant<bool, std::string>>>>(
+      json,
+      "variants",
+      List<std::optional<std::variant<bool, std::string>>>(
+          Nullable<std::variant<bool, std::string>>(
+              Variant(
+                  VariantOption<bool>{
+                      .predicate = IsBool,
+                      .converter = JsonToBool,
+                  },
+                  VariantOption<std::string>{
+                      .predicate = IsString,
+                      .converter = JsonToString,
+                  })
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfOptionalVariant>>

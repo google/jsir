@@ -61,18 +61,18 @@ Symbol::Symbol(absl::string_view str) {
   }
 }
 
-Symbol &Symbol::operator+=(const Symbol &other) {
+Symbol& Symbol::operator+=(const Symbol& other) {
   words_.insert(words_.end(), other.words_.begin(), other.words_.end());
   return *this;
 }
 
-Symbol &Symbol::operator+=(Symbol &&other) {
+Symbol& Symbol::operator+=(Symbol&& other) {
   words_.insert(words_.end(), std::make_move_iterator(other.words_.begin()),
                 std::make_move_iterator(other.words_.end()));
   return *this;
 }
 
-Symbol &Symbol::operator+=(absl::string_view other) {
+Symbol& Symbol::operator+=(absl::string_view other) {
   return operator+=(Symbol(other));
 }
 
@@ -80,7 +80,7 @@ std::string Symbol::ToSnakeCase() const { return absl::StrJoin(words_, "_"); }
 
 bool Symbol::IsReservedKeyword() const {
   // https://en.cppreference.com/w/cpp/keyword
-  static const auto *kReservedKeywords = new absl::flat_hash_set<std::string>{
+  static const auto* kReservedKeywords = new absl::flat_hash_set<std::string>{
       "alignas",
       "alignof",
       "and",
@@ -206,7 +206,7 @@ std::string Symbol::ToMlirGetter() const {
 
 std::string Symbol::ToPascalCase() const {
   std::string result;
-  for (const auto &word : words_) {
+  for (const auto& word : words_) {
     result.push_back(absl::ascii_toupper(word[0]));
     result.append(word.substr(1));
   }
@@ -215,7 +215,7 @@ std::string Symbol::ToPascalCase() const {
 
 std::string Symbol::ToCamelCase() const {
   std::string result;
-  for (const auto &word : words_) {
+  for (const auto& word : words_) {
     if (result.empty()) {
       result = word;
     } else {

@@ -26,10 +26,10 @@ namespace maldoca {
 
 class EirToAst {
  public:
-  absl::StatusOr<std::unique_ptr<ENode>> VisitNode(EirNodeOp op);
+  static absl::StatusOr<std::unique_ptr<ENode>> VisitNode(EirNodeOp op);
 
   template <typename T, typename... Args>
-  std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
+  static std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
     return absl::make_unique<T>(std::forward<Args>(args)...);
   }
 };

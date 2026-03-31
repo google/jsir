@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // JsPosition
@@ -61,36 +47,20 @@ static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
 
 absl::StatusOr<int64_t>
 JsPosition::GetLine(const nlohmann::json& json) {
-  auto line_it = json.find("line");
-  if (line_it == json.end()) {
-    return absl::InvalidArgumentError("`line` is undefined.");
-  }
-  const nlohmann::json& json_line = line_it.value();
-
-  if (json_line.is_null()) {
-    return absl::InvalidArgumentError("json_line is null.");
-  }
-  if (!json_line.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_line.is_number_integer().");
-  }
-  return json_line.get<int64_t>();
+  return GetRequiredField<int64_t>(
+      json,
+      "line",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<int64_t>
 JsPosition::GetColumn(const nlohmann::json& json) {
-  auto column_it = json.find("column");
-  if (column_it == json.end()) {
-    return absl::InvalidArgumentError("`column` is undefined.");
-  }
-  const nlohmann::json& json_column = column_it.value();
-
-  if (json_column.is_null()) {
-    return absl::InvalidArgumentError("json_column is null.");
-  }
-  if (!json_column.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_column.is_number_integer().");
-  }
-  return json_column.get<int64_t>();
+  return GetRequiredField<int64_t>(
+      json,
+      "column",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsPosition>>
@@ -113,47 +83,29 @@ JsPosition::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsPosition>>
 JsSourceLocation::GetStart(const nlohmann::json& json) {
-  auto start_it = json.find("start");
-  if (start_it == json.end()) {
-    return absl::InvalidArgumentError("`start` is undefined.");
-  }
-  const nlohmann::json& json_start = start_it.value();
-
-  if (json_start.is_null()) {
-    return absl::InvalidArgumentError("json_start is null.");
-  }
-  return JsPosition::FromJson(json_start);
+  return GetRequiredField<std::unique_ptr<JsPosition>>(
+      json,
+      "start",
+      JsPosition::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsPosition>>
 JsSourceLocation::GetEnd(const nlohmann::json& json) {
-  auto end_it = json.find("end");
-  if (end_it == json.end()) {
-    return absl::InvalidArgumentError("`end` is undefined.");
-  }
-  const nlohmann::json& json_end = end_it.value();
-
-  if (json_end.is_null()) {
-    return absl::InvalidArgumentError("json_end is null.");
-  }
-  return JsPosition::FromJson(json_end);
+  return GetRequiredField<std::unique_ptr<JsPosition>>(
+      json,
+      "end",
+      JsPosition::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::string>>
 JsSourceLocation::GetIdentifierName(const nlohmann::json& json) {
-  auto identifier_name_it = json.find("identifierName");
-  if (identifier_name_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_identifier_name = identifier_name_it.value();
-
-  if (json_identifier_name.is_null()) {
-    return absl::InvalidArgumentError("json_identifier_name is null.");
-  }
-  if (!json_identifier_name.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_identifier_name.is_string().");
-  }
-  return json_identifier_name.get<std::string>();
+  return GetOptionalField<std::string>(
+      json,
+      "identifierName",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsSourceLocation>>
@@ -178,67 +130,38 @@ JsSourceLocation::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsSourceLocation>>>
 JsComment::GetLoc(const nlohmann::json& json) {
-  auto loc_it = json.find("loc");
-  if (loc_it == json.end()) {
-    return absl::InvalidArgumentError("`loc` is undefined.");
-  }
-  const nlohmann::json& json_loc = loc_it.value();
-
-  if (json_loc.is_null()) {
-    return std::nullopt;
-  }
-  return JsSourceLocation::FromJson(json_loc);
+  return GetNullableField<std::unique_ptr<JsSourceLocation>>(
+      json,
+      "loc",
+      JsSourceLocation::FromJson
+  );
 }
 
 absl::StatusOr<std::string>
 JsComment::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_string().");
-  }
-  return json_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "value",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::optional<int64_t>>
 JsComment::GetStart(const nlohmann::json& json) {
-  auto start_it = json.find("start");
-  if (start_it == json.end()) {
-    return absl::InvalidArgumentError("`start` is undefined.");
-  }
-  const nlohmann::json& json_start = start_it.value();
-
-  if (json_start.is_null()) {
-    return std::nullopt;
-  }
-  if (!json_start.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_start.is_number_integer().");
-  }
-  return json_start.get<int64_t>();
+  return GetNullableField<int64_t>(
+      json,
+      "start",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::optional<int64_t>>
 JsComment::GetEnd(const nlohmann::json& json) {
-  auto end_it = json.find("end");
-  if (end_it == json.end()) {
-    return absl::InvalidArgumentError("`end` is undefined.");
-  }
-  const nlohmann::json& json_end = end_it.value();
-
-  if (json_end.is_null()) {
-    return std::nullopt;
-  }
-  if (!json_end.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_end.is_number_integer().");
-  }
-  return json_end.get<int64_t>();
+  return GetNullableField<int64_t>(
+      json,
+      "end",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsComment>>
@@ -307,36 +230,20 @@ JsCommentLine::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsSymbolId::GetName(const nlohmann::json& json) {
-  auto name_it = json.find("name");
-  if (name_it == json.end()) {
-    return absl::InvalidArgumentError("`name` is undefined.");
-  }
-  const nlohmann::json& json_name = name_it.value();
-
-  if (json_name.is_null()) {
-    return absl::InvalidArgumentError("json_name is null.");
-  }
-  if (!json_name.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_name.is_string().");
-  }
-  return json_name.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "name",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::optional<int64_t>>
 JsSymbolId::GetDefScopeUid(const nlohmann::json& json) {
-  auto def_scope_uid_it = json.find("defScopeUid");
-  if (def_scope_uid_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_def_scope_uid = def_scope_uid_it.value();
-
-  if (json_def_scope_uid.is_null()) {
-    return absl::InvalidArgumentError("json_def_scope_uid is null.");
-  }
-  if (!json_def_scope_uid.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_def_scope_uid.is_number_integer().");
-  }
-  return json_def_scope_uid.get<int64_t>();
+  return GetOptionalField<int64_t>(
+      json,
+      "defScopeUid",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsSymbolId>>
@@ -359,194 +266,91 @@ JsSymbolId::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsSourceLocation>>>
 JsNode::GetLoc(const nlohmann::json& json) {
-  auto loc_it = json.find("loc");
-  if (loc_it == json.end()) {
-    return absl::InvalidArgumentError("`loc` is undefined.");
-  }
-  const nlohmann::json& json_loc = loc_it.value();
-
-  if (json_loc.is_null()) {
-    return std::nullopt;
-  }
-  return JsSourceLocation::FromJson(json_loc);
+  return GetNullableField<std::unique_ptr<JsSourceLocation>>(
+      json,
+      "loc",
+      JsSourceLocation::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<int64_t>>
 JsNode::GetStart(const nlohmann::json& json) {
-  auto start_it = json.find("start");
-  if (start_it == json.end()) {
-    return absl::InvalidArgumentError("`start` is undefined.");
-  }
-  const nlohmann::json& json_start = start_it.value();
-
-  if (json_start.is_null()) {
-    return std::nullopt;
-  }
-  if (!json_start.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_start.is_number_integer().");
-  }
-  return json_start.get<int64_t>();
+  return GetNullableField<int64_t>(
+      json,
+      "start",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::optional<int64_t>>
 JsNode::GetEnd(const nlohmann::json& json) {
-  auto end_it = json.find("end");
-  if (end_it == json.end()) {
-    return absl::InvalidArgumentError("`end` is undefined.");
-  }
-  const nlohmann::json& json_end = end_it.value();
-
-  if (json_end.is_null()) {
-    return std::nullopt;
-  }
-  if (!json_end.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_end.is_number_integer().");
-  }
-  return json_end.get<int64_t>();
+  return GetNullableField<int64_t>(
+      json,
+      "end",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<int64_t>>>
 JsNode::GetLeadingCommentUids(const nlohmann::json& json) {
-  auto leading_comment_uids_it = json.find("leadingCommentUids");
-  if (leading_comment_uids_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_leading_comment_uids = leading_comment_uids_it.value();
-
-  if (json_leading_comment_uids.is_null()) {
-    return absl::InvalidArgumentError("json_leading_comment_uids is null.");
-  }
-  if (!json_leading_comment_uids.is_array()) {
-    return absl::InvalidArgumentError("json_leading_comment_uids expected to be array.");
-  }
-
-  std::vector<int64_t> leading_comment_uids;
-  for (const nlohmann::json& json_leading_comment_uids_element : json_leading_comment_uids) {
-    if (json_leading_comment_uids_element.is_null()) {
-      return absl::InvalidArgumentError("json_leading_comment_uids_element is null.");
-    }
-    if (!json_leading_comment_uids_element.is_number_integer()) {
-      return absl::InvalidArgumentError("Expecting json_leading_comment_uids_element.is_number_integer().");
-    }
-    auto leading_comment_uids_element = json_leading_comment_uids_element.get<int64_t>();
-    leading_comment_uids.push_back(std::move(leading_comment_uids_element));
-  }
-  return leading_comment_uids;
+  return GetOptionalField<std::vector<int64_t>>(
+      json,
+      "leadingCommentUids",
+      List<int64_t>(
+          JsonToInt64
+      )
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<int64_t>>>
 JsNode::GetTrailingCommentUids(const nlohmann::json& json) {
-  auto trailing_comment_uids_it = json.find("trailingCommentUids");
-  if (trailing_comment_uids_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_trailing_comment_uids = trailing_comment_uids_it.value();
-
-  if (json_trailing_comment_uids.is_null()) {
-    return absl::InvalidArgumentError("json_trailing_comment_uids is null.");
-  }
-  if (!json_trailing_comment_uids.is_array()) {
-    return absl::InvalidArgumentError("json_trailing_comment_uids expected to be array.");
-  }
-
-  std::vector<int64_t> trailing_comment_uids;
-  for (const nlohmann::json& json_trailing_comment_uids_element : json_trailing_comment_uids) {
-    if (json_trailing_comment_uids_element.is_null()) {
-      return absl::InvalidArgumentError("json_trailing_comment_uids_element is null.");
-    }
-    if (!json_trailing_comment_uids_element.is_number_integer()) {
-      return absl::InvalidArgumentError("Expecting json_trailing_comment_uids_element.is_number_integer().");
-    }
-    auto trailing_comment_uids_element = json_trailing_comment_uids_element.get<int64_t>();
-    trailing_comment_uids.push_back(std::move(trailing_comment_uids_element));
-  }
-  return trailing_comment_uids;
+  return GetOptionalField<std::vector<int64_t>>(
+      json,
+      "trailingCommentUids",
+      List<int64_t>(
+          JsonToInt64
+      )
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<int64_t>>>
 JsNode::GetInnerCommentUids(const nlohmann::json& json) {
-  auto inner_comment_uids_it = json.find("innerCommentUids");
-  if (inner_comment_uids_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_inner_comment_uids = inner_comment_uids_it.value();
-
-  if (json_inner_comment_uids.is_null()) {
-    return absl::InvalidArgumentError("json_inner_comment_uids is null.");
-  }
-  if (!json_inner_comment_uids.is_array()) {
-    return absl::InvalidArgumentError("json_inner_comment_uids expected to be array.");
-  }
-
-  std::vector<int64_t> inner_comment_uids;
-  for (const nlohmann::json& json_inner_comment_uids_element : json_inner_comment_uids) {
-    if (json_inner_comment_uids_element.is_null()) {
-      return absl::InvalidArgumentError("json_inner_comment_uids_element is null.");
-    }
-    if (!json_inner_comment_uids_element.is_number_integer()) {
-      return absl::InvalidArgumentError("Expecting json_inner_comment_uids_element.is_number_integer().");
-    }
-    auto inner_comment_uids_element = json_inner_comment_uids_element.get<int64_t>();
-    inner_comment_uids.push_back(std::move(inner_comment_uids_element));
-  }
-  return inner_comment_uids;
+  return GetOptionalField<std::vector<int64_t>>(
+      json,
+      "innerCommentUids",
+      List<int64_t>(
+          JsonToInt64
+      )
+  );
 }
 
 absl::StatusOr<std::optional<int64_t>>
 JsNode::GetScopeUid(const nlohmann::json& json) {
-  auto scope_uid_it = json.find("scopeUid");
-  if (scope_uid_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_scope_uid = scope_uid_it.value();
-
-  if (json_scope_uid.is_null()) {
-    return absl::InvalidArgumentError("json_scope_uid is null.");
-  }
-  if (!json_scope_uid.is_number_integer()) {
-    return absl::InvalidArgumentError("Expecting json_scope_uid.is_number_integer().");
-  }
-  return json_scope_uid.get<int64_t>();
+  return GetOptionalField<int64_t>(
+      json,
+      "scopeUid",
+      JsonToInt64
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsSymbolId>>>
 JsNode::GetReferencedSymbol(const nlohmann::json& json) {
-  auto referenced_symbol_it = json.find("referencedSymbol");
-  if (referenced_symbol_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_referenced_symbol = referenced_symbol_it.value();
-
-  if (json_referenced_symbol.is_null()) {
-    return absl::InvalidArgumentError("json_referenced_symbol is null.");
-  }
-  return JsSymbolId::FromJson(json_referenced_symbol);
+  return GetOptionalField<std::unique_ptr<JsSymbolId>>(
+      json,
+      "referencedSymbol",
+      JsSymbolId::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<std::unique_ptr<JsSymbolId>>>>
 JsNode::GetDefinedSymbols(const nlohmann::json& json) {
-  auto defined_symbols_it = json.find("definedSymbols");
-  if (defined_symbols_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_defined_symbols = defined_symbols_it.value();
-
-  if (json_defined_symbols.is_null()) {
-    return absl::InvalidArgumentError("json_defined_symbols is null.");
-  }
-  if (!json_defined_symbols.is_array()) {
-    return absl::InvalidArgumentError("json_defined_symbols expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsSymbolId>> defined_symbols;
-  for (const nlohmann::json& json_defined_symbols_element : json_defined_symbols) {
-    if (json_defined_symbols_element.is_null()) {
-      return absl::InvalidArgumentError("json_defined_symbols_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols_element, JsSymbolId::FromJson(json_defined_symbols_element));
-    defined_symbols.push_back(std::move(defined_symbols_element));
-  }
-  return defined_symbols;
+  return GetOptionalField<std::vector<std::unique_ptr<JsSymbolId>>>(
+      json,
+      "definedSymbols",
+      List<std::unique_ptr<JsSymbolId>>(
+          JsSymbolId::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsNode>>
@@ -763,19 +567,11 @@ JsNode::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsInterpreterDirective::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_string().");
-  }
-  return json_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "value",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsInterpreterDirective>>
@@ -886,36 +682,20 @@ JsProgramBodyElement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsDirectiveLiteralExtra::GetRaw(const nlohmann::json& json) {
-  auto raw_it = json.find("raw");
-  if (raw_it == json.end()) {
-    return absl::InvalidArgumentError("`raw` is undefined.");
-  }
-  const nlohmann::json& json_raw = raw_it.value();
-
-  if (json_raw.is_null()) {
-    return absl::InvalidArgumentError("json_raw is null.");
-  }
-  if (!json_raw.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw.is_string().");
-  }
-  return json_raw.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "raw",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::string>
 JsDirectiveLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  auto raw_value_it = json.find("rawValue");
-  if (raw_value_it == json.end()) {
-    return absl::InvalidArgumentError("`rawValue` is undefined.");
-  }
-  const nlohmann::json& json_raw_value = raw_value_it.value();
-
-  if (json_raw_value.is_null()) {
-    return absl::InvalidArgumentError("json_raw_value is null.");
-  }
-  if (!json_raw_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw_value.is_string().");
-  }
-  return json_raw_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "rawValue",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsDirectiveLiteralExtra>>
@@ -938,33 +718,20 @@ JsDirectiveLiteralExtra::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsDirectiveLiteral::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_string().");
-  }
-  return json_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "value",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsDirectiveLiteralExtra>>>
 JsDirectiveLiteral::GetExtra(const nlohmann::json& json) {
-  auto extra_it = json.find("extra");
-  if (extra_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_extra = extra_it.value();
-
-  if (json_extra.is_null()) {
-    return absl::InvalidArgumentError("json_extra is null.");
-  }
-  return JsDirectiveLiteralExtra::FromJson(json_extra);
+  return GetOptionalField<std::unique_ptr<JsDirectiveLiteralExtra>>(
+      json,
+      "extra",
+      JsDirectiveLiteralExtra::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsDirectiveLiteral>>
@@ -1005,16 +772,11 @@ JsDirectiveLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsDirectiveLiteral>>
 JsDirective::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  return JsDirectiveLiteral::FromJson(json_value);
+  return GetRequiredField<std::unique_ptr<JsDirectiveLiteral>>(
+      json,
+      "value",
+      JsDirectiveLiteral::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsDirective>>
@@ -1053,85 +815,42 @@ JsDirective::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsInterpreterDirective>>>
 JsProgram::GetInterpreter(const nlohmann::json& json) {
-  auto interpreter_it = json.find("interpreter");
-  if (interpreter_it == json.end()) {
-    return absl::InvalidArgumentError("`interpreter` is undefined.");
-  }
-  const nlohmann::json& json_interpreter = interpreter_it.value();
-
-  if (json_interpreter.is_null()) {
-    return std::nullopt;
-  }
-  return JsInterpreterDirective::FromJson(json_interpreter);
+  return GetNullableField<std::unique_ptr<JsInterpreterDirective>>(
+      json,
+      "interpreter",
+      JsInterpreterDirective::FromJson
+  );
 }
 
 absl::StatusOr<std::string>
 JsProgram::GetSourceType(const nlohmann::json& json) {
-  auto source_type_it = json.find("sourceType");
-  if (source_type_it == json.end()) {
-    return absl::InvalidArgumentError("`sourceType` is undefined.");
-  }
-  const nlohmann::json& json_source_type = source_type_it.value();
-
-  if (json_source_type.is_null()) {
-    return absl::InvalidArgumentError("json_source_type is null.");
-  }
-  if (!json_source_type.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_source_type.is_string().");
-  }
-  return json_source_type.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "sourceType",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsProgramBodyElement>>>
 JsProgram::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  if (!json_body.is_array()) {
-    return absl::InvalidArgumentError("json_body expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsProgramBodyElement>> body;
-  for (const nlohmann::json& json_body_element : json_body) {
-    if (json_body_element.is_null()) {
-      return absl::InvalidArgumentError("json_body_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto body_element, JsProgramBodyElement::FromJson(json_body_element));
-    body.push_back(std::move(body_element));
-  }
-  return body;
+  return GetRequiredField<std::vector<std::unique_ptr<JsProgramBodyElement>>>(
+      json,
+      "body",
+      List<std::unique_ptr<JsProgramBodyElement>>(
+          JsProgramBodyElement::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsDirective>>>
 JsProgram::GetDirectives(const nlohmann::json& json) {
-  auto directives_it = json.find("directives");
-  if (directives_it == json.end()) {
-    return absl::InvalidArgumentError("`directives` is undefined.");
-  }
-  const nlohmann::json& json_directives = directives_it.value();
-
-  if (json_directives.is_null()) {
-    return absl::InvalidArgumentError("json_directives is null.");
-  }
-  if (!json_directives.is_array()) {
-    return absl::InvalidArgumentError("json_directives expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsDirective>> directives;
-  for (const nlohmann::json& json_directives_element : json_directives) {
-    if (json_directives_element.is_null()) {
-      return absl::InvalidArgumentError("json_directives_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto directives_element, JsDirective::FromJson(json_directives_element));
-    directives.push_back(std::move(directives_element));
-  }
-  return directives;
+  return GetRequiredField<std::vector<std::unique_ptr<JsDirective>>>(
+      json,
+      "directives",
+      List<std::unique_ptr<JsDirective>>(
+          JsDirective::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsProgram>>
@@ -1176,42 +895,22 @@ JsProgram::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsProgram>>
 JsFile::GetProgram(const nlohmann::json& json) {
-  auto program_it = json.find("program");
-  if (program_it == json.end()) {
-    return absl::InvalidArgumentError("`program` is undefined.");
-  }
-  const nlohmann::json& json_program = program_it.value();
-
-  if (json_program.is_null()) {
-    return absl::InvalidArgumentError("json_program is null.");
-  }
-  return JsProgram::FromJson(json_program);
+  return GetRequiredField<std::unique_ptr<JsProgram>>(
+      json,
+      "program",
+      JsProgram::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<std::unique_ptr<JsComment>>>>
 JsFile::GetComments(const nlohmann::json& json) {
-  auto comments_it = json.find("comments");
-  if (comments_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_comments = comments_it.value();
-
-  if (json_comments.is_null()) {
-    return absl::InvalidArgumentError("json_comments is null.");
-  }
-  if (!json_comments.is_array()) {
-    return absl::InvalidArgumentError("json_comments expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsComment>> comments;
-  for (const nlohmann::json& json_comments_element : json_comments) {
-    if (json_comments_element.is_null()) {
-      return absl::InvalidArgumentError("json_comments_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto comments_element, JsComment::FromJson(json_comments_element));
-    comments.push_back(std::move(comments_element));
-  }
-  return comments;
+  return GetOptionalField<std::vector<std::unique_ptr<JsComment>>>(
+      json,
+      "comments",
+      List<std::unique_ptr<JsComment>>(
+          JsComment::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsFile>>
@@ -1510,19 +1209,11 @@ static bool IsIdentifier(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsIdentifier::GetName(const nlohmann::json& json) {
-  auto name_it = json.find("name");
-  if (name_it == json.end()) {
-    return absl::InvalidArgumentError("`name` is undefined.");
-  }
-  const nlohmann::json& json_name = name_it.value();
-
-  if (json_name.is_null()) {
-    return absl::InvalidArgumentError("json_name is null.");
-  }
-  if (!json_name.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_name.is_string().");
-  }
-  return json_name.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "name",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
@@ -1577,16 +1268,11 @@ static bool IsPrivateName(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsPrivateName::GetId(const nlohmann::json& json) {
-  auto id_it = json.find("id");
-  if (id_it == json.end()) {
-    return absl::InvalidArgumentError("`id` is undefined.");
-  }
-  const nlohmann::json& json_id = id_it.value();
-
-  if (json_id.is_null()) {
-    return absl::InvalidArgumentError("json_id is null.");
-  }
-  return JsIdentifier::FromJson(json_id);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "id",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsPrivateName>>
@@ -1653,19 +1339,11 @@ JsLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsRegExpLiteralExtra::GetRaw(const nlohmann::json& json) {
-  auto raw_it = json.find("raw");
-  if (raw_it == json.end()) {
-    return absl::InvalidArgumentError("`raw` is undefined.");
-  }
-  const nlohmann::json& json_raw = raw_it.value();
-
-  if (json_raw.is_null()) {
-    return absl::InvalidArgumentError("json_raw is null.");
-  }
-  if (!json_raw.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw.is_string().");
-  }
-  return json_raw.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "raw",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsRegExpLiteralExtra>>
@@ -1686,50 +1364,29 @@ JsRegExpLiteralExtra::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsRegExpLiteral::GetPattern(const nlohmann::json& json) {
-  auto pattern_it = json.find("pattern");
-  if (pattern_it == json.end()) {
-    return absl::InvalidArgumentError("`pattern` is undefined.");
-  }
-  const nlohmann::json& json_pattern = pattern_it.value();
-
-  if (json_pattern.is_null()) {
-    return absl::InvalidArgumentError("json_pattern is null.");
-  }
-  if (!json_pattern.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_pattern.is_string().");
-  }
-  return json_pattern.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "pattern",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::string>
 JsRegExpLiteral::GetFlags(const nlohmann::json& json) {
-  auto flags_it = json.find("flags");
-  if (flags_it == json.end()) {
-    return absl::InvalidArgumentError("`flags` is undefined.");
-  }
-  const nlohmann::json& json_flags = flags_it.value();
-
-  if (json_flags.is_null()) {
-    return absl::InvalidArgumentError("json_flags is null.");
-  }
-  if (!json_flags.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_flags.is_string().");
-  }
-  return json_flags.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "flags",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsRegExpLiteralExtra>>>
 JsRegExpLiteral::GetExtra(const nlohmann::json& json) {
-  auto extra_it = json.find("extra");
-  if (extra_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_extra = extra_it.value();
-
-  if (json_extra.is_null()) {
-    return absl::InvalidArgumentError("json_extra is null.");
-  }
-  return JsRegExpLiteralExtra::FromJson(json_extra);
+  return GetOptionalField<std::unique_ptr<JsRegExpLiteralExtra>>(
+      json,
+      "extra",
+      JsRegExpLiteralExtra::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsRegExpLiteral>>
@@ -1804,36 +1461,20 @@ JsNullLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsStringLiteralExtra::GetRaw(const nlohmann::json& json) {
-  auto raw_it = json.find("raw");
-  if (raw_it == json.end()) {
-    return absl::InvalidArgumentError("`raw` is undefined.");
-  }
-  const nlohmann::json& json_raw = raw_it.value();
-
-  if (json_raw.is_null()) {
-    return absl::InvalidArgumentError("json_raw is null.");
-  }
-  if (!json_raw.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw.is_string().");
-  }
-  return json_raw.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "raw",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::string>
 JsStringLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  auto raw_value_it = json.find("rawValue");
-  if (raw_value_it == json.end()) {
-    return absl::InvalidArgumentError("`rawValue` is undefined.");
-  }
-  const nlohmann::json& json_raw_value = raw_value_it.value();
-
-  if (json_raw_value.is_null()) {
-    return absl::InvalidArgumentError("json_raw_value is null.");
-  }
-  if (!json_raw_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw_value.is_string().");
-  }
-  return json_raw_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "rawValue",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStringLiteralExtra>>
@@ -1872,33 +1513,20 @@ static bool IsStringLiteral(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsStringLiteral::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_string().");
-  }
-  return json_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "value",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsStringLiteralExtra>>>
 JsStringLiteral::GetExtra(const nlohmann::json& json) {
-  auto extra_it = json.find("extra");
-  if (extra_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_extra = extra_it.value();
-
-  if (json_extra.is_null()) {
-    return absl::InvalidArgumentError("json_extra is null.");
-  }
-  return JsStringLiteralExtra::FromJson(json_extra);
+  return GetOptionalField<std::unique_ptr<JsStringLiteralExtra>>(
+      json,
+      "extra",
+      JsStringLiteralExtra::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
@@ -1939,19 +1567,11 @@ JsStringLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<bool>
 JsBooleanLiteral::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_boolean().");
-  }
-  return json_value.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "value",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBooleanLiteral>>
@@ -1990,36 +1610,20 @@ JsBooleanLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsNumericLiteralExtra::GetRaw(const nlohmann::json& json) {
-  auto raw_it = json.find("raw");
-  if (raw_it == json.end()) {
-    return absl::InvalidArgumentError("`raw` is undefined.");
-  }
-  const nlohmann::json& json_raw = raw_it.value();
-
-  if (json_raw.is_null()) {
-    return absl::InvalidArgumentError("json_raw is null.");
-  }
-  if (!json_raw.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw.is_string().");
-  }
-  return json_raw.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "raw",
+      JsonToString
+  );
 }
 
 absl::StatusOr<double>
 JsNumericLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  auto raw_value_it = json.find("rawValue");
-  if (raw_value_it == json.end()) {
-    return absl::InvalidArgumentError("`rawValue` is undefined.");
-  }
-  const nlohmann::json& json_raw_value = raw_value_it.value();
-
-  if (json_raw_value.is_null()) {
-    return absl::InvalidArgumentError("json_raw_value is null.");
-  }
-  if (!json_raw_value.is_number()) {
-    return absl::InvalidArgumentError("Expecting json_raw_value.is_number().");
-  }
-  return json_raw_value.get<double>();
+  return GetRequiredField<double>(
+      json,
+      "rawValue",
+      JsonToDouble
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsNumericLiteralExtra>>
@@ -2042,33 +1646,20 @@ JsNumericLiteralExtra::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<double>
 JsNumericLiteral::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_number()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_number().");
-  }
-  return json_value.get<double>();
+  return GetRequiredField<double>(
+      json,
+      "value",
+      JsonToDouble
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsNumericLiteralExtra>>>
 JsNumericLiteral::GetExtra(const nlohmann::json& json) {
-  auto extra_it = json.find("extra");
-  if (extra_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_extra = extra_it.value();
-
-  if (json_extra.is_null()) {
-    return absl::InvalidArgumentError("json_extra is null.");
-  }
-  return JsNumericLiteralExtra::FromJson(json_extra);
+  return GetOptionalField<std::unique_ptr<JsNumericLiteralExtra>>(
+      json,
+      "extra",
+      JsNumericLiteralExtra::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsNumericLiteral>>
@@ -2109,36 +1700,20 @@ JsNumericLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsBigIntLiteralExtra::GetRaw(const nlohmann::json& json) {
-  auto raw_it = json.find("raw");
-  if (raw_it == json.end()) {
-    return absl::InvalidArgumentError("`raw` is undefined.");
-  }
-  const nlohmann::json& json_raw = raw_it.value();
-
-  if (json_raw.is_null()) {
-    return absl::InvalidArgumentError("json_raw is null.");
-  }
-  if (!json_raw.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw.is_string().");
-  }
-  return json_raw.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "raw",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::string>
 JsBigIntLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  auto raw_value_it = json.find("rawValue");
-  if (raw_value_it == json.end()) {
-    return absl::InvalidArgumentError("`rawValue` is undefined.");
-  }
-  const nlohmann::json& json_raw_value = raw_value_it.value();
-
-  if (json_raw_value.is_null()) {
-    return absl::InvalidArgumentError("json_raw_value is null.");
-  }
-  if (!json_raw_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw_value.is_string().");
-  }
-  return json_raw_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "rawValue",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteralExtra>>
@@ -2161,33 +1736,20 @@ JsBigIntLiteralExtra::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsBigIntLiteral::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (!json_value.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value.is_string().");
-  }
-  return json_value.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "value",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsBigIntLiteralExtra>>>
 JsBigIntLiteral::GetExtra(const nlohmann::json& json) {
-  auto extra_it = json.find("extra");
-  if (extra_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_extra = extra_it.value();
-
-  if (json_extra.is_null()) {
-    return absl::InvalidArgumentError("json_extra is null.");
-  }
-  return JsBigIntLiteralExtra::FromJson(json_extra);
+  return GetOptionalField<std::unique_ptr<JsBigIntLiteralExtra>>(
+      json,
+      "extra",
+      JsBigIntLiteralExtra::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteral>>
@@ -2228,76 +1790,40 @@ JsBigIntLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsIdentifier>>>
 JsFunction::GetId(const nlohmann::json& json) {
-  auto id_it = json.find("id");
-  if (id_it == json.end()) {
-    return absl::InvalidArgumentError("`id` is undefined.");
-  }
-  const nlohmann::json& json_id = id_it.value();
-
-  if (json_id.is_null()) {
-    return std::nullopt;
-  }
-  return JsIdentifier::FromJson(json_id);
+  return GetNullableField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "id",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsPattern>>>
 JsFunction::GetParams(const nlohmann::json& json) {
-  auto params_it = json.find("params");
-  if (params_it == json.end()) {
-    return absl::InvalidArgumentError("`params` is undefined.");
-  }
-  const nlohmann::json& json_params = params_it.value();
-
-  if (json_params.is_null()) {
-    return absl::InvalidArgumentError("json_params is null.");
-  }
-  if (!json_params.is_array()) {
-    return absl::InvalidArgumentError("json_params expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsPattern>> params;
-  for (const nlohmann::json& json_params_element : json_params) {
-    if (json_params_element.is_null()) {
-      return absl::InvalidArgumentError("json_params_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto params_element, JsPattern::FromJson(json_params_element));
-    params.push_back(std::move(params_element));
-  }
-  return params;
+  return GetRequiredField<std::vector<std::unique_ptr<JsPattern>>>(
+      json,
+      "params",
+      List<std::unique_ptr<JsPattern>>(
+          JsPattern::FromJson
+      )
+  );
 }
 
 absl::StatusOr<bool>
 JsFunction::GetGenerator(const nlohmann::json& json) {
-  auto generator_it = json.find("generator");
-  if (generator_it == json.end()) {
-    return absl::InvalidArgumentError("`generator` is undefined.");
-  }
-  const nlohmann::json& json_generator = generator_it.value();
-
-  if (json_generator.is_null()) {
-    return absl::InvalidArgumentError("json_generator is null.");
-  }
-  if (!json_generator.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_generator.is_boolean().");
-  }
-  return json_generator.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "generator",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<bool>
 JsFunction::GetAsync(const nlohmann::json& json) {
-  auto async_it = json.find("async");
-  if (async_it == json.end()) {
-    return absl::InvalidArgumentError("`async` is undefined.");
-  }
-  const nlohmann::json& json_async = async_it.value();
-
-  if (json_async.is_null()) {
-    return absl::InvalidArgumentError("json_async is null.");
-  }
-  if (!json_async.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_async.is_boolean().");
-  }
-  return json_async.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "async",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsFunction>>
@@ -2408,54 +1934,24 @@ static bool IsBlockStatement(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>>
 JsBlockStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  if (!json_body.is_array()) {
-    return absl::InvalidArgumentError("json_body expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsStatement>> body;
-  for (const nlohmann::json& json_body_element : json_body) {
-    if (json_body_element.is_null()) {
-      return absl::InvalidArgumentError("json_body_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto body_element, JsStatement::FromJson(json_body_element));
-    body.push_back(std::move(body_element));
-  }
-  return body;
+  return GetRequiredField<std::vector<std::unique_ptr<JsStatement>>>(
+      json,
+      "body",
+      List<std::unique_ptr<JsStatement>>(
+          JsStatement::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsDirective>>>
 JsBlockStatement::GetDirectives(const nlohmann::json& json) {
-  auto directives_it = json.find("directives");
-  if (directives_it == json.end()) {
-    return absl::InvalidArgumentError("`directives` is undefined.");
-  }
-  const nlohmann::json& json_directives = directives_it.value();
-
-  if (json_directives.is_null()) {
-    return absl::InvalidArgumentError("json_directives is null.");
-  }
-  if (!json_directives.is_array()) {
-    return absl::InvalidArgumentError("json_directives expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsDirective>> directives;
-  for (const nlohmann::json& json_directives_element : json_directives) {
-    if (json_directives_element.is_null()) {
-      return absl::InvalidArgumentError("json_directives_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto directives_element, JsDirective::FromJson(json_directives_element));
-    directives.push_back(std::move(directives_element));
-  }
-  return directives;
+  return GetRequiredField<std::vector<std::unique_ptr<JsDirective>>>(
+      json,
+      "directives",
+      List<std::unique_ptr<JsDirective>>(
+          JsDirective::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
@@ -2496,16 +1992,11 @@ JsBlockStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
 JsBlockStatementFunction::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsBlockStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsBlockStatement>>(
+      json,
+      "body",
+      JsBlockStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBlockStatementFunction>>
@@ -2536,16 +2027,11 @@ JsBlockStatementFunction::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsExpressionStatement::GetExpression(const nlohmann::json& json) {
-  auto expression_it = json.find("expression");
-  if (expression_it == json.end()) {
-    return absl::InvalidArgumentError("`expression` is undefined.");
-  }
-  const nlohmann::json& json_expression = expression_it.value();
-
-  if (json_expression.is_null()) {
-    return absl::InvalidArgumentError("json_expression is null.");
-  }
-  return JsExpression::FromJson(json_expression);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "expression",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpressionStatement>>
@@ -2648,30 +2134,20 @@ JsDebuggerStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsWithStatement::GetObject(const nlohmann::json& json) {
-  auto object_it = json.find("object");
-  if (object_it == json.end()) {
-    return absl::InvalidArgumentError("`object` is undefined.");
-  }
-  const nlohmann::json& json_object = object_it.value();
-
-  if (json_object.is_null()) {
-    return absl::InvalidArgumentError("json_object is null.");
-  }
-  return JsExpression::FromJson(json_object);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "object",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsWithStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsWithStatement>>
@@ -2712,16 +2188,11 @@ JsWithStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsReturnStatement::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_argument);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "argument",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsReturnStatement>>
@@ -2760,30 +2231,20 @@ JsReturnStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsLabeledStatement::GetLabel(const nlohmann::json& json) {
-  auto label_it = json.find("label");
-  if (label_it == json.end()) {
-    return absl::InvalidArgumentError("`label` is undefined.");
-  }
-  const nlohmann::json& json_label = label_it.value();
-
-  if (json_label.is_null()) {
-    return absl::InvalidArgumentError("json_label is null.");
-  }
-  return JsIdentifier::FromJson(json_label);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "label",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsLabeledStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsLabeledStatement>>
@@ -2824,16 +2285,11 @@ JsLabeledStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsIdentifier>>>
 JsBreakStatement::GetLabel(const nlohmann::json& json) {
-  auto label_it = json.find("label");
-  if (label_it == json.end()) {
-    return absl::InvalidArgumentError("`label` is undefined.");
-  }
-  const nlohmann::json& json_label = label_it.value();
-
-  if (json_label.is_null()) {
-    return std::nullopt;
-  }
-  return JsIdentifier::FromJson(json_label);
+  return GetNullableField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "label",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBreakStatement>>
@@ -2872,16 +2328,11 @@ JsBreakStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsIdentifier>>>
 JsContinueStatement::GetLabel(const nlohmann::json& json) {
-  auto label_it = json.find("label");
-  if (label_it == json.end()) {
-    return absl::InvalidArgumentError("`label` is undefined.");
-  }
-  const nlohmann::json& json_label = label_it.value();
-
-  if (json_label.is_null()) {
-    return std::nullopt;
-  }
-  return JsIdentifier::FromJson(json_label);
+  return GetNullableField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "label",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsContinueStatement>>
@@ -2920,44 +2371,29 @@ JsContinueStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsIfStatement::GetTest(const nlohmann::json& json) {
-  auto test_it = json.find("test");
-  if (test_it == json.end()) {
-    return absl::InvalidArgumentError("`test` is undefined.");
-  }
-  const nlohmann::json& json_test = test_it.value();
-
-  if (json_test.is_null()) {
-    return absl::InvalidArgumentError("json_test is null.");
-  }
-  return JsExpression::FromJson(json_test);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsIfStatement::GetConsequent(const nlohmann::json& json) {
-  auto consequent_it = json.find("consequent");
-  if (consequent_it == json.end()) {
-    return absl::InvalidArgumentError("`consequent` is undefined.");
-  }
-  const nlohmann::json& json_consequent = consequent_it.value();
-
-  if (json_consequent.is_null()) {
-    return absl::InvalidArgumentError("json_consequent is null.");
-  }
-  return JsStatement::FromJson(json_consequent);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "consequent",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsStatement>>>
 JsIfStatement::GetAlternate(const nlohmann::json& json) {
-  auto alternate_it = json.find("alternate");
-  if (alternate_it == json.end()) {
-    return absl::InvalidArgumentError("`alternate` is undefined.");
-  }
-  const nlohmann::json& json_alternate = alternate_it.value();
-
-  if (json_alternate.is_null()) {
-    return std::nullopt;
-  }
-  return JsStatement::FromJson(json_alternate);
+  return GetNullableField<std::unique_ptr<JsStatement>>(
+      json,
+      "alternate",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsIfStatement>>
@@ -3000,42 +2436,22 @@ JsIfStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsSwitchCase::GetTest(const nlohmann::json& json) {
-  auto test_it = json.find("test");
-  if (test_it == json.end()) {
-    return absl::InvalidArgumentError("`test` is undefined.");
-  }
-  const nlohmann::json& json_test = test_it.value();
-
-  if (json_test.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_test);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>>
 JsSwitchCase::GetConsequent(const nlohmann::json& json) {
-  auto consequent_it = json.find("consequent");
-  if (consequent_it == json.end()) {
-    return absl::InvalidArgumentError("`consequent` is undefined.");
-  }
-  const nlohmann::json& json_consequent = consequent_it.value();
-
-  if (json_consequent.is_null()) {
-    return absl::InvalidArgumentError("json_consequent is null.");
-  }
-  if (!json_consequent.is_array()) {
-    return absl::InvalidArgumentError("json_consequent expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsStatement>> consequent;
-  for (const nlohmann::json& json_consequent_element : json_consequent) {
-    if (json_consequent_element.is_null()) {
-      return absl::InvalidArgumentError("json_consequent_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto consequent_element, JsStatement::FromJson(json_consequent_element));
-    consequent.push_back(std::move(consequent_element));
-  }
-  return consequent;
+  return GetRequiredField<std::vector<std::unique_ptr<JsStatement>>>(
+      json,
+      "consequent",
+      List<std::unique_ptr<JsStatement>>(
+          JsStatement::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsSwitchCase>>
@@ -3076,42 +2492,22 @@ JsSwitchCase::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsSwitchStatement::GetDiscriminant(const nlohmann::json& json) {
-  auto discriminant_it = json.find("discriminant");
-  if (discriminant_it == json.end()) {
-    return absl::InvalidArgumentError("`discriminant` is undefined.");
-  }
-  const nlohmann::json& json_discriminant = discriminant_it.value();
-
-  if (json_discriminant.is_null()) {
-    return absl::InvalidArgumentError("json_discriminant is null.");
-  }
-  return JsExpression::FromJson(json_discriminant);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "discriminant",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsSwitchCase>>>
 JsSwitchStatement::GetCases(const nlohmann::json& json) {
-  auto cases_it = json.find("cases");
-  if (cases_it == json.end()) {
-    return absl::InvalidArgumentError("`cases` is undefined.");
-  }
-  const nlohmann::json& json_cases = cases_it.value();
-
-  if (json_cases.is_null()) {
-    return absl::InvalidArgumentError("json_cases is null.");
-  }
-  if (!json_cases.is_array()) {
-    return absl::InvalidArgumentError("json_cases expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsSwitchCase>> cases;
-  for (const nlohmann::json& json_cases_element : json_cases) {
-    if (json_cases_element.is_null()) {
-      return absl::InvalidArgumentError("json_cases_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto cases_element, JsSwitchCase::FromJson(json_cases_element));
-    cases.push_back(std::move(cases_element));
-  }
-  return cases;
+  return GetRequiredField<std::vector<std::unique_ptr<JsSwitchCase>>>(
+      json,
+      "cases",
+      List<std::unique_ptr<JsSwitchCase>>(
+          JsSwitchCase::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsSwitchStatement>>
@@ -3152,16 +2548,11 @@ JsSwitchStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsThrowStatement::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return absl::InvalidArgumentError("json_argument is null.");
-  }
-  return JsExpression::FromJson(json_argument);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "argument",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsThrowStatement>>
@@ -3200,30 +2591,20 @@ JsThrowStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsPattern>>>
 JsCatchClause::GetParam(const nlohmann::json& json) {
-  auto param_it = json.find("param");
-  if (param_it == json.end()) {
-    return absl::InvalidArgumentError("`param` is undefined.");
-  }
-  const nlohmann::json& json_param = param_it.value();
-
-  if (json_param.is_null()) {
-    return std::nullopt;
-  }
-  return JsPattern::FromJson(json_param);
+  return GetNullableField<std::unique_ptr<JsPattern>>(
+      json,
+      "param",
+      JsPattern::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
 JsCatchClause::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsBlockStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsBlockStatement>>(
+      json,
+      "body",
+      JsBlockStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsCatchClause>>
@@ -3264,44 +2645,29 @@ JsCatchClause::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
 JsTryStatement::GetBlock(const nlohmann::json& json) {
-  auto block_it = json.find("block");
-  if (block_it == json.end()) {
-    return absl::InvalidArgumentError("`block` is undefined.");
-  }
-  const nlohmann::json& json_block = block_it.value();
-
-  if (json_block.is_null()) {
-    return absl::InvalidArgumentError("json_block is null.");
-  }
-  return JsBlockStatement::FromJson(json_block);
+  return GetRequiredField<std::unique_ptr<JsBlockStatement>>(
+      json,
+      "block",
+      JsBlockStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsCatchClause>>>
 JsTryStatement::GetHandler(const nlohmann::json& json) {
-  auto handler_it = json.find("handler");
-  if (handler_it == json.end()) {
-    return absl::InvalidArgumentError("`handler` is undefined.");
-  }
-  const nlohmann::json& json_handler = handler_it.value();
-
-  if (json_handler.is_null()) {
-    return std::nullopt;
-  }
-  return JsCatchClause::FromJson(json_handler);
+  return GetNullableField<std::unique_ptr<JsCatchClause>>(
+      json,
+      "handler",
+      JsCatchClause::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsBlockStatement>>>
 JsTryStatement::GetFinalizer(const nlohmann::json& json) {
-  auto finalizer_it = json.find("finalizer");
-  if (finalizer_it == json.end()) {
-    return absl::InvalidArgumentError("`finalizer` is undefined.");
-  }
-  const nlohmann::json& json_finalizer = finalizer_it.value();
-
-  if (json_finalizer.is_null()) {
-    return std::nullopt;
-  }
-  return JsBlockStatement::FromJson(json_finalizer);
+  return GetNullableField<std::unique_ptr<JsBlockStatement>>(
+      json,
+      "finalizer",
+      JsBlockStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTryStatement>>
@@ -3344,30 +2710,20 @@ JsTryStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsWhileStatement::GetTest(const nlohmann::json& json) {
-  auto test_it = json.find("test");
-  if (test_it == json.end()) {
-    return absl::InvalidArgumentError("`test` is undefined.");
-  }
-  const nlohmann::json& json_test = test_it.value();
-
-  if (json_test.is_null()) {
-    return absl::InvalidArgumentError("json_test is null.");
-  }
-  return JsExpression::FromJson(json_test);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsWhileStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsWhileStatement>>
@@ -3408,30 +2764,20 @@ JsWhileStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsDoWhileStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsDoWhileStatement::GetTest(const nlohmann::json& json) {
-  auto test_it = json.find("test");
-  if (test_it == json.end()) {
-    return absl::InvalidArgumentError("`test` is undefined.");
-  }
-  const nlohmann::json& json_test = test_it.value();
-
-  if (json_test.is_null()) {
-    return absl::InvalidArgumentError("json_test is null.");
-  }
-  return JsExpression::FromJson(json_test);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsDoWhileStatement>>
@@ -3494,30 +2840,20 @@ JsDeclaration::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsLVal>>
 JsVariableDeclarator::GetId(const nlohmann::json& json) {
-  auto id_it = json.find("id");
-  if (id_it == json.end()) {
-    return absl::InvalidArgumentError("`id` is undefined.");
-  }
-  const nlohmann::json& json_id = id_it.value();
-
-  if (json_id.is_null()) {
-    return absl::InvalidArgumentError("json_id is null.");
-  }
-  return JsLVal::FromJson(json_id);
+  return GetRequiredField<std::unique_ptr<JsLVal>>(
+      json,
+      "id",
+      JsLVal::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsVariableDeclarator::GetInit(const nlohmann::json& json) {
-  auto init_it = json.find("init");
-  if (init_it == json.end()) {
-    return absl::InvalidArgumentError("`init` is undefined.");
-  }
-  const nlohmann::json& json_init = init_it.value();
-
-  if (json_init.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_init);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "init",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsVariableDeclarator>>
@@ -3574,45 +2910,22 @@ static bool IsVariableDeclaration(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::unique_ptr<JsVariableDeclarator>>>
 JsVariableDeclaration::GetDeclarations(const nlohmann::json& json) {
-  auto declarations_it = json.find("declarations");
-  if (declarations_it == json.end()) {
-    return absl::InvalidArgumentError("`declarations` is undefined.");
-  }
-  const nlohmann::json& json_declarations = declarations_it.value();
-
-  if (json_declarations.is_null()) {
-    return absl::InvalidArgumentError("json_declarations is null.");
-  }
-  if (!json_declarations.is_array()) {
-    return absl::InvalidArgumentError("json_declarations expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsVariableDeclarator>> declarations;
-  for (const nlohmann::json& json_declarations_element : json_declarations) {
-    if (json_declarations_element.is_null()) {
-      return absl::InvalidArgumentError("json_declarations_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto declarations_element, JsVariableDeclarator::FromJson(json_declarations_element));
-    declarations.push_back(std::move(declarations_element));
-  }
-  return declarations;
+  return GetRequiredField<std::vector<std::unique_ptr<JsVariableDeclarator>>>(
+      json,
+      "declarations",
+      List<std::unique_ptr<JsVariableDeclarator>>(
+          JsVariableDeclarator::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::string>
 JsVariableDeclaration::GetKind(const nlohmann::json& json) {
-  auto kind_it = json.find("kind");
-  if (kind_it == json.end()) {
-    return absl::InvalidArgumentError("`kind` is undefined.");
-  }
-  const nlohmann::json& json_kind = kind_it.value();
-
-  if (json_kind.is_null()) {
-    return absl::InvalidArgumentError("json_kind is null.");
-  }
-  if (!json_kind.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_kind.is_string().");
-  }
-  return json_kind.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "kind",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsVariableDeclaration>>
@@ -3653,67 +2966,46 @@ JsVariableDeclaration::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>>>
 JsForStatement::GetInit(const nlohmann::json& json) {
-  auto init_it = json.find("init");
-  if (init_it == json.end()) {
-    return absl::InvalidArgumentError("`init` is undefined.");
-  }
-  const nlohmann::json& json_init = init_it.value();
-
-  if (json_init.is_null()) {
-    return std::nullopt;
-  }
-  if (IsVariableDeclaration(json_init)) {
-    return JsVariableDeclaration::FromJson(json_init);
-  } else if (IsExpression(json_init)) {
-    return JsExpression::FromJson(json_init);
-  } else {
-    auto result = absl::InvalidArgumentError("json_init has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_init.dump()});
-    return result;
-  }
+  return GetNullableField<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>>(
+      json,
+      "init",
+      Variant(
+          VariantOption<std::unique_ptr<JsVariableDeclaration>>{
+              .predicate = IsVariableDeclaration,
+              .converter = JsVariableDeclaration::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsForStatement::GetTest(const nlohmann::json& json) {
-  auto test_it = json.find("test");
-  if (test_it == json.end()) {
-    return absl::InvalidArgumentError("`test` is undefined.");
-  }
-  const nlohmann::json& json_test = test_it.value();
-
-  if (json_test.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_test);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsForStatement::GetUpdate(const nlohmann::json& json) {
-  auto update_it = json.find("update");
-  if (update_it == json.end()) {
-    return absl::InvalidArgumentError("`update` is undefined.");
-  }
-  const nlohmann::json& json_update = update_it.value();
-
-  if (json_update.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_update);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "update",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsForStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsForStatement>>
@@ -3758,53 +3050,37 @@ JsForStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>>
 JsForInStatement::GetLeft(const nlohmann::json& json) {
-  auto left_it = json.find("left");
-  if (left_it == json.end()) {
-    return absl::InvalidArgumentError("`left` is undefined.");
-  }
-  const nlohmann::json& json_left = left_it.value();
-
-  if (json_left.is_null()) {
-    return absl::InvalidArgumentError("json_left is null.");
-  }
-  if (IsVariableDeclaration(json_left)) {
-    return JsVariableDeclaration::FromJson(json_left);
-  } else if (IsLVal(json_left)) {
-    return JsLVal::FromJson(json_left);
-  } else {
-    auto result = absl::InvalidArgumentError("json_left has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_left.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>>(
+      json,
+      "left",
+      Variant(
+          VariantOption<std::unique_ptr<JsVariableDeclaration>>{
+              .predicate = IsVariableDeclaration,
+              .converter = JsVariableDeclaration::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsLVal>>{
+              .predicate = IsLVal,
+              .converter = JsLVal::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsForInStatement::GetRight(const nlohmann::json& json) {
-  auto right_it = json.find("right");
-  if (right_it == json.end()) {
-    return absl::InvalidArgumentError("`right` is undefined.");
-  }
-  const nlohmann::json& json_right = right_it.value();
-
-  if (json_right.is_null()) {
-    return absl::InvalidArgumentError("json_right is null.");
-  }
-  return JsExpression::FromJson(json_right);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "right",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsForInStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsForInStatement>>
@@ -3847,70 +3123,46 @@ JsForInStatement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>>
 JsForOfStatement::GetLeft(const nlohmann::json& json) {
-  auto left_it = json.find("left");
-  if (left_it == json.end()) {
-    return absl::InvalidArgumentError("`left` is undefined.");
-  }
-  const nlohmann::json& json_left = left_it.value();
-
-  if (json_left.is_null()) {
-    return absl::InvalidArgumentError("json_left is null.");
-  }
-  if (IsVariableDeclaration(json_left)) {
-    return JsVariableDeclaration::FromJson(json_left);
-  } else if (IsLVal(json_left)) {
-    return JsLVal::FromJson(json_left);
-  } else {
-    auto result = absl::InvalidArgumentError("json_left has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_left.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>>(
+      json,
+      "left",
+      Variant(
+          VariantOption<std::unique_ptr<JsVariableDeclaration>>{
+              .predicate = IsVariableDeclaration,
+              .converter = JsVariableDeclaration::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsLVal>>{
+              .predicate = IsLVal,
+              .converter = JsLVal::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsForOfStatement::GetRight(const nlohmann::json& json) {
-  auto right_it = json.find("right");
-  if (right_it == json.end()) {
-    return absl::InvalidArgumentError("`right` is undefined.");
-  }
-  const nlohmann::json& json_right = right_it.value();
-
-  if (json_right.is_null()) {
-    return absl::InvalidArgumentError("json_right is null.");
-  }
-  return JsExpression::FromJson(json_right);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "right",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>
 JsForOfStatement::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsStatement::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
 }
 
 absl::StatusOr<bool>
 JsForOfStatement::GetAwait(const nlohmann::json& json) {
-  auto await_it = json.find("await");
-  if (await_it == json.end()) {
-    return absl::InvalidArgumentError("`await` is undefined.");
-  }
-  const nlohmann::json& json_await = await_it.value();
-
-  if (json_await.is_null()) {
-    return absl::InvalidArgumentError("json_await is null.");
-  }
-  if (!json_await.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_await.is_boolean().");
-  }
-  return json_await.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "await",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsForOfStatement>>
@@ -4141,25 +3393,19 @@ JsThisExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>>
 JsArrowFunctionExpression::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  if (IsBlockStatement(json_body)) {
-    return JsBlockStatement::FromJson(json_body);
-  } else if (IsExpression(json_body)) {
-    return JsExpression::FromJson(json_body);
-  } else {
-    auto result = absl::InvalidArgumentError("json_body has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_body.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>>(
+      json,
+      "body",
+      Variant(
+          VariantOption<std::unique_ptr<JsBlockStatement>>{
+              .predicate = IsBlockStatement,
+              .converter = JsBlockStatement::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsArrowFunctionExpression>>
@@ -4206,33 +3452,20 @@ JsArrowFunctionExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsYieldExpression::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_argument);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "argument",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<bool>
 JsYieldExpression::GetDelegate(const nlohmann::json& json) {
-  auto delegate_it = json.find("delegate");
-  if (delegate_it == json.end()) {
-    return absl::InvalidArgumentError("`delegate` is undefined.");
-  }
-  const nlohmann::json& json_delegate = delegate_it.value();
-
-  if (json_delegate.is_null()) {
-    return absl::InvalidArgumentError("json_delegate is null.");
-  }
-  if (!json_delegate.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_delegate.is_boolean().");
-  }
-  return json_delegate.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "delegate",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsYieldExpression>>
@@ -4273,16 +3506,11 @@ JsYieldExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsAwaitExpression::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_argument);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "argument",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsAwaitExpression>>
@@ -4337,16 +3565,11 @@ static bool IsSpreadElement(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsSpreadElement::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return absl::InvalidArgumentError("json_argument is null.");
-  }
-  return JsExpression::FromJson(json_argument);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "argument",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsSpreadElement>>
@@ -4385,37 +3608,23 @@ JsSpreadElement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>>
 JsArrayExpression::GetElements(const nlohmann::json& json) {
-  auto elements_it = json.find("elements");
-  if (elements_it == json.end()) {
-    return absl::InvalidArgumentError("`elements` is undefined.");
-  }
-  const nlohmann::json& json_elements = elements_it.value();
-
-  if (json_elements.is_null()) {
-    return absl::InvalidArgumentError("json_elements is null.");
-  }
-  if (!json_elements.is_array()) {
-    return absl::InvalidArgumentError("json_elements expected to be array.");
-  }
-
-  std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>> elements;
-  for (const nlohmann::json& json_elements_element : json_elements) {
-    std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> elements_element;
-    if (!json_elements_element.is_null()) {
-      if (IsExpression(json_elements_element)) {
-        MALDOCA_ASSIGN_OR_RETURN(elements_element, JsExpression::FromJson(json_elements_element));
-      } else if (IsSpreadElement(json_elements_element)) {
-        MALDOCA_ASSIGN_OR_RETURN(elements_element, JsSpreadElement::FromJson(json_elements_element));
-      } else {
-        auto result = absl::InvalidArgumentError("json_elements_element has invalid type.");
-        result.SetPayload("json", absl::Cord{json.dump()});
-        result.SetPayload("json_element", absl::Cord{json_elements_element.dump()});
-        return result;
-      }
-    }
-    elements.push_back(std::move(elements_element));
-  }
-  return elements;
+  return GetRequiredField<std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>>(
+      json,
+      "elements",
+      List<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>(
+          Nullable<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>(
+              Variant(
+                  VariantOption<std::unique_ptr<JsExpression>>{
+                      .predicate = IsExpression,
+                      .converter = JsExpression::FromJson,
+                  },
+                  VariantOption<std::unique_ptr<JsSpreadElement>>{
+                      .predicate = IsSpreadElement,
+                      .converter = JsSpreadElement::FromJson,
+                  })
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsArrayExpression>>
@@ -4454,33 +3663,20 @@ JsArrayExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsObjectMember::GetKey(const nlohmann::json& json) {
-  auto key_it = json.find("key");
-  if (key_it == json.end()) {
-    return absl::InvalidArgumentError("`key` is undefined.");
-  }
-  const nlohmann::json& json_key = key_it.value();
-
-  if (json_key.is_null()) {
-    return absl::InvalidArgumentError("json_key is null.");
-  }
-  return JsExpression::FromJson(json_key);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "key",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<bool>
 JsObjectMember::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return absl::InvalidArgumentError("`computed` is undefined.");
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsObjectMember>>
@@ -4521,42 +3717,28 @@ static bool IsObjectProperty(const nlohmann::json& json) {
 
 absl::StatusOr<bool>
 JsObjectProperty::GetShorthand(const nlohmann::json& json) {
-  auto shorthand_it = json.find("shorthand");
-  if (shorthand_it == json.end()) {
-    return absl::InvalidArgumentError("`shorthand` is undefined.");
-  }
-  const nlohmann::json& json_shorthand = shorthand_it.value();
-
-  if (json_shorthand.is_null()) {
-    return absl::InvalidArgumentError("json_shorthand is null.");
-  }
-  if (!json_shorthand.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_shorthand.is_boolean().");
-  }
-  return json_shorthand.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "shorthand",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPattern>>>
 JsObjectProperty::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (IsExpression(json_value)) {
-    return JsExpression::FromJson(json_value);
-  } else if (IsPattern(json_value)) {
-    return JsPattern::FromJson(json_value);
-  } else {
-    auto result = absl::InvalidArgumentError("json_value has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_value.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPattern>>>(
+      json,
+      "value",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsPattern>>{
+              .predicate = IsPattern,
+              .converter = JsPattern::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsObjectProperty>>
@@ -4617,19 +3799,11 @@ static bool IsObjectMethod(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 JsObjectMethod::GetKind(const nlohmann::json& json) {
-  auto kind_it = json.find("kind");
-  if (kind_it == json.end()) {
-    return absl::InvalidArgumentError("`kind` is undefined.");
-  }
-  const nlohmann::json& json_kind = kind_it.value();
-
-  if (json_kind.is_null()) {
-    return absl::InvalidArgumentError("json_kind is null.");
-  }
-  if (!json_kind.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_kind.is_string().");
-  }
-  return json_kind.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "kind",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsObjectMethod>>
@@ -4682,40 +3856,25 @@ JsObjectMethod::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>>>
 JsObjectExpression::GetProperties(const nlohmann::json& json) {
-  auto properties_it = json.find("properties");
-  if (properties_it == json.end()) {
-    return absl::InvalidArgumentError("`properties` is undefined.");
-  }
-  const nlohmann::json& json_properties = properties_it.value();
-
-  if (json_properties.is_null()) {
-    return absl::InvalidArgumentError("json_properties is null.");
-  }
-  if (!json_properties.is_array()) {
-    return absl::InvalidArgumentError("json_properties expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>> properties_;
-  for (const nlohmann::json& json_properties_element : json_properties) {
-    if (json_properties_element.is_null()) {
-      return absl::InvalidArgumentError("json_properties_element is null.");
-    }
-    std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>> properties_element;
-    if (IsObjectProperty(json_properties_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, JsObjectProperty::FromJson(json_properties_element));
-    } else if (IsObjectMethod(json_properties_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, JsObjectMethod::FromJson(json_properties_element));
-    } else if (IsSpreadElement(json_properties_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, JsSpreadElement::FromJson(json_properties_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_properties_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_properties_element.dump()});
-      return result;
-    }
-    properties_.push_back(std::move(properties_element));
-  }
-  return properties_;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>>>(
+      json,
+      "properties",
+      List<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsObjectProperty>>{
+                  .predicate = IsObjectProperty,
+                  .converter = JsObjectProperty::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsObjectMethod>>{
+                  .predicate = IsObjectMethod,
+                  .converter = JsObjectMethod::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsSpreadElement>>{
+                  .predicate = IsSpreadElement,
+                  .converter = JsSpreadElement::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsObjectExpression>>
@@ -4796,51 +3955,29 @@ JsFunctionExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<JsUnaryOperator>
 JsUnaryExpression::GetOperator(const nlohmann::json& json) {
-  auto operator_it = json.find("operator");
-  if (operator_it == json.end()) {
-    return absl::InvalidArgumentError("`operator` is undefined.");
-  }
-  const nlohmann::json& json_operator = operator_it.value();
-
-  if (json_operator.is_null()) {
-    return absl::InvalidArgumentError("json_operator is null.");
-  }
-  if (!json_operator.is_string()) {
-    return absl::InvalidArgumentError("`json_operator` expected to be a string.");
-  }
-  std::string json_operator_str = json_operator.get<std::string>();
-  return StringToJsUnaryOperator(json_operator_str);
+  return GetRequiredField<JsUnaryOperator>(
+      json,
+      "operator",
+      Enum<JsUnaryOperator>(StringToJsUnaryOperator)
+  );
 }
 
 absl::StatusOr<bool>
 JsUnaryExpression::GetPrefix(const nlohmann::json& json) {
-  auto prefix_it = json.find("prefix");
-  if (prefix_it == json.end()) {
-    return absl::InvalidArgumentError("`prefix` is undefined.");
-  }
-  const nlohmann::json& json_prefix = prefix_it.value();
-
-  if (json_prefix.is_null()) {
-    return absl::InvalidArgumentError("json_prefix is null.");
-  }
-  if (!json_prefix.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_prefix.is_boolean().");
-  }
-  return json_prefix.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "prefix",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsUnaryExpression::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return absl::InvalidArgumentError("json_argument is null.");
-  }
-  return JsExpression::FromJson(json_argument);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "argument",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsUnaryExpression>>
@@ -4883,51 +4020,29 @@ JsUnaryExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<JsUpdateOperator>
 JsUpdateExpression::GetOperator(const nlohmann::json& json) {
-  auto operator_it = json.find("operator");
-  if (operator_it == json.end()) {
-    return absl::InvalidArgumentError("`operator` is undefined.");
-  }
-  const nlohmann::json& json_operator = operator_it.value();
-
-  if (json_operator.is_null()) {
-    return absl::InvalidArgumentError("json_operator is null.");
-  }
-  if (!json_operator.is_string()) {
-    return absl::InvalidArgumentError("`json_operator` expected to be a string.");
-  }
-  std::string json_operator_str = json_operator.get<std::string>();
-  return StringToJsUpdateOperator(json_operator_str);
+  return GetRequiredField<JsUpdateOperator>(
+      json,
+      "operator",
+      Enum<JsUpdateOperator>(StringToJsUpdateOperator)
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsLVal>>
 JsUpdateExpression::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return absl::InvalidArgumentError("json_argument is null.");
-  }
-  return JsLVal::FromJson(json_argument);
+  return GetRequiredField<std::unique_ptr<JsLVal>>(
+      json,
+      "argument",
+      JsLVal::FromJson
+  );
 }
 
 absl::StatusOr<bool>
 JsUpdateExpression::GetPrefix(const nlohmann::json& json) {
-  auto prefix_it = json.find("prefix");
-  if (prefix_it == json.end()) {
-    return absl::InvalidArgumentError("`prefix` is undefined.");
-  }
-  const nlohmann::json& json_prefix = prefix_it.value();
-
-  if (json_prefix.is_null()) {
-    return absl::InvalidArgumentError("json_prefix is null.");
-  }
-  if (!json_prefix.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_prefix.is_boolean().");
-  }
-  return json_prefix.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "prefix",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsUpdateExpression>>
@@ -4970,57 +4085,37 @@ JsUpdateExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<JsBinaryOperator>
 JsBinaryExpression::GetOperator(const nlohmann::json& json) {
-  auto operator_it = json.find("operator");
-  if (operator_it == json.end()) {
-    return absl::InvalidArgumentError("`operator` is undefined.");
-  }
-  const nlohmann::json& json_operator = operator_it.value();
-
-  if (json_operator.is_null()) {
-    return absl::InvalidArgumentError("json_operator is null.");
-  }
-  if (!json_operator.is_string()) {
-    return absl::InvalidArgumentError("`json_operator` expected to be a string.");
-  }
-  std::string json_operator_str = json_operator.get<std::string>();
-  return StringToJsBinaryOperator(json_operator_str);
+  return GetRequiredField<JsBinaryOperator>(
+      json,
+      "operator",
+      Enum<JsBinaryOperator>(StringToJsBinaryOperator)
+  );
 }
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>>
 JsBinaryExpression::GetLeft(const nlohmann::json& json) {
-  auto left_it = json.find("left");
-  if (left_it == json.end()) {
-    return absl::InvalidArgumentError("`left` is undefined.");
-  }
-  const nlohmann::json& json_left = left_it.value();
-
-  if (json_left.is_null()) {
-    return absl::InvalidArgumentError("json_left is null.");
-  }
-  if (IsExpression(json_left)) {
-    return JsExpression::FromJson(json_left);
-  } else if (IsPrivateName(json_left)) {
-    return JsPrivateName::FromJson(json_left);
-  } else {
-    auto result = absl::InvalidArgumentError("json_left has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_left.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>>(
+      json,
+      "left",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsPrivateName>>{
+              .predicate = IsPrivateName,
+              .converter = JsPrivateName::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsBinaryExpression::GetRight(const nlohmann::json& json) {
-  auto right_it = json.find("right");
-  if (right_it == json.end()) {
-    return absl::InvalidArgumentError("`right` is undefined.");
-  }
-  const nlohmann::json& json_right = right_it.value();
-
-  if (json_right.is_null()) {
-    return absl::InvalidArgumentError("json_right is null.");
-  }
-  return JsExpression::FromJson(json_right);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "right",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsBinaryExpression>>
@@ -5063,48 +4158,29 @@ JsBinaryExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<JsAssignmentOperator>
 JsAssignmentExpression::GetOperator(const nlohmann::json& json) {
-  auto operator_it = json.find("operator");
-  if (operator_it == json.end()) {
-    return absl::InvalidArgumentError("`operator` is undefined.");
-  }
-  const nlohmann::json& json_operator = operator_it.value();
-
-  if (json_operator.is_null()) {
-    return absl::InvalidArgumentError("json_operator is null.");
-  }
-  if (!json_operator.is_string()) {
-    return absl::InvalidArgumentError("`json_operator` expected to be a string.");
-  }
-  std::string json_operator_str = json_operator.get<std::string>();
-  return StringToJsAssignmentOperator(json_operator_str);
+  return GetRequiredField<JsAssignmentOperator>(
+      json,
+      "operator",
+      Enum<JsAssignmentOperator>(StringToJsAssignmentOperator)
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsLVal>>
 JsAssignmentExpression::GetLeft(const nlohmann::json& json) {
-  auto left_it = json.find("left");
-  if (left_it == json.end()) {
-    return absl::InvalidArgumentError("`left` is undefined.");
-  }
-  const nlohmann::json& json_left = left_it.value();
-
-  if (json_left.is_null()) {
-    return absl::InvalidArgumentError("json_left is null.");
-  }
-  return JsLVal::FromJson(json_left);
+  return GetRequiredField<std::unique_ptr<JsLVal>>(
+      json,
+      "left",
+      JsLVal::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsAssignmentExpression::GetRight(const nlohmann::json& json) {
-  auto right_it = json.find("right");
-  if (right_it == json.end()) {
-    return absl::InvalidArgumentError("`right` is undefined.");
-  }
-  const nlohmann::json& json_right = right_it.value();
-
-  if (json_right.is_null()) {
-    return absl::InvalidArgumentError("json_right is null.");
-  }
-  return JsExpression::FromJson(json_right);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "right",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsAssignmentExpression>>
@@ -5147,48 +4223,29 @@ JsAssignmentExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<JsLogicalOperator>
 JsLogicalExpression::GetOperator(const nlohmann::json& json) {
-  auto operator_it = json.find("operator");
-  if (operator_it == json.end()) {
-    return absl::InvalidArgumentError("`operator` is undefined.");
-  }
-  const nlohmann::json& json_operator = operator_it.value();
-
-  if (json_operator.is_null()) {
-    return absl::InvalidArgumentError("json_operator is null.");
-  }
-  if (!json_operator.is_string()) {
-    return absl::InvalidArgumentError("`json_operator` expected to be a string.");
-  }
-  std::string json_operator_str = json_operator.get<std::string>();
-  return StringToJsLogicalOperator(json_operator_str);
+  return GetRequiredField<JsLogicalOperator>(
+      json,
+      "operator",
+      Enum<JsLogicalOperator>(StringToJsLogicalOperator)
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsLogicalExpression::GetLeft(const nlohmann::json& json) {
-  auto left_it = json.find("left");
-  if (left_it == json.end()) {
-    return absl::InvalidArgumentError("`left` is undefined.");
-  }
-  const nlohmann::json& json_left = left_it.value();
-
-  if (json_left.is_null()) {
-    return absl::InvalidArgumentError("json_left is null.");
-  }
-  return JsExpression::FromJson(json_left);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "left",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsLogicalExpression::GetRight(const nlohmann::json& json) {
-  auto right_it = json.find("right");
-  if (right_it == json.end()) {
-    return absl::InvalidArgumentError("`right` is undefined.");
-  }
-  const nlohmann::json& json_right = right_it.value();
-
-  if (json_right.is_null()) {
-    return absl::InvalidArgumentError("json_right is null.");
-  }
-  return JsExpression::FromJson(json_right);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "right",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsLogicalExpression>>
@@ -5231,65 +4288,45 @@ JsLogicalExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>>>
 JsMemberExpression::GetObject(const nlohmann::json& json) {
-  auto object_it = json.find("object");
-  if (object_it == json.end()) {
-    return absl::InvalidArgumentError("`object` is undefined.");
-  }
-  const nlohmann::json& json_object = object_it.value();
-
-  if (json_object.is_null()) {
-    return absl::InvalidArgumentError("json_object is null.");
-  }
-  if (IsExpression(json_object)) {
-    return JsExpression::FromJson(json_object);
-  } else if (IsSuper(json_object)) {
-    return JsSuper::FromJson(json_object);
-  } else {
-    auto result = absl::InvalidArgumentError("json_object has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_object.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>>>(
+      json,
+      "object",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsSuper>>{
+              .predicate = IsSuper,
+              .converter = JsSuper::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>>
 JsMemberExpression::GetProperty(const nlohmann::json& json) {
-  auto property_it = json.find("property");
-  if (property_it == json.end()) {
-    return absl::InvalidArgumentError("`property` is undefined.");
-  }
-  const nlohmann::json& json_property = property_it.value();
-
-  if (json_property.is_null()) {
-    return absl::InvalidArgumentError("json_property is null.");
-  }
-  if (IsExpression(json_property)) {
-    return JsExpression::FromJson(json_property);
-  } else if (IsPrivateName(json_property)) {
-    return JsPrivateName::FromJson(json_property);
-  } else {
-    auto result = absl::InvalidArgumentError("json_property has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_property.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>>(
+      json,
+      "property",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsPrivateName>>{
+              .predicate = IsPrivateName,
+              .converter = JsPrivateName::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<bool>
 JsMemberExpression::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return absl::InvalidArgumentError("`computed` is undefined.");
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsMemberExpression>>
@@ -5332,73 +4369,46 @@ JsMemberExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsOptionalMemberExpression::GetObject(const nlohmann::json& json) {
-  auto object_it = json.find("object");
-  if (object_it == json.end()) {
-    return absl::InvalidArgumentError("`object` is undefined.");
-  }
-  const nlohmann::json& json_object = object_it.value();
-
-  if (json_object.is_null()) {
-    return absl::InvalidArgumentError("json_object is null.");
-  }
-  return JsExpression::FromJson(json_object);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "object",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>>
 JsOptionalMemberExpression::GetProperty(const nlohmann::json& json) {
-  auto property_it = json.find("property");
-  if (property_it == json.end()) {
-    return absl::InvalidArgumentError("`property` is undefined.");
-  }
-  const nlohmann::json& json_property = property_it.value();
-
-  if (json_property.is_null()) {
-    return absl::InvalidArgumentError("json_property is null.");
-  }
-  if (IsExpression(json_property)) {
-    return JsExpression::FromJson(json_property);
-  } else if (IsPrivateName(json_property)) {
-    return JsPrivateName::FromJson(json_property);
-  } else {
-    auto result = absl::InvalidArgumentError("json_property has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_property.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>>(
+      json,
+      "property",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsPrivateName>>{
+              .predicate = IsPrivateName,
+              .converter = JsPrivateName::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<bool>
 JsOptionalMemberExpression::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return absl::InvalidArgumentError("`computed` is undefined.");
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<bool>
 JsOptionalMemberExpression::GetOptional(const nlohmann::json& json) {
-  auto optional_it = json.find("optional");
-  if (optional_it == json.end()) {
-    return absl::InvalidArgumentError("`optional` is undefined.");
-  }
-  const nlohmann::json& json_optional = optional_it.value();
-
-  if (json_optional.is_null()) {
-    return absl::InvalidArgumentError("json_optional is null.");
-  }
-  if (!json_optional.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_optional.is_boolean().");
-  }
-  return json_optional.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "optional",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsOptionalMemberExpression>>
@@ -5443,44 +4453,29 @@ JsOptionalMemberExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsConditionalExpression::GetTest(const nlohmann::json& json) {
-  auto test_it = json.find("test");
-  if (test_it == json.end()) {
-    return absl::InvalidArgumentError("`test` is undefined.");
-  }
-  const nlohmann::json& json_test = test_it.value();
-
-  if (json_test.is_null()) {
-    return absl::InvalidArgumentError("json_test is null.");
-  }
-  return JsExpression::FromJson(json_test);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsConditionalExpression::GetAlternate(const nlohmann::json& json) {
-  auto alternate_it = json.find("alternate");
-  if (alternate_it == json.end()) {
-    return absl::InvalidArgumentError("`alternate` is undefined.");
-  }
-  const nlohmann::json& json_alternate = alternate_it.value();
-
-  if (json_alternate.is_null()) {
-    return absl::InvalidArgumentError("json_alternate is null.");
-  }
-  return JsExpression::FromJson(json_alternate);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "alternate",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsConditionalExpression::GetConsequent(const nlohmann::json& json) {
-  auto consequent_it = json.find("consequent");
-  if (consequent_it == json.end()) {
-    return absl::InvalidArgumentError("`consequent` is undefined.");
-  }
-  const nlohmann::json& json_consequent = consequent_it.value();
-
-  if (json_consequent.is_null()) {
-    return absl::InvalidArgumentError("json_consequent is null.");
-  }
-  return JsExpression::FromJson(json_consequent);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "consequent",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsConditionalExpression>>
@@ -5523,63 +4518,42 @@ JsConditionalExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>>>
 JsCallExpression::GetCallee(const nlohmann::json& json) {
-  auto callee_it = json.find("callee");
-  if (callee_it == json.end()) {
-    return absl::InvalidArgumentError("`callee` is undefined.");
-  }
-  const nlohmann::json& json_callee = callee_it.value();
-
-  if (json_callee.is_null()) {
-    return absl::InvalidArgumentError("json_callee is null.");
-  }
-  if (IsExpression(json_callee)) {
-    return JsExpression::FromJson(json_callee);
-  } else if (IsSuper(json_callee)) {
-    return JsSuper::FromJson(json_callee);
-  } else if (IsImport(json_callee)) {
-    return JsImport::FromJson(json_callee);
-  } else {
-    auto result = absl::InvalidArgumentError("json_callee has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_callee.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>>>(
+      json,
+      "callee",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsSuper>>{
+              .predicate = IsSuper,
+              .converter = JsSuper::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsImport>>{
+              .predicate = IsImport,
+              .converter = JsImport::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>
 JsCallExpression::GetArguments(const nlohmann::json& json) {
-  auto arguments_it = json.find("arguments");
-  if (arguments_it == json.end()) {
-    return absl::InvalidArgumentError("`arguments` is undefined.");
-  }
-  const nlohmann::json& json_arguments = arguments_it.value();
-
-  if (json_arguments.is_null()) {
-    return absl::InvalidArgumentError("json_arguments is null.");
-  }
-  if (!json_arguments.is_array()) {
-    return absl::InvalidArgumentError("json_arguments expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments;
-  for (const nlohmann::json& json_arguments_element : json_arguments) {
-    if (json_arguments_element.is_null()) {
-      return absl::InvalidArgumentError("json_arguments_element is null.");
-    }
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>> arguments_element;
-    if (IsExpression(json_arguments_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, JsExpression::FromJson(json_arguments_element));
-    } else if (IsSpreadElement(json_arguments_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, JsSpreadElement::FromJson(json_arguments_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_arguments_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_arguments_element.dump()});
-      return result;
-    }
-    arguments.push_back(std::move(arguments_element));
-  }
-  return arguments;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>(
+      json,
+      "arguments",
+      List<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsExpression>>{
+                  .predicate = IsExpression,
+                  .converter = JsExpression::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsSpreadElement>>{
+                  .predicate = IsSpreadElement,
+                  .converter = JsSpreadElement::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsCallExpression>>
@@ -5620,69 +4594,39 @@ JsCallExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsOptionalCallExpression::GetCallee(const nlohmann::json& json) {
-  auto callee_it = json.find("callee");
-  if (callee_it == json.end()) {
-    return absl::InvalidArgumentError("`callee` is undefined.");
-  }
-  const nlohmann::json& json_callee = callee_it.value();
-
-  if (json_callee.is_null()) {
-    return absl::InvalidArgumentError("json_callee is null.");
-  }
-  return JsExpression::FromJson(json_callee);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "callee",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>
 JsOptionalCallExpression::GetArguments(const nlohmann::json& json) {
-  auto arguments_it = json.find("arguments");
-  if (arguments_it == json.end()) {
-    return absl::InvalidArgumentError("`arguments` is undefined.");
-  }
-  const nlohmann::json& json_arguments = arguments_it.value();
-
-  if (json_arguments.is_null()) {
-    return absl::InvalidArgumentError("json_arguments is null.");
-  }
-  if (!json_arguments.is_array()) {
-    return absl::InvalidArgumentError("json_arguments expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments;
-  for (const nlohmann::json& json_arguments_element : json_arguments) {
-    if (json_arguments_element.is_null()) {
-      return absl::InvalidArgumentError("json_arguments_element is null.");
-    }
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>> arguments_element;
-    if (IsExpression(json_arguments_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, JsExpression::FromJson(json_arguments_element));
-    } else if (IsSpreadElement(json_arguments_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, JsSpreadElement::FromJson(json_arguments_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_arguments_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_arguments_element.dump()});
-      return result;
-    }
-    arguments.push_back(std::move(arguments_element));
-  }
-  return arguments;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>(
+      json,
+      "arguments",
+      List<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsExpression>>{
+                  .predicate = IsExpression,
+                  .converter = JsExpression::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsSpreadElement>>{
+                  .predicate = IsSpreadElement,
+                  .converter = JsSpreadElement::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<bool>
 JsOptionalCallExpression::GetOptional(const nlohmann::json& json) {
-  auto optional_it = json.find("optional");
-  if (optional_it == json.end()) {
-    return absl::InvalidArgumentError("`optional` is undefined.");
-  }
-  const nlohmann::json& json_optional = optional_it.value();
-
-  if (json_optional.is_null()) {
-    return absl::InvalidArgumentError("json_optional is null.");
-  }
-  if (!json_optional.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_optional.is_boolean().");
-  }
-  return json_optional.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "optional",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsOptionalCallExpression>>
@@ -5725,63 +4669,42 @@ JsOptionalCallExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>>>
 JsNewExpression::GetCallee(const nlohmann::json& json) {
-  auto callee_it = json.find("callee");
-  if (callee_it == json.end()) {
-    return absl::InvalidArgumentError("`callee` is undefined.");
-  }
-  const nlohmann::json& json_callee = callee_it.value();
-
-  if (json_callee.is_null()) {
-    return absl::InvalidArgumentError("json_callee is null.");
-  }
-  if (IsExpression(json_callee)) {
-    return JsExpression::FromJson(json_callee);
-  } else if (IsSuper(json_callee)) {
-    return JsSuper::FromJson(json_callee);
-  } else if (IsImport(json_callee)) {
-    return JsImport::FromJson(json_callee);
-  } else {
-    auto result = absl::InvalidArgumentError("json_callee has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_callee.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>>>(
+      json,
+      "callee",
+      Variant(
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsSuper>>{
+              .predicate = IsSuper,
+              .converter = JsSuper::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsImport>>{
+              .predicate = IsImport,
+              .converter = JsImport::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>
 JsNewExpression::GetArguments(const nlohmann::json& json) {
-  auto arguments_it = json.find("arguments");
-  if (arguments_it == json.end()) {
-    return absl::InvalidArgumentError("`arguments` is undefined.");
-  }
-  const nlohmann::json& json_arguments = arguments_it.value();
-
-  if (json_arguments.is_null()) {
-    return absl::InvalidArgumentError("json_arguments is null.");
-  }
-  if (!json_arguments.is_array()) {
-    return absl::InvalidArgumentError("json_arguments expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments;
-  for (const nlohmann::json& json_arguments_element : json_arguments) {
-    if (json_arguments_element.is_null()) {
-      return absl::InvalidArgumentError("json_arguments_element is null.");
-    }
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>> arguments_element;
-    if (IsExpression(json_arguments_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, JsExpression::FromJson(json_arguments_element));
-    } else if (IsSpreadElement(json_arguments_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(arguments_element, JsSpreadElement::FromJson(json_arguments_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_arguments_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_arguments_element.dump()});
-      return result;
-    }
-    arguments.push_back(std::move(arguments_element));
-  }
-  return arguments;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>(
+      json,
+      "arguments",
+      List<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsExpression>>{
+                  .predicate = IsExpression,
+                  .converter = JsExpression::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsSpreadElement>>{
+                  .predicate = IsSpreadElement,
+                  .converter = JsSpreadElement::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsNewExpression>>
@@ -5822,28 +4745,13 @@ JsNewExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::unique_ptr<JsExpression>>>
 JsSequenceExpression::GetExpressions(const nlohmann::json& json) {
-  auto expressions_it = json.find("expressions");
-  if (expressions_it == json.end()) {
-    return absl::InvalidArgumentError("`expressions` is undefined.");
-  }
-  const nlohmann::json& json_expressions = expressions_it.value();
-
-  if (json_expressions.is_null()) {
-    return absl::InvalidArgumentError("json_expressions is null.");
-  }
-  if (!json_expressions.is_array()) {
-    return absl::InvalidArgumentError("json_expressions expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsExpression>> expressions;
-  for (const nlohmann::json& json_expressions_element : json_expressions) {
-    if (json_expressions_element.is_null()) {
-      return absl::InvalidArgumentError("json_expressions_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto expressions_element, JsExpression::FromJson(json_expressions_element));
-    expressions.push_back(std::move(expressions_element));
-  }
-  return expressions;
+  return GetRequiredField<std::vector<std::unique_ptr<JsExpression>>>(
+      json,
+      "expressions",
+      List<std::unique_ptr<JsExpression>>(
+          JsExpression::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsSequenceExpression>>
@@ -5882,16 +4790,11 @@ JsSequenceExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsParenthesizedExpression::GetExpression(const nlohmann::json& json) {
-  auto expression_it = json.find("expression");
-  if (expression_it == json.end()) {
-    return absl::InvalidArgumentError("`expression` is undefined.");
-  }
-  const nlohmann::json& json_expression = expression_it.value();
-
-  if (json_expression.is_null()) {
-    return absl::InvalidArgumentError("json_expression is null.");
-  }
-  return JsExpression::FromJson(json_expression);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "expression",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsParenthesizedExpression>>
@@ -5930,36 +4833,20 @@ JsParenthesizedExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::string>>
 JsTemplateElementValue::GetCooked(const nlohmann::json& json) {
-  auto cooked_it = json.find("cooked");
-  if (cooked_it == json.end()) {
-    return absl::InvalidArgumentError("`cooked` is undefined.");
-  }
-  const nlohmann::json& json_cooked = cooked_it.value();
-
-  if (json_cooked.is_null()) {
-    return std::nullopt;
-  }
-  if (!json_cooked.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_cooked.is_string().");
-  }
-  return json_cooked.get<std::string>();
+  return GetNullableField<std::string>(
+      json,
+      "cooked",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::string>
 JsTemplateElementValue::GetRaw(const nlohmann::json& json) {
-  auto raw_it = json.find("raw");
-  if (raw_it == json.end()) {
-    return absl::InvalidArgumentError("`raw` is undefined.");
-  }
-  const nlohmann::json& json_raw = raw_it.value();
-
-  if (json_raw.is_null()) {
-    return absl::InvalidArgumentError("json_raw is null.");
-  }
-  if (!json_raw.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_raw.is_string().");
-  }
-  return json_raw.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "raw",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTemplateElementValue>>
@@ -5982,33 +4869,20 @@ JsTemplateElementValue::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<bool>
 JsTemplateElement::GetTail(const nlohmann::json& json) {
-  auto tail_it = json.find("tail");
-  if (tail_it == json.end()) {
-    return absl::InvalidArgumentError("`tail` is undefined.");
-  }
-  const nlohmann::json& json_tail = tail_it.value();
-
-  if (json_tail.is_null()) {
-    return absl::InvalidArgumentError("json_tail is null.");
-  }
-  if (!json_tail.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_tail.is_boolean().");
-  }
-  return json_tail.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "tail",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTemplateElementValue>>
 JsTemplateElement::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  return JsTemplateElementValue::FromJson(json_value);
+  return GetRequiredField<std::unique_ptr<JsTemplateElementValue>>(
+      json,
+      "value",
+      JsTemplateElementValue::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTemplateElement>>
@@ -6049,54 +4923,24 @@ JsTemplateElement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::unique_ptr<JsTemplateElement>>>
 JsTemplateLiteral::GetQuasis(const nlohmann::json& json) {
-  auto quasis_it = json.find("quasis");
-  if (quasis_it == json.end()) {
-    return absl::InvalidArgumentError("`quasis` is undefined.");
-  }
-  const nlohmann::json& json_quasis = quasis_it.value();
-
-  if (json_quasis.is_null()) {
-    return absl::InvalidArgumentError("json_quasis is null.");
-  }
-  if (!json_quasis.is_array()) {
-    return absl::InvalidArgumentError("json_quasis expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsTemplateElement>> quasis;
-  for (const nlohmann::json& json_quasis_element : json_quasis) {
-    if (json_quasis_element.is_null()) {
-      return absl::InvalidArgumentError("json_quasis_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto quasis_element, JsTemplateElement::FromJson(json_quasis_element));
-    quasis.push_back(std::move(quasis_element));
-  }
-  return quasis;
+  return GetRequiredField<std::vector<std::unique_ptr<JsTemplateElement>>>(
+      json,
+      "quasis",
+      List<std::unique_ptr<JsTemplateElement>>(
+          JsTemplateElement::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsExpression>>>
 JsTemplateLiteral::GetExpressions(const nlohmann::json& json) {
-  auto expressions_it = json.find("expressions");
-  if (expressions_it == json.end()) {
-    return absl::InvalidArgumentError("`expressions` is undefined.");
-  }
-  const nlohmann::json& json_expressions = expressions_it.value();
-
-  if (json_expressions.is_null()) {
-    return absl::InvalidArgumentError("json_expressions is null.");
-  }
-  if (!json_expressions.is_array()) {
-    return absl::InvalidArgumentError("json_expressions expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsExpression>> expressions;
-  for (const nlohmann::json& json_expressions_element : json_expressions) {
-    if (json_expressions_element.is_null()) {
-      return absl::InvalidArgumentError("json_expressions_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto expressions_element, JsExpression::FromJson(json_expressions_element));
-    expressions.push_back(std::move(expressions_element));
-  }
-  return expressions;
+  return GetRequiredField<std::vector<std::unique_ptr<JsExpression>>>(
+      json,
+      "expressions",
+      List<std::unique_ptr<JsExpression>>(
+          JsExpression::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTemplateLiteral>>
@@ -6137,30 +4981,20 @@ JsTemplateLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsTaggedTemplateExpression::GetTag(const nlohmann::json& json) {
-  auto tag_it = json.find("tag");
-  if (tag_it == json.end()) {
-    return absl::InvalidArgumentError("`tag` is undefined.");
-  }
-  const nlohmann::json& json_tag = tag_it.value();
-
-  if (json_tag.is_null()) {
-    return absl::InvalidArgumentError("json_tag is null.");
-  }
-  return JsExpression::FromJson(json_tag);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "tag",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTemplateLiteral>>
 JsTaggedTemplateExpression::GetQuasi(const nlohmann::json& json) {
-  auto quasi_it = json.find("quasi");
-  if (quasi_it == json.end()) {
-    return absl::InvalidArgumentError("`quasi` is undefined.");
-  }
-  const nlohmann::json& json_quasi = quasi_it.value();
-
-  if (json_quasi.is_null()) {
-    return absl::InvalidArgumentError("json_quasi is null.");
-  }
-  return JsTemplateLiteral::FromJson(json_quasi);
+  return GetRequiredField<std::unique_ptr<JsTemplateLiteral>>(
+      json,
+      "quasi",
+      JsTemplateLiteral::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsTaggedTemplateExpression>>
@@ -6217,16 +5051,11 @@ static bool IsRestElement(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsLVal>>
 JsRestElement::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return absl::InvalidArgumentError("json_argument is null.");
-  }
-  return JsLVal::FromJson(json_argument);
+  return GetRequiredField<std::unique_ptr<JsLVal>>(
+      json,
+      "argument",
+      JsLVal::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsRestElement>>
@@ -6265,38 +5094,21 @@ JsRestElement::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>>>
 JsObjectPattern::GetProperties(const nlohmann::json& json) {
-  auto properties_it = json.find("properties");
-  if (properties_it == json.end()) {
-    return absl::InvalidArgumentError("`properties` is undefined.");
-  }
-  const nlohmann::json& json_properties = properties_it.value();
-
-  if (json_properties.is_null()) {
-    return absl::InvalidArgumentError("json_properties is null.");
-  }
-  if (!json_properties.is_array()) {
-    return absl::InvalidArgumentError("json_properties expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>> properties_;
-  for (const nlohmann::json& json_properties_element : json_properties) {
-    if (json_properties_element.is_null()) {
-      return absl::InvalidArgumentError("json_properties_element is null.");
-    }
-    std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>> properties_element;
-    if (IsObjectProperty(json_properties_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, JsObjectProperty::FromJson(json_properties_element));
-    } else if (IsRestElement(json_properties_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(properties_element, JsRestElement::FromJson(json_properties_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_properties_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_properties_element.dump()});
-      return result;
-    }
-    properties_.push_back(std::move(properties_element));
-  }
-  return properties_;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>>>(
+      json,
+      "properties",
+      List<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsObjectProperty>>{
+                  .predicate = IsObjectProperty,
+                  .converter = JsObjectProperty::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsRestElement>>{
+                  .predicate = IsRestElement,
+                  .converter = JsRestElement::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsObjectPattern>>
@@ -6335,28 +5147,15 @@ JsObjectPattern::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::optional<std::unique_ptr<JsPattern>>>>
 JsArrayPattern::GetElements(const nlohmann::json& json) {
-  auto elements_it = json.find("elements");
-  if (elements_it == json.end()) {
-    return absl::InvalidArgumentError("`elements` is undefined.");
-  }
-  const nlohmann::json& json_elements = elements_it.value();
-
-  if (json_elements.is_null()) {
-    return absl::InvalidArgumentError("json_elements is null.");
-  }
-  if (!json_elements.is_array()) {
-    return absl::InvalidArgumentError("json_elements expected to be array.");
-  }
-
-  std::vector<std::optional<std::unique_ptr<JsPattern>>> elements;
-  for (const nlohmann::json& json_elements_element : json_elements) {
-    std::optional<std::unique_ptr<JsPattern>> elements_element;
-    if (!json_elements_element.is_null()) {
-      MALDOCA_ASSIGN_OR_RETURN(elements_element, JsPattern::FromJson(json_elements_element));
-    }
-    elements.push_back(std::move(elements_element));
-  }
-  return elements;
+  return GetRequiredField<std::vector<std::optional<std::unique_ptr<JsPattern>>>>(
+      json,
+      "elements",
+      List<std::optional<std::unique_ptr<JsPattern>>>(
+          Nullable<std::unique_ptr<JsPattern>>(
+              JsPattern::FromJson
+          )
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsArrayPattern>>
@@ -6395,30 +5194,20 @@ JsArrayPattern::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsPattern>>
 JsAssignmentPattern::GetLeft(const nlohmann::json& json) {
-  auto left_it = json.find("left");
-  if (left_it == json.end()) {
-    return absl::InvalidArgumentError("`left` is undefined.");
-  }
-  const nlohmann::json& json_left = left_it.value();
-
-  if (json_left.is_null()) {
-    return absl::InvalidArgumentError("json_left is null.");
-  }
-  return JsPattern::FromJson(json_left);
+  return GetRequiredField<std::unique_ptr<JsPattern>>(
+      json,
+      "left",
+      JsPattern::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsAssignmentPattern::GetRight(const nlohmann::json& json) {
-  auto right_it = json.find("right");
-  if (right_it == json.end()) {
-    return absl::InvalidArgumentError("`right` is undefined.");
-  }
-  const nlohmann::json& json_right = right_it.value();
-
-  if (json_right.is_null()) {
-    return absl::InvalidArgumentError("json_right is null.");
-  }
-  return JsExpression::FromJson(json_right);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "right",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsAssignmentPattern>>
@@ -6475,67 +5264,38 @@ static bool IsClassMethod(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsClassMethod::GetKey(const nlohmann::json& json) {
-  auto key_it = json.find("key");
-  if (key_it == json.end()) {
-    return absl::InvalidArgumentError("`key` is undefined.");
-  }
-  const nlohmann::json& json_key = key_it.value();
-
-  if (json_key.is_null()) {
-    return absl::InvalidArgumentError("json_key is null.");
-  }
-  return JsExpression::FromJson(json_key);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "key",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::string>
 JsClassMethod::GetKind(const nlohmann::json& json) {
-  auto kind_it = json.find("kind");
-  if (kind_it == json.end()) {
-    return absl::InvalidArgumentError("`kind` is undefined.");
-  }
-  const nlohmann::json& json_kind = kind_it.value();
-
-  if (json_kind.is_null()) {
-    return absl::InvalidArgumentError("json_kind is null.");
-  }
-  if (!json_kind.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_kind.is_string().");
-  }
-  return json_kind.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "kind",
+      JsonToString
+  );
 }
 
 absl::StatusOr<bool>
 JsClassMethod::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return absl::InvalidArgumentError("`computed` is undefined.");
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<bool>
 JsClassMethod::GetStatic(const nlohmann::json& json) {
-  auto static_it = json.find("static");
-  if (static_it == json.end()) {
-    return absl::InvalidArgumentError("`static` is undefined.");
-  }
-  const nlohmann::json& json_static = static_it.value();
-
-  if (json_static.is_null()) {
-    return absl::InvalidArgumentError("json_static is null.");
-  }
-  if (!json_static.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_static.is_boolean().");
-  }
-  return json_static.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "static",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassMethod>>
@@ -6606,67 +5366,38 @@ static bool IsClassPrivateMethod(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsPrivateName>>
 JsClassPrivateMethod::GetKey(const nlohmann::json& json) {
-  auto key_it = json.find("key");
-  if (key_it == json.end()) {
-    return absl::InvalidArgumentError("`key` is undefined.");
-  }
-  const nlohmann::json& json_key = key_it.value();
-
-  if (json_key.is_null()) {
-    return absl::InvalidArgumentError("json_key is null.");
-  }
-  return JsPrivateName::FromJson(json_key);
+  return GetRequiredField<std::unique_ptr<JsPrivateName>>(
+      json,
+      "key",
+      JsPrivateName::FromJson
+  );
 }
 
 absl::StatusOr<std::string>
 JsClassPrivateMethod::GetKind(const nlohmann::json& json) {
-  auto kind_it = json.find("kind");
-  if (kind_it == json.end()) {
-    return absl::InvalidArgumentError("`kind` is undefined.");
-  }
-  const nlohmann::json& json_kind = kind_it.value();
-
-  if (json_kind.is_null()) {
-    return absl::InvalidArgumentError("json_kind is null.");
-  }
-  if (!json_kind.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_kind.is_string().");
-  }
-  return json_kind.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "kind",
+      JsonToString
+  );
 }
 
 absl::StatusOr<bool>
 JsClassPrivateMethod::GetStatic(const nlohmann::json& json) {
-  auto static_it = json.find("static");
-  if (static_it == json.end()) {
-    return absl::InvalidArgumentError("`static` is undefined.");
-  }
-  const nlohmann::json& json_static = static_it.value();
-
-  if (json_static.is_null()) {
-    return absl::InvalidArgumentError("json_static is null.");
-  }
-  if (!json_static.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_static.is_boolean().");
-  }
-  return json_static.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "static",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::optional<bool>>
 JsClassPrivateMethod::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetOptionalField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassPrivateMethod>>
@@ -6737,64 +5468,38 @@ static bool IsClassProperty(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsExpression>>
 JsClassProperty::GetKey(const nlohmann::json& json) {
-  auto key_it = json.find("key");
-  if (key_it == json.end()) {
-    return absl::InvalidArgumentError("`key` is undefined.");
-  }
-  const nlohmann::json& json_key = key_it.value();
-
-  if (json_key.is_null()) {
-    return absl::InvalidArgumentError("json_key is null.");
-  }
-  return JsExpression::FromJson(json_key);
+  return GetRequiredField<std::unique_ptr<JsExpression>>(
+      json,
+      "key",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsClassProperty::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_value);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "value",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<bool>
 JsClassProperty::GetStatic(const nlohmann::json& json) {
-  auto static_it = json.find("static");
-  if (static_it == json.end()) {
-    return absl::InvalidArgumentError("`static` is undefined.");
-  }
-  const nlohmann::json& json_static = static_it.value();
-
-  if (json_static.is_null()) {
-    return absl::InvalidArgumentError("json_static is null.");
-  }
-  if (!json_static.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_static.is_boolean().");
-  }
-  return json_static.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "static",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<bool>
 JsClassProperty::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return absl::InvalidArgumentError("`computed` is undefined.");
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassProperty>>
@@ -6855,47 +5560,29 @@ static bool IsClassPrivateProperty(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsPrivateName>>
 JsClassPrivateProperty::GetKey(const nlohmann::json& json) {
-  auto key_it = json.find("key");
-  if (key_it == json.end()) {
-    return absl::InvalidArgumentError("`key` is undefined.");
-  }
-  const nlohmann::json& json_key = key_it.value();
-
-  if (json_key.is_null()) {
-    return absl::InvalidArgumentError("json_key is null.");
-  }
-  return JsPrivateName::FromJson(json_key);
+  return GetRequiredField<std::unique_ptr<JsPrivateName>>(
+      json,
+      "key",
+      JsPrivateName::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsClassPrivateProperty::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_value);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "value",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<bool>
 JsClassPrivateProperty::GetStatic(const nlohmann::json& json) {
-  auto static_it = json.find("static");
-  if (static_it == json.end()) {
-    return absl::InvalidArgumentError("`static` is undefined.");
-  }
-  const nlohmann::json& json_static = static_it.value();
-
-  if (json_static.is_null()) {
-    return absl::InvalidArgumentError("json_static is null.");
-  }
-  if (!json_static.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_static.is_boolean().");
-  }
-  return json_static.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "static",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassPrivateProperty>>
@@ -6938,42 +5625,29 @@ JsClassPrivateProperty::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>>
 JsClassBody::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  if (!json_body.is_array()) {
-    return absl::InvalidArgumentError("json_body expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body;
-  for (const nlohmann::json& json_body_element : json_body) {
-    if (json_body_element.is_null()) {
-      return absl::InvalidArgumentError("json_body_element is null.");
-    }
-    std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>> body_element;
-    if (IsClassMethod(json_body_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, JsClassMethod::FromJson(json_body_element));
-    } else if (IsClassPrivateMethod(json_body_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, JsClassPrivateMethod::FromJson(json_body_element));
-    } else if (IsClassProperty(json_body_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, JsClassProperty::FromJson(json_body_element));
-    } else if (IsClassPrivateProperty(json_body_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(body_element, JsClassPrivateProperty::FromJson(json_body_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_body_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_body_element.dump()});
-      return result;
-    }
-    body.push_back(std::move(body_element));
-  }
-  return body;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>>(
+      json,
+      "body",
+      List<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsClassMethod>>{
+                  .predicate = IsClassMethod,
+                  .converter = JsClassMethod::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsClassPrivateMethod>>{
+                  .predicate = IsClassPrivateMethod,
+                  .converter = JsClassPrivateMethod::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsClassProperty>>{
+                  .predicate = IsClassProperty,
+                  .converter = JsClassProperty::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsClassPrivateProperty>>{
+                  .predicate = IsClassPrivateProperty,
+                  .converter = JsClassPrivateProperty::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassBody>>
@@ -7012,30 +5686,20 @@ JsClassBody::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
 JsClass::GetSuperClass(const nlohmann::json& json) {
-  auto super_class_it = json.find("superClass");
-  if (super_class_it == json.end()) {
-    return absl::InvalidArgumentError("`superClass` is undefined.");
-  }
-  const nlohmann::json& json_super_class = super_class_it.value();
-
-  if (json_super_class.is_null()) {
-    return std::nullopt;
-  }
-  return JsExpression::FromJson(json_super_class);
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "superClass",
+      JsExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassBody>>
 JsClass::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return JsClassBody::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<JsClassBody>>(
+      json,
+      "body",
+      JsClassBody::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClass>>
@@ -7076,16 +5740,11 @@ static bool IsClassDeclaration(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsIdentifier>>>
 JsClassDeclaration::GetId(const nlohmann::json& json) {
-  auto id_it = json.find("id");
-  if (id_it == json.end()) {
-    return absl::InvalidArgumentError("`id` is undefined.");
-  }
-  const nlohmann::json& json_id = id_it.value();
-
-  if (json_id.is_null()) {
-    return std::nullopt;
-  }
-  return JsIdentifier::FromJson(json_id);
+  return GetNullableField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "id",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassDeclaration>>
@@ -7128,16 +5787,11 @@ JsClassDeclaration::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsIdentifier>>>
 JsClassExpression::GetId(const nlohmann::json& json) {
-  auto id_it = json.find("id");
-  if (id_it == json.end()) {
-    return absl::InvalidArgumentError("`id` is undefined.");
-  }
-  const nlohmann::json& json_id = id_it.value();
-
-  if (json_id.is_null()) {
-    return std::nullopt;
-  }
-  return JsIdentifier::FromJson(json_id);
+  return GetNullableField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "id",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsClassExpression>>
@@ -7180,30 +5834,20 @@ JsClassExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsMetaProperty::GetMeta(const nlohmann::json& json) {
-  auto meta_it = json.find("meta");
-  if (meta_it == json.end()) {
-    return absl::InvalidArgumentError("`meta` is undefined.");
-  }
-  const nlohmann::json& json_meta = meta_it.value();
-
-  if (json_meta.is_null()) {
-    return absl::InvalidArgumentError("json_meta is null.");
-  }
-  return JsIdentifier::FromJson(json_meta);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "meta",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsMetaProperty::GetProperty(const nlohmann::json& json) {
-  auto property_it = json.find("property");
-  if (property_it == json.end()) {
-    return absl::InvalidArgumentError("`property` is undefined.");
-  }
-  const nlohmann::json& json_property = property_it.value();
-
-  if (json_property.is_null()) {
-    return absl::InvalidArgumentError("json_property is null.");
-  }
-  return JsIdentifier::FromJson(json_property);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "property",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsMetaProperty>>
@@ -7308,39 +5952,28 @@ static bool IsImportSpecifier(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>
 JsImportSpecifier::GetImported(const nlohmann::json& json) {
-  auto imported_it = json.find("imported");
-  if (imported_it == json.end()) {
-    return absl::InvalidArgumentError("`imported` is undefined.");
-  }
-  const nlohmann::json& json_imported = imported_it.value();
-
-  if (json_imported.is_null()) {
-    return absl::InvalidArgumentError("json_imported is null.");
-  }
-  if (IsIdentifier(json_imported)) {
-    return JsIdentifier::FromJson(json_imported);
-  } else if (IsStringLiteral(json_imported)) {
-    return JsStringLiteral::FromJson(json_imported);
-  } else {
-    auto result = absl::InvalidArgumentError("json_imported has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_imported.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>(
+      json,
+      "imported",
+      Variant(
+          VariantOption<std::unique_ptr<JsIdentifier>>{
+              .predicate = IsIdentifier,
+              .converter = JsIdentifier::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsStringLiteral>>{
+              .predicate = IsStringLiteral,
+              .converter = JsStringLiteral::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsImportSpecifier::GetLocal(const nlohmann::json& json) {
-  auto local_it = json.find("local");
-  if (local_it == json.end()) {
-    return absl::InvalidArgumentError("`local` is undefined.");
-  }
-  const nlohmann::json& json_local = local_it.value();
-
-  if (json_local.is_null()) {
-    return absl::InvalidArgumentError("json_local is null.");
-  }
-  return JsIdentifier::FromJson(json_local);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "local",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsImportSpecifier>>
@@ -7397,16 +6030,11 @@ static bool IsImportDefaultSpecifier(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsImportDefaultSpecifier::GetLocal(const nlohmann::json& json) {
-  auto local_it = json.find("local");
-  if (local_it == json.end()) {
-    return absl::InvalidArgumentError("`local` is undefined.");
-  }
-  const nlohmann::json& json_local = local_it.value();
-
-  if (json_local.is_null()) {
-    return absl::InvalidArgumentError("json_local is null.");
-  }
-  return JsIdentifier::FromJson(json_local);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "local",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsImportDefaultSpecifier>>
@@ -7461,16 +6089,11 @@ static bool IsImportNamespaceSpecifier(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsImportNamespaceSpecifier::GetLocal(const nlohmann::json& json) {
-  auto local_it = json.find("local");
-  if (local_it == json.end()) {
-    return absl::InvalidArgumentError("`local` is undefined.");
-  }
-  const nlohmann::json& json_local = local_it.value();
-
-  if (json_local.is_null()) {
-    return absl::InvalidArgumentError("json_local is null.");
-  }
-  return JsIdentifier::FromJson(json_local);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "local",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsImportNamespaceSpecifier>>
@@ -7509,30 +6132,20 @@ JsImportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsImportAttribute::GetKey(const nlohmann::json& json) {
-  auto key_it = json.find("key");
-  if (key_it == json.end()) {
-    return absl::InvalidArgumentError("`key` is undefined.");
-  }
-  const nlohmann::json& json_key = key_it.value();
-
-  if (json_key.is_null()) {
-    return absl::InvalidArgumentError("json_key is null.");
-  }
-  return JsIdentifier::FromJson(json_key);
+  return GetRequiredField<std::unique_ptr<JsIdentifier>>(
+      json,
+      "key",
+      JsIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsImportAttribute::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  return JsStringLiteral::FromJson(json_value);
+  return GetRequiredField<std::unique_ptr<JsStringLiteral>>(
+      json,
+      "value",
+      JsStringLiteral::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsImportAttribute>>
@@ -7573,68 +6186,43 @@ JsImportAttribute::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>>>
 JsImportDeclaration::GetSpecifiers(const nlohmann::json& json) {
-  auto specifiers_it = json.find("specifiers");
-  if (specifiers_it == json.end()) {
-    return absl::InvalidArgumentError("`specifiers` is undefined.");
-  }
-  const nlohmann::json& json_specifiers = specifiers_it.value();
-
-  if (json_specifiers.is_null()) {
-    return absl::InvalidArgumentError("json_specifiers is null.");
-  }
-  if (!json_specifiers.is_array()) {
-    return absl::InvalidArgumentError("json_specifiers expected to be array.");
-  }
-
-  std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>> specifiers;
-  for (const nlohmann::json& json_specifiers_element : json_specifiers) {
-    if (json_specifiers_element.is_null()) {
-      return absl::InvalidArgumentError("json_specifiers_element is null.");
-    }
-    std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>> specifiers_element;
-    if (IsImportSpecifier(json_specifiers_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(specifiers_element, JsImportSpecifier::FromJson(json_specifiers_element));
-    } else if (IsImportDefaultSpecifier(json_specifiers_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(specifiers_element, JsImportDefaultSpecifier::FromJson(json_specifiers_element));
-    } else if (IsImportNamespaceSpecifier(json_specifiers_element)) {
-      MALDOCA_ASSIGN_OR_RETURN(specifiers_element, JsImportNamespaceSpecifier::FromJson(json_specifiers_element));
-    } else {
-      auto result = absl::InvalidArgumentError("json_specifiers_element has invalid type.");
-      result.SetPayload("json", absl::Cord{json.dump()});
-      result.SetPayload("json_element", absl::Cord{json_specifiers_element.dump()});
-      return result;
-    }
-    specifiers.push_back(std::move(specifiers_element));
-  }
-  return specifiers;
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>>>(
+      json,
+      "specifiers",
+      List<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsImportSpecifier>>{
+                  .predicate = IsImportSpecifier,
+                  .converter = JsImportSpecifier::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsImportDefaultSpecifier>>{
+                  .predicate = IsImportDefaultSpecifier,
+                  .converter = JsImportDefaultSpecifier::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsImportNamespaceSpecifier>>{
+                  .predicate = IsImportNamespaceSpecifier,
+                  .converter = JsImportNamespaceSpecifier::FromJson,
+              })
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsImportDeclaration::GetSource(const nlohmann::json& json) {
-  auto source_it = json.find("source");
-  if (source_it == json.end()) {
-    return absl::InvalidArgumentError("`source` is undefined.");
-  }
-  const nlohmann::json& json_source = source_it.value();
-
-  if (json_source.is_null()) {
-    return absl::InvalidArgumentError("json_source is null.");
-  }
-  return JsStringLiteral::FromJson(json_source);
+  return GetRequiredField<std::unique_ptr<JsStringLiteral>>(
+      json,
+      "source",
+      JsStringLiteral::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsImportAttribute>>>
 JsImportDeclaration::GetAssertions(const nlohmann::json& json) {
-  auto assertions_it = json.find("assertions");
-  if (assertions_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_assertions = assertions_it.value();
-
-  if (json_assertions.is_null()) {
-    return absl::InvalidArgumentError("json_assertions is null.");
-  }
-  return JsImportAttribute::FromJson(json_assertions);
+  return GetOptionalField<std::unique_ptr<JsImportAttribute>>(
+      json,
+      "assertions",
+      JsImportAttribute::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsImportDeclaration>>
@@ -7677,48 +6265,36 @@ JsImportDeclaration::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>
 JsExportSpecifier::GetExported(const nlohmann::json& json) {
-  auto exported_it = json.find("exported");
-  if (exported_it == json.end()) {
-    return absl::InvalidArgumentError("`exported` is undefined.");
-  }
-  const nlohmann::json& json_exported = exported_it.value();
-
-  if (json_exported.is_null()) {
-    return absl::InvalidArgumentError("json_exported is null.");
-  }
-  if (IsIdentifier(json_exported)) {
-    return JsIdentifier::FromJson(json_exported);
-  } else if (IsStringLiteral(json_exported)) {
-    return JsStringLiteral::FromJson(json_exported);
-  } else {
-    auto result = absl::InvalidArgumentError("json_exported has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_exported.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>(
+      json,
+      "exported",
+      Variant(
+          VariantOption<std::unique_ptr<JsIdentifier>>{
+              .predicate = IsIdentifier,
+              .converter = JsIdentifier::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsStringLiteral>>{
+              .predicate = IsStringLiteral,
+              .converter = JsStringLiteral::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::optional<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>>
 JsExportSpecifier::GetLocal(const nlohmann::json& json) {
-  auto local_it = json.find("local");
-  if (local_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_local = local_it.value();
-
-  if (json_local.is_null()) {
-    return absl::InvalidArgumentError("json_local is null.");
-  }
-  if (IsIdentifier(json_local)) {
-    return JsIdentifier::FromJson(json_local);
-  } else if (IsStringLiteral(json_local)) {
-    return JsStringLiteral::FromJson(json_local);
-  } else {
-    auto result = absl::InvalidArgumentError("json_local has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_local.dump()});
-    return result;
-  }
+  return GetOptionalField<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>(
+      json,
+      "local",
+      Variant(
+          VariantOption<std::unique_ptr<JsIdentifier>>{
+              .predicate = IsIdentifier,
+              .converter = JsIdentifier::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsStringLiteral>>{
+              .predicate = IsStringLiteral,
+              .converter = JsStringLiteral::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExportSpecifier>>
@@ -7759,82 +6335,42 @@ JsExportSpecifier::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::optional<std::unique_ptr<JsDeclaration>>>
 JsExportNamedDeclaration::GetDeclaration(const nlohmann::json& json) {
-  auto declaration_it = json.find("declaration");
-  if (declaration_it == json.end()) {
-    return absl::InvalidArgumentError("`declaration` is undefined.");
-  }
-  const nlohmann::json& json_declaration = declaration_it.value();
-
-  if (json_declaration.is_null()) {
-    return std::nullopt;
-  }
-  return JsDeclaration::FromJson(json_declaration);
+  return GetNullableField<std::unique_ptr<JsDeclaration>>(
+      json,
+      "declaration",
+      JsDeclaration::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<JsExportSpecifier>>>
 JsExportNamedDeclaration::GetSpecifiers(const nlohmann::json& json) {
-  auto specifiers_it = json.find("specifiers");
-  if (specifiers_it == json.end()) {
-    return absl::InvalidArgumentError("`specifiers` is undefined.");
-  }
-  const nlohmann::json& json_specifiers = specifiers_it.value();
-
-  if (json_specifiers.is_null()) {
-    return absl::InvalidArgumentError("json_specifiers is null.");
-  }
-  if (!json_specifiers.is_array()) {
-    return absl::InvalidArgumentError("json_specifiers expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsExportSpecifier>> specifiers;
-  for (const nlohmann::json& json_specifiers_element : json_specifiers) {
-    if (json_specifiers_element.is_null()) {
-      return absl::InvalidArgumentError("json_specifiers_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto specifiers_element, JsExportSpecifier::FromJson(json_specifiers_element));
-    specifiers.push_back(std::move(specifiers_element));
-  }
-  return specifiers;
+  return GetRequiredField<std::vector<std::unique_ptr<JsExportSpecifier>>>(
+      json,
+      "specifiers",
+      List<std::unique_ptr<JsExportSpecifier>>(
+          JsExportSpecifier::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<JsStringLiteral>>>
 JsExportNamedDeclaration::GetSource(const nlohmann::json& json) {
-  auto source_it = json.find("source");
-  if (source_it == json.end()) {
-    return absl::InvalidArgumentError("`source` is undefined.");
-  }
-  const nlohmann::json& json_source = source_it.value();
-
-  if (json_source.is_null()) {
-    return std::nullopt;
-  }
-  return JsStringLiteral::FromJson(json_source);
+  return GetNullableField<std::unique_ptr<JsStringLiteral>>(
+      json,
+      "source",
+      JsStringLiteral::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<std::unique_ptr<JsImportAttribute>>>>
 JsExportNamedDeclaration::GetAssertions(const nlohmann::json& json) {
-  auto assertions_it = json.find("assertions");
-  if (assertions_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_assertions = assertions_it.value();
-
-  if (json_assertions.is_null()) {
-    return absl::InvalidArgumentError("json_assertions is null.");
-  }
-  if (!json_assertions.is_array()) {
-    return absl::InvalidArgumentError("json_assertions expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsImportAttribute>> assertions;
-  for (const nlohmann::json& json_assertions_element : json_assertions) {
-    if (json_assertions_element.is_null()) {
-      return absl::InvalidArgumentError("json_assertions_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto assertions_element, JsImportAttribute::FromJson(json_assertions_element));
-    assertions.push_back(std::move(assertions_element));
-  }
-  return assertions;
+  return GetOptionalField<std::vector<std::unique_ptr<JsImportAttribute>>>(
+      json,
+      "assertions",
+      List<std::unique_ptr<JsImportAttribute>>(
+          JsImportAttribute::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExportNamedDeclaration>>
@@ -7879,27 +6415,23 @@ JsExportNamedDeclaration::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<std::unique_ptr<JsFunctionDeclaration>, std::unique_ptr<JsClassDeclaration>, std::unique_ptr<JsExpression>>>
 JsExportDefaultDeclaration::GetDeclaration(const nlohmann::json& json) {
-  auto declaration_it = json.find("declaration");
-  if (declaration_it == json.end()) {
-    return absl::InvalidArgumentError("`declaration` is undefined.");
-  }
-  const nlohmann::json& json_declaration = declaration_it.value();
-
-  if (json_declaration.is_null()) {
-    return absl::InvalidArgumentError("json_declaration is null.");
-  }
-  if (IsFunctionDeclaration(json_declaration)) {
-    return JsFunctionDeclaration::FromJson(json_declaration);
-  } else if (IsClassDeclaration(json_declaration)) {
-    return JsClassDeclaration::FromJson(json_declaration);
-  } else if (IsExpression(json_declaration)) {
-    return JsExpression::FromJson(json_declaration);
-  } else {
-    auto result = absl::InvalidArgumentError("json_declaration has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_declaration.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<JsFunctionDeclaration>, std::unique_ptr<JsClassDeclaration>, std::unique_ptr<JsExpression>>>(
+      json,
+      "declaration",
+      Variant(
+          VariantOption<std::unique_ptr<JsFunctionDeclaration>>{
+              .predicate = IsFunctionDeclaration,
+              .converter = JsFunctionDeclaration::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsClassDeclaration>>{
+              .predicate = IsClassDeclaration,
+              .converter = JsClassDeclaration::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsExpression>>{
+              .predicate = IsExpression,
+              .converter = JsExpression::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExportDefaultDeclaration>>
@@ -7938,42 +6470,22 @@ JsExportDefaultDeclaration::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsExportAllDeclaration::GetSource(const nlohmann::json& json) {
-  auto source_it = json.find("source");
-  if (source_it == json.end()) {
-    return absl::InvalidArgumentError("`source` is undefined.");
-  }
-  const nlohmann::json& json_source = source_it.value();
-
-  if (json_source.is_null()) {
-    return absl::InvalidArgumentError("json_source is null.");
-  }
-  return JsStringLiteral::FromJson(json_source);
+  return GetRequiredField<std::unique_ptr<JsStringLiteral>>(
+      json,
+      "source",
+      JsStringLiteral::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::vector<std::unique_ptr<JsImportAttribute>>>>
 JsExportAllDeclaration::GetAssertions(const nlohmann::json& json) {
-  auto assertions_it = json.find("assertions");
-  if (assertions_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_assertions = assertions_it.value();
-
-  if (json_assertions.is_null()) {
-    return absl::InvalidArgumentError("json_assertions is null.");
-  }
-  if (!json_assertions.is_array()) {
-    return absl::InvalidArgumentError("json_assertions expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<JsImportAttribute>> assertions;
-  for (const nlohmann::json& json_assertions_element : json_assertions) {
-    if (json_assertions_element.is_null()) {
-      return absl::InvalidArgumentError("json_assertions_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto assertions_element, JsImportAttribute::FromJson(json_assertions_element));
-    assertions.push_back(std::move(assertions_element));
-  }
-  return assertions;
+  return GetOptionalField<std::vector<std::unique_ptr<JsImportAttribute>>>(
+      json,
+      "assertions",
+      List<std::unique_ptr<JsImportAttribute>>(
+          JsImportAttribute::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<JsExportAllDeclaration>>

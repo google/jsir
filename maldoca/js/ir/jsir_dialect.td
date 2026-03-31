@@ -25,6 +25,10 @@ def Jsir_Dialect : Dialect {
   let hasConstantMaterializer = 1;
   let useDefaultAttributePrinterParser = 1;
   let useDefaultTypePrinterParser = 1;
+  let extraClassDeclaration = [{
+    std::unique_ptr<JSRuntime, QjsRuntimeDeleter> qjs_runtime;
+    std::unique_ptr<JSContext, QjsContextDeleter> qjs_context;
+  }];
 }
 
 // Base class for JSIR dialect types.

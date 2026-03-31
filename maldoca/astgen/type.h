@@ -553,6 +553,10 @@ class ClassType : public ScalarType {
 
   std::string JsType() const override;
 
+  std::string CcClassName() const {
+    return (Symbol(lang_name_) + name()).ToPascalCase();
+  }
+
   std::string CcType() const override;
 
   std::string CcGetterType(CcGetterKind getter_kind) const override;

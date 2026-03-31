@@ -49,9 +49,9 @@ module {
 }
   )";
 
-  TestIrConversion<VNode, VirNodeOp, VirDialect, AstToVir, VirToAst>({
+  TestIrConversion<VNode, VirNodeOp, VirDialect, AstToVir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToVir::VisitNode,
+      .ast_to_ir_visit = AstToVir::VisitNode,
       .ir_to_ast_visit = &VirToAst::VisitNode,
       .expected_ir_dump = kExpectedIr,
   });
@@ -84,9 +84,9 @@ module {
 }
   )";
 
-  TestIrConversion<VNode, VirNodeOp, VirDialect, AstToVir, VirToAst>({
+  TestIrConversion<VNode, VirNodeOp, VirDialect, AstToVir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToVir::VisitNode,
+      .ast_to_ir_visit = AstToVir::VisitNode,
       .ir_to_ast_visit = &VirToAst::VisitNode,
       .expected_ir_dump = kExpectedIr,
   });
@@ -111,9 +111,9 @@ module {
 }
   )";
 
-  TestIrConversion<VNode, VirNodeOp, VirDialect, AstToVir, VirToAst>({
+  TestIrConversion<VNode, VirNodeOp, VirDialect, AstToVir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToVir::VisitNode,
+      .ast_to_ir_visit = AstToVir::VisitNode,
       .ir_to_ast_visit = &VirToAst::VisitNode,
       .expected_ir_dump = kExpectedIr,
   });

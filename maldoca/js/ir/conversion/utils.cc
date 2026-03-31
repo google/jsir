@@ -15,6 +15,7 @@
 #include "maldoca/js/ir/conversion/utils.h"
 
 #include <memory>
+#include <utility>
 
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -40,17 +41,15 @@ absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
                        nullptr);
 
   mlir::OpBuilder builder(&context);
-  AstToJsir ast_to_jsir(builder);
-  mlir::OwningOpRef<JsirFileOp> hir_file = ast_to_jsir.VisitFile(&ast);
+  mlir::OwningOpRef<JsirFileOp> hir_file = AstToJsir::VisitFile(builder, &ast);
 
   MALDOCA_RET_CHECK(mlir::verify(*hir_file).succeeded());
 
-  return hir_file;
+  return std::move(hir_file);
 }
 
 absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file) {
-  JsirToAst jsir_to_ast;
-  return jsir_to_ast.VisitFile(hir_file);
+  return JsirToAst::VisitFile(hir_file);
 }
 
 void LoadNecessaryDialects(mlir::MLIRContext &context) {

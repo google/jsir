@@ -48,6 +48,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
+#include "maldoca/astgen/ir_to_ast_util.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/list/ast.generated.h"
 #include "maldoca/astgen/test/list/ir.h"
@@ -68,26 +69,24 @@ LiirToAst::VisitClass2(LiirClass2Op op) {
 
 absl::StatusOr<std::unique_ptr<LiSimpleList>>
 LiirToAst::VisitSimpleList(LiirSimpleListOp op) {
-  std::vector<std::string> strings;
-  for (mlir::Attribute mlir_strings_element_unchecked : op.getStringsAttr().getValue()) {
-    auto strings_element_attr = llvm::dyn_cast<mlir::StringAttr>(mlir_strings_element_unchecked);
-    if (strings_element_attr == nullptr) {
-      return absl::InvalidArgumentError("Invalid attribute.");
-    }
-    std::string strings_element = strings_element_attr.str();
-    strings.push_back(std::move(strings_element));
-  }
-  std::vector<std::unique_ptr<LiClass1>> operations;
-  for (mlir::Value mlir_operations_element_unchecked : op.getOperations()) {
-    auto operations_element_op = llvm::dyn_cast<LiirClass1Op>(mlir_operations_element_unchecked.getDefiningOp());
-    if (operations_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected LiirClass1Op, got ",
-                       mlir_operations_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<LiClass1> operations_element, VisitClass1(operations_element_op));
-    operations.push_back(std::move(operations_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto strings,
+      Convert(
+          op.getStringsAttr(),
+          List(
+              ToString()
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operations,
+      Convert(
+          op.getOperations(),
+          List(
+              ToOpConverter(VisitClass1)
+          )
+      )
+  );
   return Create<LiSimpleList>(
       op,
       std::move(strings),
@@ -96,19 +95,17 @@ LiirToAst::VisitSimpleList(LiirSimpleListOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalList>>
 LiirToAst::VisitOptionalList(LiirOptionalListOp op) {
-  std::optional<std::vector<std::string>> strings;
-  if (op.getStringsAttr() != nullptr) {
-    std::vector<std::string> strings_value;
-    for (mlir::Attribute mlir_strings_element_unchecked : op.getStringsAttr().getValue()) {
-      auto strings_element_attr = llvm::dyn_cast<mlir::StringAttr>(mlir_strings_element_unchecked);
-      if (strings_element_attr == nullptr) {
-        return absl::InvalidArgumentError("Invalid attribute.");
-      }
-      std::string strings_element = strings_element_attr.str();
-      strings_value.push_back(std::move(strings_element));
-    }
-    strings = std::move(strings_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto strings,
+      Convert(
+          op.getStringsAttr(),
+          Nullable(
+              List(
+                  ToString()
+              )
+          )
+      )
+  );
   return Create<LiOptionalList>(
       op,
       std::move(strings));
@@ -116,32 +113,28 @@ LiirToAst::VisitOptionalList(LiirOptionalListOp op) {
 
 absl::StatusOr<std::unique_ptr<LiListOfOptional>>
 LiirToAst::VisitListOfOptional(LiirListOfOptionalOp op) {
-  std::vector<std::optional<std::string>> strings;
-  for (mlir::Attribute mlir_strings_element_unchecked : op.getStringsAttr().getValue()) {
-    std::optional<std::string> strings_element;
-    if (mlir_strings_element_unchecked != nullptr) {
-      auto strings_element_attr = llvm::dyn_cast<mlir::StringAttr>(mlir_strings_element_unchecked);
-      if (strings_element_attr == nullptr) {
-        return absl::InvalidArgumentError("Invalid attribute.");
-      }
-      strings_element = strings_element_attr.str();
-    }
-    strings.push_back(std::move(strings_element));
-  }
-  std::vector<std::optional<std::unique_ptr<LiClass1>>> operations;
-  for (mlir::Value mlir_operations_element_unchecked : op.getOperations()) {
-    std::optional<std::unique_ptr<LiClass1>> operations_element;
-    if (!llvm::isa<LiirNoneOp>(mlir_operations_element_unchecked.getDefiningOp())) {
-      auto operations_element_op = llvm::dyn_cast<LiirClass1Op>(mlir_operations_element_unchecked.getDefiningOp());
-      if (operations_element_op == nullptr) {
-        return absl::InvalidArgumentError(
-            absl::StrCat("Expected LiirClass1Op, got ",
-                         mlir_operations_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-      }
-      MALDOCA_ASSIGN_OR_RETURN(operations_element, VisitClass1(operations_element_op));
-    }
-    operations.push_back(std::move(operations_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto strings,
+      Convert(
+          op.getStringsAttr(),
+          List(
+              Nullable(
+                  ToString()
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operations,
+      Convert(
+          op.getOperations(),
+          List(
+              Nullable<LiirNoneOp>(
+                  ToOpConverter(VisitClass1)
+              )
+          )
+      )
+  );
   return Create<LiListOfOptional>(
       op,
       std::move(strings),
@@ -150,30 +143,30 @@ LiirToAst::VisitListOfOptional(LiirListOfOptionalOp op) {
 
 absl::StatusOr<std::unique_ptr<LiListOfVariant>>
 LiirToAst::VisitListOfVariant(LiirListOfVariantOp op) {
-  std::vector<std::variant<bool, std::string>> variants;
-  for (mlir::Attribute mlir_variants_element_unchecked : op.getVariantsAttr().getValue()) {
-    std::variant<bool, std::string> variants_element;
-    if (auto mlir_variants_element = llvm::dyn_cast<mlir::BoolAttr>(mlir_variants_element_unchecked)) {
-      variants_element = mlir_variants_element.getValue();
-    } else if (auto mlir_variants_element = llvm::dyn_cast<mlir::StringAttr>(mlir_variants_element_unchecked)) {
-      variants_element = mlir_variants_element.str();
-    } else {
-      return absl::InvalidArgumentError("mlir_variants_element_unchecked has invalid type.");
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  std::vector<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>> operations;
-  for (mlir::Value mlir_operations_element_unchecked : op.getOperations()) {
-    std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>> operations_element;
-    if (auto mlir_operations_element = llvm::dyn_cast<LiirClass1Op>(mlir_operations_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(operations_element, VisitClass1(mlir_operations_element));
-    } else if (auto mlir_operations_element = llvm::dyn_cast<LiirClass2Op>(mlir_operations_element_unchecked.getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(operations_element, VisitClass2(mlir_operations_element));
-    } else {
-      return absl::InvalidArgumentError("mlir_operations_element_unchecked.getDefiningOp() has invalid type.");
-    }
-    operations.push_back(std::move(operations_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto variants,
+      Convert(
+          op.getVariantsAttr(),
+          List(
+              AttrVariant(
+                  ToBool(),
+                  ToString()
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operations,
+      Convert(
+          op.getOperations(),
+          List(
+              OpVariant(
+                  ToOpConverter(VisitClass1),
+                  ToOpConverter(VisitClass2)
+              )
+          )
+      )
+  );
   return Create<LiListOfVariant>(
       op,
       std::move(variants),
@@ -182,22 +175,19 @@ LiirToAst::VisitListOfVariant(LiirListOfVariantOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfOptional>>
 LiirToAst::VisitOptionalListOfOptional(LiirOptionalListOfOptionalOp op) {
-  std::optional<std::vector<std::optional<std::string>>> variants;
-  if (op.getVariantsAttr() != nullptr) {
-    std::vector<std::optional<std::string>> variants_value;
-    for (mlir::Attribute mlir_variants_element_unchecked : op.getVariantsAttr().getValue()) {
-      std::optional<std::string> variants_element;
-      if (mlir_variants_element_unchecked != nullptr) {
-        auto variants_element_attr = llvm::dyn_cast<mlir::StringAttr>(mlir_variants_element_unchecked);
-        if (variants_element_attr == nullptr) {
-          return absl::InvalidArgumentError("Invalid attribute.");
-        }
-        variants_element = variants_element_attr.str();
-      }
-      variants_value.push_back(std::move(variants_element));
-    }
-    variants = std::move(variants_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto variants,
+      Convert(
+          op.getVariantsAttr(),
+          Nullable(
+              List(
+                  Nullable(
+                      ToString()
+                  )
+              )
+          )
+      )
+  );
   return Create<LiOptionalListOfOptional>(
       op,
       std::move(variants));
@@ -205,22 +195,20 @@ LiirToAst::VisitOptionalListOfOptional(LiirOptionalListOfOptionalOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfVariant>>
 LiirToAst::VisitOptionalListOfVariant(LiirOptionalListOfVariantOp op) {
-  std::optional<std::vector<std::variant<bool, std::string>>> variants;
-  if (op.getVariantsAttr() != nullptr) {
-    std::vector<std::variant<bool, std::string>> variants_value;
-    for (mlir::Attribute mlir_variants_element_unchecked : op.getVariantsAttr().getValue()) {
-      std::variant<bool, std::string> variants_element;
-      if (auto mlir_variants_element = llvm::dyn_cast<mlir::BoolAttr>(mlir_variants_element_unchecked)) {
-        variants_element = mlir_variants_element.getValue();
-      } else if (auto mlir_variants_element = llvm::dyn_cast<mlir::StringAttr>(mlir_variants_element_unchecked)) {
-        variants_element = mlir_variants_element.str();
-      } else {
-        return absl::InvalidArgumentError("mlir_variants_element_unchecked has invalid type.");
-      }
-      variants_value.push_back(std::move(variants_element));
-    }
-    variants = std::move(variants_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto variants,
+      Convert(
+          op.getVariantsAttr(),
+          Nullable(
+              List(
+                  AttrVariant(
+                      ToBool(),
+                      ToString()
+                  )
+              )
+          )
+      )
+  );
   return Create<LiOptionalListOfVariant>(
       op,
       std::move(variants));
@@ -228,34 +216,34 @@ LiirToAst::VisitOptionalListOfVariant(LiirOptionalListOfVariantOp op) {
 
 absl::StatusOr<std::unique_ptr<LiListOfOptionalVariant>>
 LiirToAst::VisitListOfOptionalVariant(LiirListOfOptionalVariantOp op) {
-  std::vector<std::optional<std::variant<bool, std::string>>> variants;
-  for (mlir::Attribute mlir_variants_element_unchecked : op.getVariantsAttr().getValue()) {
-    std::optional<std::variant<bool, std::string>> variants_element;
-    if (mlir_variants_element_unchecked != nullptr) {
-      if (auto mlir_variants_element = llvm::dyn_cast<mlir::BoolAttr>(mlir_variants_element_unchecked)) {
-        variants_element = mlir_variants_element.getValue();
-      } else if (auto mlir_variants_element = llvm::dyn_cast<mlir::StringAttr>(mlir_variants_element_unchecked)) {
-        variants_element = mlir_variants_element.str();
-      } else {
-        return absl::InvalidArgumentError("mlir_variants_element_unchecked has invalid type.");
-      }
-    }
-    variants.push_back(std::move(variants_element));
-  }
-  std::vector<std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>>> operations;
-  for (mlir::Value mlir_operations_element_unchecked : op.getOperations()) {
-    std::optional<std::variant<std::unique_ptr<LiClass1>, std::unique_ptr<LiClass2>>> operations_element;
-    if (!llvm::isa<LiirNoneOp>(mlir_operations_element_unchecked.getDefiningOp())) {
-      if (auto mlir_operations_element = llvm::dyn_cast<LiirClass1Op>(mlir_operations_element_unchecked.getDefiningOp())) {
-        MALDOCA_ASSIGN_OR_RETURN(operations_element, VisitClass1(mlir_operations_element));
-      } else if (auto mlir_operations_element = llvm::dyn_cast<LiirClass2Op>(mlir_operations_element_unchecked.getDefiningOp())) {
-        MALDOCA_ASSIGN_OR_RETURN(operations_element, VisitClass2(mlir_operations_element));
-      } else {
-        return absl::InvalidArgumentError("mlir_operations_element_unchecked.getDefiningOp() has invalid type.");
-      }
-    }
-    operations.push_back(std::move(operations_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto variants,
+      Convert(
+          op.getVariantsAttr(),
+          List(
+              Nullable(
+                  AttrVariant(
+                      ToBool(),
+                      ToString()
+                  )
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto operations,
+      Convert(
+          op.getOperations(),
+          List(
+              Nullable<LiirNoneOp>(
+                  OpVariant(
+                      ToOpConverter(VisitClass1),
+                      ToOpConverter(VisitClass2)
+                  )
+              )
+          )
+      )
+  );
   return Create<LiListOfOptionalVariant>(
       op,
       std::move(variants),
@@ -264,24 +252,22 @@ LiirToAst::VisitListOfOptionalVariant(LiirListOfOptionalVariantOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfOptionalVariant>>
 LiirToAst::VisitOptionalListOfOptionalVariant(LiirOptionalListOfOptionalVariantOp op) {
-  std::optional<std::vector<std::optional<std::variant<bool, std::string>>>> variants;
-  if (op.getVariantsAttr() != nullptr) {
-    std::vector<std::optional<std::variant<bool, std::string>>> variants_value;
-    for (mlir::Attribute mlir_variants_element_unchecked : op.getVariantsAttr().getValue()) {
-      std::optional<std::variant<bool, std::string>> variants_element;
-      if (mlir_variants_element_unchecked != nullptr) {
-        if (auto mlir_variants_element = llvm::dyn_cast<mlir::BoolAttr>(mlir_variants_element_unchecked)) {
-          variants_element = mlir_variants_element.getValue();
-        } else if (auto mlir_variants_element = llvm::dyn_cast<mlir::StringAttr>(mlir_variants_element_unchecked)) {
-          variants_element = mlir_variants_element.str();
-        } else {
-          return absl::InvalidArgumentError("mlir_variants_element_unchecked has invalid type.");
-        }
-      }
-      variants_value.push_back(std::move(variants_element));
-    }
-    variants = std::move(variants_value);
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto variants,
+      Convert(
+          op.getVariantsAttr(),
+          Nullable(
+              List(
+                  Nullable(
+                      AttrVariant(
+                          ToBool(),
+                          ToString()
+                      )
+                  )
+              )
+          )
+      )
+  );
   return Create<LiOptionalListOfOptionalVariant>(
       op,
       std::move(variants));

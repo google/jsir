@@ -35,6 +35,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/time.h"
 #include "absl/types/span.h"
 #include "nlohmann/json.hpp"
 #include "maldoca/base/ret_check.h"
@@ -58,7 +59,6 @@ enum class JsReprKind {
   kAstString,
   kAst,
   kJshir,
-  kJslir,
 };
 
 std::ostream& operator<<(std::ostream& os, JsReprKind kind);
@@ -173,7 +173,7 @@ struct JsirRepr : JsRepr {
   BabelScopes scopes;
 
   static bool classof(const JsRepr* repr) {
-    return repr->kind == JsReprKind::kJshir || repr->kind == JsReprKind::kJslir;
+    return repr->kind == JsReprKind::kJshir;
   }
 
   std::string Dump() const override { return mlir::debugString(*op); }
@@ -190,17 +190,6 @@ struct JsHirRepr : JsirRepr {
 
   static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJshir;
-  }
-
-  absl::StatusOr<JsReprPb> ToProto() const override;
-};
-
-struct JsLirRepr : JsirRepr {
-  explicit JsLirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes)
-      : JsirRepr(JsReprKind::kJslir, std::move(op), std::move(scopes)) {}
-
-  static bool classof(const JsRepr* repr) {
-    return repr->kind == JsReprKind::kJslir;
   }
 
   absl::StatusOr<JsReprPb> ToProto() const override;
@@ -252,7 +241,8 @@ class JsPassRunner {
 
   virtual absl::StatusOr<Result> Run(absl::string_view original_source,
                                      const JsReprPb& input_repr_pb,
-                                     const JsPassConfigs& passes) = 0;
+                                     const JsPassConfigs& passes,
+                                     absl::Duration timeout) = 0;
 };
 
 class UnsandboxedJsPassRunner : public JsPassRunner {
@@ -262,7 +252,17 @@ class UnsandboxedJsPassRunner : public JsPassRunner {
 
   absl::StatusOr<Result> Run(absl::string_view original_source,
                              const JsReprPb& input_repr_pb,
-                             const JsPassConfigs& passes) override;
+                             const JsPassConfigs& passes,
+                             absl::Duration timeout) override;
+
+  absl::StatusOr<Result> Run(absl::string_view original_source,
+                             const JsReprPb& input_repr_pb,
+                             const JsPassConfigs& passes) {
+    // Default arguments on virtual or override methods are prohibited.
+    // go/cstyle#Default_Arguments.
+    return Run(original_source, input_repr_pb, passes,
+               absl::InfiniteDuration());
+  };
 
  private:
   Babel* absl_nullable babel_;

@@ -26,20 +26,20 @@ namespace maldoca {
 
 class AirToAst {
  public:
-  absl::StatusOr<std::unique_ptr<AExpression>> VisitExpression(
+  static absl::StatusOr<std::unique_ptr<AExpression>> VisitExpression(
       AirExpressionOpInterface op);
 
-  absl::StatusOr<std::unique_ptr<AIdentifier>> VisitIdentifier(
+  static absl::StatusOr<std::unique_ptr<AIdentifier>> VisitIdentifier(
       AirIdentifierOp op);
 
-  absl::StatusOr<std::unique_ptr<AIdentifier>> VisitIdentifierRef(
+  static absl::StatusOr<std::unique_ptr<AIdentifier>> VisitIdentifierRef(
       AirIdentifierRefOp op);
 
-  absl::StatusOr<std::unique_ptr<AAssignment>> VisitAssignment(
+  static absl::StatusOr<std::unique_ptr<AAssignment>> VisitAssignment(
       AirAssignmentOp op);
 
   template <typename T, typename... Args>
-  std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
+  static std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
     return absl::make_unique<T>(std::forward<Args>(args)...);
   }
 };

@@ -23,24 +23,24 @@ namespace maldoca {
 
 class AstToVir {
  public:
-  explicit AstToVir(mlir::OpBuilder &builder) : builder_(builder) {}
+  static VirBaseClassOpInterface VisitBaseClass(mlir::OpBuilder& builder,
+                                                const VBaseClass* node);
 
-  VirBaseClassOpInterface VisitBaseClass(const VBaseClass *node);
+  static VirDerivedClass1Op VisitDerivedClass1(mlir::OpBuilder& builder,
+                                               const VDerivedClass1* node);
 
-  VirDerivedClass1Op VisitDerivedClass1(const VDerivedClass1 *node);
+  static VirDerivedClass2Op VisitDerivedClass2(mlir::OpBuilder& builder,
+                                               const VDerivedClass2* node);
 
-  VirDerivedClass2Op VisitDerivedClass2(const VDerivedClass2 *node);
-
-  VirNodeOp VisitNode(const VNode *node);
+  static VirNodeOp VisitNode(mlir::OpBuilder& builder, const VNode* node);
 
  private:
   template <typename Op, typename VNode, typename... Args>
-  Op CreateExpr(const VNode *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(),
-                               std::forward<Args>(args)...);
+  static Op CreateExpr(mlir::OpBuilder& builder, const VNode* node,
+                       Args&&... args) {
+    return Op::create(builder, builder.getUnknownLoc(),
+                      std::forward<Args>(args)...);
   }
-
-  mlir::OpBuilder &builder_;
 };
 
 }  // namespace maldoca

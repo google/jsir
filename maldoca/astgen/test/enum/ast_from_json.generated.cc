@@ -35,6 +35,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
@@ -46,38 +47,20 @@ namespace maldoca {
 
 absl::StatusOr<EUnaryOperator>
 ENode::GetUnaryOperator(const nlohmann::json& json) {
-  auto unary_operator_it = json.find("unaryOperator");
-  if (unary_operator_it == json.end()) {
-    return absl::InvalidArgumentError("`unaryOperator` is undefined.");
-  }
-  const nlohmann::json& json_unary_operator = unary_operator_it.value();
-
-  if (json_unary_operator.is_null()) {
-    return absl::InvalidArgumentError("json_unary_operator is null.");
-  }
-  if (!json_unary_operator.is_string()) {
-    return absl::InvalidArgumentError("`json_unary_operator` expected to be a string.");
-  }
-  std::string json_unary_operator_str = json_unary_operator.get<std::string>();
-  return StringToEUnaryOperator(json_unary_operator_str);
+  return GetRequiredField<EUnaryOperator>(
+      json,
+      "unaryOperator",
+      Enum<EUnaryOperator>(StringToEUnaryOperator)
+  );
 }
 
 absl::StatusOr<EEscapedChar>
 ENode::GetEscapedChar(const nlohmann::json& json) {
-  auto escaped_char_it = json.find("escapedChar");
-  if (escaped_char_it == json.end()) {
-    return absl::InvalidArgumentError("`escapedChar` is undefined.");
-  }
-  const nlohmann::json& json_escaped_char = escaped_char_it.value();
-
-  if (json_escaped_char.is_null()) {
-    return absl::InvalidArgumentError("json_escaped_char is null.");
-  }
-  if (!json_escaped_char.is_string()) {
-    return absl::InvalidArgumentError("`json_escaped_char` expected to be a string.");
-  }
-  std::string json_escaped_char_str = json_escaped_char.get<std::string>();
-  return StringToEEscapedChar(json_escaped_char_str);
+  return GetRequiredField<EEscapedChar>(
+      json,
+      "escapedChar",
+      Enum<EEscapedChar>(StringToEEscapedChar)
+  );
 }
 
 absl::StatusOr<std::unique_ptr<ENode>>

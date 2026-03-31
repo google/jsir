@@ -46,6 +46,7 @@ cc_library(
     srcs = ["vir_to_ast.generated.cc"],
     hdrs = ["vir_to_ast.h"],
     deps = [
+        "//maldoca/astgen:ir_to_ast_util",
         "//maldoca/astgen/test/variant:ast",
         "//maldoca/astgen/test/variant:ir",
         "//maldoca/base:status",
@@ -59,7 +60,6 @@ cc_library(
         "@abseil-cpp//absl/types:variant",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
-        "@llvm-project//mlir:Support",
     ],
 )
 

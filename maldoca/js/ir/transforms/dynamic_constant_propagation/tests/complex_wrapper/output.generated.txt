@@ -26,7 +26,7 @@
 // SOURCE-NEXT:       ^bb0:
 // SOURCE-NEXT:           // <executable>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier   <L 1 C 9>, <L 1 C 12>, "foo", 9, 12, 1, "foo">} ({
+// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier <L 1 C 9>, <L 1 C 12>, "foo", 9, 12, 1, "foo">} ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
@@ -62,7 +62,7 @@
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier   <L 5 C 9>, <L 5 C 12>, "bar", 46, 49, 2, "bar">} ({
+// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier <L 5 C 9>, <L 5 C 12>, "bar", 46, 49, 2, "bar">} ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
@@ -80,7 +80,7 @@
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %19 = jsir.identifier {"foo"}
-// SOURCE-NEXT:                   // %19 = #jsir_builtin<inline_expression_function  "x", 1, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 1>, 1.000000e+00 : f64, "+">>
+// SOURCE-NEXT:                   // %19 = #jsir_builtin<inline_expression_function "x", 1, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 1>, 1.000000e+00 : f64, "+">>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %20 = jsir.identifier {"x"}
 // SOURCE-NEXT:                   // %20 = <unknown>
@@ -113,7 +113,7 @@
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier   <L 9 C 9>, <L 9 C 12>, "baz", 94, 97, 3, "baz">} ({
+// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier <L 9 C 9>, <L 9 C 12>, "baz", 94, 97, 3, "baz">} ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
@@ -155,11 +155,11 @@
 // SOURCE-NEXT:         %0 = jsir.identifier {"console"}
 // SOURCE-NEXT:           // %0 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier   <L 13 C 8>, <L 13 C 11>, "log", 132, 135, 0, "log">}
+// SOURCE-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 13 C 8>, <L 13 C 11>, "log", 132, 135, 0, "log">}
 // SOURCE-NEXT:           // %1 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %2 = jsir.identifier {"foo"}
-// SOURCE-NEXT:           // %2 = #jsir_builtin<inline_expression_function  "x", 1, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 1>, 1.000000e+00 : f64, "+">>
+// SOURCE-NEXT:           // %2 = #jsir_builtin<inline_expression_function "x", 1, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 1>, 1.000000e+00 : f64, "+">>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %3 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
 // SOURCE-NEXT:           // %3 = 1.000000e+00 : f64
@@ -175,11 +175,11 @@
 // SOURCE-NEXT:         %6 = jsir.identifier {"console"}
 // SOURCE-NEXT:           // %6 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %7 = jsir.member_expression (%6) {#jsir<identifier   <L 14 C 8>, <L 14 C 11>, "log", 153, 156, 0, "log">}
+// SOURCE-NEXT:         %7 = jsir.member_expression (%6) {#jsir<identifier <L 14 C 8>, <L 14 C 11>, "log", 153, 156, 0, "log">}
 // SOURCE-NEXT:           // %7 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %8 = jsir.identifier {"bar"}
-// SOURCE-NEXT:           // %8 = #jsir_builtin<inline_expression_function  "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "foo", 0>, #jsir_builtin<inline_expression_binary_expression #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 2>, 1.000000e+00 : f64, "+">, 2.000000e+00 : f64, "*">>>
+// SOURCE-NEXT:           // %8 = #jsir_builtin<inline_expression_function "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "foo", 0>, #jsir_builtin<inline_expression_binary_expression #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 2>, 1.000000e+00 : f64, "+">, 2.000000e+00 : f64, "*">>>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %9 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
 // SOURCE-NEXT:           // %9 = 2.000000e+00 : f64
@@ -195,14 +195,14 @@
 // SOURCE-NEXT:         %12 = jsir.identifier {"console"}
 // SOURCE-NEXT:           // %12 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %13 = jsir.member_expression (%12) {#jsir<identifier   <L 15 C 8>, <L 15 C 11>, "log", 174, 177, 0, "log">}
+// SOURCE-NEXT:         %13 = jsir.member_expression (%12) {#jsir<identifier <L 15 C 8>, <L 15 C 11>, "log", 174, 177, 0, "log">}
 // SOURCE-NEXT:           // %13 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %14 = jsir.identifier {"baz"}
-// SOURCE-NEXT:           // %14 = #jsir_builtin<inline_expression_function  "f", 3,  "x", 3, #jsir_builtin<inline_expression_call #jsir<symbol_id "f", 3>, #jsir<symbol_id "x", 3>>>
+// SOURCE-NEXT:           // %14 = #jsir_builtin<inline_expression_function "f", 3, "x", 3, #jsir_builtin<inline_expression_call #jsir<symbol_id "f", 3>, #jsir<symbol_id "x", 3>>>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %15 = jsir.identifier {"bar"}
-// SOURCE-NEXT:           // %15 = #jsir_builtin<inline_expression_function  "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "foo", 0>, #jsir_builtin<inline_expression_binary_expression #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 2>, 1.000000e+00 : f64, "+">, 2.000000e+00 : f64, "*">>>
+// SOURCE-NEXT:           // %15 = #jsir_builtin<inline_expression_function "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "foo", 0>, #jsir_builtin<inline_expression_binary_expression #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 2>, 1.000000e+00 : f64, "+">, 2.000000e+00 : f64, "*">>>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
 // SOURCE-NEXT:           // %16 = 2.000000e+00 : f64
