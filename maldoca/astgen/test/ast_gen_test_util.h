@@ -32,13 +32,13 @@ struct AstGenTestParam {
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast_def.textproto"
-  std::string ast_def_google3_path;
+  std::string ast_def_path;
 
   // Path to the expected generated TypeScript interface file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast_ts_interface.generated"
-  std::optional<std::string> ts_interface_google3_path;
+  std::optional<std::string> ts_interface_path;
 
   // The C++ namespace for the AST classes in C++.
   // Example:
@@ -64,43 +64,43 @@ struct AstGenTestParam {
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast.generated.h"
-  std::optional<std::string> expected_ast_header_google3_path;
+  std::optional<std::string> expected_ast_header_path;
 
   // Path to the expected "ast.generated.cc" C++ source file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast.generated.cc"
-  std::optional<std::string> expected_ast_source_google3_path;
+  std::optional<std::string> expected_ast_source_path;
 
   // Path to the expected "ast_to_json.generated.cc" C++ source file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast_to_json.generated.cc"
-  std::optional<std::string> expected_ast_to_json_google3_path;
+  std::optional<std::string> expected_ast_to_json_path;
 
   // Path to the expected "ast_from_json.generated.cc" C++ source file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast_from_json.generated.cc"
-  std::optional<std::string> expected_ast_from_json_google3_path;
+  std::optional<std::string> expected_ast_from_json_path;
 
   // Path to the expected "<lang_name>ir_ops.generated.td" TableGen source file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/lambdair_ops.generated.td"
-  std::optional<std::string> expected_ir_tablegen_google3_path;
+  std::optional<std::string> expected_ir_tablegen_path;
 
   // Path to the expected "ast_to_<lang_name>ir.generated.cc" C++ source file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/ast_to_lambdair.generated.cc"
-  std::optional<std::string> expected_ast_to_ir_source_google3_path;
+  std::optional<std::string> expected_ast_to_ir_source_path;
 
   // Path to the expected "<lang_name>ir_to_ast.generated.cc" C++ source file.
   // Should start with "google3/".
   // Example:
   // "maldoca/astgen/test/lambda/lambdair_to_ast.generated.cc"
-  std::optional<std::string> expected_ir_to_ast_source_google3_path;
+  std::optional<std::string> expected_ir_to_ast_source_path;
 };
 
 class AstGenTest : public ::testing::TestWithParam<AstGenTestParam> {

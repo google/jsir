@@ -21,30 +21,26 @@ namespace {
 INSTANTIATE_TEST_SUITE_P(
     Assign, AstGenTest,
     ::testing::Values(AstGenTestParam{
-        .ast_def_google3_path =
-            "maldoca/astgen/test/assign/ast_def.textproto",
-        .ts_interface_google3_path = "maldoca/astgen/test/"
-                                     "assign/ast_ts_interface.generated",
+        .ast_def_path = "maldoca/astgen/test/assign/ast_def.textproto",
+        .ts_interface_path = "maldoca/astgen/test/"
+                             "assign/ast_ts_interface.generated",
         .cc_namespace = "maldoca",
         .ast_path = "maldoca/astgen/test/assign",
         .ir_path = "maldoca/astgen/test/assign",
-        .expected_ast_header_google3_path =
+        .expected_ast_header_path =
             "maldoca/astgen/test/assign/ast.generated.h",
-        .expected_ast_source_google3_path =
+        .expected_ast_source_path =
             "maldoca/astgen/test/assign/ast.generated.cc",
-        .expected_ast_to_json_google3_path =
-            "maldoca/astgen/test/"
-            "assign/ast_to_json.generated.cc",
-        .expected_ast_from_json_google3_path =
-            "maldoca/astgen/test/"
-            "assign/ast_from_json.generated.cc",
-        .expected_ir_tablegen_google3_path =
-            "maldoca/astgen/test/"
-            "assign/air_ops.generated.td",
-        .expected_ast_to_ir_source_google3_path =
+        .expected_ast_to_json_path = "maldoca/astgen/test/"
+                                     "assign/ast_to_json.generated.cc",
+        .expected_ast_from_json_path = "maldoca/astgen/test/"
+                                       "assign/ast_from_json.generated.cc",
+        .expected_ir_tablegen_path = "maldoca/astgen/test/"
+                                     "assign/air_ops.generated.td",
+        .expected_ast_to_ir_source_path =
             "maldoca/astgen/test/assign/conversion/"
             "ast_to_air.generated.cc",
-        .expected_ir_to_ast_source_google3_path =
+        .expected_ir_to_ast_source_path =
             "maldoca/astgen/test/assign/conversion/"
             "air_to_ast.generated.cc",
     }));

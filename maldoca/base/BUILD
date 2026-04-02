@@ -21,7 +21,6 @@ package(
     default_applicable_licenses = ["//:license"],
     default_visibility = [
         "//:__subpackages__",
-        "//security/tagpub/vbsparser:__subpackages__",
     ],
 )
 

@@ -15,8 +15,6 @@
 #ifndef MALDOCA_BASE_GET_RUNFILES_DIR_H_
 #define MALDOCA_BASE_GET_RUNFILES_DIR_H_
 
-// #include "maldoca/base_oss/get_runfiles_dir.h"
-
 #include <string>
 
 #include "absl/strings/string_view.h"
