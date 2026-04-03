@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // TlNode
@@ -137,29 +123,27 @@ TlType::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<bool, int64_t, double, std::string>>
 TlLiteral::GetValue(const nlohmann::json& json) {
-  auto value_it = json.find("value");
-  if (value_it == json.end()) {
-    return absl::InvalidArgumentError("`value` is undefined.");
-  }
-  const nlohmann::json& json_value = value_it.value();
-
-  if (json_value.is_null()) {
-    return absl::InvalidArgumentError("json_value is null.");
-  }
-  if (json_value.is_boolean()) {
-    return json_value.get<bool>();
-  } else if (json_value.is_number_integer()) {
-    return json_value.get<int64_t>();
-  } else if (json_value.is_number()) {
-    return json_value.get<double>();
-  } else if (json_value.is_string()) {
-    return json_value.get<std::string>();
-  } else {
-    auto result = absl::InvalidArgumentError("json_value has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_value.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<bool, int64_t, double, std::string>>(
+      json,
+      "value",
+      Variant(
+          VariantOption<bool>{
+              .predicate = IsBool,
+              .converter = JsonToBool,
+          },
+          VariantOption<int64_t>{
+              .predicate = IsInt64,
+              .converter = JsonToInt64,
+          },
+          VariantOption<double>{
+              .predicate = IsDouble,
+              .converter = JsonToDouble,
+          },
+          VariantOption<std::string>{
+              .predicate = IsString,
+              .converter = JsonToString,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlLiteral>>
@@ -180,19 +164,11 @@ TlLiteral::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 TlVariable::GetIdentifier(const nlohmann::json& json) {
-  auto identifier_it = json.find("identifier");
-  if (identifier_it == json.end()) {
-    return absl::InvalidArgumentError("`identifier` is undefined.");
-  }
-  const nlohmann::json& json_identifier = identifier_it.value();
-
-  if (json_identifier.is_null()) {
-    return absl::InvalidArgumentError("json_identifier is null.");
-  }
-  if (!json_identifier.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_identifier.is_string().");
-  }
-  return json_identifier.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "identifier",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlVariable>>
@@ -213,44 +189,29 @@ TlVariable::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<TlVariable>>
 TlFunctionDefinition::GetParameter(const nlohmann::json& json) {
-  auto parameter_it = json.find("parameter");
-  if (parameter_it == json.end()) {
-    return absl::InvalidArgumentError("`parameter` is undefined.");
-  }
-  const nlohmann::json& json_parameter = parameter_it.value();
-
-  if (json_parameter.is_null()) {
-    return absl::InvalidArgumentError("json_parameter is null.");
-  }
-  return TlVariable::FromJson(json_parameter);
+  return GetRequiredField<std::unique_ptr<TlVariable>>(
+      json,
+      "parameter",
+      TlVariable::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlType>>
 TlFunctionDefinition::GetParameterType(const nlohmann::json& json) {
-  auto parameter_type_it = json.find("parameterType");
-  if (parameter_type_it == json.end()) {
-    return absl::InvalidArgumentError("`parameterType` is undefined.");
-  }
-  const nlohmann::json& json_parameter_type = parameter_type_it.value();
-
-  if (json_parameter_type.is_null()) {
-    return absl::InvalidArgumentError("json_parameter_type is null.");
-  }
-  return TlType::FromJson(json_parameter_type);
+  return GetRequiredField<std::unique_ptr<TlType>>(
+      json,
+      "parameterType",
+      TlType::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlExpression>>
 TlFunctionDefinition::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return TlExpression::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<TlExpression>>(
+      json,
+      "body",
+      TlExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlFunctionDefinition>>
@@ -275,30 +236,20 @@ TlFunctionDefinition::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<TlExpression>>
 TlFunctionCall::GetCaller(const nlohmann::json& json) {
-  auto caller_it = json.find("caller");
-  if (caller_it == json.end()) {
-    return absl::InvalidArgumentError("`caller` is undefined.");
-  }
-  const nlohmann::json& json_caller = caller_it.value();
-
-  if (json_caller.is_null()) {
-    return absl::InvalidArgumentError("json_caller is null.");
-  }
-  return TlExpression::FromJson(json_caller);
+  return GetRequiredField<std::unique_ptr<TlExpression>>(
+      json,
+      "caller",
+      TlExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlExpression>>
 TlFunctionCall::GetCallee(const nlohmann::json& json) {
-  auto callee_it = json.find("callee");
-  if (callee_it == json.end()) {
-    return absl::InvalidArgumentError("`callee` is undefined.");
-  }
-  const nlohmann::json& json_callee = callee_it.value();
-
-  if (json_callee.is_null()) {
-    return absl::InvalidArgumentError("json_callee is null.");
-  }
-  return TlExpression::FromJson(json_callee);
+  return GetRequiredField<std::unique_ptr<TlExpression>>(
+      json,
+      "callee",
+      TlExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlFunctionCall>>
@@ -336,30 +287,20 @@ TlLiteralType::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<TlType>>
 TlFunctionType::GetParameterType(const nlohmann::json& json) {
-  auto parameter_type_it = json.find("parameterType");
-  if (parameter_type_it == json.end()) {
-    return absl::InvalidArgumentError("`parameterType` is undefined.");
-  }
-  const nlohmann::json& json_parameter_type = parameter_type_it.value();
-
-  if (json_parameter_type.is_null()) {
-    return absl::InvalidArgumentError("json_parameter_type is null.");
-  }
-  return TlType::FromJson(json_parameter_type);
+  return GetRequiredField<std::unique_ptr<TlType>>(
+      json,
+      "parameterType",
+      TlType::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlType>>
 TlFunctionType::GetBodyType(const nlohmann::json& json) {
-  auto body_type_it = json.find("bodyType");
-  if (body_type_it == json.end()) {
-    return absl::InvalidArgumentError("`bodyType` is undefined.");
-  }
-  const nlohmann::json& json_body_type = body_type_it.value();
-
-  if (json_body_type.is_null()) {
-    return absl::InvalidArgumentError("json_body_type is null.");
-  }
-  return TlType::FromJson(json_body_type);
+  return GetRequiredField<std::unique_ptr<TlType>>(
+      json,
+      "bodyType",
+      TlType::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<TlFunctionType>>

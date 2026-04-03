@@ -14,6 +14,8 @@
 
 #include "maldoca/js/ir/ir.h"
 
+#include <memory>
+
 // IWYU pragma: begin_keep
 
 #include "llvm/ADT/APSInt.h"
@@ -32,6 +34,8 @@
 #include "mlir/IR/OpDefinition.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/Region.h"
+#include "maldoca/js/quickjs/quickjs.h"
+#include "quickjs/quickjs.h"
 
 // IWYU pragma: end_keep
 
@@ -57,6 +61,10 @@ void maldoca::JsirDialect::initialize() {
 #define GET_ATTRDEF_LIST
 #include "maldoca/js/ir/jsir_attrs.cc.inc"
       >();
+
+  qjs_runtime = std::unique_ptr<JSRuntime, QjsRuntimeDeleter>(JS_NewRuntime());
+  qjs_context = std::unique_ptr<JSContext, QjsContextDeleter>(
+      JS_NewContext(qjs_runtime.get()));
 }
 
 void maldoca::JshirDialect::initialize() {
@@ -75,21 +83,21 @@ void maldoca::JshirDialect::initialize() {
 mlir::Operation *maldoca::JsirDialect::materializeConstant(
     mlir::OpBuilder &builder, mlir::Attribute value, mlir::Type type,
     mlir::Location loc) {
-  return llvm::TypeSwitch<mlir::Attribute, mlir::Operation *>(value)
+  return llvm::TypeSwitch<mlir::Attribute, mlir::Operation*>(value)
       .Case([&](mlir::BoolAttr value) {
-        return builder.create<JsirBooleanLiteralOp>(loc, value);
+        return JsirBooleanLiteralOp::create(builder, loc, value);
       })
       .Case([&](mlir::FloatAttr value) {
-        return builder.create<JsirNumericLiteralOp>(loc, value,
-                                                    /*extra=*/nullptr);
+        return JsirNumericLiteralOp::create(builder, loc, value,
+                                            /*extra=*/nullptr);
       })
       .Case([&](mlir::StringAttr value) {
-        return builder.create<JsirStringLiteralOp>(loc, value,
-                                                   /*extra=*/nullptr);
+        return JsirStringLiteralOp::create(builder, loc, value,
+                                           /*extra=*/nullptr);
       })
       .Case([&](JsirBigIntLiteralAttr value) {
-        return builder.create<JsirBigIntLiteralOp>(loc, value.getValue(),
-                                                   value.getExtra());
+        return JsirBigIntLiteralOp::create(builder, loc, value.getValue(),
+                                           value.getExtra());
       })
       .Default([](mlir::Attribute value) { return nullptr; });
 }

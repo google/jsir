@@ -46,6 +46,7 @@ cc_library(
     srcs = ["air_to_ast.generated.cc"],
     hdrs = ["air_to_ast.h"],
     deps = [
+        "//maldoca/astgen:ir_to_ast_util",
         "//maldoca/astgen/test/assign:ast",
         "//maldoca/astgen/test/assign:ir",
         "//maldoca/base:status",

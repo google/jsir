@@ -45,33 +45,33 @@
 
 namespace maldoca {
 
-VirBaseClassOpInterface AstToVir::VisitBaseClass(const VBaseClass *node) {
+VirBaseClassOpInterface AstToVir::VisitBaseClass(mlir::OpBuilder &builder, const VBaseClass *node) {
   if (auto *derived_class1 = dynamic_cast<const VDerivedClass1 *>(node)) {
-    return VisitDerivedClass1(derived_class1);
+    return VisitDerivedClass1(builder, derived_class1);
   }
   if (auto *derived_class2 = dynamic_cast<const VDerivedClass2 *>(node)) {
-    return VisitDerivedClass2(derived_class2);
+    return VisitDerivedClass2(builder, derived_class2);
   }
   LOG(FATAL) << "Unreachable code.";
 }
 
-VirDerivedClass1Op AstToVir::VisitDerivedClass1(const VDerivedClass1 *node) {
-  return CreateExpr<VirDerivedClass1Op>(node);
+VirDerivedClass1Op AstToVir::VisitDerivedClass1(mlir::OpBuilder &builder, const VDerivedClass1 *node) {
+  return CreateExpr<VirDerivedClass1Op>(builder, node);
 }
 
-VirDerivedClass2Op AstToVir::VisitDerivedClass2(const VDerivedClass2 *node) {
-  return CreateExpr<VirDerivedClass2Op>(node);
+VirDerivedClass2Op AstToVir::VisitDerivedClass2(mlir::OpBuilder &builder, const VDerivedClass2 *node) {
+  return CreateExpr<VirDerivedClass2Op>(builder, node);
 }
 
-VirNodeOp AstToVir::VisitNode(const VNode *node) {
+VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
   mlir::Attribute mlir_simple_variant_builtin;
   switch (node->simple_variant_builtin().index()) {
     case 0: {
-      mlir_simple_variant_builtin = builder_.getF64FloatAttr(std::get<0>(node->simple_variant_builtin()));
+      mlir_simple_variant_builtin = builder.getF64FloatAttr(std::get<0>(node->simple_variant_builtin()));
       break;
     }
     case 1: {
-      mlir_simple_variant_builtin = builder_.getStringAttr(std::get<1>(node->simple_variant_builtin()));
+      mlir_simple_variant_builtin = builder.getStringAttr(std::get<1>(node->simple_variant_builtin()));
       break;
     }
     default:
@@ -81,11 +81,11 @@ VirNodeOp AstToVir::VisitNode(const VNode *node) {
   if (node->nullable_variant_builtin().has_value()) {
     switch (node->nullable_variant_builtin().value().index()) {
       case 0: {
-        mlir_nullable_variant_builtin = builder_.getF64FloatAttr(std::get<0>(node->nullable_variant_builtin().value()));
+        mlir_nullable_variant_builtin = builder.getF64FloatAttr(std::get<0>(node->nullable_variant_builtin().value()));
         break;
       }
       case 1: {
-        mlir_nullable_variant_builtin = builder_.getStringAttr(std::get<1>(node->nullable_variant_builtin().value()));
+        mlir_nullable_variant_builtin = builder.getStringAttr(std::get<1>(node->nullable_variant_builtin().value()));
         break;
       }
       default:
@@ -96,11 +96,11 @@ VirNodeOp AstToVir::VisitNode(const VNode *node) {
   if (node->optional_variant_builtin().has_value()) {
     switch (node->optional_variant_builtin().value().index()) {
       case 0: {
-        mlir_optional_variant_builtin = builder_.getF64FloatAttr(std::get<0>(node->optional_variant_builtin().value()));
+        mlir_optional_variant_builtin = builder.getF64FloatAttr(std::get<0>(node->optional_variant_builtin().value()));
         break;
       }
       case 1: {
-        mlir_optional_variant_builtin = builder_.getStringAttr(std::get<1>(node->optional_variant_builtin().value()));
+        mlir_optional_variant_builtin = builder.getStringAttr(std::get<1>(node->optional_variant_builtin().value()));
         break;
       }
       default:
@@ -110,11 +110,11 @@ VirNodeOp AstToVir::VisitNode(const VNode *node) {
   mlir::Value mlir_simple_variant_class;
   switch (node->simple_variant_class().index()) {
     case 0: {
-      mlir_simple_variant_class = VisitDerivedClass1(std::get<0>(node->simple_variant_class()));
+      mlir_simple_variant_class = VisitDerivedClass1(builder, std::get<0>(node->simple_variant_class()));
       break;
     }
     case 1: {
-      mlir_simple_variant_class = VisitDerivedClass2(std::get<1>(node->simple_variant_class()));
+      mlir_simple_variant_class = VisitDerivedClass2(builder, std::get<1>(node->simple_variant_class()));
       break;
     }
     default:
@@ -124,11 +124,11 @@ VirNodeOp AstToVir::VisitNode(const VNode *node) {
   if (node->nullable_variant_class().has_value()) {
     switch (node->nullable_variant_class().value().index()) {
       case 0: {
-        mlir_nullable_variant_class = VisitDerivedClass1(std::get<0>(node->nullable_variant_class().value()));
+        mlir_nullable_variant_class = VisitDerivedClass1(builder, std::get<0>(node->nullable_variant_class().value()));
         break;
       }
       case 1: {
-        mlir_nullable_variant_class = VisitDerivedClass2(std::get<1>(node->nullable_variant_class().value()));
+        mlir_nullable_variant_class = VisitDerivedClass2(builder, std::get<1>(node->nullable_variant_class().value()));
         break;
       }
       default:
@@ -139,18 +139,18 @@ VirNodeOp AstToVir::VisitNode(const VNode *node) {
   if (node->optional_variant_class().has_value()) {
     switch (node->optional_variant_class().value().index()) {
       case 0: {
-        mlir_optional_variant_class = VisitDerivedClass1(std::get<0>(node->optional_variant_class().value()));
+        mlir_optional_variant_class = VisitDerivedClass1(builder, std::get<0>(node->optional_variant_class().value()));
         break;
       }
       case 1: {
-        mlir_optional_variant_class = VisitDerivedClass2(std::get<1>(node->optional_variant_class().value()));
+        mlir_optional_variant_class = VisitDerivedClass2(builder, std::get<1>(node->optional_variant_class().value()));
         break;
       }
       default:
         LOG(FATAL) << "Unreachable code.";
     }
   }
-  return CreateExpr<VirNodeOp>(node, mlir_simple_variant_builtin, mlir_nullable_variant_builtin, mlir_optional_variant_builtin, mlir_simple_variant_class, mlir_nullable_variant_class, mlir_optional_variant_class);
+  return CreateExpr<VirNodeOp>(builder, node, mlir_simple_variant_builtin, mlir_nullable_variant_builtin, mlir_optional_variant_builtin, mlir_simple_variant_class, mlir_nullable_variant_class, mlir_optional_variant_class);
 }
 
 // clang-format on

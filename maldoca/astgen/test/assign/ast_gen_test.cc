@@ -21,10 +21,9 @@ namespace {
 INSTANTIATE_TEST_SUITE_P(
     Assign, AstGenTest,
     ::testing::Values(AstGenTestParam{
-        .ast_def_path =
-            "maldoca/astgen/test/assign/ast_def.textproto",
+        .ast_def_path = "maldoca/astgen/test/assign/ast_def.textproto",
         .ts_interface_path = "maldoca/astgen/test/"
-                                     "assign/ast_ts_interface.generated",
+                             "assign/ast_ts_interface.generated",
         .cc_namespace = "maldoca",
         .ast_path = "maldoca/astgen/test/assign",
         .ir_path = "maldoca/astgen/test/assign",
@@ -32,15 +31,12 @@ INSTANTIATE_TEST_SUITE_P(
             "maldoca/astgen/test/assign/ast.generated.h",
         .expected_ast_source_path =
             "maldoca/astgen/test/assign/ast.generated.cc",
-        .expected_ast_to_json_path =
-            "maldoca/astgen/test/"
-            "assign/ast_to_json.generated.cc",
-        .expected_ast_from_json_path =
-            "maldoca/astgen/test/"
-            "assign/ast_from_json.generated.cc",
-        .expected_ir_tablegen_path =
-            "maldoca/astgen/test/"
-            "assign/air_ops.generated.td",
+        .expected_ast_to_json_path = "maldoca/astgen/test/"
+                                     "assign/ast_to_json.generated.cc",
+        .expected_ast_from_json_path = "maldoca/astgen/test/"
+                                       "assign/ast_from_json.generated.cc",
+        .expected_ir_tablegen_path = "maldoca/astgen/test/"
+                                     "assign/air_ops.generated.td",
         .expected_ast_to_ir_source_path =
             "maldoca/astgen/test/assign/conversion/"
             "ast_to_air.generated.cc",

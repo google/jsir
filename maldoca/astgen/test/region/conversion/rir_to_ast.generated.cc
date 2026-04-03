@@ -48,6 +48,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
+#include "maldoca/astgen/ir_to_ast_util.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/region/ast.generated.h"
 #include "maldoca/astgen/test/region/ir.h"
@@ -62,13 +63,13 @@ RirToAst::VisitExpr(RirExprOp op) {
 
 absl::StatusOr<std::unique_ptr<RStmt>>
 RirToAst::VisitStmt(RirStmtOp op) {
-  auto expr_op = llvm::dyn_cast<RirExprOp>(op.getExpr().getDefiningOp());
-  if (expr_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected RirExprOp, got ",
-                     op.getExpr().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<RExpr> expr, VisitExpr(expr_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto expr,
+      Convert(
+          op.getExpr(),
+          ToOpConverter(VisitExpr)
+      )
+  );
   return Create<RStmt>(
       op,
       std::move(expr));
@@ -76,66 +77,68 @@ RirToAst::VisitStmt(RirStmtOp op) {
 
 absl::StatusOr<std::unique_ptr<RNode>>
 RirToAst::VisitNode(RirNodeOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_expr_value, GetExprRegionValue(op.getExpr()));
-  auto expr_op = llvm::dyn_cast<RirExprOp>(mlir_expr_value.getDefiningOp());
-  if (expr_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected RirExprOp, got ",
-                     mlir_expr_value.getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<RExpr> expr, VisitExpr(expr_op));
-  std::optional<std::unique_ptr<RExpr>> optional_expr;
-  if (!op.getOptionalExpr().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_optional_expr_value, GetExprRegionValue(op.getOptionalExpr()));
-    auto optional_expr_op = llvm::dyn_cast<RirExprOp>(mlir_optional_expr_value.getDefiningOp());
-    if (optional_expr_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected RirExprOp, got ",
-                       mlir_optional_expr_value.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(optional_expr, VisitExpr(optional_expr_op));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_exprs_values, GetExprsRegionValues(op.getExprs()));
-  std::vector<std::unique_ptr<RExpr>> exprs;
-  for (mlir::Value mlir_exprs_element_unchecked : mlir_exprs_values) {
-    auto exprs_element_op = llvm::dyn_cast<RirExprOp>(mlir_exprs_element_unchecked.getDefiningOp());
-    if (exprs_element_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected RirExprOp, got ",
-                       mlir_exprs_element_unchecked.getDefiningOp()->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<RExpr> exprs_element, VisitExpr(exprs_element_op));
-    exprs.push_back(std::move(exprs_element));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_stmt_operation, GetStmtRegionOperation(op.getStmt()));
-  auto stmt_op = llvm::dyn_cast<RirStmtOp>(mlir_stmt_operation);
-  if (stmt_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected RirStmtOp, got ",
-                     mlir_stmt_operation->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<RStmt> stmt, VisitStmt(stmt_op));
-  std::optional<std::unique_ptr<RStmt>> optional_stmt;
-  if (!op.getOptionalStmt().empty()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_optional_stmt_operation, GetStmtRegionOperation(op.getOptionalStmt()));
-    auto optional_stmt_op = llvm::dyn_cast<RirStmtOp>(mlir_optional_stmt_operation);
-    if (optional_stmt_op == nullptr) {
-      return absl::InvalidArgumentError(
-          absl::StrCat("Expected RirStmtOp, got ",
-                       mlir_optional_stmt_operation->getName().getStringRef().str(), "."));
-    }
-    MALDOCA_ASSIGN_OR_RETURN(optional_stmt, VisitStmt(optional_stmt_op));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(auto mlir_stmts_block, GetStmtsRegionBlock(op.getStmts()));
-  std::vector<std::unique_ptr<RStmt>> stmts;
-  for (mlir::Operation& mlir_stmts_element_unchecked : *mlir_stmts_block) {
-    auto stmts_element_op = llvm::dyn_cast<RirStmtOp>(mlir_stmts_element_unchecked);
-    if (stmts_element_op == nullptr) {
-      continue;
-    }
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<RStmt> stmts_element, VisitStmt(stmts_element_op));
-    stmts.push_back(std::move(stmts_element));
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto expr,
+      Convert(
+          op.getExpr(),
+          ExprRegion<RirExprRegionEndOp>(
+              ToOpConverter(VisitExpr)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto optional_expr,
+      Convert(
+          op.getOptionalExpr(),
+          Nullable(
+              ExprRegion<RirExprRegionEndOp>(
+                  ToOpConverter(VisitExpr)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto exprs,
+      Convert(
+          op.getExprs(),
+          ExprsRegion<RirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitExpr)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto stmt,
+      Convert(
+          op.getStmt(),
+          StmtRegion(
+              ToOpConverter(VisitStmt)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto optional_stmt,
+      Convert(
+          op.getOptionalStmt(),
+          Nullable(
+              StmtRegion(
+                  ToOpConverter(VisitStmt)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto stmts,
+      Convert(
+          op.getStmts(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitStmt)
+              )
+          )
+      )
+  );
   return Create<RNode>(
       op,
       std::move(expr),

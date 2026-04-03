@@ -26,37 +26,37 @@ namespace maldoca {
 
 class LiirToAst {
  public:
-  absl::StatusOr<std::unique_ptr<LiClass1>> VisitClass1(LiirClass1Op op);
+  static absl::StatusOr<std::unique_ptr<LiClass1>> VisitClass1(LiirClass1Op op);
 
-  absl::StatusOr<std::unique_ptr<LiClass2>> VisitClass2(LiirClass2Op op);
+  static absl::StatusOr<std::unique_ptr<LiClass2>> VisitClass2(LiirClass2Op op);
 
-  absl::StatusOr<std::unique_ptr<LiSimpleList>> VisitSimpleList(
+  static absl::StatusOr<std::unique_ptr<LiSimpleList>> VisitSimpleList(
       LiirSimpleListOp op);
 
-  absl::StatusOr<std::unique_ptr<LiOptionalList>> VisitOptionalList(
+  static absl::StatusOr<std::unique_ptr<LiOptionalList>> VisitOptionalList(
       LiirOptionalListOp op);
 
-  absl::StatusOr<std::unique_ptr<LiListOfOptional>> VisitListOfOptional(
+  static absl::StatusOr<std::unique_ptr<LiListOfOptional>> VisitListOfOptional(
       LiirListOfOptionalOp op);
 
-  absl::StatusOr<std::unique_ptr<LiListOfVariant>> VisitListOfVariant(
+  static absl::StatusOr<std::unique_ptr<LiListOfVariant>> VisitListOfVariant(
       LiirListOfVariantOp op);
 
-  absl::StatusOr<std::unique_ptr<LiOptionalListOfOptional>>
+  static absl::StatusOr<std::unique_ptr<LiOptionalListOfOptional>>
   VisitOptionalListOfOptional(LiirOptionalListOfOptionalOp op);
 
-  absl::StatusOr<std::unique_ptr<LiOptionalListOfVariant>>
+  static absl::StatusOr<std::unique_ptr<LiOptionalListOfVariant>>
   VisitOptionalListOfVariant(LiirOptionalListOfVariantOp op);
 
-  absl::StatusOr<std::unique_ptr<LiListOfOptionalVariant>>
+  static absl::StatusOr<std::unique_ptr<LiListOfOptionalVariant>>
   VisitListOfOptionalVariant(LiirListOfOptionalVariantOp op);
 
-  absl::StatusOr<std::unique_ptr<LiOptionalListOfOptionalVariant>>
+  static absl::StatusOr<std::unique_ptr<LiOptionalListOfOptionalVariant>>
   VisitOptionalListOfOptionalVariant(LiirOptionalListOfOptionalVariantOp op);
 
  private:
   template <typename T, typename... Args>
-  std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
+  static std::unique_ptr<T> Create(mlir::Operation *op, Args &&...args) {
     return absl::make_unique<T>(std::forward<Args>(args)...);
   }
 };

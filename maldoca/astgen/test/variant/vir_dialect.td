@@ -39,4 +39,6 @@ class Vir_Type<string name, list<Trait> traits = [],
 class Vir_Op<string mnemonic, list<Trait> traits = []> :
     Op<Vir_Dialect, mnemonic, traits>;
 
+def VirNoneOp : Vir_Op<"none", []> {}
+
 #endif  // MALDOCA_ASTGEN_TEST_VARIANT_VIR_DIALECT_TD_

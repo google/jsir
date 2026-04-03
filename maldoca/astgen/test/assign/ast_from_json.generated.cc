@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // AExpression
@@ -81,19 +67,11 @@ AExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 AIdentifier::GetName(const nlohmann::json& json) {
-  auto name_it = json.find("name");
-  if (name_it == json.end()) {
-    return absl::InvalidArgumentError("`name` is undefined.");
-  }
-  const nlohmann::json& json_name = name_it.value();
-
-  if (json_name.is_null()) {
-    return absl::InvalidArgumentError("json_name is null.");
-  }
-  if (!json_name.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_name.is_string().");
-  }
-  return json_name.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "name",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
@@ -114,30 +92,20 @@ AIdentifier::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
 AAssignment::GetLhs(const nlohmann::json& json) {
-  auto lhs_it = json.find("lhs");
-  if (lhs_it == json.end()) {
-    return absl::InvalidArgumentError("`lhs` is undefined.");
-  }
-  const nlohmann::json& json_lhs = lhs_it.value();
-
-  if (json_lhs.is_null()) {
-    return absl::InvalidArgumentError("json_lhs is null.");
-  }
-  return AIdentifier::FromJson(json_lhs);
+  return GetRequiredField<std::unique_ptr<AIdentifier>>(
+      json,
+      "lhs",
+      AIdentifier::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<AExpression>>
 AAssignment::GetRhs(const nlohmann::json& json) {
-  auto rhs_it = json.find("rhs");
-  if (rhs_it == json.end()) {
-    return absl::InvalidArgumentError("`rhs` is undefined.");
-  }
-  const nlohmann::json& json_rhs = rhs_it.value();
-
-  if (json_rhs.is_null()) {
-    return absl::InvalidArgumentError("json_rhs is null.");
-  }
-  return AExpression::FromJson(json_rhs);
+  return GetRequiredField<std::unique_ptr<AExpression>>(
+      json,
+      "rhs",
+      AExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<AAssignment>>

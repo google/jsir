@@ -45,52 +45,52 @@
 
 namespace maldoca {
 
-RirExprOp AstToRir::VisitExpr(const RExpr *node) {
-  return CreateExpr<RirExprOp>(node);
+RirExprOp AstToRir::VisitExpr(mlir::OpBuilder &builder, const RExpr *node) {
+  return CreateExpr<RirExprOp>(builder, node);
 }
 
-RirStmtOp AstToRir::VisitStmt(const RStmt *node) {
-  mlir::Value mlir_expr = VisitExpr(node->expr());
-  return CreateStmt<RirStmtOp>(node, mlir_expr);
+RirStmtOp AstToRir::VisitStmt(mlir::OpBuilder &builder, const RStmt *node) {
+  mlir::Value mlir_expr = VisitExpr(builder, node->expr());
+  return CreateStmt<RirStmtOp>(builder, node, mlir_expr);
 }
 
-RirNodeOp AstToRir::VisitNode(const RNode *node) {
-  auto op = CreateExpr<RirNodeOp>(node);
+RirNodeOp AstToRir::VisitNode(mlir::OpBuilder &builder, const RNode *node) {
+  auto op = CreateExpr<RirNodeOp>(builder, node);
   mlir::Region &mlir_expr_region = op.getExpr();
-  AppendNewBlockAndPopulate(mlir_expr_region, [&] {
-    mlir::Value mlir_expr = VisitExpr(node->expr());
-    CreateStmt<RirExprRegionEndOp>(node, mlir_expr);
+  AppendNewBlockAndPopulate(builder, mlir_expr_region, [&] {
+    mlir::Value mlir_expr = VisitExpr(builder, node->expr());
+    CreateStmt<RirExprRegionEndOp>(builder, nullptr, mlir_expr);
   });
   if (node->optional_expr().has_value()) {
     mlir::Region &mlir_optional_expr_region = op.getOptionalExpr();
-    AppendNewBlockAndPopulate(mlir_optional_expr_region, [&] {
-      mlir::Value mlir_optional_expr = VisitExpr(node->optional_expr().value());
-      CreateStmt<RirExprRegionEndOp>(node, mlir_optional_expr);
+    AppendNewBlockAndPopulate(builder, mlir_optional_expr_region, [&] {
+      mlir::Value mlir_optional_expr = VisitExpr(builder, node->optional_expr().value());
+      CreateStmt<RirExprRegionEndOp>(builder, nullptr, mlir_optional_expr);
     });
   }
   mlir::Region &mlir_exprs_region = op.getExprs();
-  AppendNewBlockAndPopulate(mlir_exprs_region, [&] {
+  AppendNewBlockAndPopulate(builder, mlir_exprs_region, [&] {
     std::vector<mlir::Value> mlir_exprs;
     for (const auto &element : *node->exprs()) {
-      mlir::Value mlir_element = VisitExpr(element.get());
+      mlir::Value mlir_element = VisitExpr(builder, element.get());
       mlir_exprs.push_back(std::move(mlir_element));
     }
-    CreateStmt<RirExprsRegionEndOp>(node, mlir_exprs);
+    CreateStmt<RirExprsRegionEndOp>(builder, nullptr, mlir_exprs);
   });
   mlir::Region &mlir_stmt_region = op.getStmt();
-  AppendNewBlockAndPopulate(mlir_stmt_region, [&] {
-    VisitStmt(node->stmt());
+  AppendNewBlockAndPopulate(builder, mlir_stmt_region, [&] {
+    VisitStmt(builder, node->stmt());
   });
   if (node->optional_stmt().has_value()) {
     mlir::Region &mlir_optional_stmt_region = op.getOptionalStmt();
-    AppendNewBlockAndPopulate(mlir_optional_stmt_region, [&] {
-      VisitStmt(node->optional_stmt().value());
+    AppendNewBlockAndPopulate(builder, mlir_optional_stmt_region, [&] {
+      VisitStmt(builder, node->optional_stmt().value());
     });
   }
   mlir::Region &mlir_stmts_region = op.getStmts();
-  AppendNewBlockAndPopulate(mlir_stmts_region, [&] {
+  AppendNewBlockAndPopulate(builder, mlir_stmts_region, [&] {
     for (const auto &element : *node->stmts()) {
-      VisitStmt(element.get());
+      VisitStmt(builder, element.get());
     }
   });
   return op;

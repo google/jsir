@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // LaExpression
@@ -83,19 +69,11 @@ LaExpression::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 LaVariable::GetIdentifier(const nlohmann::json& json) {
-  auto identifier_it = json.find("identifier");
-  if (identifier_it == json.end()) {
-    return absl::InvalidArgumentError("`identifier` is undefined.");
-  }
-  const nlohmann::json& json_identifier = identifier_it.value();
-
-  if (json_identifier.is_null()) {
-    return absl::InvalidArgumentError("json_identifier is null.");
-  }
-  if (!json_identifier.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_identifier.is_string().");
-  }
-  return json_identifier.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "identifier",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LaVariable>>
@@ -116,30 +94,20 @@ LaVariable::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<LaVariable>>
 LaFunctionDefinition::GetParameter(const nlohmann::json& json) {
-  auto parameter_it = json.find("parameter");
-  if (parameter_it == json.end()) {
-    return absl::InvalidArgumentError("`parameter` is undefined.");
-  }
-  const nlohmann::json& json_parameter = parameter_it.value();
-
-  if (json_parameter.is_null()) {
-    return absl::InvalidArgumentError("json_parameter is null.");
-  }
-  return LaVariable::FromJson(json_parameter);
+  return GetRequiredField<std::unique_ptr<LaVariable>>(
+      json,
+      "parameter",
+      LaVariable::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LaExpression>>
 LaFunctionDefinition::GetBody(const nlohmann::json& json) {
-  auto body_it = json.find("body");
-  if (body_it == json.end()) {
-    return absl::InvalidArgumentError("`body` is undefined.");
-  }
-  const nlohmann::json& json_body = body_it.value();
-
-  if (json_body.is_null()) {
-    return absl::InvalidArgumentError("json_body is null.");
-  }
-  return LaExpression::FromJson(json_body);
+  return GetRequiredField<std::unique_ptr<LaExpression>>(
+      json,
+      "body",
+      LaExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LaFunctionDefinition>>
@@ -162,30 +130,20 @@ LaFunctionDefinition::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<LaExpression>>
 LaFunctionCall::GetFunction(const nlohmann::json& json) {
-  auto function_it = json.find("function");
-  if (function_it == json.end()) {
-    return absl::InvalidArgumentError("`function` is undefined.");
-  }
-  const nlohmann::json& json_function = function_it.value();
-
-  if (json_function.is_null()) {
-    return absl::InvalidArgumentError("json_function is null.");
-  }
-  return LaExpression::FromJson(json_function);
+  return GetRequiredField<std::unique_ptr<LaExpression>>(
+      json,
+      "function",
+      LaExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LaExpression>>
 LaFunctionCall::GetArgument(const nlohmann::json& json) {
-  auto argument_it = json.find("argument");
-  if (argument_it == json.end()) {
-    return absl::InvalidArgumentError("`argument` is undefined.");
-  }
-  const nlohmann::json& json_argument = argument_it.value();
-
-  if (json_argument.is_null()) {
-    return absl::InvalidArgumentError("json_argument is null.");
-  }
-  return LaExpression::FromJson(json_argument);
+  return GetRequiredField<std::unique_ptr<LaExpression>>(
+      json,
+      "argument",
+      LaExpression::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<LaFunctionCall>>

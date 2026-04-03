@@ -194,7 +194,8 @@ class JsirConstantPropagationAnalysis
       llvm::MutableArrayRef<JsirStateRef<JsirConstantPropagationValue>> results,
       JsirStateRef<JsirConstantPropagationState> after);
 
-  bool IsCfgEdgeExecutable(JsirGeneralCfgEdge *edge) override;
+  bool IsCfgEdgeExecutable(JsirGeneralCfgEdge *edge, mlir::MLIRContext *context)
+      override;
 
   void VisitOp(
       mlir::Operation *op,

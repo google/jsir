@@ -18,13 +18,21 @@ package(default_applicable_licenses = ["//:license"])
 
 licenses(["notice"])
 
-glob_lit_tests(
-    name = "all_tests",
-    data = [
+filegroup(
+    name = "test_files",
+    srcs = [
         "ast.json",
         "input.js",
         "jshir.mlir",
         "output.js",
+    ],
+    tags = ["ignore_srcs"],
+)
+
+glob_lit_tests(
+    name = "all_tests",
+    data = [
+        ":test_files",
         "//maldoca/js/ir:lit_test_files",
     ],
     test_file_exts = [

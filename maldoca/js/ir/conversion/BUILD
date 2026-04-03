@@ -61,6 +61,7 @@ cc_library(
         "jsir_to_ast.h",
     ],
     deps = [
+        "//maldoca/astgen:ir_to_ast_util",
         "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/ir",

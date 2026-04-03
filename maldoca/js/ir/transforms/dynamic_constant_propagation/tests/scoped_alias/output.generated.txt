@@ -40,7 +40,7 @@
 // SOURCE-NEXT:         %0 = jsir.identifier {"console"}
 // SOURCE-NEXT:           // %0 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier   <L 13 C 8>, <L 13 C 11>, "log", 176, 179, 0, "log">}
+// SOURCE-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 13 C 8>, <L 13 C 11>, "log", 176, 179, 0, "log">}
 // SOURCE-NEXT:           // %1 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %2 = jsir.identifier {"prelude_1"}
@@ -74,7 +74,7 @@
 // SOURCE-NEXT:         %5 = jsir.identifier {"console"}
 // SOURCE-NEXT:           // %5 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:         %6 = jsir.member_expression (%5) {#jsir<identifier   <L 16 C 8>, <L 16 C 11>, "log", 228, 231, 0, "log">}
+// SOURCE-NEXT:         %6 = jsir.member_expression (%5) {#jsir<identifier <L 16 C 8>, <L 16 C 11>, "log", 228, 231, 0, "log">}
 // SOURCE-NEXT:           // %6 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
 // SOURCE-NEXT:         %7 = jsir.identifier {"wrapper"}
@@ -112,7 +112,7 @@
 // SOURCE-NEXT:             %10 = jsir.identifier {"console"}
 // SOURCE-NEXT:               // %10 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:             %11 = jsir.member_expression (%10) {#jsir<identifier   <L 20 C 10>, <L 20 C 13>, "log", 284, 287, 4, "log">}
+// SOURCE-NEXT:             %11 = jsir.member_expression (%10) {#jsir<identifier <L 20 C 10>, <L 20 C 13>, "log", 284, 287, 4, "log">}
 // SOURCE-NEXT:               // %11 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
 // SOURCE-NEXT:             %12 = jsir.identifier {"wrapper"}
@@ -133,7 +133,7 @@
 // SOURCE-NEXT:                 %15 = jsir.identifier {"console"}
 // SOURCE-NEXT:                   // %15 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:                 %16 = jsir.member_expression (%15) {#jsir<identifier   <L 22 C 12>, <L 22 C 15>, "log", 316, 319, 5, "log">}
+// SOURCE-NEXT:                 %16 = jsir.member_expression (%15) {#jsir<identifier <L 22 C 12>, <L 22 C 15>, "log", 316, 319, 5, "log">}
 // SOURCE-NEXT:                   // %16 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
 // SOURCE-NEXT:                 %17 = jsir.identifier {"wrapper"}
@@ -159,7 +159,7 @@
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
 // SOURCE-NEXT:         })
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier   <L 26 C 9>, <L 26 C 12>, "foo", 348, 351, 6, "foo">} ({
+// SOURCE-NEXT:         jsir.function_declaration {false, false, #jsir<identifier <L 26 C 9>, <L 26 C 12>, "foo", 348, 351, 6, "foo">} ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
@@ -193,7 +193,7 @@
 // SOURCE-NEXT:                 %10 = jsir.identifier {"console"}
 // SOURCE-NEXT:                   // %10 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
-// SOURCE-NEXT:                 %11 = jsir.member_expression (%10) {#jsir<identifier   <L 28 C 10>, <L 28 C 13>, "log", 393, 396, 6, "log">}
+// SOURCE-NEXT:                 %11 = jsir.member_expression (%10) {#jsir<identifier <L 28 C 10>, <L 28 C 13>, "log", 393, 396, 6, "log">}
 // SOURCE-NEXT:                   // %11 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#6 : #jsir_builtin<builtin_function "prelude_3">> }
 // SOURCE-NEXT:                 %12 = jsir.identifier {"wrapper"}

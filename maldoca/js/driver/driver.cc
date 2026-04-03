@@ -27,6 +27,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/time.h"
 #include "absl/types/span.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/js/babel/babel.h"
@@ -49,8 +50,6 @@ std::ostream &operator<<(std::ostream &os, JsReprKind kind) {
       return os << "Ast";
     case JsReprKind::kJshir:
       return os << "Jshir";
-    case JsReprKind::kJslir:
-      return os << "Jslir";
   }
 }
 
@@ -64,7 +63,6 @@ absl::StatusOr<std::unique_ptr<JsRepr>> JsRepr::FromProto(
     case JsReprPb::kBabelAstString:
       return std::make_unique<JsAstStringRepr>(proto.babel_ast_string());
     case JsReprPb::kJsHir:
-    case JsReprPb::kJsLir:
       return absl::UnimplementedError("JSIR parsing not supported");
   }
 }
@@ -84,12 +82,6 @@ absl::StatusOr<JsReprPb> JsAstStringRepr::ToProto() const {
 absl::StatusOr<JsReprPb> JsHirRepr::ToProto() const {
   JsReprPb proto;
   proto.set_js_hir(mlir::debugString(*op));
-  return proto;
-}
-
-absl::StatusOr<JsReprPb> JsLirRepr::ToProto() const {
-  JsReprPb proto;
-  proto.set_js_lir(mlir::debugString(*op));
   return proto;
 }
 
@@ -173,8 +165,12 @@ bool PassRequiresBabel(const JsPassConfig &pass) {
 }
 
 absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
-    absl::string_view original_source, const JsReprPb &input_repr_pb,
-    const JsPassConfigs &passes) {
+    absl::string_view original_source, const JsReprPb& input_repr_pb,
+    const JsPassConfigs& passes, absl::Duration timeout) {
+  if (timeout != absl::InfiniteDuration()) {
+    DLOG(ERROR) << "In UnsandboxedJsPassRunner, timeout must be infinite. The "
+                   "provided timeout is ignored.";
+  }
   MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsRepr> input_repr,
                            JsRepr::FromProto(input_repr_pb));
 

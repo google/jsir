@@ -15,12 +15,8 @@
 #ifndef MALDOCA_JS_IR_CONVERSION_AST_TO_JSIR_H_
 #define MALDOCA_JS_IR_CONVERSION_AST_TO_JSIR_H_
 
-#include <cstdint>
 #include <functional>
-#include <memory>
-#include <optional>
 #include <variant>
-#include <vector>
 
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Builders.h"
@@ -37,31 +33,36 @@ namespace maldoca {
 
 class AstToJsir {
  public:
-  explicit AstToJsir(mlir::OpBuilder &builder) : builder_(builder) {}
+// Example:
+//
+// static JsirFileOp VisitFile(mlir::OpBuilder &builder, const JsFile *node);
+#define DECLARE_CIR_OP_VISIT_FUNCTION(TYPE)                   \
+  static Jsir##TYPE##Op Visit##TYPE(mlir::OpBuilder& builder, \
+                                    const Js##TYPE* node);
 
 // Example:
 //
-// JsirFileOp VisitFile(const JsFile *node);
-#define DECLARE_CIR_OP_VISIT_FUNCTION(TYPE) \
-  Jsir##TYPE##Op Visit##TYPE(const Js##TYPE *node);
+// static JshirBlockStatementOp VisitBlockStatement(mlir::OpBuilder &builder,
+// const JsBlockStatement *node);
+#define DECLARE_HIR_OP_VISIT_FUNCTION(TYPE)                    \
+  static Jshir##TYPE##Op Visit##TYPE(mlir::OpBuilder& builder, \
+                                     const Js##TYPE* node);
 
 // Example:
 //
-// JshirBlockStatementOp VisitBlockStatement(const JsBlockStatement *node);
-#define DECLARE_HIR_OP_VISIT_FUNCTION(TYPE) \
-  Jshir##TYPE##Op Visit##TYPE(const Js##TYPE *node);
+// static JsirIdentifierRefOp VisitIdentifierRef(mlir::OpBuilder &builder, const
+// JsIdentifier *node);
+#define DECLARE_REF_OP_VISIT_FUNCTION(TYPE)                           \
+  static Jsir##TYPE##RefOp Visit##TYPE##Ref(mlir::OpBuilder& builder, \
+                                            const Js##TYPE* node);
 
 // Example:
 //
-// JsirIdentifierRefOp VisitIdentifierRef(const JsIdentifier *node);
-#define DECLARE_REF_OP_VISIT_FUNCTION(TYPE) \
-  Jsir##TYPE##RefOp Visit##TYPE##Ref(const Js##TYPE *node);
-
-// Example:
-//
-// JsirIdentifierAttr VisitIdentifierAttr(const JsIdentifier *node);
-#define DECLARE_ATTRIB_VISIT_FUNCTION(TYPE) \
-  Jsir##TYPE##Attr Visit##TYPE##Attr(const Js##TYPE *node);
+// static JsirIdentifierAttr VisitIdentifierAttr(mlir::OpBuilder &builder, const
+// JsIdentifier *node);
+#define DECLARE_ATTRIB_VISIT_FUNCTION(TYPE)                           \
+  static Jsir##TYPE##Attr Visit##TYPE##Attr(mlir::OpBuilder& builder, \
+                                            const Js##TYPE* node);
 
   FOR_EACH_JSIR_CLASS(DECLARE_CIR_OP_VISIT_FUNCTION,
                       DECLARE_HIR_OP_VISIT_FUNCTION,
@@ -73,57 +74,72 @@ class AstToJsir {
 #undef DECLARE_HIR_OP_VISIT_FUNCTION
 #undef DECLARE_ATTRIB_VISIT_FUNCTION
 
-  JsirProgramBodyElementOpInterface VisitProgramBodyElement(
-      const JsProgramBodyElement* node);
+  static JsirProgramBodyElementOpInterface VisitProgramBodyElement(
+      mlir::OpBuilder& builder, const JsProgramBodyElement* node);
 
-  JsirLiteralOpInterface VisitLiteral(const JsLiteral *node);
+  static JsirLiteralOpInterface VisitLiteral(mlir::OpBuilder& builder,
+                                             const JsLiteral* node);
 
-  JsirStatementOpInterface VisitStatement(const JsStatement *node);
+  static JsirStatementOpInterface VisitStatement(mlir::OpBuilder& builder,
+                                                 const JsStatement* node);
 
-  JsirExpressionOpInterface VisitExpression(const JsExpression *node);
+  static JsirExpressionOpInterface VisitExpression(mlir::OpBuilder& builder,
+                                                   const JsExpression* node);
 
-  JsirLValRefOpInterface VisitLValRef(const JsLVal *node);
+  static JsirLValRefOpInterface VisitLValRef(mlir::OpBuilder& builder,
+                                             const JsLVal* node);
 
-  JsirDeclarationOpInterface VisitDeclaration(const JsDeclaration *node);
+  static JsirDeclarationOpInterface VisitDeclaration(mlir::OpBuilder& builder,
+                                                     const JsDeclaration* node);
 
-  JsirPatternRefOpInterface VisitPatternRef(const JsPattern *node);
+  static JsirPatternRefOpInterface VisitPatternRef(mlir::OpBuilder& builder,
+                                                   const JsPattern* node);
 
-  JsirModuleSpecifierAttrInterface VisitModuleSpecifierAttr(
-      const JsModuleSpecifier *node);
+  static JsirModuleSpecifierAttrInterface VisitModuleSpecifierAttr(
+      mlir::OpBuilder& builder, const JsModuleSpecifier* node);
 
-  JsirModuleDeclarationOpInterface VisitModuleDeclaration(
-      const JsModuleDeclaration *node);
+  static JsirModuleDeclarationOpInterface VisitModuleDeclaration(
+      mlir::OpBuilder& builder, const JsModuleDeclaration* node);
 
  private:
-  JsirCommentAttrInterface VisitCommentAttr(const JsComment *node);
+  static JsirCommentAttrInterface VisitCommentAttr(mlir::OpBuilder& builder,
+                                                   const JsComment* node);
 
   template <typename T, typename... Args>
-  T CreateExpr(const JsNode *node, Args &&...args) {
-    CHECK(node != nullptr) << "Node cannot be null.";
-    mlir::MLIRContext *context = builder_.getContext();
-    return builder_.create<T>(GetJsirTriviaAttr(context, *node),
-                              std::forward<Args>(args)...);
+  static T CreateExpr(mlir::OpBuilder& builder, const JsNode* node,
+                      Args&&... args) {
+    mlir::MLIRContext* context = builder.getContext();
+    mlir::Location trivia_attr =
+        (node != nullptr) ? GetJsirTriviaAttr(context, *node)
+                          : builder.getUnknownLoc();
+    return T::create(builder, trivia_attr,
+                     std::forward<Args>(args)...);
   }
 
   // Overloads `CreateExpr` when the input does not implement `JsNode`.
 
   template <typename T, typename... Args>
-  T CreateExpr(const JsTemplateElementValue *node, Args &&...args) {
+  static T CreateExpr(mlir::OpBuilder& builder,
+                      const JsTemplateElementValue* node, Args&&... args) {
     CHECK(node != nullptr) << "Node cannot be null.";
-    return builder_.create<T>(builder_.getUnknownLoc(),
-                              std::forward<Args>(args)...);
+    return T::create(builder, builder.getUnknownLoc(),
+                     std::forward<Args>(args)...);
   }
 
   template <typename T, typename... Args>
-  T CreateStmt(const JsNode *node, Args &&...args) {
-    CHECK(node != nullptr) << "Node cannot be null.";
-    mlir::MLIRContext *context = builder_.getContext();
-    return builder_.create<T>(GetJsirTriviaAttr(context, *node),
-                              mlir::TypeRange(), std::forward<Args>(args)...);
+  static T CreateStmt(mlir::OpBuilder& builder, const JsNode* node,
+                      Args&&... args) {
+    mlir::MLIRContext* context = builder.getContext();
+    mlir::Location trivia_attr =
+        (node != nullptr) ? GetJsirTriviaAttr(context, *node)
+                          : builder.getUnknownLoc();
+    return T::create(builder, trivia_attr,
+                     mlir::TypeRange(), std::forward<Args>(args)...);
   }
 
-  void AppendNewBlockAndPopulate(mlir::Region &region,
-                                 std::function<void()> populate);
+  static void AppendNewBlockAndPopulate(mlir::OpBuilder& builder,
+                                        mlir::Region& region,
+                                        std::function<void()> populate);
 
   // The key of an object property.
   //
@@ -156,22 +172,23 @@ class AstToJsir {
   // If computed == true:
   //   ObjectPropertyKey::literal is null.
   //   ObjectPropertyKey::computed is non-null.
-  ObjectPropertyKey GetObjectPropertyKey(const JsExpression *node,
-                                         bool computed);
+  static ObjectPropertyKey GetObjectPropertyKey(mlir::OpBuilder& builder,
+                                                const JsExpression* node,
+                                                bool computed);
 
-  mlir::Value VisitMemberExpressionObject(
-      std::variant<const JsExpression *, const JsSuper *> object);
+  static mlir::Value VisitMemberExpressionObject(
+      mlir::OpBuilder& builder,
+      std::variant<const JsExpression*, const JsSuper*> object);
 
   struct MemberExpressionProperty {
     mlir::Attribute literal;
     mlir::Value computed;
   };
 
-  MemberExpressionProperty VisitMemberExpressionProperty(
-      std::variant<const JsExpression *, const JsPrivateName *> property,
+  static MemberExpressionProperty VisitMemberExpressionProperty(
+      mlir::OpBuilder& builder,
+      std::variant<const JsExpression*, const JsPrivateName*> property,
       bool computed);
-
-  mlir::OpBuilder &builder_;
 };
 
 }  // namespace maldoca

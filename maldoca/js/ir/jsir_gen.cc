@@ -45,7 +45,7 @@
 #include "maldoca/js/quickjs_babel/quickjs_babel.h"
 
 // Maps pass string to enum.
-static auto *kStringToPassKind =
+static auto* kStringToPassKind =
     new absl::flat_hash_map<std::string, maldoca::JsirPassKind>{
         {"source2ast", maldoca::JsirPassKind::kSourceToAst},
         {"ast2hir", maldoca::JsirPassKind::kAstToJshir},
@@ -75,7 +75,7 @@ ABSL_FLAG(
     std::vector<std::string>, passes, {},
     absl::StrCat("The passes to run. Available passes: ", []() -> std::string {
       std::vector<std::string> available_passes;
-      for (const auto &[pass, pass_kind] : *kStringToPassKind) {
+      for (const auto& [pass, pass_kind] : *kStringToPassKind) {
         available_passes.push_back(pass);
       }
       return absl::StrJoin(available_passes, ", ");
@@ -86,9 +86,10 @@ ABSL_FLAG(std::string, dynamic_prelude_path, "",
           "constant propagation.");
 ABSL_FLAG(std::vector<std::string>, dynamic_prelude_functions, {},
           "A list of functions to treat as builtins in the dynamic prelude.");
+ABSL_FLAG(std::string, output_type, "",
+          "The output type. Can be '', 'ir', or 'analysis'.");
 
 namespace maldoca {
-
 
 static JsirAnalysisConfig::DynamicConstantPropagation
 GetJsirDynamicConstantPropagationConfig() {
@@ -114,7 +115,7 @@ GetJsirDynamicConstantPropagationConfig() {
 
 static std::optional<JsirAnalysisConfig::KindCase> StringToJsirAnalysisKind(
     absl::string_view kind) {
-  static const auto *kMap =
+  static const auto* kMap =
       new absl::flat_hash_map<std::string, JsirAnalysisConfig::KindCase>{
           {"constant_propagation", JsirAnalysisConfig::kConstantPropagation},
       };
@@ -160,7 +161,7 @@ static JsirAnalysisConfig GetJsirAnalysisConfig() {
 
 }  // namespace maldoca
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   absl::ParseCommandLine(argc, argv);
 
   auto input_file = absl::GetFlag(FLAGS_input_file);
@@ -200,16 +201,19 @@ int main(int argc, char *argv[]) {
     std::cerr << output.status().ToString() << std::endl;
     return 1;
   }
-
-  std::string output_file = absl::GetFlag(FLAGS_output_file);
-  if (!output_file.empty()) {
-    CHECK_OK(maldoca::SetFileContents(output_file, output->repr));
-  } else {
-    std::cout << output->repr << std::endl;
+  auto type = absl::GetFlag(FLAGS_output_type);
+  if (type == "" || type == "ir") {
+    std::string output_file = absl::GetFlag(FLAGS_output_file);
+    if (!output_file.empty()) {
+      CHECK_OK(maldoca::SetFileContents(output_file, output->repr));
+    } else {
+      std::cout << output->repr << std::endl;
+    }
   }
-
-  for (const auto &analysis_output : output->analysis_outputs.outputs()) {
-    std::cout << DumpJsAnalysisOutput(*input, analysis_output) << std::endl;
+  if (type == "" || type == "analysis") {
+    for (const auto& analysis_output : output->analysis_outputs.outputs()) {
+      std::cout << DumpJsAnalysisOutput(*input, analysis_output) << std::endl;
+    }
   }
 
   return 0;

@@ -45,48 +45,48 @@
 
 namespace maldoca {
 
-LairExpressionOpInterface AstToLair::VisitExpression(const LaExpression *node) {
+LairExpressionOpInterface AstToLair::VisitExpression(mlir::OpBuilder &builder, const LaExpression *node) {
   if (auto *variable = dynamic_cast<const LaVariable *>(node)) {
-    return VisitVariable(variable);
+    return VisitVariable(builder, variable);
   }
   if (auto *function_definition = dynamic_cast<const LaFunctionDefinition *>(node)) {
-    return VisitFunctionDefinition(function_definition);
+    return VisitFunctionDefinition(builder, function_definition);
   }
   if (auto *function_call = dynamic_cast<const LaFunctionCall *>(node)) {
-    return VisitFunctionCall(function_call);
+    return VisitFunctionCall(builder, function_call);
   }
   LOG(FATAL) << "Unreachable code.";
 }
 
-LairVariableOp AstToLair::VisitVariable(const LaVariable *node) {
-  mlir::StringAttr mlir_identifier = builder_.getStringAttr(node->identifier());
-  return CreateExpr<LairVariableOp>(node, mlir_identifier);
+LairVariableOp AstToLair::VisitVariable(mlir::OpBuilder &builder, const LaVariable *node) {
+  mlir::StringAttr mlir_identifier = builder.getStringAttr(node->identifier());
+  return CreateExpr<LairVariableOp>(builder, node, mlir_identifier);
 }
 
-LairVariableRefOp AstToLair::VisitVariableRef(const LaVariable *node) {
-  mlir::StringAttr mlir_identifier = builder_.getStringAttr(node->identifier());
-  return CreateExpr<LairVariableRefOp>(node, mlir_identifier);
+LairVariableRefOp AstToLair::VisitVariableRef(mlir::OpBuilder &builder, const LaVariable *node) {
+  mlir::StringAttr mlir_identifier = builder.getStringAttr(node->identifier());
+  return CreateExpr<LairVariableRefOp>(builder, node, mlir_identifier);
 }
 
-LairFunctionDefinitionOp AstToLair::VisitFunctionDefinition(const LaFunctionDefinition *node) {
-  auto op = CreateExpr<LairFunctionDefinitionOp>(node);
+LairFunctionDefinitionOp AstToLair::VisitFunctionDefinition(mlir::OpBuilder &builder, const LaFunctionDefinition *node) {
+  auto op = CreateExpr<LairFunctionDefinitionOp>(builder, node);
   mlir::Region &mlir_parameter_region = op.getParameter();
-  AppendNewBlockAndPopulate(mlir_parameter_region, [&] {
-    mlir::Value mlir_parameter = VisitVariableRef(node->parameter());
-    CreateStmt<LairExprRegionEndOp>(node, mlir_parameter);
+  AppendNewBlockAndPopulate(builder, mlir_parameter_region, [&] {
+    mlir::Value mlir_parameter = VisitVariableRef(builder, node->parameter());
+    CreateStmt<LairExprRegionEndOp>(builder, nullptr, mlir_parameter);
   });
   mlir::Region &mlir_body_region = op.getBody();
-  AppendNewBlockAndPopulate(mlir_body_region, [&] {
-    mlir::Value mlir_body = VisitExpression(node->body());
-    CreateStmt<LairExprRegionEndOp>(node, mlir_body);
+  AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
+    mlir::Value mlir_body = VisitExpression(builder, node->body());
+    CreateStmt<LairExprRegionEndOp>(builder, nullptr, mlir_body);
   });
   return op;
 }
 
-LairFunctionCallOp AstToLair::VisitFunctionCall(const LaFunctionCall *node) {
-  mlir::Value mlir_function = VisitExpression(node->function());
-  mlir::Value mlir_argument = VisitExpression(node->argument());
-  return CreateExpr<LairFunctionCallOp>(node, mlir_function, mlir_argument);
+LairFunctionCallOp AstToLair::VisitFunctionCall(mlir::OpBuilder &builder, const LaFunctionCall *node) {
+  mlir::Value mlir_function = VisitExpression(builder, node->function());
+  mlir::Value mlir_argument = VisitExpression(builder, node->argument());
+  return CreateExpr<LairFunctionCallOp>(builder, node, mlir_function, mlir_argument);
 }
 
 // clang-format on

@@ -18,11 +18,19 @@ package(default_applicable_licenses = ["//:license"])
 
 licenses(["notice"])
 
+filegroup(
+    name = "test_files",
+    srcs = [
+        "input.js",
+        "output.generated.txt",
+    ],
+    tags = ["ignore_srcs"],
+)
+
 glob_lit_tests(
     name = "all_tests",
     data = [
-        "input.js",
-        "output.generated.txt",
+        ":test_files",
         "//maldoca/js/ir:lit_test_files",
     ],
     test_file_exts = [

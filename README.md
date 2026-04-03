@@ -38,7 +38,8 @@ JSIR needs to achieve two seemingly conflicting goals:
 *   It needs to be **low-level** enough to facilitate dataflow analysis, in
     order to support taint analysis, constant propagation, etc..
 
-To achieve these goals, JSIR defines a high level IR that uses MLIR regions to accurately model control flow structures.
+To achieve these goals, JSIR defines a high level IR that uses MLIR regions to
+accurately model control flow structures.
 
 See
 [intermediate_representation_design.md](docs/intermediate_representation_design.md)
@@ -60,7 +61,6 @@ docker run --rm jsir:latest jsir_gen --help
 # Analyze a JavaScript file
 docker run --rm -v $(pwd):/workspace jsir:latest jsir_gen --input_file=/workspace/yourfile.js
 ```
-
 
 ### Install build tools
 

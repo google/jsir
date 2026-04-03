@@ -36,7 +36,7 @@ module {
 }
   )";
 
-  TestIrConversion<ENode, EirNodeOp, EirDialect, AstToEir, EirToAst>({
+  TestIrConversion<ENode, EirNodeOp, EirDialect, AstToEir>({
       .ast_json_string = kAstJsonString,
       .ast_to_ir_visit = &AstToEir::VisitNode,
       .ir_to_ast_visit = &EirToAst::VisitNode,

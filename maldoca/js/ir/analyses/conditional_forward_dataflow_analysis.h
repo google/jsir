@@ -22,6 +22,7 @@
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/BlockSupport.h"
+#include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/Operation.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/ir.h"
@@ -55,7 +56,10 @@ class JsirConditionalForwardDataFlowAnalysis
                        llvm::MutableArrayRef<JsirStateRef<ValueT>> results,
                        JsirStateRef<StateT> after) = 0;
 
-  virtual bool IsCfgEdgeExecutable(JsirGeneralCfgEdge *edge) { return true; }
+  virtual bool IsCfgEdgeExecutable(JsirGeneralCfgEdge *edge,
+                                   mlir::MLIRContext *context) {
+    return true;
+  }
 
   void PrintAtBlockEntry(mlir::Block &block, size_t num_indents,
                          llvm::raw_ostream &os) override {
@@ -95,7 +99,7 @@ void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitOp(
   auto [operands, result_state_refs] = Base::GetValueStateRefs(op);
 
   for (JsirGeneralCfgEdge *edge : this->op_to_cfg_edges_[op]) {
-    if (!IsCfgEdgeExecutable(edge) ||
+    if (!IsCfgEdgeExecutable(edge, op->getContext()) ||
         !*GetIsExecutable(edge->getPred()->getBlock()).value()) {
       continue;
     }
@@ -160,7 +164,7 @@ template <typename ValueT, typename StateT>
 void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitBlock(
     mlir::Block *block) {
   for (auto *edge : Base::block_to_cfg_edges_[block]) {
-    if (!IsCfgEdgeExecutable(edge) ||
+    if (!IsCfgEdgeExecutable(edge, block->getParent()->getContext()) ||
         !*GetIsExecutable(edge->getPred()->getBlock()).value()) {
       continue;
     }

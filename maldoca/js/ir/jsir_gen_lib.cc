@@ -41,7 +41,7 @@ namespace maldoca {
 namespace {
 
 std::string DumpJsAstAnalysisResult(absl::string_view original_source,
-                                    const JsAstAnalysisResult &result) {
+                                    const JsAstAnalysisResult& result) {
   switch (result.kind_case()) {
     case JsAstAnalysisResult::KIND_NOT_SET:
       return "";
@@ -56,7 +56,7 @@ std::string DumpJsAstAnalysisResult(absl::string_view original_source,
 }
 
 std::string DumpJsirAnalysisResult(absl::string_view original_source,
-                                   const JsirAnalysisResult &result) {
+                                   const JsirAnalysisResult& result) {
   switch (result.kind_case()) {
     case JsirAnalysisResult::KIND_NOT_SET:
       return "";
@@ -68,7 +68,7 @@ std::string DumpJsirAnalysisResult(absl::string_view original_source,
       using ComputedConstant =
           JsirAnalysisResult::DynamicConstantPropagation::ComputedConstant;
 
-      auto formatter = [&](std::string *out, const ComputedConstant &constant) {
+      auto formatter = [&](std::string* out, const ComputedConstant& constant) {
         absl::StrAppendFormat(
             out, "From [%d, %d): `%s` -> `", constant.start_offset(),
             constant.end_offset(),
@@ -122,7 +122,7 @@ std::string DumpJsirAnalysisResult(absl::string_view original_source,
 }  // namespace
 
 std::string DumpJsAnalysisOutput(absl::string_view original_source,
-                                 const JsAnalysisOutput &output) {
+                                 const JsAnalysisOutput& output) {
   switch (output.kind_case()) {
     case JsAnalysisOutput::KIND_NOT_SET:
       LOG(FATAL) << "JsAnalysisOutput::KIND_NOT_SET";
@@ -134,9 +134,9 @@ std::string DumpJsAnalysisOutput(absl::string_view original_source,
 }
 
 absl::StatusOr<JsirGenOutput> JsirGen(
-    Babel &babel, absl::string_view source,
-    const std::vector<JsirPassKind> &passes, JsirAnalysisConfig analysis_config,
-    const std::vector<JsirTransformConfig> &transform_configs) {
+    Babel& babel, absl::string_view source,
+    const std::vector<JsirPassKind>& passes, JsirAnalysisConfig analysis_config,
+    const std::vector<JsirTransformConfig>& transform_configs) {
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
@@ -307,11 +307,11 @@ absl::StatusOr<JsirGenOutput> JsirGen(
       }
 
       case JsirPassKind::kDynamicConstantPropagation: {
-        auto it = absl::c_find_if(transform_configs, [](const auto &config) {
+        auto it = absl::c_find_if(transform_configs, [](const auto& config) {
           return config.has_dynamic_constant_propagation();
         });
         MALDOCA_RET_CHECK(it != transform_configs.end());
-        const JsirTransformConfig &transform = *it;
+        const JsirTransformConfig& transform = *it;
 
         *pass_configs.add_passes()->mutable_jsir_transform() =
             std::move(transform);
@@ -350,9 +350,9 @@ absl::StatusOr<JsirGenOutput> JsirGen(
 }
 
 absl::StatusOr<JsirGenOutput> JsirGenHermetic(
-    absl::string_view source, const std::vector<JsirPassKind> &passes,
+    absl::string_view source, const std::vector<JsirPassKind>& passes,
     JsirAnalysisConfig analysis_config,
-    const std::vector<JsirTransformConfig> &transform_configs) {
+    const std::vector<JsirTransformConfig>& transform_configs) {
   QuickJsBabel babel;
 
   return maldoca::JsirGen(babel, source, passes, analysis_config,

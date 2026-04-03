@@ -15,6 +15,7 @@
 #ifndef MALDOCA_ASTGEN_TEST_CONVERSION_TEST_UTIL_H_
 #define MALDOCA_ASTGEN_TEST_CONVERSION_TEST_UTIL_H_
 
+#include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -32,21 +33,18 @@
 
 namespace maldoca {
 
-class DummyIrToAst {};
-
-template <typename NodeT, typename OpT, typename AstToIr, typename IrToAst>
+template <typename NodeT, typename OpT, typename AstToIr>
 struct ConversionTestCase {
   std::string ast_json_string;
   std::unique_ptr<NodeT> ast;
-  OpT (AstToIr::*ast_to_ir_visit)(const NodeT *);
-  absl::StatusOr<std::unique_ptr<NodeT>> (IrToAst::*ir_to_ast_visit)(OpT);
+  std::function<OpT(mlir::OpBuilder&, const NodeT*)> ast_to_ir_visit;
+  std::function<absl::StatusOr<std::unique_ptr<NodeT>>(OpT)> ir_to_ast_visit;
   std::string expected_ir_dump;
 };
 
-template <typename NodeT, typename OpT, typename Dialect, typename AstToIr,
-          typename IrToAst = DummyIrToAst>
+template <typename NodeT, typename OpT, typename Dialect, typename AstToIr>
 void TestIrConversion(
-    ConversionTestCase<NodeT, OpT, AstToIr, IrToAst> &&test_case) {
+    ConversionTestCase<NodeT, OpT, AstToIr> &&test_case) {
   if (!test_case.ast_json_string.empty()) {
     auto ast_json = nlohmann::json::parse(test_case.ast_json_string,
                                           /*callback=*/nullptr,
@@ -69,8 +67,7 @@ void TestIrConversion(
   mlir::Block *block = &module->getBodyRegion().front();
   builder.setInsertionPointToStart(block);
 
-  AstToIr ast_to_ir(builder);
-  OpT op = (ast_to_ir.*(test_case.ast_to_ir_visit))(test_case.ast.get());
+  OpT op = test_case.ast_to_ir_visit(builder, test_case.ast.get());
 
   std::string ir_dump;
   llvm::raw_string_ostream os(ir_dump);
@@ -80,9 +77,8 @@ void TestIrConversion(
             absl::StripAsciiWhitespace(test_case.expected_ir_dump));
 
   if (test_case.ir_to_ast_visit != nullptr) {
-    IrToAst ir_to_ast;
     MALDOCA_ASSERT_OK_AND_ASSIGN(auto raised_ast,
-                                 (ir_to_ast.*(test_case.ir_to_ast_visit))(op));
+                                 test_case.ir_to_ast_visit(op));
 
     std::stringstream test_case_ss;
     test_case.ast->Serialize(test_case_ss);

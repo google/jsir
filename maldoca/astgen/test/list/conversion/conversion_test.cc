@@ -33,10 +33,9 @@ module {
 }
   )";
 
-  TestIrConversion<LiOptionalList, LiirOptionalListOp, LiirDialect, AstToLiir,
-                   LiirToAst>({
+  TestIrConversion<LiOptionalList, LiirOptionalListOp, LiirDialect, AstToLiir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToLiir::VisitOptionalList,
+      .ast_to_ir_visit = AstToLiir::VisitOptionalList,
       .ir_to_ast_visit = &LiirToAst::VisitOptionalList,
       .expected_ir_dump = kExpectedIr,
   });
@@ -58,10 +57,9 @@ module {
 }
   )";
 
-  TestIrConversion<LiOptionalList, LiirOptionalListOp, LiirDialect, AstToLiir,
-                   LiirToAst>({
+  TestIrConversion<LiOptionalList, LiirOptionalListOp, LiirDialect, AstToLiir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToLiir::VisitOptionalList,
+      .ast_to_ir_visit = AstToLiir::VisitOptionalList,
       .ir_to_ast_visit = &LiirToAst::VisitOptionalList,
       .expected_ir_dump = kExpectedIr,
   });
@@ -87,10 +85,10 @@ module {
 }
   )";
 
-  TestIrConversion<LiListOfVariant, LiirListOfVariantOp, LiirDialect, AstToLiir,
-                   LiirToAst>({
+  TestIrConversion<LiListOfVariant, LiirListOfVariantOp, LiirDialect,
+                   AstToLiir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToLiir::VisitListOfVariant,
+      .ast_to_ir_visit = AstToLiir::VisitListOfVariant,
       .ir_to_ast_visit = &LiirToAst::VisitListOfVariant,
       .expected_ir_dump = kExpectedIr,
   });
@@ -115,9 +113,9 @@ TEST(ConversionTest, DISABLED_ListOfOptional) {
   )";
 
   TestIrConversion<LiListOfOptional, LiirListOfOptionalOp, LiirDialect,
-                   AstToLiir, LiirToAst>({
+                   AstToLiir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToLiir::VisitListOfOptional,
+      .ast_to_ir_visit = AstToLiir::VisitListOfOptional,
       .ir_to_ast_visit = &LiirToAst::VisitListOfOptional,
       .expected_ir_dump = kExpectedIr,
   });

@@ -22,7 +22,7 @@
 // SOURCE-NEXT:         %0 = jsir.identifier {"console"}
 // SOURCE-NEXT:           // %0 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier   <L 1 C 8>, <L 1 C 11>, "log", 8, 11, 0, "log">}
+// SOURCE-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 1 C 8>, <L 1 C 11>, "log", 8, 11, 0, "log">}
 // SOURCE-NEXT:           // %1 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %2 = jsir.identifier {"btoa"}
@@ -63,7 +63,7 @@
 // SOURCE-NEXT:             %6 = jsir.identifier {"console"}
 // SOURCE-NEXT:               // %6 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:             %7 = jsir.member_expression (%6) {#jsir<identifier   <L 4 C 10>, <L 4 C 13>, "log", 58, 61, 1, "log">}
+// SOURCE-NEXT:             %7 = jsir.member_expression (%6) {#jsir<identifier <L 4 C 10>, <L 4 C 13>, "log", 58, 61, 1, "log">}
 // SOURCE-NEXT:               // %7 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %8 = jsir.identifier {"btoa"}

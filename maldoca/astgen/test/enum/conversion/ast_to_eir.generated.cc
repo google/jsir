@@ -45,10 +45,10 @@
 
 namespace maldoca {
 
-EirNodeOp AstToEir::VisitNode(const ENode *node) {
-  mlir::StringAttr mlir_unary_operator = builder_.getStringAttr(EUnaryOperatorToString(node->unary_operator()));
-  mlir::StringAttr mlir_escaped_char = builder_.getStringAttr(EEscapedCharToString(node->escaped_char()));
-  return CreateExpr<EirNodeOp>(node, mlir_unary_operator, mlir_escaped_char);
+EirNodeOp AstToEir::VisitNode(mlir::OpBuilder &builder, const ENode *node) {
+  mlir::StringAttr mlir_unary_operator = builder.getStringAttr(EUnaryOperatorToString(node->unary_operator()));
+  mlir::StringAttr mlir_escaped_char = builder.getStringAttr(EEscapedCharToString(node->escaped_char()));
+  return CreateExpr<EirNodeOp>(builder, node, mlir_unary_operator, mlir_escaped_char);
 }
 
 // clang-format on

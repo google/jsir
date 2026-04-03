@@ -35,6 +35,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
@@ -61,16 +62,11 @@ RExpr::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<RExpr>>
 RStmt::GetExpr(const nlohmann::json& json) {
-  auto expr_it = json.find("expr");
-  if (expr_it == json.end()) {
-    return absl::InvalidArgumentError("`expr` is undefined.");
-  }
-  const nlohmann::json& json_expr = expr_it.value();
-
-  if (json_expr.is_null()) {
-    return absl::InvalidArgumentError("json_expr is null.");
-  }
-  return RExpr::FromJson(json_expr);
+  return GetRequiredField<std::unique_ptr<RExpr>>(
+      json,
+      "expr",
+      RExpr::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<RStmt>>
@@ -91,110 +87,60 @@ RStmt::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<RExpr>>
 RNode::GetExpr(const nlohmann::json& json) {
-  auto expr_it = json.find("expr");
-  if (expr_it == json.end()) {
-    return absl::InvalidArgumentError("`expr` is undefined.");
-  }
-  const nlohmann::json& json_expr = expr_it.value();
-
-  if (json_expr.is_null()) {
-    return absl::InvalidArgumentError("json_expr is null.");
-  }
-  return RExpr::FromJson(json_expr);
+  return GetRequiredField<std::unique_ptr<RExpr>>(
+      json,
+      "expr",
+      RExpr::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<RExpr>>>
 RNode::GetOptionalExpr(const nlohmann::json& json) {
-  auto optional_expr_it = json.find("optionalExpr");
-  if (optional_expr_it == json.end()) {
-    return absl::InvalidArgumentError("`optionalExpr` is undefined.");
-  }
-  const nlohmann::json& json_optional_expr = optional_expr_it.value();
-
-  if (json_optional_expr.is_null()) {
-    return std::nullopt;
-  }
-  return RExpr::FromJson(json_optional_expr);
+  return GetNullableField<std::unique_ptr<RExpr>>(
+      json,
+      "optionalExpr",
+      RExpr::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<RExpr>>>
 RNode::GetExprs(const nlohmann::json& json) {
-  auto exprs_it = json.find("exprs");
-  if (exprs_it == json.end()) {
-    return absl::InvalidArgumentError("`exprs` is undefined.");
-  }
-  const nlohmann::json& json_exprs = exprs_it.value();
-
-  if (json_exprs.is_null()) {
-    return absl::InvalidArgumentError("json_exprs is null.");
-  }
-  if (!json_exprs.is_array()) {
-    return absl::InvalidArgumentError("json_exprs expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<RExpr>> exprs;
-  for (const nlohmann::json& json_exprs_element : json_exprs) {
-    if (json_exprs_element.is_null()) {
-      return absl::InvalidArgumentError("json_exprs_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto exprs_element, RExpr::FromJson(json_exprs_element));
-    exprs.push_back(std::move(exprs_element));
-  }
-  return exprs;
+  return GetRequiredField<std::vector<std::unique_ptr<RExpr>>>(
+      json,
+      "exprs",
+      List<std::unique_ptr<RExpr>>(
+          RExpr::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<RStmt>>
 RNode::GetStmt(const nlohmann::json& json) {
-  auto stmt_it = json.find("stmt");
-  if (stmt_it == json.end()) {
-    return absl::InvalidArgumentError("`stmt` is undefined.");
-  }
-  const nlohmann::json& json_stmt = stmt_it.value();
-
-  if (json_stmt.is_null()) {
-    return absl::InvalidArgumentError("json_stmt is null.");
-  }
-  return RStmt::FromJson(json_stmt);
+  return GetRequiredField<std::unique_ptr<RStmt>>(
+      json,
+      "stmt",
+      RStmt::FromJson
+  );
 }
 
 absl::StatusOr<std::optional<std::unique_ptr<RStmt>>>
 RNode::GetOptionalStmt(const nlohmann::json& json) {
-  auto optional_stmt_it = json.find("optionalStmt");
-  if (optional_stmt_it == json.end()) {
-    return absl::InvalidArgumentError("`optionalStmt` is undefined.");
-  }
-  const nlohmann::json& json_optional_stmt = optional_stmt_it.value();
-
-  if (json_optional_stmt.is_null()) {
-    return std::nullopt;
-  }
-  return RStmt::FromJson(json_optional_stmt);
+  return GetNullableField<std::unique_ptr<RStmt>>(
+      json,
+      "optionalStmt",
+      RStmt::FromJson
+  );
 }
 
 absl::StatusOr<std::vector<std::unique_ptr<RStmt>>>
 RNode::GetStmts(const nlohmann::json& json) {
-  auto stmts_it = json.find("stmts");
-  if (stmts_it == json.end()) {
-    return absl::InvalidArgumentError("`stmts` is undefined.");
-  }
-  const nlohmann::json& json_stmts = stmts_it.value();
-
-  if (json_stmts.is_null()) {
-    return absl::InvalidArgumentError("json_stmts is null.");
-  }
-  if (!json_stmts.is_array()) {
-    return absl::InvalidArgumentError("json_stmts expected to be array.");
-  }
-
-  std::vector<std::unique_ptr<RStmt>> stmts;
-  for (const nlohmann::json& json_stmts_element : json_stmts) {
-    if (json_stmts_element.is_null()) {
-      return absl::InvalidArgumentError("json_stmts_element is null.");
-    }
-    MALDOCA_ASSIGN_OR_RETURN(auto stmts_element, RStmt::FromJson(json_stmts_element));
-    stmts.push_back(std::move(stmts_element));
-  }
-  return stmts;
+  return GetRequiredField<std::vector<std::unique_ptr<RStmt>>>(
+      json,
+      "stmts",
+      List<std::unique_ptr<RStmt>>(
+          RStmt::FromJson
+      )
+  );
 }
 
 absl::StatusOr<std::unique_ptr<RNode>>

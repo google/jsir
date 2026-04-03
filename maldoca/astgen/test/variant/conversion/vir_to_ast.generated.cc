@@ -48,6 +48,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
+#include "maldoca/astgen/ir_to_ast_util.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/variant/ast.generated.h"
 #include "maldoca/astgen/test/variant/ir.h"
@@ -83,62 +84,74 @@ VirToAst::VisitDerivedClass2(VirDerivedClass2Op op) {
 
 absl::StatusOr<std::unique_ptr<VNode>>
 VirToAst::VisitNode(VirNodeOp op) {
-  std::variant<double, std::string> simple_variant_builtin;
-  if (auto mlir_simple_variant_builtin = llvm::dyn_cast<mlir::FloatAttr>(op.getSimpleVariantBuiltinAttr())) {
-    simple_variant_builtin = mlir_simple_variant_builtin.getValueAsDouble();
-  } else if (auto mlir_simple_variant_builtin = llvm::dyn_cast<mlir::StringAttr>(op.getSimpleVariantBuiltinAttr())) {
-    simple_variant_builtin = mlir_simple_variant_builtin.str();
-  } else {
-    return absl::InvalidArgumentError("op.getSimpleVariantBuiltinAttr() has invalid type.");
-  }
-  std::optional<std::variant<double, std::string>> nullable_variant_builtin;
-  if (op.getNullableVariantBuiltinAttr() != nullptr) {
-    if (auto mlir_nullable_variant_builtin = llvm::dyn_cast<mlir::FloatAttr>(op.getNullableVariantBuiltinAttr())) {
-      nullable_variant_builtin = mlir_nullable_variant_builtin.getValueAsDouble();
-    } else if (auto mlir_nullable_variant_builtin = llvm::dyn_cast<mlir::StringAttr>(op.getNullableVariantBuiltinAttr())) {
-      nullable_variant_builtin = mlir_nullable_variant_builtin.str();
-    } else {
-      return absl::InvalidArgumentError("op.getNullableVariantBuiltinAttr() has invalid type.");
-    }
-  }
-  std::optional<std::variant<double, std::string>> optional_variant_builtin;
-  if (op.getOptionalVariantBuiltinAttr() != nullptr) {
-    if (auto mlir_optional_variant_builtin = llvm::dyn_cast<mlir::FloatAttr>(op.getOptionalVariantBuiltinAttr())) {
-      optional_variant_builtin = mlir_optional_variant_builtin.getValueAsDouble();
-    } else if (auto mlir_optional_variant_builtin = llvm::dyn_cast<mlir::StringAttr>(op.getOptionalVariantBuiltinAttr())) {
-      optional_variant_builtin = mlir_optional_variant_builtin.str();
-    } else {
-      return absl::InvalidArgumentError("op.getOptionalVariantBuiltinAttr() has invalid type.");
-    }
-  }
-  std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>> simple_variant_class;
-  if (auto mlir_simple_variant_class = llvm::dyn_cast<VirDerivedClass1Op>(op.getSimpleVariantClass().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(simple_variant_class, VisitDerivedClass1(mlir_simple_variant_class));
-  } else if (auto mlir_simple_variant_class = llvm::dyn_cast<VirDerivedClass2Op>(op.getSimpleVariantClass().getDefiningOp())) {
-    MALDOCA_ASSIGN_OR_RETURN(simple_variant_class, VisitDerivedClass2(mlir_simple_variant_class));
-  } else {
-    return absl::InvalidArgumentError("op.getSimpleVariantClass().getDefiningOp() has invalid type.");
-  }
-  std::optional<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>> nullable_variant_class;
-  if (op.getNullableVariantClass() != nullptr) {
-    if (auto mlir_nullable_variant_class = llvm::dyn_cast<VirDerivedClass1Op>(op.getNullableVariantClass().getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(nullable_variant_class, VisitDerivedClass1(mlir_nullable_variant_class));
-    } else if (auto mlir_nullable_variant_class = llvm::dyn_cast<VirDerivedClass2Op>(op.getNullableVariantClass().getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(nullable_variant_class, VisitDerivedClass2(mlir_nullable_variant_class));
-    } else {
-      return absl::InvalidArgumentError("op.getNullableVariantClass().getDefiningOp() has invalid type.");
-    }
-  }
-  std::optional<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>> optional_variant_class;
-  if (op.getOptionalVariantClass() != nullptr) {
-    if (auto mlir_optional_variant_class = llvm::dyn_cast<VirDerivedClass1Op>(op.getOptionalVariantClass().getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(optional_variant_class, VisitDerivedClass1(mlir_optional_variant_class));
-    } else if (auto mlir_optional_variant_class = llvm::dyn_cast<VirDerivedClass2Op>(op.getOptionalVariantClass().getDefiningOp())) {
-      MALDOCA_ASSIGN_OR_RETURN(optional_variant_class, VisitDerivedClass2(mlir_optional_variant_class));
-    } else {
-      return absl::InvalidArgumentError("op.getOptionalVariantClass().getDefiningOp() has invalid type.");
-    }
-  }
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto simple_variant_builtin,
+      Convert(
+          op.getSimpleVariantBuiltinAttr(),
+          AttrVariant(
+              ToDouble(),
+              ToString()
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto nullable_variant_builtin,
+      Convert(
+          op.getNullableVariantBuiltinAttr(),
+          Nullable(
+              AttrVariant(
+                  ToDouble(),
+                  ToString()
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto optional_variant_builtin,
+      Convert(
+          op.getOptionalVariantBuiltinAttr(),
+          Nullable(
+              AttrVariant(
+                  ToDouble(),
+                  ToString()
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto simple_variant_class,
+      Convert(
+          op.getSimpleVariantClass(),
+          OpVariant(
+              ToOpConverter(VisitDerivedClass1),
+              ToOpConverter(VisitDerivedClass2)
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto nullable_variant_class,
+      Convert(
+          op.getNullableVariantClass(),
+          Nullable<VirNoneOp>(
+              OpVariant(
+                  ToOpConverter(VisitDerivedClass1),
+                  ToOpConverter(VisitDerivedClass2)
+              )
+          )
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto optional_variant_class,
+      Convert(
+          op.getOptionalVariantClass(),
+          Nullable<VirNoneOp>(
+              OpVariant(
+                  ToOpConverter(VisitDerivedClass1),
+                  ToOpConverter(VisitDerivedClass2)
+              )
+          )
+      )
+  );
   return Create<VNode>(
       op,
       std::move(simple_variant_builtin),

@@ -52,7 +52,7 @@ module {
   TestIrConversion<LaFunctionDefinition, LairFunctionDefinitionOp, LairDialect,
                    AstToLair>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToLair::VisitFunctionDefinition,
+      .ast_to_ir_visit = AstToLair::VisitFunctionDefinition,
       .expected_ir_dump = kExpectedIrDump,
   });
 }
@@ -96,7 +96,7 @@ module {
 
   TestIrConversion<LaFunctionCall, LairFunctionCallOp, LairDialect, AstToLair>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToLair::VisitFunctionCall,
+      .ast_to_ir_visit = AstToLair::VisitFunctionCall,
       .expected_ir_dump = kExpectedIrDump,
   });
 }

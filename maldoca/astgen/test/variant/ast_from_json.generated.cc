@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // VBaseClass
@@ -143,140 +129,104 @@ VDerivedClass2::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::variant<double, std::string>>
 VNode::GetSimpleVariantBuiltin(const nlohmann::json& json) {
-  auto simple_variant_builtin_it = json.find("simpleVariantBuiltin");
-  if (simple_variant_builtin_it == json.end()) {
-    return absl::InvalidArgumentError("`simpleVariantBuiltin` is undefined.");
-  }
-  const nlohmann::json& json_simple_variant_builtin = simple_variant_builtin_it.value();
-
-  if (json_simple_variant_builtin.is_null()) {
-    return absl::InvalidArgumentError("json_simple_variant_builtin is null.");
-  }
-  if (json_simple_variant_builtin.is_number()) {
-    return json_simple_variant_builtin.get<double>();
-  } else if (json_simple_variant_builtin.is_string()) {
-    return json_simple_variant_builtin.get<std::string>();
-  } else {
-    auto result = absl::InvalidArgumentError("json_simple_variant_builtin has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_simple_variant_builtin.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<double, std::string>>(
+      json,
+      "simpleVariantBuiltin",
+      Variant(
+          VariantOption<double>{
+              .predicate = IsDouble,
+              .converter = JsonToDouble,
+          },
+          VariantOption<std::string>{
+              .predicate = IsString,
+              .converter = JsonToString,
+          })
+  );
 }
 
 absl::StatusOr<std::optional<std::variant<double, std::string>>>
 VNode::GetNullableVariantBuiltin(const nlohmann::json& json) {
-  auto nullable_variant_builtin_it = json.find("nullableVariantBuiltin");
-  if (nullable_variant_builtin_it == json.end()) {
-    return absl::InvalidArgumentError("`nullableVariantBuiltin` is undefined.");
-  }
-  const nlohmann::json& json_nullable_variant_builtin = nullable_variant_builtin_it.value();
-
-  if (json_nullable_variant_builtin.is_null()) {
-    return std::nullopt;
-  }
-  if (json_nullable_variant_builtin.is_number()) {
-    return json_nullable_variant_builtin.get<double>();
-  } else if (json_nullable_variant_builtin.is_string()) {
-    return json_nullable_variant_builtin.get<std::string>();
-  } else {
-    auto result = absl::InvalidArgumentError("json_nullable_variant_builtin has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_nullable_variant_builtin.dump()});
-    return result;
-  }
+  return GetNullableField<std::variant<double, std::string>>(
+      json,
+      "nullableVariantBuiltin",
+      Variant(
+          VariantOption<double>{
+              .predicate = IsDouble,
+              .converter = JsonToDouble,
+          },
+          VariantOption<std::string>{
+              .predicate = IsString,
+              .converter = JsonToString,
+          })
+  );
 }
 
 absl::StatusOr<std::optional<std::variant<double, std::string>>>
 VNode::GetOptionalVariantBuiltin(const nlohmann::json& json) {
-  auto optional_variant_builtin_it = json.find("optionalVariantBuiltin");
-  if (optional_variant_builtin_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_optional_variant_builtin = optional_variant_builtin_it.value();
-
-  if (json_optional_variant_builtin.is_null()) {
-    return absl::InvalidArgumentError("json_optional_variant_builtin is null.");
-  }
-  if (json_optional_variant_builtin.is_number()) {
-    return json_optional_variant_builtin.get<double>();
-  } else if (json_optional_variant_builtin.is_string()) {
-    return json_optional_variant_builtin.get<std::string>();
-  } else {
-    auto result = absl::InvalidArgumentError("json_optional_variant_builtin has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_optional_variant_builtin.dump()});
-    return result;
-  }
+  return GetOptionalField<std::variant<double, std::string>>(
+      json,
+      "optionalVariantBuiltin",
+      Variant(
+          VariantOption<double>{
+              .predicate = IsDouble,
+              .converter = JsonToDouble,
+          },
+          VariantOption<std::string>{
+              .predicate = IsString,
+              .converter = JsonToString,
+          })
+  );
 }
 
 absl::StatusOr<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>>
 VNode::GetSimpleVariantClass(const nlohmann::json& json) {
-  auto simple_variant_class_it = json.find("simpleVariantClass");
-  if (simple_variant_class_it == json.end()) {
-    return absl::InvalidArgumentError("`simpleVariantClass` is undefined.");
-  }
-  const nlohmann::json& json_simple_variant_class = simple_variant_class_it.value();
-
-  if (json_simple_variant_class.is_null()) {
-    return absl::InvalidArgumentError("json_simple_variant_class is null.");
-  }
-  if (IsDerivedClass1(json_simple_variant_class)) {
-    return VDerivedClass1::FromJson(json_simple_variant_class);
-  } else if (IsDerivedClass2(json_simple_variant_class)) {
-    return VDerivedClass2::FromJson(json_simple_variant_class);
-  } else {
-    auto result = absl::InvalidArgumentError("json_simple_variant_class has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_simple_variant_class.dump()});
-    return result;
-  }
+  return GetRequiredField<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>>(
+      json,
+      "simpleVariantClass",
+      Variant(
+          VariantOption<std::unique_ptr<VDerivedClass1>>{
+              .predicate = IsDerivedClass1,
+              .converter = VDerivedClass1::FromJson,
+          },
+          VariantOption<std::unique_ptr<VDerivedClass2>>{
+              .predicate = IsDerivedClass2,
+              .converter = VDerivedClass2::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::optional<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>>>
 VNode::GetNullableVariantClass(const nlohmann::json& json) {
-  auto nullable_variant_class_it = json.find("nullableVariantClass");
-  if (nullable_variant_class_it == json.end()) {
-    return absl::InvalidArgumentError("`nullableVariantClass` is undefined.");
-  }
-  const nlohmann::json& json_nullable_variant_class = nullable_variant_class_it.value();
-
-  if (json_nullable_variant_class.is_null()) {
-    return std::nullopt;
-  }
-  if (IsDerivedClass1(json_nullable_variant_class)) {
-    return VDerivedClass1::FromJson(json_nullable_variant_class);
-  } else if (IsDerivedClass2(json_nullable_variant_class)) {
-    return VDerivedClass2::FromJson(json_nullable_variant_class);
-  } else {
-    auto result = absl::InvalidArgumentError("json_nullable_variant_class has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_nullable_variant_class.dump()});
-    return result;
-  }
+  return GetNullableField<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>>(
+      json,
+      "nullableVariantClass",
+      Variant(
+          VariantOption<std::unique_ptr<VDerivedClass1>>{
+              .predicate = IsDerivedClass1,
+              .converter = VDerivedClass1::FromJson,
+          },
+          VariantOption<std::unique_ptr<VDerivedClass2>>{
+              .predicate = IsDerivedClass2,
+              .converter = VDerivedClass2::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::optional<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>>>
 VNode::GetOptionalVariantClass(const nlohmann::json& json) {
-  auto optional_variant_class_it = json.find("optionalVariantClass");
-  if (optional_variant_class_it == json.end()) {
-    return std::nullopt;
-  }
-  const nlohmann::json& json_optional_variant_class = optional_variant_class_it.value();
-
-  if (json_optional_variant_class.is_null()) {
-    return absl::InvalidArgumentError("json_optional_variant_class is null.");
-  }
-  if (IsDerivedClass1(json_optional_variant_class)) {
-    return VDerivedClass1::FromJson(json_optional_variant_class);
-  } else if (IsDerivedClass2(json_optional_variant_class)) {
-    return VDerivedClass2::FromJson(json_optional_variant_class);
-  } else {
-    auto result = absl::InvalidArgumentError("json_optional_variant_class has invalid type.");
-    result.SetPayload("json", absl::Cord{json.dump()});
-    result.SetPayload("json_element", absl::Cord{json_optional_variant_class.dump()});
-    return result;
-  }
+  return GetOptionalField<std::variant<std::unique_ptr<VDerivedClass1>, std::unique_ptr<VDerivedClass2>>>(
+      json,
+      "optionalVariantClass",
+      Variant(
+          VariantOption<std::unique_ptr<VDerivedClass1>>{
+              .predicate = IsDerivedClass1,
+              .converter = VDerivedClass1::FromJson,
+          },
+          VariantOption<std::unique_ptr<VDerivedClass2>>{
+              .predicate = IsDerivedClass2,
+              .converter = VDerivedClass2::FromJson,
+          })
+  );
 }
 
 absl::StatusOr<std::unique_ptr<VNode>>

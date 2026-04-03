@@ -46,6 +46,7 @@ cc_library(
     srcs = ["rir_to_ast.generated.cc"],
     hdrs = ["rir_to_ast.h"],
     deps = [
+        "//maldoca/astgen:ir_to_ast_util",
         "//maldoca/astgen/test/region:ast",
         "//maldoca/astgen/test/region:ir",
         "//maldoca/base:status",

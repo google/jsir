@@ -45,30 +45,30 @@
 
 namespace maldoca {
 
-AirExpressionOpInterface AstToAir::VisitExpression(const AExpression *node) {
+AirExpressionOpInterface AstToAir::VisitExpression(mlir::OpBuilder &builder, const AExpression *node) {
   if (auto *identifier = dynamic_cast<const AIdentifier *>(node)) {
-    return VisitIdentifier(identifier);
+    return VisitIdentifier(builder, identifier);
   }
   if (auto *assignment = dynamic_cast<const AAssignment *>(node)) {
-    return VisitAssignment(assignment);
+    return VisitAssignment(builder, assignment);
   }
   LOG(FATAL) << "Unreachable code.";
 }
 
-AirIdentifierOp AstToAir::VisitIdentifier(const AIdentifier *node) {
-  mlir::StringAttr mlir_name = builder_.getStringAttr(node->name());
-  return CreateExpr<AirIdentifierOp>(node, mlir_name);
+AirIdentifierOp AstToAir::VisitIdentifier(mlir::OpBuilder &builder, const AIdentifier *node) {
+  mlir::StringAttr mlir_name = builder.getStringAttr(node->name());
+  return CreateExpr<AirIdentifierOp>(builder, node, mlir_name);
 }
 
-AirIdentifierRefOp AstToAir::VisitIdentifierRef(const AIdentifier *node) {
-  mlir::StringAttr mlir_name = builder_.getStringAttr(node->name());
-  return CreateExpr<AirIdentifierRefOp>(node, mlir_name);
+AirIdentifierRefOp AstToAir::VisitIdentifierRef(mlir::OpBuilder &builder, const AIdentifier *node) {
+  mlir::StringAttr mlir_name = builder.getStringAttr(node->name());
+  return CreateExpr<AirIdentifierRefOp>(builder, node, mlir_name);
 }
 
-AirAssignmentOp AstToAir::VisitAssignment(const AAssignment *node) {
-  mlir::Value mlir_lhs = VisitIdentifierRef(node->lhs());
-  mlir::Value mlir_rhs = VisitExpression(node->rhs());
-  return CreateExpr<AirAssignmentOp>(node, mlir_lhs, mlir_rhs);
+AirAssignmentOp AstToAir::VisitAssignment(mlir::OpBuilder &builder, const AAssignment *node) {
+  mlir::Value mlir_lhs = VisitIdentifierRef(builder, node->lhs());
+  mlir::Value mlir_rhs = VisitExpression(builder, node->rhs());
+  return CreateExpr<AirAssignmentOp>(builder, node, mlir_lhs, mlir_rhs);
 }
 
 // clang-format on

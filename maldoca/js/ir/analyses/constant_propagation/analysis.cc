@@ -269,16 +269,17 @@ void JsirConstantPropagationAnalysis::VisitUpdateExpression(
 }
 
 bool JsirConstantPropagationAnalysis::IsCfgEdgeExecutable(
-    JsirGeneralCfgEdge *edge) {
+    JsirGeneralCfgEdge *edge, mlir::MLIRContext *context) {
   if (!edge->getLivenessInfo().has_value()) {
     return true;
   }
 
-  auto [liveness_kind, liveness_values] = edge->getLivenessInfo().value();
+  JsirDialect* dialect = context->getOrLoadDialect<JsirDialect>();
 
-  std::unique_ptr<JSRuntime, QjsRuntimeDeleter> qjs_runtime{JS_NewRuntime()};
-  std::unique_ptr<JSContext, QjsContextDeleter> qjs_context{
-      JS_NewContext(qjs_runtime.get())};
+  std::unique_ptr<JSContext, QjsContextDeleter>& qjs_context =
+      dialect->qjs_context;
+
+  auto [liveness_kind, liveness_values] = edge->getLivenessInfo().value();
 
   std::vector<std::optional<QjsValue>> qjs_values;
   for (auto arg : liveness_values) {

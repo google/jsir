@@ -45,76 +45,76 @@
 
 namespace maldoca {
 
-LiirClass1Op AstToLiir::VisitClass1(const LiClass1 *node) {
-  return CreateExpr<LiirClass1Op>(node);
+LiirClass1Op AstToLiir::VisitClass1(mlir::OpBuilder &builder, const LiClass1 *node) {
+  return CreateExpr<LiirClass1Op>(builder, node);
 }
 
-LiirClass2Op AstToLiir::VisitClass2(const LiClass2 *node) {
-  return CreateExpr<LiirClass2Op>(node);
+LiirClass2Op AstToLiir::VisitClass2(mlir::OpBuilder &builder, const LiClass2 *node) {
+  return CreateExpr<LiirClass2Op>(builder, node);
 }
 
-LiirSimpleListOp AstToLiir::VisitSimpleList(const LiSimpleList *node) {
+LiirSimpleListOp AstToLiir::VisitSimpleList(mlir::OpBuilder &builder, const LiSimpleList *node) {
   std::vector<mlir::Attribute> mlir_strings_data;
   for (const auto &element : *node->strings()) {
-    mlir::StringAttr mlir_element = builder_.getStringAttr(element);
+    mlir::StringAttr mlir_element = builder.getStringAttr(element);
     mlir_strings_data.push_back(std::move(mlir_element));
   }
-  auto mlir_strings = builder_.getArrayAttr(mlir_strings_data);
+  auto mlir_strings = builder.getArrayAttr(mlir_strings_data);
   std::vector<mlir::Value> mlir_operations;
   for (const auto &element : *node->operations()) {
-    mlir::Value mlir_element = VisitClass1(element.get());
+    mlir::Value mlir_element = VisitClass1(builder, element.get());
     mlir_operations.push_back(std::move(mlir_element));
   }
-  return CreateExpr<LiirSimpleListOp>(node, mlir_strings, mlir_operations);
+  return CreateExpr<LiirSimpleListOp>(builder, node, mlir_strings, mlir_operations);
 }
 
-LiirOptionalListOp AstToLiir::VisitOptionalList(const LiOptionalList *node) {
+LiirOptionalListOp AstToLiir::VisitOptionalList(mlir::OpBuilder &builder, const LiOptionalList *node) {
   mlir::ArrayAttr mlir_strings;
   if (node->strings().has_value()) {
     std::vector<mlir::Attribute> mlir_strings_data;
     for (const auto &element : *node->strings().value()) {
-      mlir::StringAttr mlir_element = builder_.getStringAttr(element);
+      mlir::StringAttr mlir_element = builder.getStringAttr(element);
       mlir_strings_data.push_back(std::move(mlir_element));
     }
-    mlir_strings = builder_.getArrayAttr(mlir_strings_data);
+    mlir_strings = builder.getArrayAttr(mlir_strings_data);
   }
-  return CreateExpr<LiirOptionalListOp>(node, mlir_strings);
+  return CreateExpr<LiirOptionalListOp>(builder, node, mlir_strings);
 }
 
-LiirListOfOptionalOp AstToLiir::VisitListOfOptional(const LiListOfOptional *node) {
+LiirListOfOptionalOp AstToLiir::VisitListOfOptional(mlir::OpBuilder &builder, const LiListOfOptional *node) {
   std::vector<mlir::Attribute> mlir_strings_data;
   for (const auto &element : *node->strings()) {
     mlir::StringAttr mlir_element;
     if (element.has_value()) {
-      mlir_element = builder_.getStringAttr(element.value());
+      mlir_element = builder.getStringAttr(element.value());
     }
     mlir_strings_data.push_back(std::move(mlir_element));
   }
-  auto mlir_strings = builder_.getArrayAttr(mlir_strings_data);
+  auto mlir_strings = builder.getArrayAttr(mlir_strings_data);
   std::vector<mlir::Value> mlir_operations;
   for (const auto &element : *node->operations()) {
     mlir::Value mlir_element;
     if (element.has_value()) {
-      mlir_element = VisitClass1(element.value().get());
+      mlir_element = VisitClass1(builder, element.value().get());
     } else {
-      mlir_element = CreateExpr<LiirNoneOp>(node);
+      mlir_element = CreateExpr<LiirNoneOp>(builder, node);
     }
     mlir_operations.push_back(std::move(mlir_element));
   }
-  return CreateExpr<LiirListOfOptionalOp>(node, mlir_strings, mlir_operations);
+  return CreateExpr<LiirListOfOptionalOp>(builder, node, mlir_strings, mlir_operations);
 }
 
-LiirListOfVariantOp AstToLiir::VisitListOfVariant(const LiListOfVariant *node) {
+LiirListOfVariantOp AstToLiir::VisitListOfVariant(mlir::OpBuilder &builder, const LiListOfVariant *node) {
   std::vector<mlir::Attribute> mlir_variants_data;
   for (const auto &element : *node->variants()) {
     mlir::Attribute mlir_element;
     switch (element.index()) {
       case 0: {
-        mlir_element = builder_.getBoolAttr(std::get<0>(element));
+        mlir_element = builder.getBoolAttr(std::get<0>(element));
         break;
       }
       case 1: {
-        mlir_element = builder_.getStringAttr(std::get<1>(element));
+        mlir_element = builder.getStringAttr(std::get<1>(element));
         break;
       }
       default:
@@ -122,17 +122,17 @@ LiirListOfVariantOp AstToLiir::VisitListOfVariant(const LiListOfVariant *node) {
     }
     mlir_variants_data.push_back(std::move(mlir_element));
   }
-  auto mlir_variants = builder_.getArrayAttr(mlir_variants_data);
+  auto mlir_variants = builder.getArrayAttr(mlir_variants_data);
   std::vector<mlir::Value> mlir_operations;
   for (const auto &element : *node->operations()) {
     mlir::Value mlir_element;
     switch (element.index()) {
       case 0: {
-        mlir_element = VisitClass1(std::get<0>(element).get());
+        mlir_element = VisitClass1(builder, std::get<0>(element).get());
         break;
       }
       case 1: {
-        mlir_element = VisitClass2(std::get<1>(element).get());
+        mlir_element = VisitClass2(builder, std::get<1>(element).get());
         break;
       }
       default:
@@ -140,26 +140,26 @@ LiirListOfVariantOp AstToLiir::VisitListOfVariant(const LiListOfVariant *node) {
     }
     mlir_operations.push_back(std::move(mlir_element));
   }
-  return CreateExpr<LiirListOfVariantOp>(node, mlir_variants, mlir_operations);
+  return CreateExpr<LiirListOfVariantOp>(builder, node, mlir_variants, mlir_operations);
 }
 
-LiirOptionalListOfOptionalOp AstToLiir::VisitOptionalListOfOptional(const LiOptionalListOfOptional *node) {
+LiirOptionalListOfOptionalOp AstToLiir::VisitOptionalListOfOptional(mlir::OpBuilder &builder, const LiOptionalListOfOptional *node) {
   mlir::ArrayAttr mlir_variants;
   if (node->variants().has_value()) {
     std::vector<mlir::Attribute> mlir_variants_data;
     for (const auto &element : *node->variants().value()) {
       mlir::StringAttr mlir_element;
       if (element.has_value()) {
-        mlir_element = builder_.getStringAttr(element.value());
+        mlir_element = builder.getStringAttr(element.value());
       }
       mlir_variants_data.push_back(std::move(mlir_element));
     }
-    mlir_variants = builder_.getArrayAttr(mlir_variants_data);
+    mlir_variants = builder.getArrayAttr(mlir_variants_data);
   }
-  return CreateExpr<LiirOptionalListOfOptionalOp>(node, mlir_variants);
+  return CreateExpr<LiirOptionalListOfOptionalOp>(builder, node, mlir_variants);
 }
 
-LiirOptionalListOfVariantOp AstToLiir::VisitOptionalListOfVariant(const LiOptionalListOfVariant *node) {
+LiirOptionalListOfVariantOp AstToLiir::VisitOptionalListOfVariant(mlir::OpBuilder &builder, const LiOptionalListOfVariant *node) {
   mlir::ArrayAttr mlir_variants;
   if (node->variants().has_value()) {
     std::vector<mlir::Attribute> mlir_variants_data;
@@ -167,11 +167,11 @@ LiirOptionalListOfVariantOp AstToLiir::VisitOptionalListOfVariant(const LiOption
       mlir::Attribute mlir_element;
       switch (element.index()) {
         case 0: {
-          mlir_element = builder_.getBoolAttr(std::get<0>(element));
+          mlir_element = builder.getBoolAttr(std::get<0>(element));
           break;
         }
         case 1: {
-          mlir_element = builder_.getStringAttr(std::get<1>(element));
+          mlir_element = builder.getStringAttr(std::get<1>(element));
           break;
         }
         default:
@@ -179,23 +179,23 @@ LiirOptionalListOfVariantOp AstToLiir::VisitOptionalListOfVariant(const LiOption
       }
       mlir_variants_data.push_back(std::move(mlir_element));
     }
-    mlir_variants = builder_.getArrayAttr(mlir_variants_data);
+    mlir_variants = builder.getArrayAttr(mlir_variants_data);
   }
-  return CreateExpr<LiirOptionalListOfVariantOp>(node, mlir_variants);
+  return CreateExpr<LiirOptionalListOfVariantOp>(builder, node, mlir_variants);
 }
 
-LiirListOfOptionalVariantOp AstToLiir::VisitListOfOptionalVariant(const LiListOfOptionalVariant *node) {
+LiirListOfOptionalVariantOp AstToLiir::VisitListOfOptionalVariant(mlir::OpBuilder &builder, const LiListOfOptionalVariant *node) {
   std::vector<mlir::Attribute> mlir_variants_data;
   for (const auto &element : *node->variants()) {
     mlir::Attribute mlir_element;
     if (element.has_value()) {
       switch (element.value().index()) {
         case 0: {
-          mlir_element = builder_.getBoolAttr(std::get<0>(element.value()));
+          mlir_element = builder.getBoolAttr(std::get<0>(element.value()));
           break;
         }
         case 1: {
-          mlir_element = builder_.getStringAttr(std::get<1>(element.value()));
+          mlir_element = builder.getStringAttr(std::get<1>(element.value()));
           break;
         }
         default:
@@ -204,32 +204,32 @@ LiirListOfOptionalVariantOp AstToLiir::VisitListOfOptionalVariant(const LiListOf
     }
     mlir_variants_data.push_back(std::move(mlir_element));
   }
-  auto mlir_variants = builder_.getArrayAttr(mlir_variants_data);
+  auto mlir_variants = builder.getArrayAttr(mlir_variants_data);
   std::vector<mlir::Value> mlir_operations;
   for (const auto &element : *node->operations()) {
     mlir::Value mlir_element;
     if (element.has_value()) {
       switch (element.value().index()) {
         case 0: {
-          mlir_element = VisitClass1(std::get<0>(element.value()).get());
+          mlir_element = VisitClass1(builder, std::get<0>(element.value()).get());
           break;
         }
         case 1: {
-          mlir_element = VisitClass2(std::get<1>(element.value()).get());
+          mlir_element = VisitClass2(builder, std::get<1>(element.value()).get());
           break;
         }
         default:
           LOG(FATAL) << "Unreachable code.";
       }
     } else {
-      mlir_element = CreateExpr<LiirNoneOp>(node);
+      mlir_element = CreateExpr<LiirNoneOp>(builder, node);
     }
     mlir_operations.push_back(std::move(mlir_element));
   }
-  return CreateExpr<LiirListOfOptionalVariantOp>(node, mlir_variants, mlir_operations);
+  return CreateExpr<LiirListOfOptionalVariantOp>(builder, node, mlir_variants, mlir_operations);
 }
 
-LiirOptionalListOfOptionalVariantOp AstToLiir::VisitOptionalListOfOptionalVariant(const LiOptionalListOfOptionalVariant *node) {
+LiirOptionalListOfOptionalVariantOp AstToLiir::VisitOptionalListOfOptionalVariant(mlir::OpBuilder &builder, const LiOptionalListOfOptionalVariant *node) {
   mlir::ArrayAttr mlir_variants;
   if (node->variants().has_value()) {
     std::vector<mlir::Attribute> mlir_variants_data;
@@ -238,11 +238,11 @@ LiirOptionalListOfOptionalVariantOp AstToLiir::VisitOptionalListOfOptionalVarian
       if (element.has_value()) {
         switch (element.value().index()) {
           case 0: {
-            mlir_element = builder_.getBoolAttr(std::get<0>(element.value()));
+            mlir_element = builder.getBoolAttr(std::get<0>(element.value()));
             break;
           }
           case 1: {
-            mlir_element = builder_.getStringAttr(std::get<1>(element.value()));
+            mlir_element = builder.getStringAttr(std::get<1>(element.value()));
             break;
           }
           default:
@@ -251,9 +251,9 @@ LiirOptionalListOfOptionalVariantOp AstToLiir::VisitOptionalListOfOptionalVarian
       }
       mlir_variants_data.push_back(std::move(mlir_element));
     }
-    mlir_variants = builder_.getArrayAttr(mlir_variants_data);
+    mlir_variants = builder.getArrayAttr(mlir_variants_data);
   }
-  return CreateExpr<LiirOptionalListOfOptionalVariantOp>(node, mlir_variants);
+  return CreateExpr<LiirOptionalListOfOptionalVariantOp>(builder, node, mlir_variants);
 }
 
 // clang-format on

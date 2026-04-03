@@ -46,10 +46,9 @@ module {
 }
   )";
 
-  TestIrConversion<AAssignment, AirAssignmentOp, AirDialect, AstToAir,
-                   AirToAst>({
+  TestIrConversion<AAssignment, AirAssignmentOp, AirDialect, AstToAir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToAir::VisitAssignment,
+      .ast_to_ir_visit = AstToAir::VisitAssignment,
       .ir_to_ast_visit = &AirToAst::VisitAssignment,
       .expected_ir_dump = kExpectedIrDump,
   });
@@ -88,10 +87,9 @@ module {
 }
   )";
 
-  TestIrConversion<AAssignment, AirAssignmentOp, AirDialect, AstToAir,
-                   AirToAst>({
+  TestIrConversion<AAssignment, AirAssignmentOp, AirDialect, AstToAir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToAir::VisitAssignment,
+      .ast_to_ir_visit = AstToAir::VisitAssignment,
       .ir_to_ast_visit = &AirToAst::VisitAssignment,
       .expected_ir_dump = kExpectedIrDump,
   });

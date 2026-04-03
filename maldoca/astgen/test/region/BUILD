@@ -54,6 +54,7 @@ cc_library(
     ],
     hdrs = ["ast.generated.h"],
     deps = [
+        "//maldoca/astgen:ast_from_json_utils",
         "//maldoca/base:status",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",

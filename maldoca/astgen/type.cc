@@ -289,8 +289,7 @@ std::string EnumType::CcType() const {
 }
 
 std::string ClassType::CcType() const {
-  return absl::StrCat("std::unique_ptr<",
-                      (Symbol(lang_name_) + name()).ToPascalCase(), ">");
+  return absl::StrCat("std::unique_ptr<", CcClassName(), ">");
 }
 
 // =============================================================================
@@ -378,12 +377,11 @@ std::string EnumType::CcGetterType(CcGetterKind getter_kind) const {
 }
 
 std::string ClassType::CcGetterType(CcGetterKind getter_kind) const {
-  const auto class_name = (Symbol(lang_name_) + name()).ToPascalCase();
   switch (getter_kind) {
     case CcGetterKind::kMutable:
-      return absl::StrCat(class_name, "*");
+      return absl::StrCat(CcClassName(), "*");
     case CcGetterKind::kConst:
-      return absl::StrCat("const ", class_name, "*");
+      return absl::StrCat("const ", CcClassName(), "*");
   }
 }
 

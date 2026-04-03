@@ -48,6 +48,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
+#include "maldoca/astgen/ir_to_ast_util.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/assign/ast.generated.h"
 #include "maldoca/astgen/test/assign/ir.h"
@@ -71,7 +72,13 @@ AirToAst::VisitExpression(AirExpressionOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
 AirToAst::VisitIdentifier(AirIdentifierOp op) {
-  std::string name = op.getNameAttr().str();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto name,
+      Convert(
+          op.getNameAttr(),
+          ToString()
+      )
+  );
   return Create<AIdentifier>(
       op,
       std::move(name));
@@ -79,7 +86,13 @@ AirToAst::VisitIdentifier(AirIdentifierOp op) {
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
 AirToAst::VisitIdentifierRef(AirIdentifierRefOp op) {
-  std::string name = op.getNameAttr().str();
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto name,
+      Convert(
+          op.getNameAttr(),
+          ToString()
+      )
+  );
   return Create<AIdentifier>(
       op,
       std::move(name));
@@ -87,20 +100,20 @@ AirToAst::VisitIdentifierRef(AirIdentifierRefOp op) {
 
 absl::StatusOr<std::unique_ptr<AAssignment>>
 AirToAst::VisitAssignment(AirAssignmentOp op) {
-  auto lhs_op = llvm::dyn_cast<AirIdentifierRefOp>(op.getLhs().getDefiningOp());
-  if (lhs_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected AirIdentifierRefOp, got ",
-                     op.getLhs().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<AIdentifier> lhs, VisitIdentifierRef(lhs_op));
-  auto rhs_op = llvm::dyn_cast<AirExpressionOpInterface>(op.getRhs().getDefiningOp());
-  if (rhs_op == nullptr) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Expected AirExpressionOpInterface, got ",
-                     op.getRhs().getDefiningOp()->getName().getStringRef().str(), "."));
-  }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<AExpression> rhs, VisitExpression(rhs_op));
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto lhs,
+      Convert(
+          op.getLhs(),
+          ToOpConverter(VisitIdentifierRef)
+      )
+  );
+  MALDOCA_ASSIGN_OR_RETURN(
+      auto rhs,
+      Convert(
+          op.getRhs(),
+          ToOpConverter(VisitExpression)
+      )
+  );
   return Create<AAssignment>(
       op,
       std::move(lhs),

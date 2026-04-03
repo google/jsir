@@ -70,25 +70,202 @@ cc_library(
 )
 
 cc_library(
-    name = "ast_gen",
-    srcs = ["ast_gen.cc"],
-    hdrs = ["ast_gen.h"],
+    name = "printer_base",
+    hdrs = ["printer_base.h"],
+    deps = [
+        "@com_google_protobuf//src/google/protobuf/io",
+        "@com_google_protobuf//src/google/protobuf/io:printer",
+    ],
+)
+
+cc_library(
+    name = "ast_gen_utils",
+    hdrs = ["ast_gen_utils.h"],
+    deps = [
+        ":ast_def",
+        "//maldoca/base:path",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io:printer",
+    ],
+)
+
+cc_library(
+    name = "cc_printer_base",
+    srcs = ["cc_printer_base.cc"],
+    hdrs = ["cc_printer_base.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":printer_base",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ast_header_printer",
+    srcs = ["ast_header_printer.cc"],
+    hdrs = ["ast_header_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ast_source_printer",
+    srcs = ["ast_source_printer.cc"],
+    hdrs = ["ast_source_printer.h"],
     deps = [
         ":ast_def",
         ":ast_def_cc_proto",
+        ":ast_gen_utils",
+        ":cc_printer_base",
         ":symbol",
-        "//maldoca/base:path",
-        "@abseil-cpp//absl/algorithm:container",
-        "@abseil-cpp//absl/base:core_headers",
-        "@abseil-cpp//absl/cleanup",
-        "@abseil-cpp//absl/container:btree",
-        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ast_serialize_printer",
+    srcs = ["ast_serialize_printer.cc"],
+    hdrs = ["ast_serialize_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ast_from_json_printer",
+    srcs = ["ast_from_json_printer.cc"],
+    hdrs = ["ast_from_json_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_def_cc_proto",
+        ":ast_from_json_utils",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/cleanup",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ts_interface_printer",
+    srcs = ["ts_interface_printer.cc"],
+    hdrs = ["ts_interface_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_def_cc_proto",
+        ":ast_gen_utils",
+        ":printer_base",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ir_table_gen_printer",
+    srcs = ["ir_table_gen_printer.cc"],
+    hdrs = ["ir_table_gen_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ast_to_ir_source_printer",
+    srcs = ["ast_to_ir_source_printer.cc"],
+    hdrs = ["ast_to_ir_source_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_def_cc_proto",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ir_to_ast_source_printer",
+    srcs = ["ir_to_ast_source_printer.cc"],
+    hdrs = ["ir_to_ast_source_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_def_cc_proto",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/container:btree",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
         "@com_google_protobuf//src/google/protobuf/io:printer",
+    ],
+)
+
+cc_library(
+    name = "ast_from_json_utils",
+    hdrs = ["ast_from_json_utils.h"],
+    deps = [
+        "//maldoca/base:status",
+        "@abseil-cpp//absl/functional:any_invocable",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@nlohmann_json//:json",
+    ],
+)
+
+cc_library(
+    name = "ir_to_ast_util",
+    hdrs = ["ir_to_ast_util.h"],
+    deps = [
+        "//maldoca/base:status",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:string_view",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:IR",
     ],
 )
 
@@ -98,7 +275,13 @@ cc_binary(
     deps = [
         ":ast_def",
         ":ast_def_cc_proto",
-        ":ast_gen",
+        ":ast_from_json_printer",
+        ":ast_header_printer",
+        ":ast_serialize_printer",
+        ":ast_source_printer",
+        ":ast_to_ir_source_printer",
+        ":ir_table_gen_printer",
+        ":ir_to_ast_source_printer",
         "//maldoca/base:filesystem",
         "//maldoca/base:path",
         "//maldoca/base:status",
@@ -113,8 +296,10 @@ cc_test(
     deps = [
         ":ast_def",
         ":ast_def_cc_proto",
-        ":ast_gen",
+        ":ast_from_json_printer",
+        ":ast_header_printer",
         ":symbol",
+        ":ts_interface_printer",
         "//maldoca/base:filesystem",
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/memory",

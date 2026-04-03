@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // MSourceLocation
@@ -61,36 +47,20 @@ static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
 
 absl::StatusOr<double>
 MSourceLocation::GetStart(const nlohmann::json& json) {
-  auto start_it = json.find("start");
-  if (start_it == json.end()) {
-    return absl::InvalidArgumentError("`start` is undefined.");
-  }
-  const nlohmann::json& json_start = start_it.value();
-
-  if (json_start.is_null()) {
-    return absl::InvalidArgumentError("json_start is null.");
-  }
-  if (!json_start.is_number()) {
-    return absl::InvalidArgumentError("Expecting json_start.is_number().");
-  }
-  return json_start.get<double>();
+  return GetRequiredField<double>(
+      json,
+      "start",
+      JsonToDouble
+  );
 }
 
 absl::StatusOr<double>
 MSourceLocation::GetEnd(const nlohmann::json& json) {
-  auto end_it = json.find("end");
-  if (end_it == json.end()) {
-    return absl::InvalidArgumentError("`end` is undefined.");
-  }
-  const nlohmann::json& json_end = end_it.value();
-
-  if (json_end.is_null()) {
-    return absl::InvalidArgumentError("json_end is null.");
-  }
-  if (!json_end.is_number()) {
-    return absl::InvalidArgumentError("Expecting json_end.is_number().");
-  }
-  return json_end.get<double>();
+  return GetRequiredField<double>(
+      json,
+      "end",
+      JsonToDouble
+  );
 }
 
 absl::StatusOr<std::unique_ptr<MSourceLocation>>
@@ -113,16 +83,11 @@ MSourceLocation::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::unique_ptr<MSourceLocation>>
 MNode::GetLoc(const nlohmann::json& json) {
-  auto loc_it = json.find("loc");
-  if (loc_it == json.end()) {
-    return absl::InvalidArgumentError("`loc` is undefined.");
-  }
-  const nlohmann::json& json_loc = loc_it.value();
-
-  if (json_loc.is_null()) {
-    return absl::InvalidArgumentError("json_loc is null.");
-  }
-  return MSourceLocation::FromJson(json_loc);
+  return GetRequiredField<std::unique_ptr<MSourceLocation>>(
+      json,
+      "loc",
+      MSourceLocation::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<MNode>>
@@ -149,19 +114,11 @@ MNode::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 MFunction::GetId(const nlohmann::json& json) {
-  auto id_it = json.find("id");
-  if (id_it == json.end()) {
-    return absl::InvalidArgumentError("`id` is undefined.");
-  }
-  const nlohmann::json& json_id = id_it.value();
-
-  if (json_id.is_null()) {
-    return absl::InvalidArgumentError("json_id is null.");
-  }
-  if (!json_id.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_id.is_string().");
-  }
-  return json_id.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "id",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<MFunction>>
@@ -184,19 +141,11 @@ MFunction::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<bool>
 MObjectMember::GetComputed(const nlohmann::json& json) {
-  auto computed_it = json.find("computed");
-  if (computed_it == json.end()) {
-    return absl::InvalidArgumentError("`computed` is undefined.");
-  }
-  const nlohmann::json& json_computed = computed_it.value();
-
-  if (json_computed.is_null()) {
-    return absl::InvalidArgumentError("json_computed is null.");
-  }
-  if (!json_computed.is_boolean()) {
-    return absl::InvalidArgumentError("Expecting json_computed.is_boolean().");
-  }
-  return json_computed.get<bool>();
+  return GetRequiredField<bool>(
+      json,
+      "computed",
+      JsonToBool
+  );
 }
 
 absl::StatusOr<std::unique_ptr<MObjectMember>>

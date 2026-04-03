@@ -23,24 +23,25 @@ namespace maldoca {
 
 class AstToAir {
  public:
-  explicit AstToAir(mlir::OpBuilder &builder) : builder_(builder) {}
+  static AirIdentifierOp VisitIdentifier(mlir::OpBuilder& builder,
+                                         const AIdentifier* node);
 
-  AirIdentifierOp VisitIdentifier(const AIdentifier *node);
+  static AirIdentifierRefOp VisitIdentifierRef(mlir::OpBuilder& builder,
+                                               const AIdentifier* node);
 
-  AirIdentifierRefOp VisitIdentifierRef(const AIdentifier *node);
+  static AirAssignmentOp VisitAssignment(mlir::OpBuilder& builder,
+                                         const AAssignment* node);
 
-  AirAssignmentOp VisitAssignment(const AAssignment *node);
-
-  AirExpressionOpInterface VisitExpression(const AExpression *node);
+  static AirExpressionOpInterface VisitExpression(mlir::OpBuilder& builder,
+                                                  const AExpression* node);
 
  private:
   template <typename Op, typename Node, typename... Args>
-  Op CreateExpr(const Node *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(),
-                               std::forward<Args>(args)...);
+  static Op CreateExpr(mlir::OpBuilder& builder, const Node* node,
+                       Args&&... args) {
+    return Op::create(builder, builder.getUnknownLoc(),
+                      std::forward<Args>(args)...);
   }
-
-  mlir::OpBuilder &builder_;
 };
 
 }  // namespace maldoca

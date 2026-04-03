@@ -18,9 +18,9 @@
 #include <functional>
 #include <optional>
 
+#include "mlir/IR/Block.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Region.h"
-#include "mlir/IR/Block.h"
 #include "maldoca/astgen/test/region/ast.generated.h"
 #include "maldoca/astgen/test/region/ir.h"
 
@@ -28,41 +28,40 @@ namespace maldoca {
 
 class AstToRir {
  public:
-  explicit AstToRir(mlir::OpBuilder &builder) : builder_(builder) {}
+  static RirExprOp VisitExpr(mlir::OpBuilder& builder, const RExpr* node);
 
-  RirExprOp VisitExpr(const RExpr *node);
+  static RirStmtOp VisitStmt(mlir::OpBuilder& builder, const RStmt* node);
 
-  RirStmtOp VisitStmt(const RStmt *node);
-
-  RirNodeOp VisitNode(const RNode *node);
+  static RirNodeOp VisitNode(mlir::OpBuilder& builder, const RNode* node);
 
  private:
-  template <typename Op, typename RNode, typename... Args>
-  Op CreateExpr(const RNode *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(),
-                               std::forward<Args>(args)...);
+  template <typename Op, typename... Args>
+  static Op CreateExpr(mlir::OpBuilder& builder, const void* node,
+                       Args&&... args) {
+    return Op::create(builder, builder.getUnknownLoc(),
+                      std::forward<Args>(args)...);
   }
 
-  template <typename Op, typename RNode, typename... Args>
-  Op CreateStmt(const RNode *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(), mlir::TypeRange(),
-                               std::forward<Args>(args)...);
+  template <typename Op, typename... Args>
+  static Op CreateStmt(mlir::OpBuilder& builder, const void* node,
+                       Args&&... args) {
+    return Op::create(builder, builder.getUnknownLoc(), mlir::TypeRange(),
+                      std::forward<Args>(args)...);
   }
 
-  void AppendNewBlockAndPopulate(mlir::Region &region,
-                                 std::function<void()> populate) {
+  static void AppendNewBlockAndPopulate(mlir::OpBuilder& builder,
+                                        mlir::Region& region,
+                                        std::function<void()> populate) {
     // Save insertion point.
     // Will revert at the end.
-    mlir::OpBuilder::InsertionGuard insertion_guard(builder_);
+    mlir::OpBuilder::InsertionGuard insertion_guard(builder);
 
     // Insert new block and point builder to it.
-    mlir::Block &block = region.emplaceBlock();
-    builder_.setInsertionPointToStart(&block);
+    mlir::Block& block = region.emplaceBlock();
+    builder.setInsertionPointToStart(&block);
 
     populate();
   }
-
-  mlir::OpBuilder &builder_;
 };
 
 }  // namespace maldoca

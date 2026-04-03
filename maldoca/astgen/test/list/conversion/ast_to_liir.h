@@ -23,40 +23,43 @@ namespace maldoca {
 
 class AstToLiir {
  public:
-  explicit AstToLiir(mlir::OpBuilder &builder) : builder_(builder) {}
+  static LiirClass1Op VisitClass1(mlir::OpBuilder& builder,
+                                  const LiClass1* node);
 
-  LiirClass1Op VisitClass1(const LiClass1 *node);
+  static LiirClass2Op VisitClass2(mlir::OpBuilder& builder,
+                                  const LiClass2* node);
 
-  LiirClass2Op VisitClass2(const LiClass2 *node);
+  static LiirSimpleListOp VisitSimpleList(mlir::OpBuilder& builder,
+                                          const LiSimpleList* node);
 
-  LiirSimpleListOp VisitSimpleList(const LiSimpleList *node);
+  static LiirOptionalListOp VisitOptionalList(mlir::OpBuilder& builder,
+                                              const LiOptionalList* node);
 
-  LiirOptionalListOp VisitOptionalList(const LiOptionalList *node);
+  static LiirListOfOptionalOp VisitListOfOptional(mlir::OpBuilder& builder,
+                                                  const LiListOfOptional* node);
 
-  LiirListOfOptionalOp VisitListOfOptional(const LiListOfOptional *node);
+  static LiirListOfVariantOp VisitListOfVariant(mlir::OpBuilder& builder,
+                                                const LiListOfVariant* node);
 
-  LiirListOfVariantOp VisitListOfVariant(const LiListOfVariant *node);
+  static LiirOptionalListOfOptionalOp VisitOptionalListOfOptional(
+      mlir::OpBuilder& builder, const LiOptionalListOfOptional* node);
 
-  LiirOptionalListOfOptionalOp VisitOptionalListOfOptional(
-      const LiOptionalListOfOptional *node);
+  static LiirOptionalListOfVariantOp VisitOptionalListOfVariant(
+      mlir::OpBuilder& builder, const LiOptionalListOfVariant* node);
 
-  LiirOptionalListOfVariantOp VisitOptionalListOfVariant(
-      const LiOptionalListOfVariant *node);
+  static LiirListOfOptionalVariantOp VisitListOfOptionalVariant(
+      mlir::OpBuilder& builder, const LiListOfOptionalVariant* node);
 
-  LiirListOfOptionalVariantOp VisitListOfOptionalVariant(
-      const LiListOfOptionalVariant *node);
-
-  LiirOptionalListOfOptionalVariantOp VisitOptionalListOfOptionalVariant(
-      const LiOptionalListOfOptionalVariant *node);
+  static LiirOptionalListOfOptionalVariantOp VisitOptionalListOfOptionalVariant(
+      mlir::OpBuilder& builder, const LiOptionalListOfOptionalVariant* node);
 
  private:
   template <typename Op, typename Node, typename... Args>
-  Op CreateExpr(const Node *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(),
-                               std::forward<Args>(args)...);
+  static Op CreateExpr(mlir::OpBuilder& builder, const Node* node,
+                       Args&&... args) {
+    return Op::create(builder, builder.getUnknownLoc(),
+                      std::forward<Args>(args)...);
   }
-
-  mlir::OpBuilder &builder_;
 };
 
 }  // namespace maldoca

@@ -191,23 +191,23 @@ std::optional<mlir::Attribute> EmulateBinOp(std::string op,
                                             mlir::MLIRContext *context,
                                             mlir::Attribute mlir_left,
                                             mlir::Attribute mlir_right) {
-  std::unique_ptr<JSRuntime, QjsRuntimeDeleter> qjs_runtime{JS_NewRuntime()};
-  std::unique_ptr<JSContext, QjsContextDeleter> qjs_context{
-      JS_NewContext(qjs_runtime.get())};
-  auto left = MlirAttributeToQuickJsValue(qjs_context.get(), mlir_left);
-  auto right = MlirAttributeToQuickJsValue(qjs_context.get(), mlir_right);
+  JsirDialect* dialect = context->getOrLoadDialect<JsirDialect>();
+  JSContext* qjs_context = dialect->qjs_context.get();
+
+  auto left = MlirAttributeToQuickJsValue(qjs_context, mlir_left);
+  auto right = MlirAttributeToQuickJsValue(qjs_context, mlir_right);
   if (!left.has_value() || !right.has_value()) {
     return std::nullopt;
   }
 
-  QjsValue bin_op_result = EmulateBinOp(qjs_context.get(), op, *left, *right);
+  QjsValue bin_op_result = EmulateBinOp(qjs_context, op, *left, *right);
 
   if (JS_IsException(bin_op_result.get())) {
     LOG(ERROR) << "evaluate_bin_op returned an exception?";
     return std::nullopt;
   }
 
-  return QuickJsValueToMlirAttribute(qjs_context.get(), context,
+  return QuickJsValueToMlirAttribute(qjs_context, context,
                                      bin_op_result.get());
 }
 
@@ -241,33 +241,32 @@ QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
 std::optional<mlir::Attribute> EmulateUnaryOp(std::string op,
                                               mlir::MLIRContext *context,
                                               mlir::Attribute mlir_operand) {
-  std::unique_ptr<JSRuntime, QjsRuntimeDeleter> qjs_runtime{JS_NewRuntime()};
-  std::unique_ptr<JSContext, QjsContextDeleter> qjs_context{
-      JS_NewContext(qjs_runtime.get())};
+  JsirDialect* dialect = context->getOrLoadDialect<JsirDialect>();
+  JSContext* qjs_context = dialect->qjs_context.get();
 
-  auto expr = MlirAttributeToQuickJsValue(qjs_context.get(), mlir_operand);
+  auto expr = MlirAttributeToQuickJsValue(qjs_context, mlir_operand);
   if (!expr.has_value()) {
     return std::nullopt;
   }
 
-  QjsValue unary_op_result = EmulateUnaryOp(qjs_context.get(), op, *expr);
+  QjsValue unary_op_result = EmulateUnaryOp(qjs_context, op, *expr);
 
   if (JS_IsException(unary_op_result.get())) {
     LOG(ERROR) << "evaluate_unary_op returned an exception?";
     return std::nullopt;
   }
 
-  return QuickJsValueToMlirAttribute(qjs_context.get(), context,
+  return QuickJsValueToMlirAttribute(qjs_context, context,
                                      unary_op_result.get());
 }
 
 std::optional<mlir::Attribute> EmulateMemberAccessOp(mlir::MLIRContext *context,
                                                      mlir::Attribute mlir_obj,
                                                      mlir::Attribute mlir_key) {
-  std::unique_ptr<JSRuntime, QjsRuntimeDeleter> qjs_runtime{JS_NewRuntime()};
-  std::unique_ptr<JSContext, QjsContextDeleter> qjs_context{
-      JS_NewContext(qjs_runtime.get())};
-  QjsValue global{qjs_context.get(), JS_GetGlobalObject(qjs_context.get())};
+  JsirDialect* dialect = context->getOrLoadDialect<JsirDialect>();
+  JSContext* qjs_context = dialect->qjs_context.get();
+
+  QjsValue global{qjs_context, JS_GetGlobalObject(qjs_context)};
 
   static constexpr absl::string_view kSource = R"js(
     function evaluate_member_access(a, b) {
@@ -277,25 +276,25 @@ std::optional<mlir::Attribute> EmulateMemberAccessOp(mlir::MLIRContext *context,
   )js";
 
   QjsValue evaluate_member_access{
-      qjs_context.get(),
-      JS_Eval(qjs_context.get(), kSource.data(), kSource.length(),
+      qjs_context,
+      JS_Eval(qjs_context, kSource.data(), kSource.length(),
               "evaluate_member_access.js", JS_EVAL_TYPE_GLOBAL),
   };
 
-  if (!JS_IsFunction(qjs_context.get(), evaluate_member_access.get())) {
+  if (!JS_IsFunction(qjs_context, evaluate_member_access.get())) {
     LOG(FATAL) << "evaluate_member_access is not a function?";
     return std::nullopt;
   }
 
-  auto obj = MlirAttributeToQuickJsValue(qjs_context.get(), mlir_obj);
-  auto key = MlirAttributeToQuickJsValue(qjs_context.get(), mlir_key);
+  auto obj = MlirAttributeToQuickJsValue(qjs_context, mlir_obj);
+  auto key = MlirAttributeToQuickJsValue(qjs_context, mlir_key);
   if (!obj.has_value() || !key.has_value()) {
     return std::nullopt;
   }
   std::vector<JSValue> args = {obj->get(), key->get()};
   QjsValue member_access_result{
-      qjs_context.get(),
-      JS_Call(qjs_context.get(), evaluate_member_access.get(), global.get(),
+      qjs_context,
+      JS_Call(qjs_context, evaluate_member_access.get(), global.get(),
               args.size(), args.data()),
   };
 
@@ -304,7 +303,7 @@ std::optional<mlir::Attribute> EmulateMemberAccessOp(mlir::MLIRContext *context,
     return std::nullopt;
   }
 
-  return QuickJsValueToMlirAttribute(qjs_context.get(), context,
+  return QuickJsValueToMlirAttribute(qjs_context, context,
                                      member_access_result.get());
 }
 

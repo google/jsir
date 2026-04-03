@@ -79,9 +79,9 @@ module {
 }
   )";
 
-  TestIrConversion<RNode, RirNodeOp, RirDialect, AstToRir, RirToAst>({
+  TestIrConversion<RNode, RirNodeOp, RirDialect, AstToRir>({
       .ast_json_string = kAstJsonString,
-      .ast_to_ir_visit = &AstToRir::VisitNode,
+      .ast_to_ir_visit = AstToRir::VisitNode,
       .ir_to_ast_visit = &RirToAst::VisitNode,
       .expected_ir_dump = kExpectedIr,
   });

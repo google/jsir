@@ -35,25 +35,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
-
-static absl::StatusOr<std::string> GetType(const nlohmann::json& json) {
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return absl::InvalidArgumentError("`type` is undefined.");
-  }
-  const nlohmann::json& json_type = type_it.value();
-  if (json_type.is_null()) {
-    return absl::InvalidArgumentError("json_type is null.");
-  }
-  if (!json_type.is_string()) {
-    return absl::InvalidArgumentError("`json_type` expected to be string.");
-  }
-  return json_type.get<std::string>();
-}
 
 // =============================================================================
 // EUnionType
@@ -81,33 +67,20 @@ EUnionType::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 ENode::GetName(const nlohmann::json& json) {
-  auto name_it = json.find("name");
-  if (name_it == json.end()) {
-    return absl::InvalidArgumentError("`name` is undefined.");
-  }
-  const nlohmann::json& json_name = name_it.value();
-
-  if (json_name.is_null()) {
-    return absl::InvalidArgumentError("json_name is null.");
-  }
-  if (!json_name.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_name.is_string().");
-  }
-  return json_name.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "name",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<EUnionType>>
 ENode::GetContent(const nlohmann::json& json) {
-  auto content_it = json.find("content");
-  if (content_it == json.end()) {
-    return absl::InvalidArgumentError("`content` is undefined.");
-  }
-  const nlohmann::json& json_content = content_it.value();
-
-  if (json_content.is_null()) {
-    return absl::InvalidArgumentError("json_content is null.");
-  }
-  return EUnionType::FromJson(json_content);
+  return GetRequiredField<std::unique_ptr<EUnionType>>(
+      json,
+      "content",
+      EUnionType::FromJson
+  );
 }
 
 absl::StatusOr<std::unique_ptr<ENode>>
@@ -130,19 +103,11 @@ ENode::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 ESubNodeA::GetValueA(const nlohmann::json& json) {
-  auto value_a_it = json.find("valueA");
-  if (value_a_it == json.end()) {
-    return absl::InvalidArgumentError("`valueA` is undefined.");
-  }
-  const nlohmann::json& json_value_a = value_a_it.value();
-
-  if (json_value_a.is_null()) {
-    return absl::InvalidArgumentError("json_value_a is null.");
-  }
-  if (!json_value_a.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value_a.is_string().");
-  }
-  return json_value_a.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "valueA",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<ESubNodeA>>
@@ -163,19 +128,11 @@ ESubNodeA::FromJson(const nlohmann::json& json) {
 
 absl::StatusOr<std::string>
 ESubNodeB::GetValueB(const nlohmann::json& json) {
-  auto value_b_it = json.find("valueB");
-  if (value_b_it == json.end()) {
-    return absl::InvalidArgumentError("`valueB` is undefined.");
-  }
-  const nlohmann::json& json_value_b = value_b_it.value();
-
-  if (json_value_b.is_null()) {
-    return absl::InvalidArgumentError("json_value_b is null.");
-  }
-  if (!json_value_b.is_string()) {
-    return absl::InvalidArgumentError("Expecting json_value_b.is_string().");
-  }
-  return json_value_b.get<std::string>();
+  return GetRequiredField<std::string>(
+      json,
+      "valueB",
+      JsonToString
+  );
 }
 
 absl::StatusOr<std::unique_ptr<ESubNodeB>>

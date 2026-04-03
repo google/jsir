@@ -43,10 +43,10 @@ class EnumMemberDef {
       : name_(std::move(name)), string_value_(std::move(string_value)) {}
 
   static absl::StatusOr<EnumMemberDef> FromEnumMemberDefPb(
-      const EnumMemberDefPb &member_pb);
+      const EnumMemberDefPb& member_pb);
 
-  const Symbol &name() const { return name_; }
-  const std::string &string_value() const { return string_value_; }
+  const Symbol& name() const { return name_; }
+  const std::string& string_value() const { return string_value_; }
 
  private:
   Symbol name_;
@@ -58,9 +58,9 @@ class EnumDef {
   explicit EnumDef(Symbol name, std::vector<EnumMemberDef> members)
       : name_(std::move(name)), members_(std::move(members)) {}
 
-  static absl::StatusOr<EnumDef> FromEnumDefPb(const EnumDefPb &enum_pb);
+  static absl::StatusOr<EnumDef> FromEnumDefPb(const EnumDefPb& enum_pb);
 
-  const Symbol &name() const { return name_; }
+  const Symbol& name() const { return name_; }
   absl::Span<const EnumMemberDef> members() const { return members_; }
 
  private:
@@ -71,13 +71,13 @@ class EnumDef {
 // Definition of a field in a class.
 class FieldDef {
  public:
-  static absl::StatusOr<FieldDef> FromFieldDefPb(const FieldDefPb &field_pb,
+  static absl::StatusOr<FieldDef> FromFieldDefPb(const FieldDefPb& field_pb,
                                                  absl::string_view lang_name);
 
-  const Symbol &name() const { return name_; }
+  const Symbol& name() const { return name_; }
   Optionalness optionalness() const { return optionalness_; }
-  const Type &type() const { return *type_; }
-  Type &type() { return *type_; }
+  const Type& type() const { return *type_; }
+  Type& type() { return *type_; }
   FieldKind kind() const { return kind_; }
   bool ignore_in_ir() const { return ignore_in_ir_; }
   bool enclose_in_region() const { return enclose_in_region_; }
@@ -99,7 +99,7 @@ class FieldDef {
 class NodeDef {
  public:
   // Class name.
-  const std::string &name() const { return name_; }
+  const std::string& name() const { return name_; }
 
   // Type kind enum.
   //
@@ -135,7 +135,7 @@ class NodeDef {
   // }
   //
   // parents = { Expression, Pattern }
-  absl::Span<const NodeDef *const> parents() const { return parents_; }
+  absl::Span<const NodeDef* const> parents() const { return parents_; }
 
   // Topologically sorted: base comes before derived. Use the original
   // definition order to break tie.
@@ -147,23 +147,23 @@ class NodeDef {
   //   interface Identifier <: Expression, Pattern
   //
   // ancestors: Node, Expression, Pattern
-  absl::Span<const NodeDef *const> ancestors() const { return ancestors_; }
+  absl::Span<const NodeDef* const> ancestors() const { return ancestors_; }
 
   // All fields, including those defined by ancestors.
-  absl::Span<const FieldDef *const> aggregated_fields() const {
+  absl::Span<const FieldDef* const> aggregated_fields() const {
     return aggregated_fields_;
   }
 
   // Direct children of this class.
-  absl::Span<const NodeDef *const> children() const { return children_; }
+  absl::Span<const NodeDef* const> children() const { return children_; }
 
   // All types that directly or indirectly inherit this class.
-  absl::Span<const NodeDef *const> descendants() const { return descendants_; }
+  absl::Span<const NodeDef* const> descendants() const { return descendants_; }
 
   // All descendants that are leaf classes.
-  absl::Span<const NodeDef *const> leafs() const { return leafs_; }
+  absl::Span<const NodeDef* const> leafs() const { return leafs_; }
 
-  std::optional<const EnumDef *> node_type_enum() const {
+  std::optional<const EnumDef*> node_type_enum() const {
     if (node_type_enum_.has_value()) {
       return &node_type_enum_.value();
     } else {
@@ -281,12 +281,12 @@ class NodeDef {
   std::string name_;
   std::optional<std::string> type_;
   std::vector<FieldDef> fields_;
-  std::vector<NodeDef *> parents_;
-  std::vector<NodeDef *> ancestors_;
-  std::vector<FieldDef *> aggregated_fields_;
-  std::vector<NodeDef *> children_;
-  std::vector<NodeDef *> descendants_;
-  std::vector<NodeDef *> leafs_;
+  std::vector<NodeDef*> parents_;
+  std::vector<NodeDef*> ancestors_;
+  std::vector<FieldDef*> aggregated_fields_;
+  std::vector<NodeDef*> children_;
+  std::vector<NodeDef*> descendants_;
+  std::vector<NodeDef*> leafs_;
   std::optional<EnumDef> node_type_enum_;
   bool should_generate_ir_op_;
   std::vector<FieldKind> kinds_;
@@ -305,7 +305,7 @@ class AstDef {
  public:
   // Creates an AST definition from a proto.
   // Also checks the validity of the proto.
-  static absl::StatusOr<AstDef> FromProto(const AstDefPb &pb);
+  static absl::StatusOr<AstDef> FromProto(const AstDefPb& pb);
 
   absl::string_view lang_name() const { return lang_name_; }
 
@@ -315,7 +315,7 @@ class AstDef {
   absl::Span<const std::string> node_names() const { return node_names_; }
 
   // Node name => node definition.
-  const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>> &nodes()
+  const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes()
       const {
     return nodes_;
   }
@@ -323,7 +323,7 @@ class AstDef {
   // Nodes listed in topological order.
   // This order ensures that dependencies (parent classes, field types) are
   // defined before each class.
-  absl::Span<const NodeDef *const> topological_sorted_nodes() const {
+  absl::Span<const NodeDef* const> topological_sorted_nodes() const {
     return topological_sorted_nodes_;
   }
 
@@ -332,14 +332,14 @@ class AstDef {
       std::string lang_name, std::vector<EnumDef> enum_defs,
       std::vector<std::string> node_names,
       absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>> nodes,
-      std::vector<NodeDef *> topological_sorted_nodes)
+      std::vector<NodeDef*> topological_sorted_nodes)
       : lang_name_(std::move(lang_name)),
         enum_defs_(std::move(enum_defs)),
         node_names_(std::move(node_names)),
         nodes_(std::move(nodes)),
         topological_sorted_nodes_(std::move(topological_sorted_nodes)) {
     LOG(INFO) << "Created AstDef. node_names:";
-    for (const std::string &node_name : node_names_) {
+    for (const std::string& node_name : node_names_) {
       LOG(INFO) << "  " << node_name;
     }
   }
@@ -348,10 +348,10 @@ class AstDef {
   std::vector<EnumDef> enum_defs_;
   std::vector<std::string> node_names_;
   absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>> nodes_;
-  std::vector<NodeDef *> topological_sorted_nodes_;
+  std::vector<NodeDef*> topological_sorted_nodes_;
 
   static void ResolveClassType(
-      Type &type, absl::Span<const NodeDef *const> topological_sorted_nodes);
+      Type& type, absl::Span<const NodeDef* const> topological_sorted_nodes);
 };
 
 }  // namespace maldoca

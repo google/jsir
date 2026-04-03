@@ -23,19 +23,16 @@ namespace maldoca {
 
 class AstToEir {
  public:
-  explicit AstToEir(mlir::OpBuilder &builder) : builder_(builder) {}
-
-  EirNodeOp VisitNode(const ENode *node);
+  static EirNodeOp VisitNode(mlir::OpBuilder& builder, const ENode* node);
 
  private:
   template <typename Op, typename Node, typename... Args>
-  Op CreateExpr(const Node *node, Args &&...args) {
-    return builder_.create<Op>(builder_.getUnknownLoc(),
-                               EirAnyType::get(builder_.getContext()),
-                               std::forward<Args>(args)...);
+  static Op CreateExpr(mlir::OpBuilder& builder, const Node* node,
+                       Args&&... args) {
+    return Op::create(builder, builder.getUnknownLoc(),
+                      EirAnyType::get(builder.getContext()),
+                      std::forward<Args>(args)...);
   }
-
-  mlir::OpBuilder &builder_;
 };
 
 }  // namespace maldoca
