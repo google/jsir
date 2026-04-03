@@ -34,18 +34,18 @@ namespace maldoca {
 namespace {
 
 struct PrintFieldDefTestCase {
-  const char *field_def;
-  const char *ts_interface_field;
-  const char *cc_member_variable;
+  const char* field_def;
+  const char* ts_interface_field;
+  const char* cc_member_variable;
 };
 
-void TestPrintFieldDef(const PrintFieldDefTestCase &test_case) {
+void TestPrintFieldDef(const PrintFieldDefTestCase& test_case) {
   FieldDefPb field_def_pb;
   MALDOCA_ASSERT_OK(ParseTextProto(test_case.field_def, "test_case.field_def",
                                    &field_def_pb));
 
-  MALDOCA_ASSERT_OK_AND_ASSIGN(auto field_def,
-                       FieldDef::FromFieldDefPb(field_def_pb, "UsedLanguage"));
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      auto field_def, FieldDef::FromFieldDefPb(field_def_pb, "UsedLanguage"));
 
   std::string ts_interface_field;
   {
