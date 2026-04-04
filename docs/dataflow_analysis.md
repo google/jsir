@@ -1,5 +1,7 @@
 # Dataflow Analysis
 
+[TOC]
+
 ## Overview
 
 JSIR provides an API for **flow-sensitive, conditional**, dataflow analysis.

@@ -9,6 +9,11 @@ python3 maldoca/js/ir/transforms/generate_tests.py \
     --passes source2ast,ast2hir,constprop,hir2ast,ast2source \
     --path maldoca/js/ir/transforms/constant_propagation/tests
 
+# TODO(b/452034945): Release these tests.
+python3 maldoca/js/ir/transforms/generate_tests.py \
+    --passes source2ast,ast2hir,constprop,hir2ast,ast2source \
+    --path maldoca/js/ir/transforms/constant_propagation/jscomp_peephole_tests
+
 python3 maldoca/js/ir/transforms/generate_tests.py \
     --passes source2ast,extract_prelude,erase_comments,ast2hir,dynconstprop,hir2ast,ast2source \
     --path maldoca/js/ir/transforms/dynamic_constant_propagation/tests
@@ -36,6 +41,11 @@ python3 maldoca/js/ir/transforms/generate_tests.py \
 python3 maldoca/js/ir/transforms/generate_tests.py \
     --passes source2ast,ast2hir,split_declaration_statements,hir2ast,ast2source \
     --path maldoca/js/ir/transforms/split_declaration_statements/tests
+
+# TODO(b/452034945): Release these tests.
+python3 maldoca/js/ir/transforms/generate_tests.py \
+    --passes source2ast,extract_prelude,erase_comments,ast2hir,dynconstprop,dead_code_elimination,hir2ast,ast2source \
+    --path maldoca/js/ir/transforms/dead_code_elimination/tests
 
 python3 maldoca/js/ir/transforms/generate_tests.py \
     --passes source2ast,ast2hir,split_sequence_expressions,hir2ast,ast2source \

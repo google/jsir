@@ -1,5 +1,7 @@
 # Intermediate Representation Design
 
+[TOC]
+
 ## Overview
 
 JSIR is a next-generation JavaScript analysis tooling from Google. At its core

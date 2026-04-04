@@ -31,28 +31,28 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/symbol.h"
-#include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/type.pb.h"
 #include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace {
 
-std::unique_ptr<BuiltinType> FromBoolTypePb(const BoolTypePb &pb) {
+std::unique_ptr<BuiltinType> FromBoolTypePb(const BoolTypePb& pb) {
   return absl::make_unique<BuiltinType>(BuiltinTypeKind::kBool, "");
 }
 
-std::unique_ptr<BuiltinType> FromInt64TypePb(const Int64TypePb &pb) {
+std::unique_ptr<BuiltinType> FromInt64TypePb(const Int64TypePb& pb) {
   return absl::make_unique<BuiltinType>(BuiltinTypeKind::kInt64, "");
 }
 
-std::unique_ptr<BuiltinType> FromDoubleTypePb(const DoubleTypePb &pb) {
+std::unique_ptr<BuiltinType> FromDoubleTypePb(const DoubleTypePb& pb) {
   return absl::make_unique<BuiltinType>(BuiltinTypeKind::kDouble, "");
 }
 
-std::unique_ptr<BuiltinType> FromStringTypePb(const StringTypePb &pb) {
+std::unique_ptr<BuiltinType> FromStringTypePb(const StringTypePb& pb) {
   return absl::make_unique<BuiltinType>(BuiltinTypeKind::kString, "");
 }
 
@@ -67,9 +67,9 @@ std::unique_ptr<ClassType> FromClassTypePb(absl::string_view class_,
 }
 
 absl::StatusOr<std::unique_ptr<VariantType>> FromVariantTypePb(
-    const VariantTypePb &pb, absl::string_view lang_name) {
+    const VariantTypePb& pb, absl::string_view lang_name) {
   std::vector<std::unique_ptr<ScalarType>> types;
-  for (const ScalarTypePb &type : pb.types()) {
+  for (const ScalarTypePb& type : pb.types()) {
     switch (type.kind_case()) {
       case ScalarTypePb::KindCase::KIND_NOT_SET:
         return absl::InvalidArgumentError(
@@ -113,7 +113,7 @@ absl::StatusOr<std::unique_ptr<VariantType>> FromVariantTypePb(
 }
 
 absl::StatusOr<std::unique_ptr<ListType>> FromListTypePb(
-    const ListTypePb &pb, absl::string_view lang_name) {
+    const ListTypePb& pb, absl::string_view lang_name) {
   std::unique_ptr<NonListType> element_type;
   switch (pb.element_type().kind_case()) {
     case NonListTypePb::KIND_NOT_SET:
@@ -159,7 +159,7 @@ absl::StatusOr<std::unique_ptr<ListType>> FromListTypePb(
 
 }  // namespace
 
-absl::StatusOr<std::unique_ptr<Type>> FromTypePb(const TypePb &pb,
+absl::StatusOr<std::unique_ptr<Type>> FromTypePb(const TypePb& pb,
                                                  absl::string_view lang_name) {
   switch (pb.kind_case()) {
     case TypePb::KindCase::KIND_NOT_SET:
@@ -211,7 +211,7 @@ std::string ListType::JsType() const {
 
 std::string VariantType::JsType() const {
   std::vector<std::string> type_strings;
-  for (const auto &type : types()) {
+  for (const auto& type : types()) {
     type_strings.push_back(type->JsType());
   }
   return absl::StrJoin(type_strings, " | ");
@@ -265,7 +265,7 @@ std::string ListType::CcType() const {
 
 std::string VariantType::CcType() const {
   std::vector<std::string> type_strings;
-  for (const auto &type : types()) {
+  for (const auto& type : types()) {
     type_strings.push_back(type->CcType());
   }
   return absl::StrCat("std::variant<", absl::StrJoin(type_strings, ", "), ">");
@@ -353,7 +353,7 @@ std::string ListType::CcGetterType(CcGetterKind getter_kind) const {
 
 std::string VariantType::CcGetterType(CcGetterKind getter_kind) const {
   std::vector<std::string> type_strings;
-  for (const auto &type : types()) {
+  for (const auto& type : types()) {
     type_strings.push_back(type->CcGetterType(getter_kind));
   }
   return absl::StrCat("std::variant<", absl::StrJoin(type_strings, ", "), ">");
@@ -419,7 +419,7 @@ std::string ListType::CcMlirGetterType(FieldKind kind) const {
 
 std::string VariantType::CcMlirType(FieldKind kind) const {
   absl::flat_hash_set<std::string> cc_mlir_types;
-  for (const auto &type : types()) {
+  for (const auto& type : types()) {
     cc_mlir_types.insert(type->CcMlirType(kind));
   }
 
@@ -561,13 +561,13 @@ std::string ListType::TdType(FieldKind kind) const {
 
 std::string VariantType::TdType(FieldKind kind) const {
   std::vector<TypeKind> type_kinds;
-  for (const auto &type : types()) {
+  for (const auto& type : types()) {
     type_kinds.push_back(type->kind());
   }
 
   auto VariantAttrTdType = [&] {
     std::vector<std::string> td_types;
-    for (const auto &type : types()) {
+    for (const auto& type : types()) {
       td_types.push_back(type->TdType(kind));
     }
 
