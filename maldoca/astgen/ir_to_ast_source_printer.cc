@@ -182,7 +182,7 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
     Println("return llvm::TypeSwitch<$BaseName$, Ret>($name$)");
     {
       auto indent = WithIndent();
-      for (const NodeDef* leaf : node.leafs()) {
+      for (const NodeDef* leaf : node.leaves()) {
         auto vars = WithVars({
             {"LeafOpName",
              leaf->ir_op_name(ast.lang_name(), kind)->ToPascalCase()},

@@ -199,7 +199,7 @@ void AstToIrSourcePrinter::PrintNonLeafNode(const AstDef& ast,
       "*node) {");
   {
     auto indent = WithIndent();
-    for (const NodeDef* leaf : node.leafs()) {
+    for (const NodeDef* leaf : node.leaves()) {
       auto vars = WithVars({
           {"LeafName", (Symbol(ast.lang_name()) + leaf->name()).ToPascalCase()},
           {"leaf_name", Symbol(leaf->name()).ToCcVarName()},

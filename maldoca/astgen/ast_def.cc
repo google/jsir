@@ -434,7 +434,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
         &node, [](NodeDef *node) { return node->children_; });
   }
 
-  // Set leafs vector.
+  // Set leaves vector.
   for (const std::string &name : node_names) {
     NodeDef &node = *nodes.at(name);
 
@@ -442,7 +442,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
       if (!descendent->children().empty()) {
         continue;
       }
-      node.leafs_.push_back(descendent);
+      node.leaves_.push_back(descendent);
     }
   }
 
@@ -518,7 +518,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
     }
 
     std::vector<EnumMemberDef> type_enum_members;
-    for (const NodeDef *leaf : node->leafs()) {
+    for (const NodeDef *leaf : node->leaves()) {
       EnumMemberDef member{Symbol(leaf->name()), leaf->name()};
       type_enum_members.push_back(std::move(member));
     }

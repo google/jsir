@@ -265,7 +265,7 @@ function convertCommentUidsToComments(ast) {
 // =============================================================================
 
 /**
- * Replaces characteres in the range [U+D800, U+DFFF] with '�' (U+FFFD).
+ * Replaces characters in the range [U+D800, U+DFFF] with '�' (U+FFFD).
  *
  // copybara:strip_begin(internal comment)
  * See: b/235090893.
