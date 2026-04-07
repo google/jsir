@@ -1,4 +1,4 @@
-# JSIR - Next Generation JavaScript Analysis Tooling
+# JSIR - Next Generation JavaScript Analysis Tooling 
 
 JSIR is a next-generation JavaScript analysis tool. At its core is an
 [MLIR](https://mlir.llvm.org)-based high-level
