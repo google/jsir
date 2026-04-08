@@ -53,10 +53,10 @@ namespace {
 //   Topologically sorted dependencies are appended here.
 //   See comments within the function.
 void TopologicalSortDependencies(
-    NodeDef *node,
-    std::function<std::vector<NodeDef *>(NodeDef *)> get_dependencies,
-    absl::flat_hash_set<NodeDef *> *pre_order_visited,
-    std::vector<NodeDef *> *sorted_dependencies) {
+    NodeDef* node,
+    std::function<std::vector<NodeDef*>(NodeDef*)> get_dependencies,
+    absl::flat_hash_set<NodeDef*>* pre_order_visited,
+    std::vector<NodeDef*>* sorted_dependencies) {
   // We run a DFS to perform topological sort.
   //
   // We maintain two sets:
@@ -72,8 +72,8 @@ void TopologicalSortDependencies(
   // "sorted_dependencies" post-order. If a node is already in
   // "sorted_dependencies", skip this node (typical DFS); If a node is already
   // in "pre_order_visited", this means the graph has cycle!
-  std::vector<NodeDef *> dependencies = get_dependencies(node);
-  for (NodeDef *dependency : dependencies) {
+  std::vector<NodeDef*> dependencies = get_dependencies(node);
+  for (NodeDef* dependency : dependencies) {
     CHECK(!pre_order_visited->contains(dependency)) << "Graph has cycle!";
     if (absl::c_linear_search(*sorted_dependencies, dependency)) {
       continue;
@@ -101,11 +101,11 @@ void TopologicalSortDependencies(
 //
 // Note: We use the original order of dependencies to break tie. For example,
 // Cat appears before Dog and this is preserved.
-std::vector<NodeDef *> TopologicalSortDependencies(
-    NodeDef *node,
-    std::function<std::vector<NodeDef *>(NodeDef *)> get_dependencies) {
-  absl::flat_hash_set<NodeDef *> pre_order_visited;
-  std::vector<NodeDef *> sorted_dependencies;
+std::vector<NodeDef*> TopologicalSortDependencies(
+    NodeDef* node,
+    std::function<std::vector<NodeDef*>(NodeDef*)> get_dependencies) {
+  absl::flat_hash_set<NodeDef*> pre_order_visited;
+  std::vector<NodeDef*> sorted_dependencies;
   TopologicalSortDependencies(node, get_dependencies, &pre_order_visited,
                               &sorted_dependencies);
   return sorted_dependencies;
@@ -119,9 +119,9 @@ std::vector<NodeDef *> TopologicalSortDependencies(
 // - nodes: All nodes in the AST.
 // - dependencies: Output vector. Dependencies are appended to this vector.
 void GetDependencies(
-    const Type &type,
-    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>> &nodes,
-    std::vector<NodeDef *> *dependencies) {
+    const Type& type,
+    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+    std::vector<NodeDef*>* dependencies) {
   switch (type.kind()) {
     case TypeKind::kBuiltin:
     case TypeKind::kEnum:
@@ -129,7 +129,7 @@ void GetDependencies(
       break;
 
     case TypeKind::kClass: {
-      const auto &class_type = static_cast<const ClassType &>(type);
+      const auto& class_type = static_cast<const ClassType&>(type);
       auto it = nodes.find(class_type.name().ToPascalCase());
       CHECK(it != nodes.end())
           << class_type.name().ToPascalCase() << " undefined.";
@@ -138,14 +138,14 @@ void GetDependencies(
     }
 
     case TypeKind::kList: {
-      const auto &list_type = static_cast<const ListType &>(type);
+      const auto& list_type = static_cast<const ListType&>(type);
       GetDependencies(list_type.element_type(), nodes, dependencies);
       break;
     }
 
     case TypeKind::kVariant: {
-      const auto &variant_type = static_cast<const VariantType &>(type);
-      for (const auto &type : variant_type.types()) {
+      const auto& variant_type = static_cast<const VariantType&>(type);
+      for (const auto& type : variant_type.types()) {
         GetDependencies(*type, nodes, dependencies);
       }
       break;
@@ -156,7 +156,7 @@ void GetDependencies(
 }  // namespace
 
 absl::StatusOr<EnumMemberDef> EnumMemberDef::FromEnumMemberDefPb(
-    const EnumMemberDefPb &member_pb) {
+    const EnumMemberDefPb& member_pb) {
   Symbol name{member_pb.name()};
   if (name.ToPascalCase() != member_pb.name()) {
     return absl::InvalidArgumentError(absl::StrCat(
@@ -166,7 +166,7 @@ absl::StatusOr<EnumMemberDef> EnumMemberDef::FromEnumMemberDefPb(
   return EnumMemberDef{std::move(name), std::move(member_pb.string_value())};
 }
 
-absl::StatusOr<EnumDef> EnumDef::FromEnumDefPb(const EnumDefPb &enum_pb) {
+absl::StatusOr<EnumDef> EnumDef::FromEnumDefPb(const EnumDefPb& enum_pb) {
   Symbol name{enum_pb.name()};
   if (name.ToPascalCase() != enum_pb.name()) {
     return absl::InvalidArgumentError(absl::StrCat(
@@ -174,7 +174,7 @@ absl::StatusOr<EnumDef> EnumDef::FromEnumDefPb(const EnumDefPb &enum_pb) {
   }
 
   std::vector<EnumMemberDef> members;
-  for (const EnumMemberDefPb &member_pb : enum_pb.members()) {
+  for (const EnumMemberDefPb& member_pb : enum_pb.members()) {
     MALDOCA_ASSIGN_OR_RETURN(auto member,
                              EnumMemberDef::FromEnumMemberDefPb(member_pb));
     members.push_back(std::move(member));
@@ -183,7 +183,7 @@ absl::StatusOr<EnumDef> EnumDef::FromEnumDefPb(const EnumDefPb &enum_pb) {
   return EnumDef{std::move(name), std::move(members)};
 }
 
-absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb &field_pb,
+absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
                                                   absl::string_view lang_name) {
   FieldDef field;
   field.name_ = Symbol(field_pb.name());
@@ -219,7 +219,7 @@ std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
   }
 
   // If any descendent has a custom IR op name, then we fallback to mlir::Value.
-  if (absl::c_any_of(descendants(), [](const NodeDef *descendent) {
+  if (absl::c_any_of(descendants(), [](const NodeDef* descendent) {
         return descendent->ir_op_name_.has_value();
       })) {
     return std::nullopt;
@@ -261,7 +261,7 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
   }
 
   // If any descendent has a custom IR op name, then we fallback to mlir::Value.
-  if (absl::c_any_of(descendants(), [](const NodeDef *descendent) {
+  if (absl::c_any_of(descendants(), [](const NodeDef* descendent) {
         return descendent->ir_op_name_.has_value();
       })) {
     return std::nullopt;
@@ -281,9 +281,9 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
 }
 
 /*static*/
-absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
+absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
   std::vector<EnumDef> enum_defs;
-  for (const EnumDefPb &enum_def_pb : pb.enums()) {
+  for (const EnumDefPb& enum_def_pb : pb.enums()) {
     MALDOCA_ASSIGN_OR_RETURN(EnumDef enum_def,
                              EnumDef::FromEnumDefPb(enum_def_pb));
     enum_defs.push_back(std::move(enum_def));
@@ -292,7 +292,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   std::vector<std::string> node_names;
   absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>> nodes;
 
-  for (const NodeDefPb &node_pb : pb.nodes()) {
+  for (const NodeDefPb& node_pb : pb.nodes()) {
     if (nodes.contains(node_pb.name())) {
       return absl::InvalidArgumentError(
           absl::StrCat(node_pb.name(), " already exists!"));
@@ -306,7 +306,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
       node->type_ = node_pb.type();
     }
 
-    for (const FieldDefPb &field_pb : node_pb.fields()) {
+    for (const FieldDefPb& field_pb : node_pb.fields()) {
       MALDOCA_ASSIGN_OR_RETURN(
           FieldDef field, FieldDef::FromFieldDefPb(field_pb, pb.lang_name()));
       node->fields_.push_back(std::move(field));
@@ -336,8 +336,8 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   }
 
   // Set parent pointers.
-  for (const NodeDefPb &node_pb : pb.nodes()) {
-    NodeDef &node = *nodes.at(node_pb.name());
+  for (const NodeDefPb& node_pb : pb.nodes()) {
+    NodeDef& node = *nodes.at(node_pb.name());
 
     for (absl::string_view parent_name : node_pb.parents()) {
       auto it = nodes.find(parent_name);
@@ -345,14 +345,14 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
         return absl::InvalidArgumentError(
             absl::StrCat("Parent ", parent_name, " doesn't exist!"));
       }
-      NodeDef *parent = it->second.get();
+      NodeDef* parent = it->second.get();
       node.parents_.push_back(parent);
     }
   }
 
   // For union types, create a node to represent each one and add that node as
   // a parent of the specified types.
-  for (const UnionTypePb &union_type_pb : pb.union_types()) {
+  for (const UnionTypePb& union_type_pb : pb.union_types()) {
     auto union_type_node = absl::WrapUnique(new NodeDef());
     union_type_node->name_ = union_type_pb.name();
     union_type_node->should_generate_ir_op_ =
@@ -368,9 +368,9 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
     nodes.emplace(union_type_pb.name(), std::move(union_type_node));
   }
 
-  for (const UnionTypePb &union_type_pb : pb.union_types()) {
+  for (const UnionTypePb& union_type_pb : pb.union_types()) {
     auto union_type_node = nodes.at(union_type_pb.name()).get();
-    for (const std::string &type : union_type_pb.types()) {
+    for (const std::string& type : union_type_pb.types()) {
       auto child_node = nodes.find(type);
       if (child_node == nodes.end()) {
         return absl::InvalidArgumentError(
@@ -386,7 +386,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
         return absl::InvalidArgumentError(
             absl::StrCat("Parent ", parent_name, " doesn't exist!"));
       }
-      NodeDef *parent = it->second.get();
+      NodeDef* parent = it->second.get();
       union_type_node->parents_.push_back(parent);
     }
   }
@@ -396,49 +396,49 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   // This makes sure that the algorithm is always deterministic.
 
   // Set ancestors vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
     node.ancestors_ = TopologicalSortDependencies(
-        &node, [](NodeDef *node) { return node->parents_; });
+        &node, [](NodeDef* node) { return node->parents_; });
   }
 
   // Set aggregated_fields vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
-    for (NodeDef *ancestor : node.ancestors_) {
-      for (FieldDef &field : ancestor->fields_) {
+    for (NodeDef* ancestor : node.ancestors_) {
+      for (FieldDef& field : ancestor->fields_) {
         node.aggregated_fields_.push_back(&field);
       }
     }
-    for (FieldDef &field : node.fields_) {
+    for (FieldDef& field : node.fields_) {
       node.aggregated_fields_.push_back(&field);
     }
   }
 
   // Set children vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
-    for (NodeDef *parent : node.parents_) {
+    for (NodeDef* parent : node.parents_) {
       parent->children_.push_back(&node);
     }
   }
 
   // Set descendants vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
     node.descendants_ = TopologicalSortDependencies(
-        &node, [](NodeDef *node) { return node->children_; });
+        &node, [](NodeDef* node) { return node->children_; });
   }
 
   // Set leaves vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
-    for (NodeDef *descendent : node.descendants_) {
+    for (NodeDef* descendent : node.descendants_) {
       if (!descendent->children().empty()) {
         continue;
       }
@@ -447,12 +447,12 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   }
 
   // Set aggregated_kinds vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
     absl::btree_set<FieldKind> aggregated_kinds;
 
-    for (NodeDef *ancestor : node.ancestors_) {
+    for (NodeDef* ancestor : node.ancestors_) {
       for (FieldKind kind : ancestor->kinds_) {
         aggregated_kinds.insert(kind);
       }
@@ -465,12 +465,12 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   }
 
   // Set the aggregated_additional_mlir_traits vector.
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
     absl::btree_set<MlirTrait> aggregated_additional_mlir_traits;
 
-    for (NodeDef *ancestor : node.ancestors_) {
+    for (NodeDef* ancestor : node.ancestors_) {
       for (MlirTrait trait : ancestor->additional_mlir_traits()) {
         aggregated_additional_mlir_traits.insert(trait);
       }
@@ -486,18 +486,18 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   }
 
   // Reorder the node definitions so that dependencies always come first.
-  std::vector<NodeDef *> topological_sorted_nodes;
-  absl::flat_hash_set<NodeDef *> preorder_visited_nodes;
-  for (const std::string &name : node_names) {
-    NodeDef &node = *nodes.at(name);
+  std::vector<NodeDef*> topological_sorted_nodes;
+  absl::flat_hash_set<NodeDef*> preorder_visited_nodes;
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
 
     TopologicalSortDependencies(
         &node,
-        [&nodes](NodeDef *node) {
-          std::vector<NodeDef *> dependencies;
+        [&nodes](NodeDef* node) {
+          std::vector<NodeDef*> dependencies;
           dependencies.insert(dependencies.end(), node->parents_.begin(),
                               node->parents_.end());
-          for (const FieldDef &field : node->fields()) {
+          for (const FieldDef& field : node->fields()) {
             GetDependencies(field.type(), nodes, &dependencies);
           }
           return dependencies;
@@ -509,7 +509,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   }
 
   // For each root node, add an enum field to represent the leaf type.
-  for (NodeDef *node : topological_sorted_nodes) {
+  for (NodeDef* node : topological_sorted_nodes) {
     if (!node->parents().empty()) {
       continue;
     }
@@ -518,7 +518,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
     }
 
     std::vector<EnumMemberDef> type_enum_members;
-    for (const NodeDef *leaf : node->leaves()) {
+    for (const NodeDef* leaf : node->leaves()) {
       EnumMemberDef member{Symbol(leaf->name()), leaf->name()};
       type_enum_members.push_back(std::move(member));
     }
@@ -530,8 +530,8 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
   }
 
   // For each ClassType, if it resolves to a NodeDef, store a reference to it.
-  for (NodeDef *node : topological_sorted_nodes) {
-    for (FieldDef &field : node->fields_) {
+  for (NodeDef* node : topological_sorted_nodes) {
+    for (FieldDef& field : node->fields_) {
       ResolveClassType(field.type(), topological_sorted_nodes);
     }
   }
@@ -541,15 +541,15 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb &pb) {
 }
 
 void AstDef::ResolveClassType(
-    Type &type, absl::Span<const NodeDef *const> topological_sorted_nodes) {
+    Type& type, absl::Span<const NodeDef* const> topological_sorted_nodes) {
   switch (type.kind()) {
     case TypeKind::kBuiltin:
     case TypeKind::kEnum: {
       break;
     }
     case TypeKind::kClass: {
-      auto &class_type = static_cast<ClassType &>(type);
-      for (const NodeDef *node : topological_sorted_nodes) {
+      auto& class_type = static_cast<ClassType&>(type);
+      for (const NodeDef* node : topological_sorted_nodes) {
         if (node->name() == class_type.name().ToPascalCase()) {
           LOG(INFO) << "Resolved class " << node->name();
           class_type.node_def_ = node;
@@ -559,13 +559,13 @@ void AstDef::ResolveClassType(
       break;
     }
     case TypeKind::kList: {
-      auto &list_type = static_cast<ListType &>(type);
+      auto& list_type = static_cast<ListType&>(type);
       ResolveClassType(list_type.element_type(), topological_sorted_nodes);
       break;
     }
     case TypeKind::kVariant: {
-      auto &variant_type = static_cast<VariantType &>(type);
-      for (auto &type : variant_type.types()) {
+      auto& variant_type = static_cast<VariantType&>(type);
+      for (auto& type : variant_type.types()) {
         ResolveClassType(*type, topological_sorted_nodes);
       }
       break;
