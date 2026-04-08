@@ -161,7 +161,7 @@ class NodeDef {
   absl::Span<const NodeDef* const> descendants() const { return descendants_; }
 
   // All descendants that are leaf classes.
-  absl::Span<const NodeDef* const> leafs() const { return leafs_; }
+  absl::Span<const NodeDef* const> leaves() const { return leaves_; }
 
   std::optional<const EnumDef*> node_type_enum() const {
     if (node_type_enum_.has_value()) {
@@ -286,7 +286,7 @@ class NodeDef {
   std::vector<FieldDef*> aggregated_fields_;
   std::vector<NodeDef*> children_;
   std::vector<NodeDef*> descendants_;
-  std::vector<NodeDef*> leafs_;
+  std::vector<NodeDef*> leaves_;
   std::optional<EnumDef> node_type_enum_;
   bool should_generate_ir_op_;
   std::vector<FieldKind> kinds_;

@@ -186,12 +186,12 @@ void AstFromJsonPrinter::PrintTypeChecker(const NodeDef& node) {
     )cc");
     Println(code);
 
-    if (!node.leafs().empty()) {
+    if (!node.leaves().empty()) {
       Println(
           "static const auto *kTypes = new absl::flat_hash_set<std::string>{");
       {
         auto indent = WithIndent(4);
-        for (const NodeDef* leaf : node.leafs()) {
+        for (const NodeDef* leaf : node.leaves()) {
           auto vars = WithVars({
               {"LeafType", leaf->name()},
           });

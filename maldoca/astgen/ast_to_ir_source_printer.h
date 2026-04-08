@@ -179,7 +179,7 @@ class AstToIrSourcePrinter : public CcPrinterBase {
 //
 //   "ast.generated.h" is in that directory.
 //
-//   This is used to print the #inclueds.
+//   This is used to print the #includes.
 //
 // - ir_path: The directory for the IR code.
 //

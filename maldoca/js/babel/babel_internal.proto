@@ -48,7 +48,7 @@ message BabelResponse {
 }
 
 // Only contains the errors (if any) in the response.
-// The AST is returned separatedly.
+// The AST is returned separately.
 message BabelParseResponse {
   // Some errors are recoverable and/or are not severe enough to stop parsing.
   //
