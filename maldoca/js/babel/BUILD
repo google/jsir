@@ -52,6 +52,7 @@ cc_library(
     hdrs = ["babel.h"],
     visibility = [
         "//maldoca/js:__subpackages__",
+        "//maldoca/js/flume/jscat:__pkg__",
     ],
     deps = [
         ":babel_cc_proto",
