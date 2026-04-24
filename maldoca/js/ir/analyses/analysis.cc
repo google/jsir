@@ -62,7 +62,7 @@ static absl::StatusOr<JsirAnalysisResult::DataFlow> RunJsirDataFlowAnalysis(
 }
 
 absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
-    JsirFileOp op, std::optional<absl::string_view> source_code,
+    JsirFileOp op, std::optional<std::u16string_view> source_code,
     const BabelScopes& scopes, const JsirAnalysisConfig& config,
     Babel* absl_nullable babel) {
   switch (config.kind_case()) {

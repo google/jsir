@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MALDOCA_JS_IR_ANALYSES_ANALYSIS_H_
-#define MALDOCA_JS_IR_ANALYSES_ANALYSIS_H_
+#ifndef MALDOCA_JS_IR_UTF16_H_
+#define MALDOCA_JS_IR_UTF16_H_
 
-#include <optional>
+#include <string>
 #include <string_view>
 
-#include "absl/base/nullability.h"
-#include "absl/status/statusor.h"
-#include "maldoca/js/babel/babel.h"
-#include "maldoca/js/babel/babel.pb.h"
-#include "maldoca/js/driver/driver.pb.h"
-#include "maldoca/js/ir/ir.h"
+#include "absl/strings/string_view.h"
 
 namespace maldoca {
 
-absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
-    JsirFileOp op, std::optional<std::u16string_view> source_code,
-    const BabelScopes& scopes, const JsirAnalysisConfig& config,
-    Babel* absl_nullable babel);
+std::u16string Utf8ToUtf16(absl::string_view src);
+std::string Utf16ToUtf8(std::u16string_view src);
 
 }  // namespace maldoca
 
-#endif  // MALDOCA_JS_IR_ANALYSES_ANALYSIS_H_
+#endif  // MALDOCA_JS_IR_UTF16_H_

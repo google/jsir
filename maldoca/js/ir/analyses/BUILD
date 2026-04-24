@@ -37,6 +37,7 @@ cc_library(
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/driver:driver_cc_proto",
         "//maldoca/js/ir",
+        "//maldoca/js/ir:utf16",
         "//maldoca/js/ir/analyses/constant_propagation:analysis",
         "@abseil-cpp//absl/base:nullability",
         "@abseil-cpp//absl/container:flat_hash_map",

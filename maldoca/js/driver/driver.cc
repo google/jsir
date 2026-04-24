@@ -33,6 +33,7 @@
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/internal/conversions.h"
 #include "maldoca/js/ir/conversion/utils.h"
+#include "maldoca/js/ir/utf16.h"
 
 namespace maldoca {
 
@@ -176,6 +177,7 @@ absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
 
   JsPassContext context{
       .original_source = std::string(original_source),
+      .original_source_u16 = Utf8ToUtf16(original_source),
       .repr = std::move(input_repr),
       .outputs = {},
   };

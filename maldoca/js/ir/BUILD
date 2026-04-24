@@ -269,6 +269,17 @@ cc_library(
 )
 
 cc_library(
+    name = "utf16",
+    srcs = ["utf16.cc"],
+    hdrs = ["utf16.h"],
+    visibility = ["//maldoca/js:__subpackages__"],
+    deps = [
+        "@abseil-cpp//absl/strings:string_view",
+        "@llvm-project//llvm:Support",
+    ],
+)
+
+cc_library(
     name = "trivia",
     srcs = ["trivia.cc"],
     hdrs = ["trivia.h"],

@@ -54,6 +54,7 @@ cc_library(
         "//maldoca/js/ast/transforms:transform",
         "//maldoca/js/babel",
         "//maldoca/js/ir",
+        "//maldoca/js/ir:utf16",
         "//maldoca/js/ir/analyses:analysis",
         "//maldoca/js/ir/conversion:utils",
         "//maldoca/js/ir/transforms:transform",

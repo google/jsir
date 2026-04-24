@@ -47,6 +47,7 @@
 #include "maldoca/js/ir/analyses/analysis.h"
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/transforms/transform.h"
+#include "maldoca/js/ir/utf16.h"
 
 namespace maldoca {
 
@@ -201,6 +202,7 @@ struct JsHirRepr : JsirRepr {
 
 struct JsPassContext {
   std::optional<std::string> original_source;
+  std::optional<std::u16string> original_source_u16;
   std::unique_ptr<JsRepr> repr;
   JsAnalysisOutputs outputs;
 };
@@ -320,11 +322,15 @@ class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
     return absl::StrCat("JsirAnalysis ", config_.kind_case());
   }
 
-  absl::Status Analyze(std::optional<absl::string_view> original_source,
+  absl::Status Analyze(std::optional<absl::string_view> original_source_u8,
                        const JsirRepr& repr,
                        JsAnalysisOutputs& outputs) override {
+    std::optional<std::u16string> original_source_u16;
+    if (original_source_u8.has_value()) {
+      original_source_u16 = Utf8ToUtf16(*original_source_u8);
+    }
     MALDOCA_ASSIGN_OR_RETURN(JsirAnalysisResult result,
-                             RunJsirAnalysis(*repr.op, original_source,
+                             RunJsirAnalysis(*repr.op, original_source_u16,
                                              repr.scopes, config_, babel_));
     *outputs.add_outputs()->mutable_jsir_analysis() = std::move(result);
     return absl::OkStatus();
