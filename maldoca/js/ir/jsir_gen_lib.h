@@ -46,7 +46,7 @@ enum class JsirPassKind {
   kEraseComments,
   kExtractPrelude,
   kRemoveDirectives,
-  kNormalizeMemberExpressions,
+  // kNormalizeMemberExpressions,
 };
 
 // Analyzes and transforms the provided source code. It first translates the
