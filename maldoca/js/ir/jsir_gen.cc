@@ -63,10 +63,10 @@ static auto* kStringToPassKind =
         {"remove_directives", maldoca::JsirPassKind::kRemoveDirectives},
         {"split_declaration_statements",
          maldoca::JsirPassKind::kSplitDeclarationStatements},
-        {"dead_code_elimination", maldoca::JsirPassKind::kDeadCodeElimination},
 
         {"extract_prelude", maldoca::JsirPassKind::kExtractPrelude},
         {"dynconstprop", maldoca::JsirPassKind::kDynamicConstantPropagation},
+        {"dead_code_elimination", maldoca::JsirPassKind::kDeadCodeElimination},
     };
 
 ABSL_FLAG(std::string, input_file, "", "The JavaScript file.");

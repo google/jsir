@@ -14,17 +14,26 @@
 
 #include "maldoca/js/ir/transforms/dead_code_elimination/pass.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
+#include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/STLExtras.h"
-#include "maldoca/js/ast/ast.generated.h"
-#include "maldoca/js/ir/ir.h"
-#include "maldoca/js/ir/jsir_utils.h"
+#include "llvm/Support/Casting.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Value.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/log/log.h"
+#include "maldoca/js/ast/ast.generated.h"
+#include "maldoca/js/ir/ir.h"
+#include "maldoca/js/ir/jsir_utils.h"
 
 namespace maldoca {
 
@@ -82,8 +91,9 @@ void WhileStatementElimination(mlir::Operation* root_op) {
 struct SymbolInfo {
   std::vector<mlir::Operation*> definitions;
   std::vector<mlir::Operation*> references;
-  // Symbols defined within the immediate scope of this symbol's definition (e.g., if
-  // this symbol is a function, these are variables defined inside it).
+  // Symbols defined within the immediate scope of this symbol's definition
+  // (e.g., if this symbol is a function, these are variables defined inside
+  // it).
   std::vector<JsSymbolId> inner_definitions;
   // Symbols defined in the immediate parent scope of this symbol.
   std::vector<JsSymbolId> outer_definitions;
@@ -109,7 +119,8 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
   absl::flat_hash_map<JsSymbolId, SymbolInfo> symbol_infos;
 
   root_op->walk([&](mlir::Operation* op) {
-    // TODO(Issue #40): We can remove this special handling once the trivia is fixed.
+    // TODO(Issue #40): We can remove this special handling once the trivia is
+    // fixed.
     if (llvm::isa<JsirExprsRegionEndOp>(op) ||
         llvm::isa<JsirExprRegionEndOp>(op)) {
       return;
@@ -133,13 +144,12 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
 
   for (auto& [symbol, info] : symbol_infos) {
     if (info.definitions.empty()) {
-      LOG(FATAL) << "Symbol " << symbol.name() << " is referenced but not defined.";
-      continue;
+      LOG(FATAL) << "Symbol " << symbol.name()
+                 << " is referenced but not defined.";
     }
     if (info.definitions.size() > 1) {
       LOG(FATAL) << "Symbol " << symbol.name()
                  << " is defined more than once.";
-      continue;
     }
 
     mlir::Operation* def_op = info.definitions[0];
@@ -154,7 +164,7 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
       if (current_trivia == nullptr) {
         continue;
       }
-      
+
       llvm::ArrayRef<JsirSymbolIdAttr> outer_defined_symbols =
           current_trivia.getDefinedSymbols();
       if (outer_defined_symbols.empty()) {
@@ -171,7 +181,9 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
           outer_symbol_info_it->second.inner_definitions.push_back(symbol);
         }
       }
-      break;  // Found the first op in the chain that defines symbols, break the loop.
+
+      // Found the first op in the chain that defines symbols, break the loop.
+      break;
     }
   }
 
@@ -253,9 +265,7 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
 void DeadCodeElimination(mlir::Operation* root_op) {
   IfStatementElimination(root_op);
   WhileStatementElimination(root_op);
-  // TODO: Iteratively eliminate unused functions until no more can be
-  // eliminated.
-  // TODO: Update the AST after dynamic constant progropagation (before dce).
   UnusedFunctionElimination(root_op);
 }
+
 }  // namespace maldoca

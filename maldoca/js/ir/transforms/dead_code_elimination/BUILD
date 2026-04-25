@@ -28,10 +28,11 @@ cc_library(
     srcs = ["pass.cc"],
     hdrs = ["pass.h"],
     deps = [
+        "//maldoca/js/ast",
         "//maldoca/js/ir",
         "//maldoca/js/ir:jsir_utils",
-        "//maldoca/js/ast",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/log",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Pass",
