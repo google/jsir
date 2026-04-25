@@ -44,7 +44,7 @@ python3 maldoca/js/ir/transforms/generate_tests.py \
 
 # TODO(b/452034945): Release these tests.
 python3 maldoca/js/ir/transforms/generate_tests.py \
-    --passes source2ast,extract_prelude,erase_comments,ast2hir,dynconstprop,dead_code_elimination,hir2ast,ast2source \
+    --passes source2ast,ast2hir,dead_code_elimination,hir2ast,ast2source \
     --path maldoca/js/ir/transforms/dead_code_elimination/tests
 
 python3 maldoca/js/ir/transforms/generate_tests.py \

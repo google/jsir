@@ -66,6 +66,7 @@ static auto* kStringToPassKind =
 
         {"extract_prelude", maldoca::JsirPassKind::kExtractPrelude},
         {"dynconstprop", maldoca::JsirPassKind::kDynamicConstantPropagation},
+        {"dead_code_elimination", maldoca::JsirPassKind::kDeadCodeElimination},
     };
 
 ABSL_FLAG(std::string, input_file, "", "The JavaScript file.");

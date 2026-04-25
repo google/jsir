@@ -1,0 +1,21 @@
+// SOURCE:      let a = 0;
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   let b = 1;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   {
+// SOURCE-NEXT:     let c = 2;
+// SOURCE-NEXT:   }
+// SOURCE-NEXT:   let d = 3;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   let e = 4;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: let f = 5;
+// SOURCE-NEXT: f = f + 1;
+// SOURCE-NEXT: f = f + 1;
+// SOURCE-NEXT: {
+// SOURCE-NEXT:   let g = 6;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: var h = 7;
+// SOURCE-NEXT: var i = 8;

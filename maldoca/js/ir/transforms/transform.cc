@@ -34,13 +34,14 @@
 #include "maldoca/js/ir/conversion/utils.h"
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/transforms/constant_propagation/pass.h"
+#include "maldoca/js/ir/transforms/dead_code_elimination/pass.h"
+#include "maldoca/js/ir/transforms/dynamic_constant_propagation/pass.h"
 #include "maldoca/js/ir/transforms/move_named_functions/pass.h"
 #include "maldoca/js/ir/transforms/normalize_object_properties/pass.h"
 #include "maldoca/js/ir/transforms/peel_parentheses/pass.h"
 #include "maldoca/js/ir/transforms/remove_directives/pass.h"
 #include "maldoca/js/ir/transforms/split_declaration_statements/pass.h"
 #include "maldoca/js/ir/transforms/split_sequence_expressions/pass.h"
-#include "maldoca/js/ir/transforms/dynamic_constant_propagation/pass.h"
 
 namespace maldoca {
 
@@ -105,6 +106,10 @@ absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
 
       return std::make_unique<JsirDynamicConstantPropagationPass>(
           scopes, prelude, babel, analysis_outputs);
+    }
+
+    case JsirTransformConfig::kDeadCodeElimination: {
+      return std::make_unique<DeadCodeEliminationPass>();
     }
   }
 }

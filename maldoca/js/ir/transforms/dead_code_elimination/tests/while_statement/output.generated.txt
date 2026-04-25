@@ -1,0 +1,3 @@
+// SOURCE:      while (true) {
+// SOURCE-NEXT:   console.log("Should not be eliminated");
+// SOURCE-NEXT: }
