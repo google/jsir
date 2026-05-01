@@ -784,7 +784,51 @@ class JsFile : public virtual JsNode {
   std::optional<std::vector<std::unique_ptr<JsComment>>> comments_;
 };
 
-class JsExpression : public virtual JsNode {
+class JsArrowFunctionBody : public virtual JsNode {
+ public:
+  explicit JsArrowFunctionBody(
+      std::optional<std::unique_ptr<JsSourceLocation>> loc,
+      std::optional<int64_t> start,
+      std::optional<int64_t> end,
+      std::optional<std::vector<int64_t>> leading_comment_uids,
+      std::optional<std::vector<int64_t>> trailing_comment_uids,
+      std::optional<std::vector<int64_t>> inner_comment_uids,
+      std::optional<int64_t> scope_uid,
+      std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+
+  static absl::StatusOr<std::unique_ptr<JsArrowFunctionBody>> FromJson(const nlohmann::json& json);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+};
+
+class JsForInit : public virtual JsNode {
+ public:
+  explicit JsForInit(
+      std::optional<std::unique_ptr<JsSourceLocation>> loc,
+      std::optional<int64_t> start,
+      std::optional<int64_t> end,
+      std::optional<std::vector<int64_t>> leading_comment_uids,
+      std::optional<std::vector<int64_t>> trailing_comment_uids,
+      std::optional<std::vector<int64_t>> inner_comment_uids,
+      std::optional<int64_t> scope_uid,
+      std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+
+  static absl::StatusOr<std::unique_ptr<JsForInit>> FromJson(const nlohmann::json& json);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+};
+
+class JsExpression : public virtual JsNode, public virtual JsArrowFunctionBody, public virtual JsForInit {
  public:
   explicit JsExpression(
       std::optional<std::unique_ptr<JsSourceLocation>> loc,
@@ -1405,7 +1449,7 @@ class JsStatement : public virtual JsNode, public virtual JsProgramBodyElement {
   void SerializeFields(std::ostream& os, bool &needs_comma) const;
 };
 
-class JsBlockStatement : public virtual JsStatement {
+class JsBlockStatement : public virtual JsStatement, public virtual JsArrowFunctionBody {
  public:
   explicit JsBlockStatement(
       std::optional<std::unique_ptr<JsSourceLocation>> loc,
@@ -2183,6 +2227,67 @@ class JsDoWhileStatement : public virtual JsStatement {
   std::unique_ptr<JsExpression> test_;
 };
 
+class JsForStatement : public virtual JsStatement {
+ public:
+  explicit JsForStatement(
+      std::optional<std::unique_ptr<JsSourceLocation>> loc,
+      std::optional<int64_t> start,
+      std::optional<int64_t> end,
+      std::optional<std::vector<int64_t>> leading_comment_uids,
+      std::optional<std::vector<int64_t>> trailing_comment_uids,
+      std::optional<std::vector<int64_t>> inner_comment_uids,
+      std::optional<int64_t> scope_uid,
+      std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<std::unique_ptr<JsForInit>> init,
+      std::optional<std::unique_ptr<JsExpression>> test,
+      std::optional<std::unique_ptr<JsExpression>> update,
+      std::unique_ptr<JsStatement> body);
+
+  JsNodeType node_type() const override {
+    return JsNodeType::kForStatement;
+  }
+
+  void Serialize(std::ostream& os) const override;
+
+  static absl::StatusOr<std::unique_ptr<JsForStatement>> FromJson(const nlohmann::json& json);
+
+  std::optional<JsForInit*> init();
+  std::optional<const JsForInit*> init() const;
+  void set_init(std::optional<std::unique_ptr<JsForInit>> init);
+
+  std::optional<JsExpression*> test();
+  std::optional<const JsExpression*> test() const;
+  void set_test(std::optional<std::unique_ptr<JsExpression>> test);
+
+  std::optional<JsExpression*> update();
+  std::optional<const JsExpression*> update() const;
+  void set_update(std::optional<std::unique_ptr<JsExpression>> update);
+
+  JsStatement* body();
+  const JsStatement* body() const;
+  void set_body(std::unique_ptr<JsStatement> body);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+
+  // Internal functions used by FromJson().
+  // Extracts a field from a JSON object.
+  static absl::StatusOr<std::optional<std::unique_ptr<JsForInit>>> GetInit(const nlohmann::json& json);
+  static absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>> GetTest(const nlohmann::json& json);
+  static absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>> GetUpdate(const nlohmann::json& json);
+  static absl::StatusOr<std::unique_ptr<JsStatement>> GetBody(const nlohmann::json& json);
+
+ private:
+  std::optional<std::unique_ptr<JsForInit>> init_;
+  std::optional<std::unique_ptr<JsExpression>> test_;
+  std::optional<std::unique_ptr<JsExpression>> update_;
+  std::unique_ptr<JsStatement> body_;
+};
+
 class JsDeclaration : public virtual JsStatement {
  public:
   explicit JsDeclaration(
@@ -2252,7 +2357,7 @@ class JsVariableDeclarator : public virtual JsNode {
   std::optional<std::unique_ptr<JsExpression>> init_;
 };
 
-class JsVariableDeclaration : public virtual JsDeclaration {
+class JsVariableDeclaration : public virtual JsDeclaration, public virtual JsForInit {
  public:
   explicit JsVariableDeclaration(
       std::optional<std::unique_ptr<JsSourceLocation>> loc,
@@ -2296,67 +2401,6 @@ class JsVariableDeclaration : public virtual JsDeclaration {
  private:
   std::vector<std::unique_ptr<JsVariableDeclarator>> declarations_;
   std::string kind_;
-};
-
-class JsForStatement : public virtual JsStatement {
- public:
-  explicit JsForStatement(
-      std::optional<std::unique_ptr<JsSourceLocation>> loc,
-      std::optional<int64_t> start,
-      std::optional<int64_t> end,
-      std::optional<std::vector<int64_t>> leading_comment_uids,
-      std::optional<std::vector<int64_t>> trailing_comment_uids,
-      std::optional<std::vector<int64_t>> inner_comment_uids,
-      std::optional<int64_t> scope_uid,
-      std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-      std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>> init,
-      std::optional<std::unique_ptr<JsExpression>> test,
-      std::optional<std::unique_ptr<JsExpression>> update,
-      std::unique_ptr<JsStatement> body);
-
-  JsNodeType node_type() const override {
-    return JsNodeType::kForStatement;
-  }
-
-  void Serialize(std::ostream& os) const override;
-
-  static absl::StatusOr<std::unique_ptr<JsForStatement>> FromJson(const nlohmann::json& json);
-
-  std::optional<std::variant<JsVariableDeclaration*, JsExpression*>> init();
-  std::optional<std::variant<const JsVariableDeclaration*, const JsExpression*>> init() const;
-  void set_init(std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>> init);
-
-  std::optional<JsExpression*> test();
-  std::optional<const JsExpression*> test() const;
-  void set_test(std::optional<std::unique_ptr<JsExpression>> test);
-
-  std::optional<JsExpression*> update();
-  std::optional<const JsExpression*> update() const;
-  void set_update(std::optional<std::unique_ptr<JsExpression>> update);
-
-  JsStatement* body();
-  const JsStatement* body() const;
-  void set_body(std::unique_ptr<JsStatement> body);
-
- protected:
-  // Internal function used by Serialize().
-  // Sets the fields defined in this class.
-  // Does not set fields defined in ancestors.
-  void SerializeFields(std::ostream& os, bool &needs_comma) const;
-
-  // Internal functions used by FromJson().
-  // Extracts a field from a JSON object.
-  static absl::StatusOr<std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>>> GetInit(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>> GetTest(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>> GetUpdate(const nlohmann::json& json);
-  static absl::StatusOr<std::unique_ptr<JsStatement>> GetBody(const nlohmann::json& json);
-
- private:
-  std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>> init_;
-  std::optional<std::unique_ptr<JsExpression>> test_;
-  std::optional<std::unique_ptr<JsExpression>> update_;
-  std::unique_ptr<JsStatement> body_;
 };
 
 class JsForInStatement : public virtual JsStatement {
@@ -2606,7 +2650,7 @@ class JsArrowFunctionExpression : public virtual JsFunction, public virtual JsEx
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
       bool async,
-      std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>> body);
+      std::unique_ptr<JsArrowFunctionBody> body);
 
   JsNodeType node_type() const override {
     return JsNodeType::kArrowFunctionExpression;
@@ -2616,9 +2660,9 @@ class JsArrowFunctionExpression : public virtual JsFunction, public virtual JsEx
 
   static absl::StatusOr<std::unique_ptr<JsArrowFunctionExpression>> FromJson(const nlohmann::json& json);
 
-  std::variant<JsBlockStatement*, JsExpression*> body();
-  std::variant<const JsBlockStatement*, const JsExpression*> body() const;
-  void set_body(std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>> body);
+  JsArrowFunctionBody* body();
+  const JsArrowFunctionBody* body() const;
+  void set_body(std::unique_ptr<JsArrowFunctionBody> body);
 
  protected:
   // Internal function used by Serialize().
@@ -2628,10 +2672,10 @@ class JsArrowFunctionExpression : public virtual JsFunction, public virtual JsEx
 
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
-  static absl::StatusOr<std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>> GetBody(const nlohmann::json& json);
+  static absl::StatusOr<std::unique_ptr<JsArrowFunctionBody>> GetBody(const nlohmann::json& json);
 
  private:
-  std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>> body_;
+  std::unique_ptr<JsArrowFunctionBody> body_;
 };
 
 class JsYieldExpression : public virtual JsExpression {
