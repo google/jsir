@@ -38,6 +38,9 @@ message BabelGenerateRequest {
 
   // Whether to minify the generated source.
   optional bool compact = 3 [default = false];
+
+  // Whether to generate source maps.
+  optional bool source_maps = 4 [default = false];
 }
 
 message BabelResponse {
@@ -62,4 +65,6 @@ message BabelParseResponse {
 message BabelGenerateResponse {
   // Babel throws exceptions if the provided AST is invalid.
   optional BabelError error = 1;
+
+  optional string source_map = 2;
 }
