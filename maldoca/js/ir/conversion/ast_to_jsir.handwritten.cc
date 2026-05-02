@@ -180,12 +180,11 @@ JshirForStatementOp AstToJsir::VisitForStatement(mlir::OpBuilder& builder,
   if (node->init().has_value()) {
     AppendNewBlockAndPopulate(builder, init_region, [&] {
       auto init = node->init().value();
-      if (std::holds_alternative<const JsVariableDeclaration*>(init)) {
-        auto* init_variable_declaration =
-            std::get<const JsVariableDeclaration*>(init);
+      if (auto init_variable_declaration =
+              dynamic_cast<const JsVariableDeclaration*>(init)) {
         VisitVariableDeclaration(builder, init_variable_declaration);
-      } else if (std::holds_alternative<const JsExpression*>(init)) {
-        auto* init_expression = std::get<const JsExpression*>(init);
+      } else if (auto init_expression =
+                     dynamic_cast<const JsExpression*>(init)) {
         mlir::Value mlir_init = VisitExpression(builder, init_expression);
         CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_init);
       }
@@ -316,12 +315,11 @@ JsirArrowFunctionExpressionOp AstToJsir::VisitArrowFunctionExpression(
       builder, node, mlir_id, mlir_params, mlir_generator, mlir_async);
   mlir::Region& body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, body_region, [&] {
-    if (std::holds_alternative<const JsBlockStatement*>(node->body())) {
-      auto* body = std::get<const JsBlockStatement*>(node->body());
-      VisitBlockStatement(builder, body);
-    } else if (std::holds_alternative<const JsExpression*>(node->body())) {
-      auto* body = std::get<const JsExpression*>(node->body());
-      mlir::Value mlir_body = VisitExpression(builder, body);
+    auto* body = node->body();
+    if (auto* block = dynamic_cast<const JsBlockStatement*>(body)) {
+      VisitBlockStatement(builder, block);
+    } else if (auto* expr = dynamic_cast<const JsExpression*>(body)) {
+      mlir::Value mlir_body = VisitExpression(builder, expr);
       CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_body);
     } else {
       LOG(FATAL) << "Unreachable code.";

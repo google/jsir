@@ -129,14 +129,19 @@ JsirToAst::VisitContinueStatement(JshirContinueStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsForStatement>> JsirToAst::VisitForStatement(
     maldoca::JshirForStatementOp op) {
-  std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>,
-                             std::unique_ptr<JsExpression>>>
-      init;
+  std::optional<std::unique_ptr<JsForInit>> init;
   if (!op.getInit().empty()) {
     MALDOCA_ASSIGN_OR_RETURN(
-        init, VisitStmtOrExprRegion(op.getInit(),
+        auto init_variant, VisitStmtOrExprRegion(op.getInit(),
                                     &JsirToAst::VisitVariableDeclaration,
                                     &JsirToAst::VisitExpression));
+    if (std::holds_alternative<std::unique_ptr<JsVariableDeclaration>>(
+            init_variant)) {
+      init = std::move(
+          std::get<std::unique_ptr<JsVariableDeclaration>>(init_variant));
+    } else {
+      init = std::move(std::get<std::unique_ptr<JsExpression>>(init_variant));
+    }
   }
   std::optional<std::unique_ptr<JsExpression>> test;
   if (!op.getTest().empty()) {
@@ -232,9 +237,18 @@ JsirToAst::VisitArrowFunctionExpression(JsirArrowFunctionExpressionOp op) {
   bool generator = op.getGenerator();
   bool async = op.getAsync();
   MALDOCA_ASSIGN_OR_RETURN(
-      auto body,
+      auto body_variant,
       VisitStmtOrExprRegion(op.getBody(), &JsirToAst::VisitBlockStatement,
                             &JsirToAst::VisitExpression));
+
+  std::unique_ptr<JsArrowFunctionBody> body;
+  if (std::holds_alternative<std::unique_ptr<JsBlockStatement>>(body_variant)) {
+    body = std::move(std::get<std::unique_ptr<JsBlockStatement>>(body_variant));
+  } else if (std::holds_alternative<std::unique_ptr<JsExpression>>(
+                 body_variant)) {
+    body = std::move(std::get<std::unique_ptr<JsExpression>>(body_variant));
+  }
+
   return Create<JsArrowFunctionExpression>(op, std::move(id), std::move(params),
                                            generator, async, std::move(body));
 }
