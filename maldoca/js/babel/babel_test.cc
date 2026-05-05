@@ -337,6 +337,29 @@ TEST_P(BabelTest, GenerateCompact) {
   }
 }
 
+TEST_P(BabelTest, GenerateSourceMap) {
+  static const char kSourceMap[] =
+      R"({"version":3,"names":["console","log"],"sources":["source.js"],"sourcesContent":[null],"mappings":"AAAAA,OAAO,CAACC,GAAG,CAAC,eAAe,CAAC","ignoreList":[]})";
+
+  std::unique_ptr<Babel> babel = GetParam().babel_factory();
+  BabelParseRequest request;
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      BabelParseResult parse_result,
+      babel->Parse(kSource, request, absl::InfiniteDuration()));
+
+  BabelGenerateOptions options;
+  options.set_source_maps(true);
+
+  MALDOCA_ASSERT_OK_AND_ASSIGN(BabelGenerateResult generate_result,
+                               babel->Generate(parse_result.ast_string, options,
+                                               absl::InfiniteDuration()));
+
+  EXPECT_EQ(generate_result.source_code, kSource);
+  EXPECT_EQ(generate_result.error, std::nullopt);
+  EXPECT_TRUE(generate_result.source_map.has_value());
+  EXPECT_THAT(*generate_result.source_map, StrEq(kSourceMap));
+}
+
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(BabelTest);
 
 }  // namespace maldoca
