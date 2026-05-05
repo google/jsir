@@ -15,6 +15,7 @@
 #include "maldoca/js/ir/jsir_gen_lib.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -142,7 +143,7 @@ absl::StatusOr<JsirGenOutput> JsirGen(
 
   JsPassContext pass_context{
       .original_source = std::string(source),
-      .repr = std::make_unique<JsSourceRepr>(source),
+      .repr = std::make_unique<JsSourceRepr>(source, std::nullopt),
       .outputs = {},
   };
 

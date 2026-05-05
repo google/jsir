@@ -161,6 +161,9 @@ message BabelGenerateOptions {
 
   // Whether to minify the generated source.
   optional bool compact = 2 [default = false];
+
+  // Whether to generate source maps.
+  optional bool source_maps = 3 [default = false];
 }
 
 message PositionPb {

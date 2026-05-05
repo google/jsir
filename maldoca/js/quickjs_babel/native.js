@@ -379,8 +379,12 @@ function generateInternal(ast, options) {
 
   convertCommentUidsToComments(ast);
 
-  const {code} = Babel.packages.generator.default(ast, options);
-  return code;
+  if (options.sourceMaps) {
+    options.sourceFileName = 'source.js';
+  }
+
+  const {code, map} = Babel.packages.generator.default(ast, options);
+  return {code, map};
 }
 exports.generateInternal = generateInternal;
 
@@ -523,8 +527,12 @@ exports.generate = function(astString, optionsSerialized) {
       options = JSON.parse(optionsSerialized);
     }
 
-    const source = generateInternal(ast, options);
-    return {source, response: '{}'};
+    const {code, map} = generateInternal(ast, options);
+    const response = {};
+    if (map) {
+      response.sourceMap = JSON.stringify(map);
+    }
+    return {source: code, response: JSON.stringify(response)};
 
   } catch (error) {
     const response = {};

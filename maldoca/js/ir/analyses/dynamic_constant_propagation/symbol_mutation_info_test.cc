@@ -50,6 +50,8 @@ TEST_P(GetLvalueRootSymbolsTest, GetLvalueRootSymbols) {
   LvalueRootSymbolsTestCase test_case = GetParam();
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{test_case.source, std::nullopt};
+
   BabelParseRequest request;
   request.set_compute_scopes(true);
 
@@ -59,7 +61,7 @@ TEST_P(GetLvalueRootSymbolsTest, GetLvalueRootSymbols) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsHirRepr hir_repr,
       ToJsHirRepr::FromJsSourceRepr(
-          test_case.source, request, absl::InfiniteDuration(),
+          source_repr, request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
   mlir::Value left = nullptr;
@@ -137,6 +139,8 @@ TEST_P(GetSymbolMutationInfosTest, GetSymbolMutationInfos) {
   GetSymbolMutationInfosTestCase test_case = GetParam();
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{test_case.source, std::nullopt};
+
   BabelParseRequest request;
   request.set_compute_scopes(true);
 
@@ -146,7 +150,7 @@ TEST_P(GetSymbolMutationInfosTest, GetSymbolMutationInfos) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsHirRepr hir_repr,
       ToJsHirRepr::FromJsSourceRepr(
-          test_case.source, request, absl::InfiniteDuration(),
+          source_repr, request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
   absl::flat_hash_map<JsSymbolId, SymbolMutationInfo> infos =
