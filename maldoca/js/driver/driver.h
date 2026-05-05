@@ -66,6 +66,7 @@ std::ostream& operator<<(std::ostream& os, JsReprKind kind);
 
 struct JsRepr {
   const JsReprKind kind;
+  std::optional<std::string> source_map;
 
   virtual ~JsRepr() = default;
 
@@ -114,14 +115,15 @@ struct JsRepr {
   }
 
  protected:
-  explicit JsRepr(JsReprKind kind) : kind(kind) {}
+  JsRepr(JsReprKind kind, std::optional<std::string> source_map)
+      : kind(kind), source_map(std::move(source_map)) {}
 };
 
 struct JsSourceRepr : JsRepr {
   std::string source;
 
-  explicit JsSourceRepr(absl::string_view source)
-      : JsRepr(JsReprKind::kJsSource), source(source) {}
+  JsSourceRepr(absl::string_view source, std::optional<std::string> source_map)
+      : JsRepr(JsReprKind::kJsSource, std::move(source_map)), source(source) {}
 
   static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJsSource;
@@ -135,8 +137,10 @@ struct JsSourceRepr : JsRepr {
 struct JsAstStringRepr : JsRepr {
   BabelAstString ast_string;
 
-  explicit JsAstStringRepr(BabelAstString ast_string)
-      : JsRepr(JsReprKind::kAstString), ast_string(std::move(ast_string)) {}
+  JsAstStringRepr(BabelAstString ast_string,
+                  std::optional<std::string> source_map)
+      : JsRepr(JsReprKind::kAstString, std::move(source_map)),
+        ast_string(std::move(ast_string)) {}
 
   static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kAstString;
@@ -151,8 +155,9 @@ struct JsAstRepr : JsRepr {
   std::unique_ptr<maldoca::JsFile> ast;
   BabelScopes scopes;
 
-  explicit JsAstRepr(std::unique_ptr<maldoca::JsFile> ast, BabelScopes scopes)
-      : JsRepr(JsReprKind::kAst),
+  JsAstRepr(std::unique_ptr<maldoca::JsFile> ast, BabelScopes scopes,
+            std::optional<std::string> source_map)
+      : JsRepr(JsReprKind::kAst, std::move(source_map)),
         ast(std::move(ast)),
         scopes(std::move(scopes)) {}
 
@@ -180,14 +185,18 @@ struct JsirRepr : JsRepr {
   std::string Dump() const override { return mlir::debugString(*op); }
 
  protected:
-  explicit JsirRepr(JsReprKind kind, mlir::OwningOpRef<JsirFileOp> op,
-                    BabelScopes scopes)
-      : JsRepr(kind), op(std::move(op)), scopes(std::move(scopes)) {}
+  JsirRepr(JsReprKind kind, mlir::OwningOpRef<JsirFileOp> op,
+           BabelScopes scopes, std::optional<std::string> source_map)
+      : JsRepr(kind, std::move(source_map)),
+        op(std::move(op)),
+        scopes(std::move(scopes)) {}
 };
 
 struct JsHirRepr : JsirRepr {
-  explicit JsHirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes)
-      : JsirRepr(JsReprKind::kJshir, std::move(op), std::move(scopes)) {}
+  JsHirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes,
+            std::optional<std::string> source_map)
+      : JsirRepr(JsReprKind::kJshir, std::move(op), std::move(scopes),
+                 std::move(source_map)) {}
 
   static bool classof(const JsRepr* repr) {
     return repr->kind == JsReprKind::kJshir;

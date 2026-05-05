@@ -56,7 +56,7 @@ struct TestCase {
 
   // Expected AST
   nlohmann::ordered_json serialized_ast_json;
-  std::unique_ptr<JsFile> ast;
+  JsAstRepr ast;
 
   std::unique_ptr<mlir::MLIRContext> mlir_context;
 
@@ -115,13 +115,14 @@ absl::StatusOr<TestCase> GetTestCase() {
       nlohmann::ordered_json::parse(serialized_ast_json_str);
 
   MALDOCA_ASSIGN_OR_RETURN(auto ast, JsFile::FromJson(serialized_ast_json));
+  JsAstRepr ast_repr{std::move(ast), scopes, std::nullopt};
 
   auto mlir_context = std::make_unique<mlir::MLIRContext>();
   LoadNecessaryDialects(*mlir_context);
 
   MALDOCA_ASSIGN_OR_RETURN(
       JsHirRepr hir_repr,
-      ToJsHirRepr::FromJsAstRepr(*ast, scopes, *mlir_context));
+      ToJsHirRepr::FromJsAstRepr(ast_repr, *mlir_context));
   MALDOCA_ASSIGN_OR_RETURN(auto hir_str, load_content("test_hir.mlir.test"));
 
   BabelAstString lifted_babel_ast_string;
@@ -137,7 +138,7 @@ absl::StatusOr<TestCase> GetTestCase() {
       .parsed_babel_ast_string = babel_ast_string,
 
       .serialized_ast_json = serialized_ast_json,
-      .ast = std::move(ast),
+      .ast = std::move(ast_repr),
 
       .mlir_context = std::move(mlir_context),
 
@@ -156,13 +157,16 @@ TEST(ConversionTest, SourceToAstString) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{test_case.source, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsAstStringRepr repr,
-      ToJsAstStringRepr::FromJsSourceRepr(test_case.source, parse_request,
-                                          absl::InfiniteDuration(), babel));
+      ToJsAstStringRepr::FromJsSourceRepr(
+          source_repr, parse_request,
+          absl::InfiniteDuration(), babel));
 
   EXPECT_THAT(repr.ast_string, EqualsProto(test_case.parsed_babel_ast_string));
 }
@@ -170,9 +174,12 @@ TEST(ConversionTest, SourceToAstString) {
 TEST(ConversionTest, AstStringToAst) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
+  JsAstStringRepr ast_string_repr{test_case.parsed_babel_ast_string,
+                                  std::nullopt};
+
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsAstRepr repr,
-      ToJsAstRepr::FromJsAstStringRepr(test_case.parsed_babel_ast_string,
+      ToJsAstRepr::FromJsAstStringRepr(ast_string_repr,
                                        /*recursion_depth_limit=*/std::nullopt));
 
   CheckAst(repr, test_case);
@@ -185,8 +192,7 @@ TEST(ConversionTest, AstToHir) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr repr, ToJsHirRepr::FromJsAstRepr(
-                          *test_case.ast, test_case.scopes, mlir_context));
+      JsHirRepr repr, ToJsHirRepr::FromJsAstRepr(test_case.ast, mlir_context));
 
   EXPECT_EQ(mlir::debugString(*repr.op), test_case.hir_dump);
   EXPECT_THAT(repr.scopes, EqualsProto(test_case.scopes));
@@ -196,13 +202,15 @@ TEST(ConversionTest, SourceToAst) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{test_case.source, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsAstRepr repr,
       ToJsAstRepr::FromJsSourceRepr(
-          test_case.source, parse_request, absl::InfiniteDuration(),
+          source_repr, parse_request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel));
 
   CheckAst(repr, test_case);
@@ -211,6 +219,8 @@ TEST(ConversionTest, SourceToAst) {
 TEST(ConversionTest, SourceToHir) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
   QuickJsBabel babel;
+
+  JsSourceRepr source_repr{test_case.source, std::nullopt};
 
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
@@ -221,7 +231,7 @@ TEST(ConversionTest, SourceToHir) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsHirRepr repr,
       ToJsHirRepr::FromJsSourceRepr(
-          test_case.source, parse_request, absl::InfiniteDuration(),
+          source_repr, parse_request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
   EXPECT_EQ(mlir::debugString(*repr.op), test_case.hir_dump);
@@ -231,12 +241,15 @@ TEST(ConversionTest, SourceToHir) {
 TEST(ConversionTest, AstStringToHir) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
+  JsAstStringRepr ast_string_repr{test_case.parsed_babel_ast_string,
+                                  std::nullopt};
+
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsHirRepr repr,
-      ToJsHirRepr::FromJsAstStringRepr(test_case.parsed_babel_ast_string,
+      ToJsHirRepr::FromJsAstStringRepr(ast_string_repr,
                                        /*recursion_depth_limit=*/std::nullopt,
                                        mlir_context));
 
@@ -262,7 +275,7 @@ TEST(ConversionTest, AstToAstString) {
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsAstStringRepr repr,
-      ToJsAstStringRepr::FromJsAstRepr(*test_case.ast, test_case.scopes));
+      ToJsAstStringRepr::FromJsAstRepr(test_case.ast));
 
   EXPECT_THAT(repr.ast_string, EqualsProto(test_case.lifted_babel_ast_string));
 }
@@ -272,11 +285,14 @@ TEST(ConversionTest, AstStringToSource) {
 
   QuickJsBabel babel;
 
+  JsAstStringRepr ast_string_repr{test_case.lifted_babel_ast_string,
+                                  std::nullopt};
+
   BabelGenerateOptions generate_options;
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsSourceRepr repr,
-      ToJsSourceRepr::FromJsAstStringRepr(test_case.lifted_babel_ast_string,
+      ToJsSourceRepr::FromJsAstStringRepr(ast_string_repr,
                                           generate_options,
                                           absl::InfiniteDuration(), babel));
 
@@ -312,7 +328,7 @@ TEST(ConversionTest, AstToSource) {
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsSourceRepr repr,
-      ToJsSourceRepr::FromJsAstRepr(*test_case.ast, BabelGenerateOptions(),
+      ToJsSourceRepr::FromJsAstRepr(test_case.ast, BabelGenerateOptions(),
                                     absl::InfiniteDuration(), babel));
   EXPECT_EQ(repr.source, test_case.source);
 }

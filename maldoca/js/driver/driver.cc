@@ -15,6 +15,7 @@
 #include "maldoca/js/driver/driver.h"
 
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -56,13 +57,20 @@ std::ostream &operator<<(std::ostream &os, JsReprKind kind) {
 
 absl::StatusOr<std::unique_ptr<JsRepr>> JsRepr::FromProto(
     const JsReprPb &proto) {
+  std::optional<std::string> source_map;
+  if (proto.has_source_map()) {
+    source_map = proto.source_map();
+  }
+
   switch (proto.kind_case()) {
     case JsReprPb::KIND_NOT_SET:
       return absl::InvalidArgumentError("JsReprPb kind not set");
     case JsReprPb::kJsSource:
-      return std::make_unique<JsSourceRepr>(proto.js_source());
+      return std::make_unique<JsSourceRepr>(proto.js_source(),
+                                            std::move(source_map));
     case JsReprPb::kBabelAstString:
-      return std::make_unique<JsAstStringRepr>(proto.babel_ast_string());
+      return std::make_unique<JsAstStringRepr>(proto.babel_ast_string(),
+                                               std::move(source_map));
     case JsReprPb::kJsHir:
       return absl::UnimplementedError("JSIR parsing not supported");
   }
@@ -71,18 +79,27 @@ absl::StatusOr<std::unique_ptr<JsRepr>> JsRepr::FromProto(
 absl::StatusOr<JsReprPb> JsSourceRepr::ToProto() const {
   JsReprPb proto;
   proto.set_js_source(source);
+  if (source_map.has_value()) {
+    proto.set_source_map(*source_map);
+  }
   return proto;
 }
 
 absl::StatusOr<JsReprPb> JsAstStringRepr::ToProto() const {
   JsReprPb proto;
   *proto.mutable_babel_ast_string() = ast_string;
+  if (source_map.has_value()) {
+    proto.set_source_map(*source_map);
+  }
   return proto;
 }
 
 absl::StatusOr<JsReprPb> JsHirRepr::ToProto() const {
   JsReprPb proto;
   proto.set_js_hir(mlir::debugString(*op));
+  if (source_map.has_value()) {
+    proto.set_source_map(*source_map);
+  }
   return proto;
 }
 

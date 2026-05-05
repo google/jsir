@@ -229,9 +229,15 @@ absl::StatusOr<BabelGenerateResult> QuickJsBabel::Generate(
     error = response.error();
   }
 
+  std::optional<std::string> source_map;
+  if (response.has_source_map()) {
+    source_map = response.source_map();
+  }
+
   return BabelGenerateResult{
       .source_code = std::move(*source_code),
       .error = error,
+      .source_map = source_map,
   };
 }
 
