@@ -91,7 +91,8 @@ absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsSourceToAstString::Convert(
     const JsSourceRepr &from) {
   MALDOCA_ASSIGN_OR_RETURN(auto parse_result,
                            babel_.Parse(from.source, request_, timeout_));
-  return std::make_unique<JsAstStringRepr>(std::move(parse_result.ast_string));
+  return std::make_unique<JsAstStringRepr>(std::move(parse_result.ast_string),
+                                           from.source_map);
 }
 
 absl::StatusOr<std::unique_ptr<JsSourceToAstString>>
@@ -114,7 +115,9 @@ absl::StatusOr<std::unique_ptr<JsSourceRepr>> JsAstStringToSource::Convert(
   MALDOCA_ASSIGN_OR_RETURN(
       auto generate_result,
       babel_.Generate(from.ast_string, options_, timeout_));
-  return std::make_unique<JsSourceRepr>(std::move(generate_result.source_code));
+  return std::make_unique<JsSourceRepr>(
+      std::move(generate_result.source_code),
+      std::move(generate_result.source_map));
 }
 
 absl::StatusOr<std::unique_ptr<JsAstStringToSource>>
@@ -137,7 +140,8 @@ absl::StatusOr<std::unique_ptr<JsAstRepr>> JsAstStringToAst::Convert(
   MALDOCA_ASSIGN_OR_RETURN(
       auto ast,
       GetFileAstFromAstString(from.ast_string, recursion_depth_limit_));
-  return std::make_unique<JsAstRepr>(std::move(ast), from.ast_string.scopes());
+  return std::make_unique<JsAstRepr>(std::move(ast), from.ast_string.scopes(),
+                                     from.source_map);
 }
 
 absl::StatusOr<std::unique_ptr<JsAstStringToAst>> JsAstStringToAst::Create(
@@ -156,7 +160,8 @@ absl::StatusOr<std::unique_ptr<JsAstStringToAst>> JsAstStringToAst::Create(
 absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsAstToAstString::Convert(
     const JsAstRepr &from) {
   auto ast_string = GetAstStringFromFileAst(*from.ast);
-  return std::make_unique<JsAstStringRepr>(std::move(ast_string));
+  return std::make_unique<JsAstStringRepr>(std::move(ast_string),
+                                           from.source_map);
 }
 
 // =============================================================================
@@ -166,7 +171,8 @@ absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsAstToAstString::Convert(
 absl::StatusOr<std::unique_ptr<JsHirRepr>> JsAstToHir::Convert(
     const JsAstRepr &from) {
   MALDOCA_ASSIGN_OR_RETURN(auto op, AstToJshirFile(*from.ast, mlir_context_));
-  return std::make_unique<JsHirRepr>(std::move(op), from.scopes);
+  return std::make_unique<JsHirRepr>(std::move(op), from.scopes,
+                                     from.source_map);
 }
 
 // =============================================================================
@@ -176,7 +182,8 @@ absl::StatusOr<std::unique_ptr<JsHirRepr>> JsAstToHir::Convert(
 absl::StatusOr<std::unique_ptr<JsAstRepr>> JsHirToAst::Convert(
     const JsHirRepr &from) {
   MALDOCA_ASSIGN_OR_RETURN(auto ast, JshirFileToAst(*from.op));
-  return std::make_unique<JsAstRepr>(std::move(ast), from.scopes);
+  return std::make_unique<JsAstRepr>(std::move(ast), from.scopes,
+                                     from.source_map);
 }
 
 }  // namespace maldoca

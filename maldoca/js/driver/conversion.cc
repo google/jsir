@@ -42,11 +42,13 @@ namespace maldoca {
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsSourceRepr(
-    absl::string_view source, BabelParseRequest parse_request,
+    const JsSourceRepr &source_repr, BabelParseRequest parse_request,
     absl::Duration timeout, Babel &babel) {
-  MALDOCA_ASSIGN_OR_RETURN(BabelParseResult parse_result,
-                           babel.Parse(source, parse_request, timeout));
-  return JsAstStringRepr{std::move(parse_result.ast_string)};
+  MALDOCA_ASSIGN_OR_RETURN(
+      BabelParseResult parse_result,
+      babel.Parse(source_repr.source, parse_request, timeout));
+  return JsAstStringRepr{std::move(parse_result.ast_string),
+                         source_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -54,12 +56,13 @@ absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsSourceRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsAstStringRepr(
-    const BabelAstString &ast_string,
+    const JsAstStringRepr &ast_string_repr,
     std::optional<int> recursion_depth_limit) {
-  MALDOCA_ASSIGN_OR_RETURN(
-      std::unique_ptr<JsFile> ast,
-      GetFileAstFromAstString(ast_string, recursion_depth_limit));
-  return JsAstRepr{std::move(ast), ast_string.scopes()};
+  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsFile> ast,
+                           GetFileAstFromAstString(ast_string_repr.ast_string,
+                                                   recursion_depth_limit));
+  return JsAstRepr{std::move(ast), ast_string_repr.ast_string.scopes(),
+                   ast_string_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -67,11 +70,11 @@ absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsAstStringRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstRepr(
-    const JsFile &ast, const BabelScopes &scopes,
+    const JsAstRepr &ast_repr,
     mlir::MLIRContext &mlir_context) {
   MALDOCA_ASSIGN_OR_RETURN(mlir::OwningOpRef<JsirFileOp> op,
-                   AstToJshirFile(ast, mlir_context));
-  return JsHirRepr{std::move(op), scopes};
+                   AstToJshirFile(*ast_repr.ast, mlir_context));
+  return JsHirRepr{std::move(op), ast_repr.scopes, ast_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -79,14 +82,14 @@ absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsSourceRepr(
-    absl::string_view source, BabelParseRequest parse_request,
+    const JsSourceRepr &source_repr, BabelParseRequest parse_request,
     absl::Duration timeout, std::optional<int> recursion_depth_limit,
     Babel &babel) {
-  MALDOCA_ASSIGN_OR_RETURN(JsAstStringRepr ast_string,
-                           ToJsAstStringRepr::FromJsSourceRepr(
-                               source, parse_request, timeout, babel));
-  return ToJsAstRepr::FromJsAstStringRepr(ast_string.ast_string,
-                                          recursion_depth_limit);
+  MALDOCA_ASSIGN_OR_RETURN(
+      JsAstStringRepr ast_string,
+      ToJsAstStringRepr::FromJsSourceRepr(source_repr,
+                                          parse_request, timeout, babel));
+  return ToJsAstRepr::FromJsAstStringRepr(ast_string, recursion_depth_limit);
 }
 
 // -----------------------------------------------------------------------------
@@ -94,13 +97,14 @@ absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsSourceRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsSourceRepr(
-    absl::string_view source, BabelParseRequest parse_request,
+    const JsSourceRepr &source_repr, BabelParseRequest parse_request,
     absl::Duration timeout, std::optional<int> recursion_depth_limit,
     Babel &babel, mlir::MLIRContext &mlir_context) {
-  MALDOCA_ASSIGN_OR_RETURN(JsAstRepr ast, ToJsAstRepr::FromJsSourceRepr(
-                                              source, parse_request, timeout,
-                                              recursion_depth_limit, babel));
-  return ToJsHirRepr::FromJsAstRepr(*ast.ast, ast.scopes, mlir_context);
+  MALDOCA_ASSIGN_OR_RETURN(
+      JsAstRepr ast,
+      ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request, timeout,
+                                    recursion_depth_limit, babel));
+  return ToJsHirRepr::FromJsAstRepr(ast, mlir_context);
 }
 
 // -----------------------------------------------------------------------------
@@ -108,12 +112,13 @@ absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsSourceRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstStringRepr(
-    const BabelAstString &ast_string, std::optional<int> recursion_depth_limit,
+    const JsAstStringRepr &ast_string_repr,
+    std::optional<int> recursion_depth_limit,
     mlir::MLIRContext &mlir_context) {
   MALDOCA_ASSIGN_OR_RETURN(
       JsAstRepr ast,
-      ToJsAstRepr::FromJsAstStringRepr(ast_string, recursion_depth_limit));
-  return ToJsHirRepr::FromJsAstRepr(*ast.ast, ast.scopes, mlir_context);
+      ToJsAstRepr::FromJsAstStringRepr(ast_string_repr, recursion_depth_limit));
+  return ToJsHirRepr::FromJsAstRepr(ast, mlir_context);
 }
 
 // =============================================================================
@@ -128,7 +133,7 @@ absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsHirRepr(
     const JsHirRepr &hir_repr) {
   MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsFile> ast,
                            JshirFileToAst(hir_repr.op.get()));
-  return JsAstRepr{std::move(ast), hir_repr.scopes};
+  return JsAstRepr{std::move(ast), hir_repr.scopes, hir_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -136,10 +141,10 @@ absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsHirRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsAstRepr(
-    const JsFile &ast, const BabelScopes &scopes) {
-  BabelAstString ast_string = GetAstStringFromFileAst(ast);
-  *ast_string.mutable_scopes() = scopes;
-  return JsAstStringRepr{std::move(ast_string)};
+    const JsAstRepr &ast_repr) {
+  BabelAstString ast_string = GetAstStringFromFileAst(*ast_repr.ast);
+  *ast_string.mutable_scopes() = ast_repr.scopes;
+  return JsAstStringRepr{std::move(ast_string), ast_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -147,12 +152,14 @@ absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsAstRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsAstStringRepr(
-    const BabelAstString &ast_string, BabelGenerateOptions generate_options,
-    absl::Duration timeout, Babel &babel) {
+    const JsAstStringRepr &ast_string_repr,
+    BabelGenerateOptions generate_options, absl::Duration timeout,
+    Babel &babel) {
   MALDOCA_ASSIGN_OR_RETURN(
       BabelGenerateResult generate_result,
-      babel.Generate(ast_string, generate_options, timeout));
-  return JsSourceRepr{std::move(generate_result.source_code)};
+      babel.Generate(ast_string_repr.ast_string, generate_options, timeout));
+  return JsSourceRepr{std::move(generate_result.source_code),
+                      generate_result.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -162,7 +169,7 @@ absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsAstStringRepr(
 absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsHirRepr(
     const JsHirRepr &hir_repr) {
   MALDOCA_ASSIGN_OR_RETURN(JsAstRepr ast, ToJsAstRepr::FromJsHirRepr(hir_repr));
-  return ToJsAstStringRepr::FromJsAstRepr(*ast.ast, ast.scopes);
+  return ToJsAstStringRepr::FromJsAstRepr(ast);
 }
 
 // -----------------------------------------------------------------------------
@@ -174,7 +181,7 @@ absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsHirRepr(
     absl::Duration timeout, Babel &babel) {
   MALDOCA_ASSIGN_OR_RETURN(JsAstStringRepr ast_string,
                    ToJsAstStringRepr::FromJsHirRepr(hir_repr));
-  return ToJsSourceRepr::FromJsAstStringRepr(ast_string.ast_string,
+  return ToJsSourceRepr::FromJsAstStringRepr(ast_string,
                                              generate_options, timeout, babel);
 }
 
@@ -183,12 +190,11 @@ absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsHirRepr(
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsAstRepr(
-    const JsFile &ast, BabelGenerateOptions generate_options,
+    const JsAstRepr &ast_repr, BabelGenerateOptions generate_options,
     absl::Duration timeout, Babel &babel) {
-  BabelScopes dummy_scopes;
   MALDOCA_ASSIGN_OR_RETURN(JsAstStringRepr ast_string,
-                   ToJsAstStringRepr::FromJsAstRepr(ast, dummy_scopes));
-  return ToJsSourceRepr::FromJsAstStringRepr(ast_string.ast_string,
+                   ToJsAstStringRepr::FromJsAstRepr(ast_repr));
+  return ToJsSourceRepr::FromJsAstStringRepr(ast_string,
                                              generate_options, timeout, babel);
 }
 
