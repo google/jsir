@@ -33,6 +33,8 @@ message JsReprPb {
     BabelAstString babel_ast_string = 2;
     string js_hir = 3;
   }
+
+  optional string source_map = 7;
 }
 
 // =============================================================================
