@@ -75,6 +75,7 @@ nlohmann::json BabelGenerateOptionsToJson(const BabelGenerateOptions &options,
       {"comments", options.include_comments()},
       {"compact", options.compact()},
       {"base64DecodeStringLiterals", string_literals_base64_encoded},
+      {"sourceMaps", options.source_maps()},
   };
 
   return json;

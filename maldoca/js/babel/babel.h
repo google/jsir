@@ -41,6 +41,9 @@ struct BabelGenerateResult {
   // TODO: Determine if source_code and error can co-exist, or they should be in
   // a std::variant.
   std::optional<BabelError> error;
+
+  // The generated source map, if requested.
+  std::optional<std::string> source_map;
 };
 
 class Babel {
