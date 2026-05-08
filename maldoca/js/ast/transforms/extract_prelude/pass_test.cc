@@ -65,11 +65,13 @@ function bar() {
 
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{kSource, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(kSource, parse_request,
+      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request,
                                                     absl::InfiniteDuration(),
                                                     std::nullopt, babel));
 
@@ -77,11 +79,11 @@ function bar() {
       ExtractPreludeByIndices(kSource, indices, *repr.ast);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsSourceRepr source_repr,
-      ToJsSourceRepr::FromJsAstRepr(*repr.ast, {}, absl::InfiniteDuration(),
+      JsSourceRepr printed_source_repr,
+      ToJsSourceRepr::FromJsAstRepr(repr, {}, absl::InfiniteDuration(),
                                     babel));
 
-  EXPECT_EQ(source_repr.source, kExpectedSourceWithoutPrelude);
+  EXPECT_EQ(printed_source_repr.source, kExpectedSourceWithoutPrelude);
 
   EXPECT_EQ(prelude.prelude_source(), kExpectedPrelude);
   EXPECT_EQ(prelude.extracted_from_scope_uid(), 0);
@@ -103,11 +105,13 @@ function bar() {
 
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{kSource, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(kSource, parse_request,
+      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request,
                                                     absl::InfiniteDuration(),
                                                     std::nullopt, babel));
 
@@ -115,11 +119,11 @@ function bar() {
       ExtractPreludeByAnnotations(kSource, *repr.ast);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsSourceRepr source_repr,
-      ToJsSourceRepr::FromJsAstRepr(*repr.ast, {}, absl::InfiniteDuration(),
+      JsSourceRepr printed_source_repr,
+      ToJsSourceRepr::FromJsAstRepr(repr, {}, absl::InfiniteDuration(),
                                     babel));
 
-  EXPECT_EQ(source_repr.source, kExpectedSourceWithoutPrelude);
+  EXPECT_EQ(printed_source_repr.source, kExpectedSourceWithoutPrelude);
 
   EXPECT_EQ(prelude.prelude_source(), kExpectedPrelude);
   EXPECT_EQ(prelude.extracted_from_scope_uid(), 0);
@@ -141,11 +145,13 @@ function bar() {
 
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{kSource, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(kSource, parse_request,
+      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request,
                                                     absl::InfiniteDuration(),
                                                     std::nullopt, babel));
 
@@ -153,11 +159,11 @@ function bar() {
       ExtractPreludeByIndicesAndAnnotations(kSource, indices, *repr.ast);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsSourceRepr source_repr,
-      ToJsSourceRepr::FromJsAstRepr(*repr.ast, {}, absl::InfiniteDuration(),
+      JsSourceRepr printed_source_repr,
+      ToJsSourceRepr::FromJsAstRepr(repr, {}, absl::InfiniteDuration(),
                                     babel));
 
-  EXPECT_EQ(source_repr.source, kExpectedSourceWithoutPrelude);
+  EXPECT_EQ(printed_source_repr.source, kExpectedSourceWithoutPrelude);
 
   EXPECT_EQ(prelude.prelude_source(), kExpectedPrelude);
   EXPECT_EQ(prelude.extracted_from_scope_uid(), 0);
@@ -171,20 +177,22 @@ TEST(ExtractPreludePassTest, ReuseBabel) {
 
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{kSource, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
   // Parse the source code once so that Babel increments the scope uid counter.
   {
     MALDOCA_ASSERT_OK_AND_ASSIGN(
-        JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(kSource, parse_request,
-                                                      absl::InfiniteDuration(),
-                                                      std::nullopt, babel));
+        JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(
+                            source_repr, parse_request,
+                            absl::InfiniteDuration(), std::nullopt, babel));
   }
 
   // This time the global scope uid is not 0.
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(kSource, parse_request,
+      JsAstRepr repr, ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request,
                                                     absl::InfiniteDuration(),
                                                     std::nullopt, babel));
 

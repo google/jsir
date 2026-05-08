@@ -16,12 +16,14 @@
 
 #include <iostream>
 #include <optional>
+#include <utility>
 
 #include "llvm/Support/Casting.h"
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/MLIRContext.h"
+#include "mlir/IR/OwningOpRef.h"
 #include "mlir/Support/LLVM.h"
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
@@ -74,8 +76,9 @@ void RunTest(const JsirAnalysisConfig::DynamicConstantPropagation &config,
   LoadNecessaryDialects(mlir_context);
   mlir_context.loadDialect<JsirBuiltinDialect>();
 
-  MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr repr, ToJsHirRepr::FromJsAstRepr(ast, scopes, mlir_context));
+  MALDOCA_ASSERT_OK_AND_ASSIGN(mlir::OwningOpRef<JsirFileOp> op,
+                               AstToJshirFile(ast, mlir_context));
+  JsHirRepr repr{std::move(op), scopes, std::nullopt};
 
   // Get the const bindings.
   absl::flat_hash_map<JsSymbolId, mlir::Attribute> const_bindings =
@@ -118,13 +121,17 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, Basic) {
   QuickJsBabel babel;
 
   // Convert the source to AST.
+
+  JsSourceRepr source_repr{kSource, std::nullopt};
+
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
-  MALDOCA_ASSERT_OK_AND_ASSIGN(JsAstRepr ast_repr,
-                       ToJsAstRepr::FromJsSourceRepr(kSource, parse_request,
-                                                     absl::InfiniteDuration(),
-                                                     std::nullopt, babel));
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      JsAstRepr ast_repr,
+      ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request,
+                                    absl::InfiniteDuration(), std::nullopt,
+                                    babel));
 
   // Create the dynamic prelude.
   JsirAnalysisConfig::DynamicConstantPropagation prelude_config;
@@ -141,14 +148,16 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, Basic) {
 TEST(JsirDynamicConstantPropagationAnalysisTest, CombinedSource) {
   QuickJsBabel babel;
 
+  JsSourceRepr source_repr{kCombined, std::nullopt};
+
   // Convert the **combined** source to AST.
   BabelParseRequest parse_request;
   parse_request.set_compute_scopes(true);
 
-  MALDOCA_ASSERT_OK_AND_ASSIGN(JsAstRepr ast_repr,
-                       ToJsAstRepr::FromJsSourceRepr(kCombined, parse_request,
-                                                     absl::InfiniteDuration(),
-                                                     std::nullopt, babel));
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      JsAstRepr ast_repr, ToJsAstRepr::FromJsSourceRepr(
+                              source_repr, parse_request,
+                              absl::InfiniteDuration(), std::nullopt, babel));
 
   // Extract the prelude from the AST.
   JsirAnalysisConfig::DynamicConstantPropagation prelude_config =
@@ -179,10 +188,12 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, BabelReuse) {
       babel.Parse(kSource, parse_request, absl::InfiniteDuration()));
 
   // Convert the **combined** source to AST.
-  MALDOCA_ASSERT_OK_AND_ASSIGN(JsAstRepr ast_repr,
-                       ToJsAstRepr::FromJsSourceRepr(kCombined, parse_request,
-                                                     absl::InfiniteDuration(),
-                                                     std::nullopt, babel));
+  JsSourceRepr source_repr{kCombined, std::nullopt};
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      JsAstRepr ast_repr,
+      ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request,
+                                    absl::InfiniteDuration(), std::nullopt,
+                                    babel));
 
   // Extract the prelude from the AST.
   JsirAnalysisConfig::DynamicConstantPropagation prelude_config =
