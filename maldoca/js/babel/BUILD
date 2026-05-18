@@ -85,6 +85,7 @@ cc_library(
         ":scope",
         "//maldoca/base/testing:protocol-buffer-matchers",
         "//maldoca/base/testing:status_matchers",
+        "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",

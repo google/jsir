@@ -161,6 +161,10 @@ absl::StatusOr<BabelParseResult> QuickJsBabel::Parse(
   BabelErrors errors;
   *errors.mutable_errors() = std::move(*response.mutable_errors());
 
+  if (ast_string.value().empty() && !errors.errors().empty()) {
+    return absl::InvalidArgumentError(errors.errors(0).message());
+  }
+
   return BabelParseResult{
       .ast_string = std::move(ast_string),
       .errors = std::move(errors),

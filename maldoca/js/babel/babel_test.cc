@@ -21,6 +21,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -33,6 +34,7 @@
 namespace maldoca {
 
 using ::maldoca::testing::EqualsProto;
+using ::maldoca::testing::StatusIs;
 using ::testing::IsEmpty;
 using ::testing::StrEq;
 using ::testing::StrNe;
@@ -203,12 +205,9 @@ TEST_P(BabelTest, ParseBrokenCode) {
 
   std::unique_ptr<Babel> babel = GetParam().babel_factory();
   BabelParseRequest request;
-  MALDOCA_ASSERT_OK_AND_ASSIGN(
-      BabelParseResult result,
-      babel->Parse("-_-", request, absl::InfiniteDuration()));
-
-  EXPECT_THAT(result.ast_string.value(), StrEq(""));
-  EXPECT_THAT(result.errors, EqualsProto(expected_response));
+  EXPECT_THAT(
+      babel->Parse("-_-", request, absl::InfiniteDuration()),
+      StatusIs(absl::StatusCode::kInvalidArgument, kExpectedErrorMessage));
 }
 
 TEST_P(BabelTest, ErrorRecovery) {
@@ -235,12 +234,9 @@ let a = {
                         )pb",
                         absl::CEscape(kExpectedErrorMessage));
 
-    MALDOCA_ASSERT_OK_AND_ASSIGN(
-        BabelParseResult result,
-        babel->Parse(kRecoverableSource, request, absl::InfiniteDuration()));
-
-    EXPECT_THAT(result.ast_string.value(), StrEq(""));
-    EXPECT_THAT(result.errors, EqualsProto(expected_response));
+    EXPECT_THAT(
+        babel->Parse(kRecoverableSource, request, absl::InfiniteDuration()),
+        StatusIs(absl::StatusCode::kInvalidArgument, kExpectedErrorMessage));
   }
 
   request.set_error_recovery(true);
