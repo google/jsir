@@ -1,0 +1,11 @@
+// SOURCE:      function add(a, b) {
+// SOURCE-NEXT:   return a + b;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function multiply(a, b) {
+// SOURCE-NEXT:   return a * b;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: function multiply_times_2(a, b) {
+// SOURCE-NEXT:   return multiply(a, b) * 2;
+// SOURCE-NEXT: }
+// SOURCE-NEXT: add(2, 3);
+// SOURCE-NEXT: multiply_times_2(10, 5);
