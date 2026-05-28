@@ -180,7 +180,7 @@ std::optional<mlir::Attribute> BuiltinBtoa(
 
   // Perform the binary to ascii conversion in C++ for now
   std::string ascii_string;
-  absl::Base64Escape(binary_string, &ascii_string);
+  ascii_string = absl::Base64Escape(binary_string);
   return mlir::StringAttr::get(context, ascii_string);
 }
 
