@@ -275,6 +275,9 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
       }
 
       Print(")");
+      if (!ancestor->aggregated_fields().empty()) {
+        Print(" /* NOLINT */");
+      }
     }
 
     for (const FieldDef& field : node.fields()) {
