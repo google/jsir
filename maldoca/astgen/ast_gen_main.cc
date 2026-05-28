@@ -50,6 +50,31 @@ ABSL_FLAG(std::string, ast_path, "", "The directory for the AST code in C++.");
 ABSL_FLAG(std::string, ir_path, "",
           "The directory for the IR code in TableGen and C++.");
 
+// Flags to support mapping AST nodes to a different target IR dialect
+// (e.g. mapping SWC's "jsswc" AST to the standard "jsir" dialect).
+ABSL_FLAG(std::string, ir_lang_name, "",
+          "The language name for the IR (e.g. 'js').");
+
+// Overrides to prevent generated files from overwriting other dialect
+// conversions and to use custom names/paths.
+ABSL_FLAG(std::string, ast_to_ir_cc_path, "",
+          "Override output path for generated AST to IR C++ source.");
+
+ABSL_FLAG(std::string, ir_to_ast_cc_path, "",
+          "Override output path for generated IR to AST C++ source.");
+
+ABSL_FLAG(std::string, ast_to_ir_header_include_path, "",
+          "Override include path for AST to IR header in generated source.");
+
+ABSL_FLAG(std::string, ir_to_ast_header_include_path, "",
+          "Override include path for IR to AST header in generated source.");
+
+ABSL_FLAG(std::string, ast_to_ir_class_name, "",
+          "Override class name for AST to IR converter.");
+
+ABSL_FLAG(std::string, ir_to_ast_class_name, "",
+          "Override class name for IR to AST converter.");
+
 namespace maldoca {
 namespace {
 
@@ -58,6 +83,15 @@ absl::Status AstGenMain() {
   auto cc_namespace = absl::GetFlag(FLAGS_cc_namespace);
   auto ast_path = absl::GetFlag(FLAGS_ast_path);
   auto ir_path = absl::GetFlag(FLAGS_ir_path);
+  auto ir_lang_name = absl::GetFlag(FLAGS_ir_lang_name);
+  auto ast_to_ir_cc_path_flag = absl::GetFlag(FLAGS_ast_to_ir_cc_path);
+  auto ir_to_ast_cc_path_flag = absl::GetFlag(FLAGS_ir_to_ast_cc_path);
+  auto ast_to_ir_header_include_path =
+      absl::GetFlag(FLAGS_ast_to_ir_header_include_path);
+  auto ir_to_ast_header_include_path =
+      absl::GetFlag(FLAGS_ir_to_ast_header_include_path);
+  auto ast_to_ir_class_name = absl::GetFlag(FLAGS_ast_to_ir_class_name);
+  auto ir_to_ast_class_name = absl::GetFlag(FLAGS_ir_to_ast_class_name);
 
   AstDefPb ast_def_pb;
   MALDOCA_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
@@ -87,27 +121,35 @@ absl::Status AstGenMain() {
       SetFileContents(ast_from_json_path, ast_from_json));
 
   if (!ir_path.empty()) {
-    std::string ir_tablegen = PrintIrTableGen(ast_def, ir_path);
-    auto ir_tablegen_path = JoinPath(
-        ir_path, absl::StrCat(ast_def.lang_name(), "ir_ops.generated.td"));
-    std::cout << "Writing ir_tablegen to " << ir_tablegen_path << "\n";
-    MALDOCA_RETURN_IF_ERROR(
-        SetFileContents(ir_tablegen_path, ir_tablegen));
+    if (ir_lang_name.empty() || ir_lang_name == ast_def.lang_name()) {
+      std::string ir_tablegen = PrintIrTableGen(ast_def, ir_path);
+      auto ir_tablegen_path = JoinPath(
+          ir_path, absl::StrCat(ast_def.lang_name(), "ir_ops.generated.td"));
+      std::cout << "Writing ir_tablegen to " << ir_tablegen_path << "\n";
+      MALDOCA_RETURN_IF_ERROR(SetFileContents(ir_tablegen_path, ir_tablegen));
+    }
 
-    std::string ast_to_ir =
-        PrintAstToIrSource(ast_def, cc_namespace, ast_path, ir_path);
-    auto ast_to_ir_path = JoinPath(
-        ir_path, "conversion",
-        absl::StrCat("ast_to_", ast_def.lang_name(), "ir.generated.cc"));
+    std::string ast_to_ir = PrintAstToIrSource(
+        ast_def, cc_namespace, ast_path, ir_path, ir_lang_name,
+        ast_to_ir_header_include_path, ast_to_ir_class_name);
+    auto ast_to_ir_path =
+        ast_to_ir_cc_path_flag.empty()
+            ? JoinPath(ir_path, "conversion",
+                       absl::StrCat("ast_to_", ast_def.lang_name(),
+                                    "ir.generated.cc"))
+            : ast_to_ir_cc_path_flag;
     std::cout << "Writing ast_to_ir to " << ast_to_ir_path << "\n";
     MALDOCA_RETURN_IF_ERROR(
         SetFileContents(ast_to_ir_path, ast_to_ir));
 
-    std::string ir_to_ast =
-        PrintIrToAstSource(ast_def, cc_namespace, ast_path, ir_path);
-    auto ir_to_ast_path = JoinPath(
-        ir_path, "conversion",
-        absl::StrCat(ast_def.lang_name(), "ir_to_ast.generated.cc"));
+    std::string ir_to_ast = PrintIrToAstSource(
+        ast_def, cc_namespace, ast_path, ir_path, ir_lang_name,
+        ir_to_ast_header_include_path, ir_to_ast_class_name);
+    auto ir_to_ast_path = ir_to_ast_cc_path_flag.empty()
+                              ? JoinPath(ir_path, "conversion",
+                                         absl::StrCat(ast_def.lang_name(),
+                                                      "ir_to_ast.generated.cc"))
+                              : ir_to_ast_cc_path_flag;
     std::cout << "Writing ir_to_ast to " << ir_to_ast_path << "\n";
     MALDOCA_RETURN_IF_ERROR(
         SetFileContents(ir_to_ast_path, ir_to_ast));

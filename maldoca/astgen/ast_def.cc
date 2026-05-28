@@ -360,6 +360,24 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     for (auto kind : union_type_pb.kinds()) {
       union_type_node->kinds_.push_back(static_cast<FieldKind>(kind));
     }
+    if (union_type_pb.has_ir_op_name()) {
+      union_type_node->ir_op_name_ = union_type_pb.ir_op_name();
+    }
+    if (union_type_pb.has_should_generate_dispatch()) {
+      union_type_node->should_generate_dispatch_ =
+          union_type_pb.should_generate_dispatch();
+    }
+    for (const auto& o : union_type_pb.dispatch_overrides()) {
+      std::optional<std::string> ir_op_name;
+      if (o.has_ir_op_name()) {
+        ir_op_name = o.ir_op_name();
+      }
+      union_type_node->dispatch_overrides_.emplace(
+          o.type(), NodeDef::DispatchOverride{o.visitor(), ir_op_name});
+    }
+    for (const auto& s : union_type_pb.dispatch_skip()) {
+      union_type_node->dispatch_skip_.insert(s);
+    }
     if (nodes.contains(union_type_pb.name())) {
       return absl::InvalidArgumentError(
           absl::StrCat(union_type_pb.name(), " already exists!"));
