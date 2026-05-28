@@ -113,7 +113,7 @@ void MNode::set_loc(std::unique_ptr<MSourceLocation> loc) {
 MFunction::MFunction(
     std::unique_ptr<MSourceLocation> loc,
     std::string id)
-    : MNode(std::move(loc)),
+    : MNode(std::move(loc)) /* NOLINT */,
       id_(std::move(id)) {}
 
 absl::string_view MFunction::id() const {
@@ -131,7 +131,7 @@ void MFunction::set_id(std::string id) {
 MObjectMember::MObjectMember(
     std::unique_ptr<MSourceLocation> loc,
     bool computed)
-    : MNode(std::move(loc)),
+    : MNode(std::move(loc)) /* NOLINT */,
       computed_(std::move(computed)) {}
 
 bool MObjectMember::computed() const {
@@ -150,9 +150,9 @@ MObjectMethod::MObjectMethod(
     std::unique_ptr<MSourceLocation> loc,
     bool computed,
     std::string id)
-    : MNode(std::move(loc)),
-      MObjectMember(std::move(loc), std::move(computed)),
-      MFunction(std::move(loc), std::move(id)) {}
+    : MNode(std::move(loc)) /* NOLINT */,
+      MObjectMember(std::move(loc), std::move(computed)) /* NOLINT */,
+      MFunction(std::move(loc), std::move(id)) /* NOLINT */ {}
 
 // clang-format on
 // NOLINTEND(whitespace/line_length)

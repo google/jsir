@@ -254,7 +254,8 @@ class Type {
   //
   // [Builtin]
   //   => mlir::ArrayAttr
-  virtual std::string CcMlirBuilderType(FieldKind kind) const = 0;
+  virtual std::string CcMlirBuilderType(absl::string_view ir_lang_name,
+                                        FieldKind kind) const = 0;
 
   // Prints the C++ type for MLIR getters.
   //
@@ -302,7 +303,8 @@ class Type {
   //
   // [Builtin]
   //   => mlir::ArrayAttr
-  virtual std::string CcMlirGetterType(FieldKind kind) const = 0;
+  virtual std::string CcMlirGetterType(absl::string_view ir_lang_name,
+                                       FieldKind kind) const = 0;
 
   // Prints the MLIR TableGen type.
   //
@@ -370,14 +372,17 @@ class NonListType : public Type {
   // For `NonListType`, `CcMlirGetterType` and `CcMlirBuilderType` are the same.
   // For the definitions of `CcMlirGetterType` and `CcMlirBuilderType`, see
   // comments for class `Type`.
-  virtual std::string CcMlirType(FieldKind kind) const = 0;
+  virtual std::string CcMlirType(absl::string_view ir_lang_name,
+                                 FieldKind kind) const = 0;
 
-  std::string CcMlirBuilderType(FieldKind kind) const final {
-    return CcMlirType(kind);
+  std::string CcMlirBuilderType(absl::string_view ir_lang_name,
+                                FieldKind kind) const final {
+    return CcMlirType(ir_lang_name, kind);
   }
 
-  std::string CcMlirGetterType(FieldKind kind) const final {
-    return CcMlirType(kind);
+  std::string CcMlirGetterType(absl::string_view ir_lang_name,
+                               FieldKind kind) const final {
+    return CcMlirType(ir_lang_name, kind);
   }
 
  protected:
@@ -415,9 +420,11 @@ class ListType : public Type {
 
   std::string CcGetterType(CcGetterKind getter_kind) const override;
 
-  std::string CcMlirBuilderType(FieldKind kind) const override;
+  std::string CcMlirBuilderType(absl::string_view ir_lang_name,
+                                FieldKind kind) const override;
 
-  std::string CcMlirGetterType(FieldKind kind) const override;
+  std::string CcMlirGetterType(absl::string_view ir_lang_name,
+                               FieldKind kind) const override;
 
   std::string TdType(FieldKind kind) const override;
 
@@ -467,7 +474,8 @@ class VariantType : public NonListType {
 
   std::string CcGetterType(CcGetterKind getter_kind) const override;
 
-  std::string CcMlirType(FieldKind kind) const final;
+  std::string CcMlirType(absl::string_view ir_lang_name,
+                         FieldKind kind) const final;
 
   std::string TdType(FieldKind kind) const override;
 
@@ -501,7 +509,8 @@ class BuiltinType : public ScalarType {
 
   std::string CcGetterType(CcGetterKind getter_kind) const override;
 
-  std::string CcMlirType(FieldKind kind) const final;
+  std::string CcMlirType(absl::string_view ir_lang_name,
+                         FieldKind kind) const final;
 
   std::string TdType(FieldKind kind) const override;
 
@@ -527,7 +536,8 @@ class EnumType : public ScalarType {
 
   std::string CcGetterType(CcGetterKind getter_kind) const override;
 
-  std::string CcMlirType(FieldKind kind) const final;
+  std::string CcMlirType(absl::string_view ir_lang_name,
+                         FieldKind kind) const final;
 
   std::string TdType(FieldKind kind) const override;
 
@@ -561,7 +571,8 @@ class ClassType : public ScalarType {
 
   std::string CcGetterType(CcGetterKind getter_kind) const override;
 
-  std::string CcMlirType(FieldKind kind) const final;
+  std::string CcMlirType(absl::string_view ir_lang_name,
+                         FieldKind kind) const final;
 
   std::string TdType(FieldKind kind) const override;
 

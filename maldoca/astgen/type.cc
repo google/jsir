@@ -389,7 +389,8 @@ std::string ClassType::CcGetterType(CcGetterKind getter_kind) const {
 // CcMlirBuilderType() / CcMlirGetterType()
 // =============================================================================
 
-std::string ListType::CcMlirBuilderType(FieldKind kind) const {
+std::string ListType::CcMlirBuilderType(absl::string_view ir_lang_name,
+                                        FieldKind kind) const {
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
@@ -403,7 +404,8 @@ std::string ListType::CcMlirBuilderType(FieldKind kind) const {
   }
 }
 
-std::string ListType::CcMlirGetterType(FieldKind kind) const {
+std::string ListType::CcMlirGetterType(absl::string_view ir_lang_name,
+                                       FieldKind kind) const {
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
@@ -417,10 +419,11 @@ std::string ListType::CcMlirGetterType(FieldKind kind) const {
   }
 }
 
-std::string VariantType::CcMlirType(FieldKind kind) const {
+std::string VariantType::CcMlirType(absl::string_view ir_lang_name,
+                                    FieldKind kind) const {
   absl::flat_hash_set<std::string> cc_mlir_types;
   for (const auto& type : types()) {
-    cc_mlir_types.insert(type->CcMlirType(kind));
+    cc_mlir_types.insert(type->CcMlirType(ir_lang_name, kind));
   }
 
   switch (kind) {
@@ -442,7 +445,8 @@ std::string VariantType::CcMlirType(FieldKind kind) const {
   }
 }
 
-std::string BuiltinType::CcMlirType(FieldKind kind) const {
+std::string BuiltinType::CcMlirType(absl::string_view ir_lang_name,
+                                    FieldKind kind) const {
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
@@ -466,7 +470,8 @@ std::string BuiltinType::CcMlirType(FieldKind kind) const {
   }
 }
 
-std::string EnumType::CcMlirType(FieldKind kind) const {
+std::string EnumType::CcMlirType(absl::string_view ir_lang_name,
+                                 FieldKind kind) const {
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
@@ -481,19 +486,21 @@ std::string EnumType::CcMlirType(FieldKind kind) const {
   return "mlir::StringAttr";
 }
 
-std::string ClassType::CcMlirType(FieldKind kind) const {
+std::string ClassType::CcMlirType(absl::string_view ir_lang_name,
+                                  FieldKind kind) const {
+  absl::string_view ir_lang = ir_lang_name.empty() ? lang_name_ : ir_lang_name;
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
     case FIELD_KIND_ATTR: {
       if (node_def_ != nullptr) {
-        auto ir_op_name = node_def_->ir_op_name(lang_name_, kind);
+        auto ir_op_name = node_def_->ir_op_name(ir_lang, kind);
         if (ir_op_name.has_value()) {
           return ir_op_name->ToPascalCase();
         }
       }
 
-      auto ir_name = Symbol(absl::StrCat(lang_name_, "ir"));
+      auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
       return (ir_name + name() + "Attr").ToPascalCase();
     }
     case FIELD_KIND_LVAL:

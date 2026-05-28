@@ -60,8 +60,9 @@ static Symbol GetVisitor(const NodeDef& node, FieldKind kind) {
 // Gets the name of the *RegionEndOp.
 // - For an lval or rval (expression): <Ir>ExprRegionEndOp.
 // - For a list of lvals or rvals (expressions): <Ir>ExprsRegionEndOp.
-Symbol GetRegionEndOp(const AstDef& ast, const FieldDef& field) {
-  auto ir_name = Symbol(absl::StrCat(ast.lang_name(), "ir"));
+Symbol GetRegionEndOp(const AstDef& ast, const FieldDef& field,
+                      absl::string_view ir_lang) {
+  auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
 
   Symbol region_end_op;
   switch (field.kind()) {
@@ -102,8 +103,15 @@ void AstToIrSourcePrinter::PrintAst(const AstDef& ast,
   Println("// clang-format off");
   Println();
 
-  PrintIncludeHeader(
-      absl::StrCat(ir_path, "/conversion/ast_to_", ast.lang_name(), "ir.h"));
+  if (!header_include_path_.empty()) {
+    PrintIncludeHeader(header_include_path_);
+  } else {
+    absl::string_view ir_lang = ir_lang_name_.empty()
+                                    ? ast.lang_name()
+                                    : absl::string_view(ir_lang_name_);
+    PrintIncludeHeader(
+        absl::StrCat(ir_path, "/conversion/ast_to_", ir_lang, "ir.h"));
+  }
   Println();
 
   Println("#include <memory>");
@@ -135,7 +143,7 @@ void AstToIrSourcePrinter::PrintAst(const AstDef& ast,
   Println();
 
   for (const auto* node : ast.topological_sorted_nodes()) {
-    if (!node->children().empty()) {
+    if (!node->children().empty() && node->should_generate_dispatch()) {
       for (FieldKind kind : node->aggregated_kinds()) {
         PrintNonLeafNode(ast, *node, kind);
       }
@@ -161,7 +169,10 @@ void AstToIrSourcePrinter::PrintAst(const AstDef& ast,
 void AstToIrSourcePrinter::PrintNonLeafNode(const AstDef& ast,
                                             const NodeDef& node,
                                             FieldKind kind) {
-  auto ir_op_name = node.ir_op_name(ast.lang_name(), kind);
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  auto ir_op_name = node.ir_op_name(ir_lang, kind);
   std::string return_type;
   if (ir_op_name.has_value()) {
     return_type = ir_op_name.value().ToPascalCase();
@@ -184,26 +195,40 @@ void AstToIrSourcePrinter::PrintNonLeafNode(const AstDef& ast,
       }
     }
   }
-  auto ir_name = Symbol(absl::StrCat(ast.lang_name(), "ir"));
+  auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
   auto visitor = GetVisitor(node, kind);
+  std::string class_name = class_name_.empty()
+                               ? absl::StrCat("AstTo", ir_name.ToPascalCase())
+                               : class_name_;
 
   auto vars = WithVars({
       {"Ret", return_type},
       {"Name", (Symbol(ast.lang_name()) + node.name()).ToPascalCase()},
-      {"IrName", ir_name.ToPascalCase()},
+      {"ClassName", class_name},
       {"Visitor", visitor.ToPascalCase()},
   });
 
   Println(
-      "$Ret$ AstTo$IrName$::$Visitor$(mlir::OpBuilder &builder, const $Name$ "
+      "$Ret$ $ClassName$::$Visitor$(mlir::OpBuilder &builder, const $Name$ "
       "*node) {");
   {
     auto indent = WithIndent();
     for (const NodeDef* leaf : node.leaves()) {
+      if (node.dispatch_skip().contains(leaf->name())) {
+        continue;
+      }
+      auto it = node.dispatch_overrides().find(leaf->name());
+      std::string visitor_name;
+      if (it != node.dispatch_overrides().end() &&
+          !it->second.visitor.empty()) {
+        visitor_name = it->second.visitor;
+      } else {
+        visitor_name = GetVisitor(*leaf, kind).ToPascalCase();
+      }
       auto vars = WithVars({
           {"LeafName", (Symbol(ast.lang_name()) + leaf->name()).ToPascalCase()},
           {"leaf_name", Symbol(leaf->name()).ToCcVarName()},
-          {"LeafVisitor", GetVisitor(*leaf, kind).ToPascalCase()},
+          {"LeafVisitor", visitor_name},
       });
       Println(
           "if (auto *$leaf_name$ = dynamic_cast<const $LeafName$ *>(node)) {");
@@ -219,8 +244,11 @@ void AstToIrSourcePrinter::PrintNonLeafNode(const AstDef& ast,
 
 void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
                                          FieldKind kind) {
-  auto ir_op_name = node.ir_op_name(ast.lang_name(), kind).value();
-  auto ir_name = Symbol(absl::StrCat(ast.lang_name(), "ir"));
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  auto ir_op_name = node.ir_op_name(ir_lang, kind).value();
+  auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
 
   auto visitor = Symbol("Visit") + node.name();
   if (kind == FIELD_KIND_LVAL) {
@@ -241,16 +269,20 @@ void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
       break;
   }
 
+  std::string class_name = class_name_.empty()
+                               ? absl::StrCat("AstTo", ir_name.ToPascalCase())
+                               : class_name_;
+
   auto vars = WithVars({
       {"OpName", ir_op_name.ToPascalCase()},
       {"Name", (Symbol(ast.lang_name()) + node.name()).ToPascalCase()},
-      {"IrName", ir_name.ToPascalCase()},
+      {"ClassName", class_name},
       {"Visitor", visitor.ToPascalCase()},
       {"Creator", creator.ToPascalCase()},
   });
 
   Println(
-      "$OpName$ AstTo$IrName$::$Visitor$(mlir::OpBuilder &builder, const "
+      "$OpName$ $ClassName$::$Visitor$(mlir::OpBuilder &builder, const "
       "$Name$ *node) {");
   {
     auto indent = WithIndent();
@@ -320,7 +352,10 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
   auto lhs = Symbol("mlir") + field.name();
   auto lhs_region = lhs + "region";
   auto rhs = absl::StrCat("node->", field.name().ToCcVarName(), "()");
-  auto ir_name = Symbol(absl::StrCat(ast.lang_name(), "ir"));
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
 
   auto vars = WithVars({
       {"lhs", lhs.ToCcVarName()},
@@ -351,7 +386,7 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
         }
       }();
 
-      Symbol region_end_op = GetRegionEndOp(ast, field);
+      Symbol region_end_op = GetRegionEndOp(ast, field, ir_lang);
       PrintToIr(ast, action, field.type(), RefOrVal::kRef, field.kind(), lhs,
                 rhs);
 
@@ -397,8 +432,11 @@ void AstToIrSourcePrinter::PrintBuiltinToIr(const AstDef& ast, Action action,
                                             const BuiltinType& type,
                                             const Symbol& lhs,
                                             const std::string& rhs) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   auto vars = WithVars({
-      {"mlir_type", type.CcMlirBuilderType(FIELD_KIND_ATTR)},
+      {"mlir_type", type.CcMlirBuilderType(ir_lang, FIELD_KIND_ATTR)},
       {"lhs", lhs.ToCcVarName()},
       {"rhs", rhs},
   });
@@ -440,6 +478,9 @@ void AstToIrSourcePrinter::PrintClassToIr(const AstDef& ast, Action action,
                                           const ClassType& type, FieldKind kind,
                                           const Symbol& lhs,
                                           const std::string& rhs) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   auto vars = WithVars({
       {"ClassName", type.name().ToPascalCase()},
       {"lhs", lhs.ToCcVarName()},
@@ -449,7 +490,7 @@ void AstToIrSourcePrinter::PrintClassToIr(const AstDef& ast, Action action,
   switch (action) {
     case Action::kDef: {
       auto vars = WithVars({
-          {"cc_mlir_type", type.CcMlirBuilderType(kind)},
+          {"cc_mlir_type", type.CcMlirBuilderType(ir_lang, kind)},
       });
       Print("$cc_mlir_type$ ");
       ABSL_FALLTHROUGH_INTENDED;
@@ -508,6 +549,9 @@ void AstToIrSourcePrinter::PrintVariantToIr(const AstDef& ast, Action action,
                                             RefOrVal ref_or_val, FieldKind kind,
                                             const Symbol& lhs,
                                             const std::string& rhs) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   auto vars = WithVars({
       {"lhs", lhs.ToCcVarName()},
       {"rhs", rhs},
@@ -517,7 +561,7 @@ void AstToIrSourcePrinter::PrintVariantToIr(const AstDef& ast, Action action,
   switch (action) {
     case Action::kDef: {
       auto vars = WithVars({
-          {"cc_mlir_type", type.CcMlirBuilderType(kind)},
+          {"cc_mlir_type", type.CcMlirBuilderType(ir_lang, kind)},
       });
       Println("$cc_mlir_type$ $lhs$;");
       case_action = Action::kAssign;
@@ -562,6 +606,9 @@ void AstToIrSourcePrinter::PrintListToIr(const AstDef& ast, Action action,
                                          const ListType& type, FieldKind kind,
                                          const Symbol& lhs,
                                          const std::string& rhs) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   const auto lhs_element = Symbol("mlir_element");
   const auto rhs_element = "element";
 
@@ -667,8 +714,7 @@ void AstToIrSourcePrinter::PrintListToIr(const AstDef& ast, Action action,
             Println("} else {");
             {
               auto indent = WithIndent();
-              auto none_op =
-                  Symbol(absl::StrCat(ast.lang_name(), "ir")) + "NoneOp";
+              auto none_op = Symbol(absl::StrCat(ir_lang, "ir")) + "NoneOp";
               auto vars = WithVars({
                   {"NoneOp", none_op.ToPascalCase()},
               });
@@ -730,6 +776,9 @@ void AstToIrSourcePrinter::PrintNullableToIr(const AstDef& ast, Action action,
                                              RefOrVal ref_or_val,
                                              FieldKind kind, const Symbol& lhs,
                                              const std::string& rhs) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   auto vars = WithVars({
       {"lhs", lhs.ToCcVarName()},
       {"rhs", rhs},
@@ -747,7 +796,7 @@ void AstToIrSourcePrinter::PrintNullableToIr(const AstDef& ast, Action action,
           break;
         case Action::kDef: {
           auto vars = WithVars({
-              {"mlir_type", type.CcMlirBuilderType(kind)},
+              {"mlir_type", type.CcMlirBuilderType(ir_lang, kind)},
           });
           Println("$mlir_type$ $lhs$;");
           non_null_action = Action::kAssign;
@@ -774,11 +823,15 @@ void AstToIrSourcePrinter::PrintNullableToIr(const AstDef& ast, Action action,
 std::string PrintAstToIrSource(const AstDef& ast,
                                absl::string_view cc_namespace,
                                absl::string_view ast_path,
-                               absl::string_view ir_path) {
+                               absl::string_view ir_path,
+                               absl::string_view ir_lang_name,
+                               absl::string_view header_include_path,
+                               absl::string_view class_name) {
   std::string str;
   {
     google::protobuf::io::StringOutputStream os(&str);
-    AstToIrSourcePrinter printer(&os);
+    AstToIrSourcePrinter printer(&os, ir_lang_name, header_include_path,
+                                 class_name);
     printer.PrintAst(ast, cc_namespace, ast_path, ir_path);
   }
 

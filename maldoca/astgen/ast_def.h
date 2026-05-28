@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/log/log.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
@@ -175,6 +176,44 @@ class NodeDef {
   // If false, the op is expected to be manually written.
   bool should_generate_ir_op() const { return should_generate_ir_op_; }
 
+  // Whether IR dispatch code should be automatically generated for unions.
+  bool should_generate_dispatch() const { return should_generate_dispatch_; }
+
+  // Overrides for generated dispatch code.
+  //
+  // For a union type (e.g., `Expression`), the generator automatically
+  // produces dispatch code (e.g., `dynamic_cast` chain in AST-to-IR, or
+  // `TypeSwitch` in IR-to-AST) to route to the correct visitor for each member
+  // (e.g., `VisitIdentifier`).
+  //
+  // `DispatchOverride` allows customizing this routing for specific members.
+  struct DispatchOverride {
+    // The name of the visitor function to call.
+    // E.g., "VisitIdentifierRef" instead of the default "VisitIdentifier".
+    std::string visitor;
+
+    // The IR op name to use for this member.
+    // E.g., "jsir.IdentifierRef" instead of "jsir.Identifier".
+    std::optional<std::string> ir_op_name;
+  };
+
+  // Map from union member type name (e.g., "Identifier") to its dispatch
+  // override.
+  const absl::flat_hash_map<std::string, DispatchOverride>& dispatch_overrides()
+      const {
+    return dispatch_overrides_;
+  }
+
+  // Set of union member type names to skip in the generated dispatch code.
+  //
+  // If a member is skipped, it will not be included in the generated
+  // dispatch methods, and must be handled manually if needed.
+  //
+  // E.g., {"InvalidExpression"} to skip generating dispatch for invalid nodes.
+  const absl::flat_hash_set<std::string>& dispatch_skip() const {
+    return dispatch_skip_;
+  }
+
   // The allowed FieldKinds for this node. Does not include those specified in
   // ancestors.
   //
@@ -293,6 +332,9 @@ class NodeDef {
   std::vector<FieldKind> aggregated_kinds_;
   bool has_control_flow_;
   std::optional<std::string> ir_op_name_;
+  bool should_generate_dispatch_ = true;
+  absl::flat_hash_map<std::string, DispatchOverride> dispatch_overrides_;
+  absl::flat_hash_set<std::string> dispatch_skip_;
   bool has_fold_;
   std::vector<MlirTrait> additional_mlir_traits_;
   std::vector<MlirTrait> aggregated_additional_mlir_traits_;
