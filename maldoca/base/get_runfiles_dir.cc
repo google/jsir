@@ -29,7 +29,8 @@ std::string GetDataDependencyFilepath(absl::string_view path) {
   std::unique_ptr<Runfiles> runfiles(
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY, &error));
   CHECK(runfiles != nullptr) << error;
-  return runfiles->Rlocation(JoinPath("com_google_maldoca", path));
+  // In bzlmod, the root module's canonical repo name is always "_main".
+  return runfiles->Rlocation(JoinPath("_main", path));
 }
 
 std::string GetRunfilesDir() { return GetDataDependencyFilepath(""); }
