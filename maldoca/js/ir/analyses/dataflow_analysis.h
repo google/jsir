@@ -126,11 +126,6 @@ struct DenseMapInfo<maldoca::LivenessInfo> {
     return maldoca::LivenessInfo{.kind = kind, .values = std::move(values)};
   }
 
-  static maldoca::LivenessInfo getTombstoneKey() {
-    auto [kind, values] = TupleInfo::getTombstoneKey();
-    return maldoca::LivenessInfo{.kind = kind, .values = std::move(values)};
-  }
-
   static llvm::hash_code getHashValue(maldoca::LivenessInfo info) {
     auto kind_hash = KindInfo::getHashValue(info.kind);
     for (auto value : info.values) {
