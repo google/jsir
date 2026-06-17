@@ -27,8 +27,14 @@ namespace maldoca {
 
 class IrToAstSourcePrinter : public CcPrinterBase {
  public:
-  explicit IrToAstSourcePrinter(google::protobuf::io::ZeroCopyOutputStream* os)
-      : CcPrinterBase(os) {}
+  explicit IrToAstSourcePrinter(google::protobuf::io::ZeroCopyOutputStream* os,
+                                absl::string_view ir_lang_name = "",
+                                absl::string_view header_include_path = "",
+                                absl::string_view class_name = "")
+      : CcPrinterBase(os),
+        ir_lang_name_(ir_lang_name),
+        header_include_path_(header_include_path),
+        class_name_(class_name) {}
 
   void PrintAst(const AstDef& ast, absl::string_view cc_namespace,
                 absl::string_view ast_path, absl::string_view ir_path);
@@ -61,12 +67,20 @@ class IrToAstSourcePrinter : public CcPrinterBase {
 
   void PrintListConverter(const AstDef& ast, const ListType& list_type,
                           absl::string_view lang_name, FieldKind kind);
+
+ private:
+  std::string ir_lang_name_;
+  std::string header_include_path_;
+  std::string class_name_;
 };
 
 std::string PrintIrToAstSource(const AstDef& ast,
                                absl::string_view cc_namespace,
                                absl::string_view ast_path,
-                               absl::string_view ir_path);
+                               absl::string_view ir_path,
+                               absl::string_view ir_lang_name = "",
+                               absl::string_view header_include_path = "",
+                               absl::string_view class_name = "");
 
 }  // namespace maldoca
 
