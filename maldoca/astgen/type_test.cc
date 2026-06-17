@@ -64,6 +64,8 @@ void TestTypePbToTypeAndPrint(TypeTestCase type_test_case) {
 
     EXPECT_EQ(type->TdType(field_kind), td_type);
   }
+  absl::string_view ir_lang =
+      type_test_case.cc_lang_name != nullptr ? type_test_case.cc_lang_name : "";
   for (const auto &pair : type_test_case.cc_mlir_builder_type) {
     // We don't allow C++17 in the codebase for compatibility reasons, so we
     // cannot use structured binding.
@@ -71,7 +73,8 @@ void TestTypePbToTypeAndPrint(TypeTestCase type_test_case) {
     std::string cc_mlir_builder_type;
     std::tie(field_kind, cc_mlir_builder_type) = pair;
 
-    EXPECT_EQ(type->CcMlirBuilderType(field_kind), cc_mlir_builder_type);
+    EXPECT_EQ(type->CcMlirBuilderType(ir_lang, field_kind),
+              cc_mlir_builder_type);
   }
   for (const auto &pair : type_test_case.cc_mlir_getter_type) {
     // We don't allow C++17 in the codebase for compatibility reasons, so we
@@ -81,7 +84,7 @@ void TestTypePbToTypeAndPrint(TypeTestCase type_test_case) {
     // std::tie(field_kind, cc_mlir_getter_type) = pair;
     auto [field_kind, cc_mlir_getter_type] = pair;
 
-    EXPECT_EQ(type->CcMlirGetterType(field_kind), cc_mlir_getter_type);
+    EXPECT_EQ(type->CcMlirGetterType(ir_lang, field_kind), cc_mlir_getter_type);
   }
 }
 
