@@ -342,6 +342,40 @@ message UnionTypePb {
 
   // Supported kinds. Each kind leads to a different IR op.
   repeated FieldKind kinds = 5;
+
+  // [Optional] Custom MLIR op name.
+  optional string ir_op_name = 6;
+
+  // If true, automatically generate the corresponding IR dispatch code.
+  optional bool should_generate_dispatch = 7 [default = true];
+
+  message DispatchOverridePb {
+    // The name of the union member type to override.
+    // E.g., "Identifier".
+    optional string type = 1;
+
+    // The name of the visitor function to call.
+    // E.g., "VisitIdentifierRef" instead of the default "VisitIdentifier".
+    optional string visitor = 2;
+
+    // The IR op name to use for this member.
+    // E.g., "jsir.IdentifierRef" instead of "jsir.Identifier".
+    optional string ir_op_name = 3;
+  }
+
+  // Overrides for generated dispatch code.
+  //
+  // Allows customizing the generated visitor and IR op name for specific
+  // union members.
+  repeated DispatchOverridePb dispatch_overrides = 8;
+
+  // Set of union member type names to skip in the generated dispatch code.
+  //
+  // If a member is skipped, it will not be included in the generated
+  // dispatch methods, and must be handled manually if needed.
+  //
+  // E.g., "InvalidExpression" to skip generating dispatch for invalid nodes.
+  repeated string dispatch_skip = 9;
 }
 
 // Top-level AST definition.

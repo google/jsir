@@ -28,8 +28,14 @@ namespace maldoca {
 
 class AstToIrSourcePrinter : public CcPrinterBase {
  public:
-  explicit AstToIrSourcePrinter(google::protobuf::io::ZeroCopyOutputStream* os)
-      : CcPrinterBase(os) {}
+  explicit AstToIrSourcePrinter(google::protobuf::io::ZeroCopyOutputStream* os,
+                                absl::string_view ir_lang_name = "",
+                                absl::string_view header_include_path = "",
+                                absl::string_view class_name = "")
+      : CcPrinterBase(os),
+        ir_lang_name_(ir_lang_name),
+        header_include_path_(header_include_path),
+        class_name_(class_name) {}
 
   // Action: What to do with the converted IR value/attribute.
   //
@@ -169,6 +175,11 @@ class AstToIrSourcePrinter : public CcPrinterBase {
   // });
   void PrintRegion(const AstDef& ast, const NodeDef& node,
                    const FieldDef& field);
+
+ private:
+  std::string ir_lang_name_;
+  std::string header_include_path_;
+  std::string class_name_;
 };
 
 // Prints the "ast_to<lang_name>ir.generated.cc" file.
@@ -194,7 +205,10 @@ class AstToIrSourcePrinter : public CcPrinterBase {
 std::string PrintAstToIrSource(const AstDef& ast,
                                absl::string_view cc_namespace,
                                absl::string_view ast_path,
-                               absl::string_view ir_path);
+                               absl::string_view ir_path,
+                               absl::string_view ir_lang_name = "",
+                               absl::string_view header_include_path = "",
+                               absl::string_view class_name = "");
 
 }  // namespace maldoca
 
