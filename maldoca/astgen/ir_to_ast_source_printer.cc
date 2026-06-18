@@ -74,8 +74,15 @@ void IrToAstSourcePrinter::PrintAst(const AstDef& ast,
   Println("// clang-format off");
   Println();
 
-  PrintIncludeHeader(
-      absl::StrCat(ir_path, "/conversion/", ast.lang_name(), "ir_to_ast.h"));
+  if (!header_include_path_.empty()) {
+    PrintIncludeHeader(header_include_path_);
+  } else {
+    absl::string_view ir_lang = ir_lang_name_.empty()
+                                    ? ast.lang_name()
+                                    : absl::string_view(ir_lang_name_);
+    PrintIncludeHeader(
+        absl::StrCat(ir_path, "/conversion/", ir_lang, "ir_to_ast.h"));
+  }
   Println();
 
   Println("#include <memory>");
@@ -117,7 +124,7 @@ void IrToAstSourcePrinter::PrintAst(const AstDef& ast,
   Println();
 
   for (const auto* node : ast.topological_sorted_nodes()) {
-    if (!node->children().empty()) {
+    if (!node->children().empty() && node->should_generate_dispatch()) {
       for (FieldKind kind : node->aggregated_kinds()) {
         PrintNonLeafNode(ast, *node, kind);
       }
@@ -143,7 +150,10 @@ void IrToAstSourcePrinter::PrintAst(const AstDef& ast,
 void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
                                             const NodeDef& node,
                                             FieldKind kind) {
-  auto ir_op_name = node.ir_op_name(ast.lang_name(), kind);
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  auto ir_op_name = node.ir_op_name(ir_lang, kind);
   std::string input_type;
   if (ir_op_name.has_value()) {
     input_type = ir_op_name->ToPascalCase();
@@ -161,8 +171,11 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
         break;
     }
   }
-  auto ir_name = Symbol(absl::StrCat(ast.lang_name(), "ir"));
+  auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
   auto visitor = GetVisitor(node, kind);
+  std::string class_name = class_name_.empty()
+                               ? absl::StrCat(ir_name.ToPascalCase(), "ToAst")
+                               : class_name_;
 
   auto vars = WithVars({
       {"InputType", input_type},
@@ -170,12 +183,12 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
        kind == FIELD_KIND_ATTR ? "mlir::Attribute" : "mlir::Operation*"},
       {"Name", (Symbol(ast.lang_name()) + node.name()).ToPascalCase()},
       {"name", kind == FIELD_KIND_ATTR ? "attr" : "op"},
-      {"IrName", ir_name.ToPascalCase()},
+      {"ClassName", class_name},
       {"Visitor", visitor.ToPascalCase()},
   });
 
   Println("absl::StatusOr<std::unique_ptr<$Name$>>");
-  Println("$IrName$ToAst::$Visitor$($InputType$ $name$) {");
+  Println("$ClassName$::$Visitor$($InputType$ $name$) {");
   {
     auto indent = WithIndent();
     Println("using Ret = absl::StatusOr<std::unique_ptr<$Name$>>;");
@@ -183,10 +196,34 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
     {
       auto indent = WithIndent();
       for (const NodeDef* leaf : node.leaves()) {
+        if (node.dispatch_skip().contains(leaf->name())) {
+          continue;
+        }
+        std::string visitor_name;
+        std::string op_name;
+        auto it = node.dispatch_overrides().find(leaf->name());
+
+        if (it != node.dispatch_overrides().end() &&
+            !it->second.visitor.empty()) {
+          visitor_name = it->second.visitor;
+        } else {
+          visitor_name = GetVisitor(*leaf, kind).ToPascalCase();
+        }
+
+        if (it != node.dispatch_overrides().end() &&
+            it->second.ir_op_name.has_value()) {
+          op_name = *it->second.ir_op_name;
+        } else {
+          auto ir_op = leaf->ir_op_name(ir_lang, kind);
+          if (!ir_op.has_value()) {
+            LOG(FATAL) << "Leaf node " << leaf->name()
+                       << " has no IR op name for " << ir_lang;
+          }
+          op_name = ir_op->ToPascalCase();
+        }
         auto vars = WithVars({
-            {"LeafOpName",
-             leaf->ir_op_name(ast.lang_name(), kind)->ToPascalCase()},
-            {"LeafVisitor", GetVisitor(*leaf, kind).ToPascalCase()},
+            {"LeafOpName", op_name},
+            {"LeafVisitor", visitor_name},
         });
         Println(".Case([&]($LeafOpName$ $name$) {");
         Println("  return $LeafVisitor$($name$);");
@@ -204,24 +241,31 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
 
 void IrToAstSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
                                          FieldKind kind) {
-  auto ir_op_name = node.ir_op_name(ast.lang_name(), kind).value();
-  auto ir_name = Symbol(absl::StrCat(ast.lang_name(), "ir"));
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  auto ir_op_name = node.ir_op_name(ir_lang, kind).value();
+  auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
 
   auto visitor = Symbol("Visit") + node.name();
   if (kind == FIELD_KIND_LVAL) {
     visitor += "Ref";
   }
 
+  std::string class_name = class_name_.empty()
+                               ? absl::StrCat(ir_name.ToPascalCase(), "ToAst")
+                               : class_name_;
+
   auto vars = WithVars({
       {"OpName", ir_op_name.ToPascalCase()},
       {"Name", (Symbol(ast.lang_name()) + node.name()).ToPascalCase()},
       {"name", kind == FIELD_KIND_ATTR ? "attr" : "op"},
-      {"IrName", ir_name.ToPascalCase()},
+      {"ClassName", class_name},
       {"Visitor", visitor.ToPascalCase()},
   });
 
   Println("absl::StatusOr<std::unique_ptr<$Name$>>");
-  Println("$IrName$ToAst::$Visitor$($OpName$ $name$) {");
+  Println("$ClassName$::$Visitor$($OpName$ $name$) {");
   {
     auto indent = WithIndent();
     for (const auto* field : node.aggregated_fields()) {
@@ -304,6 +348,9 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
 
 void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
                                        const FieldDef& field) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
 
   std::string converter_type = [&]() -> std::string {
@@ -315,13 +362,15 @@ void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
       case FIELD_KIND_RVAL:
       case FIELD_KIND_LVAL: {
         if (field.type().IsA<ListType>()) {
-          auto end_op =
-              Symbol(absl::StrCat(ast.lang_name(), "ir")) + "ExprsRegionEndOp";
-          return absl::StrCat("ExprsRegion<", end_op.ToPascalCase(), ">");
+          std::string end_op = absl::StrCat(
+              Symbol(absl::StrCat(ir_lang, "ir")).ToPascalCase(),
+              "ExprsRegionEndOp");
+          return absl::StrCat("ExprsRegion<", end_op, ">");
         } else {
-          auto end_op =
-              Symbol(absl::StrCat(ast.lang_name(), "ir")) + "ExprRegionEndOp";
-          return absl::StrCat("ExprRegion<", end_op.ToPascalCase(), ">");
+          std::string end_op = absl::StrCat(
+              Symbol(absl::StrCat(ir_lang, "ir")).ToPascalCase(),
+              "ExprRegionEndOp");
+          return absl::StrCat("ExprRegion<", end_op, ">");
         }
       }
       case FIELD_KIND_STMT: {
@@ -387,10 +436,15 @@ void IrToAstSourcePrinter::PrintConverter(const AstDef& ast, const Type& type,
                                           absl::string_view lang_name,
                                           FieldKind kind,
                                           MaybeNull maybe_null) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
   if (maybe_null == MaybeNull::kYes) {
     if (kind == FIELD_KIND_LVAL || kind == FIELD_KIND_RVAL) {
-      auto none_op = Symbol(absl::StrCat(ast.lang_name(), "ir")) + "NoneOp";
-      Print(absl::StrCat("Nullable<", none_op.ToPascalCase(), ">(\n"));
+      std::string none_op =
+          absl::StrCat(Symbol(absl::StrCat(ir_lang, "ir")).ToPascalCase(),
+                       "NoneOp");
+      Print(absl::StrCat("Nullable<", none_op, ">(\n"));
     } else {
       Print("Nullable(\n");
     }
@@ -526,11 +580,15 @@ void IrToAstSourcePrinter::PrintListConverter(const AstDef& ast,
 std::string PrintIrToAstSource(const AstDef& ast,
                                absl::string_view cc_namespace,
                                absl::string_view ast_path,
-                               absl::string_view ir_path) {
+                               absl::string_view ir_path,
+                               absl::string_view ir_lang_name,
+                               absl::string_view header_include_path,
+                               absl::string_view class_name) {
   std::string str;
   {
     google::protobuf::io::StringOutputStream os(&str);
-    IrToAstSourcePrinter printer(&os);
+    IrToAstSourcePrinter printer(&os, ir_lang_name, header_include_path,
+                                 class_name);
     printer.PrintAst(ast, cc_namespace, ast_path, ir_path);
   }
 
