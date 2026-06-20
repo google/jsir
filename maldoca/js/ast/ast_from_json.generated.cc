@@ -557,6 +557,10 @@ JsNode::FromJson(const nlohmann::json& json) {
     return JsImportAttribute::FromJson(json);
   } else if (type == "ProgramBodyElement") {
     return JsProgramBodyElement::FromJson(json);
+  } else if (type == "ArrowFunctionBody") {
+    return JsArrowFunctionBody::FromJson(json);
+  } else if (type == "ForInit") {
+    return JsForInit::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -943,6 +947,174 @@ JsFile::FromJson(const nlohmann::json& json) {
       std::move(defined_symbols),
       std::move(program),
       std::move(comments));
+}
+
+// =============================================================================
+// JsArrowFunctionBody
+// =============================================================================
+
+absl::StatusOr<std::unique_ptr<JsArrowFunctionBody>>
+JsArrowFunctionBody::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+
+  if (type == "BlockStatement") {
+    return JsBlockStatement::FromJson(json);
+  } else if (type == "Identifier") {
+    return JsIdentifier::FromJson(json);
+  } else if (type == "RegExpLiteral") {
+    return JsRegExpLiteral::FromJson(json);
+  } else if (type == "NullLiteral") {
+    return JsNullLiteral::FromJson(json);
+  } else if (type == "StringLiteral") {
+    return JsStringLiteral::FromJson(json);
+  } else if (type == "BooleanLiteral") {
+    return JsBooleanLiteral::FromJson(json);
+  } else if (type == "NumericLiteral") {
+    return JsNumericLiteral::FromJson(json);
+  } else if (type == "BigIntLiteral") {
+    return JsBigIntLiteral::FromJson(json);
+  } else if (type == "Literal") {
+    return JsLiteral::FromJson(json);
+  } else if (type == "ThisExpression") {
+    return JsThisExpression::FromJson(json);
+  } else if (type == "ArrowFunctionExpression") {
+    return JsArrowFunctionExpression::FromJson(json);
+  } else if (type == "YieldExpression") {
+    return JsYieldExpression::FromJson(json);
+  } else if (type == "AwaitExpression") {
+    return JsAwaitExpression::FromJson(json);
+  } else if (type == "ArrayExpression") {
+    return JsArrayExpression::FromJson(json);
+  } else if (type == "ObjectExpression") {
+    return JsObjectExpression::FromJson(json);
+  } else if (type == "FunctionExpression") {
+    return JsFunctionExpression::FromJson(json);
+  } else if (type == "UnaryExpression") {
+    return JsUnaryExpression::FromJson(json);
+  } else if (type == "UpdateExpression") {
+    return JsUpdateExpression::FromJson(json);
+  } else if (type == "BinaryExpression") {
+    return JsBinaryExpression::FromJson(json);
+  } else if (type == "AssignmentExpression") {
+    return JsAssignmentExpression::FromJson(json);
+  } else if (type == "LogicalExpression") {
+    return JsLogicalExpression::FromJson(json);
+  } else if (type == "MemberExpression") {
+    return JsMemberExpression::FromJson(json);
+  } else if (type == "OptionalMemberExpression") {
+    return JsOptionalMemberExpression::FromJson(json);
+  } else if (type == "ConditionalExpression") {
+    return JsConditionalExpression::FromJson(json);
+  } else if (type == "CallExpression") {
+    return JsCallExpression::FromJson(json);
+  } else if (type == "OptionalCallExpression") {
+    return JsOptionalCallExpression::FromJson(json);
+  } else if (type == "NewExpression") {
+    return JsNewExpression::FromJson(json);
+  } else if (type == "SequenceExpression") {
+    return JsSequenceExpression::FromJson(json);
+  } else if (type == "ParenthesizedExpression") {
+    return JsParenthesizedExpression::FromJson(json);
+  } else if (type == "TemplateLiteral") {
+    return JsTemplateLiteral::FromJson(json);
+  } else if (type == "TaggedTemplateExpression") {
+    return JsTaggedTemplateExpression::FromJson(json);
+  } else if (type == "ClassExpression") {
+    return JsClassExpression::FromJson(json);
+  } else if (type == "MetaProperty") {
+    return JsMetaProperty::FromJson(json);
+  } else if (type == "Expression") {
+    return JsExpression::FromJson(json);
+  }
+  return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
+}
+
+// =============================================================================
+// JsForInit
+// =============================================================================
+
+absl::StatusOr<std::unique_ptr<JsForInit>>
+JsForInit::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+
+  if (type == "VariableDeclaration") {
+    return JsVariableDeclaration::FromJson(json);
+  } else if (type == "Identifier") {
+    return JsIdentifier::FromJson(json);
+  } else if (type == "RegExpLiteral") {
+    return JsRegExpLiteral::FromJson(json);
+  } else if (type == "NullLiteral") {
+    return JsNullLiteral::FromJson(json);
+  } else if (type == "StringLiteral") {
+    return JsStringLiteral::FromJson(json);
+  } else if (type == "BooleanLiteral") {
+    return JsBooleanLiteral::FromJson(json);
+  } else if (type == "NumericLiteral") {
+    return JsNumericLiteral::FromJson(json);
+  } else if (type == "BigIntLiteral") {
+    return JsBigIntLiteral::FromJson(json);
+  } else if (type == "Literal") {
+    return JsLiteral::FromJson(json);
+  } else if (type == "ThisExpression") {
+    return JsThisExpression::FromJson(json);
+  } else if (type == "ArrowFunctionExpression") {
+    return JsArrowFunctionExpression::FromJson(json);
+  } else if (type == "YieldExpression") {
+    return JsYieldExpression::FromJson(json);
+  } else if (type == "AwaitExpression") {
+    return JsAwaitExpression::FromJson(json);
+  } else if (type == "ArrayExpression") {
+    return JsArrayExpression::FromJson(json);
+  } else if (type == "ObjectExpression") {
+    return JsObjectExpression::FromJson(json);
+  } else if (type == "FunctionExpression") {
+    return JsFunctionExpression::FromJson(json);
+  } else if (type == "UnaryExpression") {
+    return JsUnaryExpression::FromJson(json);
+  } else if (type == "UpdateExpression") {
+    return JsUpdateExpression::FromJson(json);
+  } else if (type == "BinaryExpression") {
+    return JsBinaryExpression::FromJson(json);
+  } else if (type == "AssignmentExpression") {
+    return JsAssignmentExpression::FromJson(json);
+  } else if (type == "LogicalExpression") {
+    return JsLogicalExpression::FromJson(json);
+  } else if (type == "MemberExpression") {
+    return JsMemberExpression::FromJson(json);
+  } else if (type == "OptionalMemberExpression") {
+    return JsOptionalMemberExpression::FromJson(json);
+  } else if (type == "ConditionalExpression") {
+    return JsConditionalExpression::FromJson(json);
+  } else if (type == "CallExpression") {
+    return JsCallExpression::FromJson(json);
+  } else if (type == "OptionalCallExpression") {
+    return JsOptionalCallExpression::FromJson(json);
+  } else if (type == "NewExpression") {
+    return JsNewExpression::FromJson(json);
+  } else if (type == "SequenceExpression") {
+    return JsSequenceExpression::FromJson(json);
+  } else if (type == "ParenthesizedExpression") {
+    return JsParenthesizedExpression::FromJson(json);
+  } else if (type == "TemplateLiteral") {
+    return JsTemplateLiteral::FromJson(json);
+  } else if (type == "TaggedTemplateExpression") {
+    return JsTaggedTemplateExpression::FromJson(json);
+  } else if (type == "ClassExpression") {
+    return JsClassExpression::FromJson(json);
+  } else if (type == "MetaProperty") {
+    return JsMetaProperty::FromJson(json);
+  } else if (type == "Expression") {
+    return JsExpression::FromJson(json);
+  }
+  return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
 
 // =============================================================================
@@ -1916,22 +2088,6 @@ JsStatement::FromJson(const nlohmann::json& json) {
 // JsBlockStatement
 // =============================================================================
 
-static bool IsBlockStatement(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return false;
-  }
-  auto type_it = json.find("type");
-  if (type_it == json.end()) {
-    return false;
-  }
-  const nlohmann::json &type_json = type_it.value();
-  if (!type_json.is_string()) {
-    return false;
-  }
-  const std::string &type = type_json.get<std::string>();
-  return type == "BlockStatement";
-}
-
 absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>>
 JsBlockStatement::GetBody(const nlohmann::json& json) {
   return GetRequiredField<std::vector<std::unique_ptr<JsStatement>>>(
@@ -2813,6 +2969,82 @@ JsDoWhileStatement::FromJson(const nlohmann::json& json) {
 }
 
 // =============================================================================
+// JsForStatement
+// =============================================================================
+
+absl::StatusOr<std::optional<std::unique_ptr<JsForInit>>>
+JsForStatement::GetInit(const nlohmann::json& json) {
+  return GetNullableField<std::unique_ptr<JsForInit>>(
+      json,
+      "init",
+      JsForInit::FromJson
+  );
+}
+
+absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
+JsForStatement::GetTest(const nlohmann::json& json) {
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "test",
+      JsExpression::FromJson
+  );
+}
+
+absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
+JsForStatement::GetUpdate(const nlohmann::json& json) {
+  return GetNullableField<std::unique_ptr<JsExpression>>(
+      json,
+      "update",
+      JsExpression::FromJson
+  );
+}
+
+absl::StatusOr<std::unique_ptr<JsStatement>>
+JsForStatement::GetBody(const nlohmann::json& json) {
+  return GetRequiredField<std::unique_ptr<JsStatement>>(
+      json,
+      "body",
+      JsStatement::FromJson
+  );
+}
+
+absl::StatusOr<std::unique_ptr<JsForStatement>>
+JsForStatement::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto init, JsForStatement::GetInit(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto test, JsForStatement::GetTest(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto update, JsForStatement::GetUpdate(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto body, JsForStatement::GetBody(json));
+
+  return absl::make_unique<JsForStatement>(
+      std::move(loc),
+      std::move(start),
+      std::move(end),
+      std::move(leading_comment_uids),
+      std::move(trailing_comment_uids),
+      std::move(inner_comment_uids),
+      std::move(scope_uid),
+      std::move(referenced_symbol),
+      std::move(defined_symbols),
+      std::move(init),
+      std::move(test),
+      std::move(update),
+      std::move(body));
+}
+
+// =============================================================================
 // JsDeclaration
 // =============================================================================
 
@@ -2958,90 +3190,6 @@ JsVariableDeclaration::FromJson(const nlohmann::json& json) {
       std::move(defined_symbols),
       std::move(declarations),
       std::move(kind));
-}
-
-// =============================================================================
-// JsForStatement
-// =============================================================================
-
-absl::StatusOr<std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>>>
-JsForStatement::GetInit(const nlohmann::json& json) {
-  return GetNullableField<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>>(
-      json,
-      "init",
-      Variant(
-          VariantOption<std::unique_ptr<JsVariableDeclaration>>{
-              .predicate = IsVariableDeclaration,
-              .converter = JsVariableDeclaration::FromJson,
-          },
-          VariantOption<std::unique_ptr<JsExpression>>{
-              .predicate = IsExpression,
-              .converter = JsExpression::FromJson,
-          })
-  );
-}
-
-absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
-JsForStatement::GetTest(const nlohmann::json& json) {
-  return GetNullableField<std::unique_ptr<JsExpression>>(
-      json,
-      "test",
-      JsExpression::FromJson
-  );
-}
-
-absl::StatusOr<std::optional<std::unique_ptr<JsExpression>>>
-JsForStatement::GetUpdate(const nlohmann::json& json) {
-  return GetNullableField<std::unique_ptr<JsExpression>>(
-      json,
-      "update",
-      JsExpression::FromJson
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsStatement>>
-JsForStatement::GetBody(const nlohmann::json& json) {
-  return GetRequiredField<std::unique_ptr<JsStatement>>(
-      json,
-      "body",
-      JsStatement::FromJson
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsForStatement>>
-JsForStatement::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto init, JsForStatement::GetInit(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsForStatement::GetTest(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto update, JsForStatement::GetUpdate(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsForStatement::GetBody(json));
-
-  return absl::make_unique<JsForStatement>(
-      std::move(loc),
-      std::move(start),
-      std::move(end),
-      std::move(leading_comment_uids),
-      std::move(trailing_comment_uids),
-      std::move(inner_comment_uids),
-      std::move(scope_uid),
-      std::move(referenced_symbol),
-      std::move(defined_symbols),
-      std::move(init),
-      std::move(test),
-      std::move(update),
-      std::move(body));
 }
 
 // =============================================================================
@@ -3391,20 +3539,12 @@ JsThisExpression::FromJson(const nlohmann::json& json) {
 // JsArrowFunctionExpression
 // =============================================================================
 
-absl::StatusOr<std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>>
+absl::StatusOr<std::unique_ptr<JsArrowFunctionBody>>
 JsArrowFunctionExpression::GetBody(const nlohmann::json& json) {
-  return GetRequiredField<std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>>(
+  return GetRequiredField<std::unique_ptr<JsArrowFunctionBody>>(
       json,
       "body",
-      Variant(
-          VariantOption<std::unique_ptr<JsBlockStatement>>{
-              .predicate = IsBlockStatement,
-              .converter = JsBlockStatement::FromJson,
-          },
-          VariantOption<std::unique_ptr<JsExpression>>{
-              .predicate = IsExpression,
-              .converter = JsExpression::FromJson,
-          })
+      JsArrowFunctionBody::FromJson
   );
 }
 

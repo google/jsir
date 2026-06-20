@@ -434,17 +434,13 @@ class JsAstWalker : public JsAstVisitor<void> {
     }
 
     if (for_statement.init().has_value()) {
-      std::variant<const JsVariableDeclaration *, const JsExpression *> init =
-          for_statement.init().value();
-      switch (init.index()) {
-        case 0:
-          VisitVariableDeclaration(*std::get<0>(init));
-          break;
-        case 1:
-          VisitExpression(*std::get<1>(init));
-          break;
-        default:
-          LOG(FATAL) << "Unreachable code.";
+      auto init = for_statement.init().value();
+      if (auto vdecl = dynamic_cast<const JsVariableDeclaration*>(init)) {
+        VisitVariableDeclaration(*vdecl);
+      } else if (auto expr = dynamic_cast<const JsExpression*>(init)) {
+        VisitExpression(*expr);
+      } else {
+        LOG(FATAL) << "Unreachable code.";
       }
     }
 
@@ -572,15 +568,14 @@ class JsAstWalker : public JsAstVisitor<void> {
          *arrow_function_expression.params()) {
       VisitPattern(*param);
     }
-    switch (arrow_function_expression.body().index()) {
-      case 0:
-        VisitBlockStatement(*std::get<0>(arrow_function_expression.body()));
-        break;
-      case 1:
-        VisitExpression(*std::get<1>(arrow_function_expression.body()));
-        break;
-      default:
-        LOG(FATAL) << "Unreachable code.";
+    if (auto block = dynamic_cast<const JsBlockStatement*>(
+            arrow_function_expression.body())) {
+      VisitBlockStatement(*block);
+    } else if (auto expr = dynamic_cast<const JsExpression*>(
+                   arrow_function_expression.body())) {
+      VisitExpression(*expr);
+    } else {
+      LOG(FATAL) << "Unreachable code.";
     }
 
     if (postorder_callback_) {
@@ -1926,17 +1921,13 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
     }
 
     if (for_statement.init().has_value()) {
-      std::variant<JsVariableDeclaration *, JsExpression *> init =
-          for_statement.init().value();
-      switch (init.index()) {
-        case 0:
-          VisitVariableDeclaration(*std::get<0>(init));
-          break;
-        case 1:
-          VisitExpression(*std::get<1>(init));
-          break;
-        default:
-          LOG(FATAL) << "Unreachable code.";
+      auto init = for_statement.init().value();
+      if (auto vdecl = dynamic_cast<JsVariableDeclaration*>(init)) {
+        VisitVariableDeclaration(*vdecl);
+      } else if (auto expr = dynamic_cast<JsExpression*>(init)) {
+        VisitExpression(*expr);
+      } else {
+        LOG(FATAL) << "Unreachable code.";
       }
     }
 
@@ -2063,15 +2054,14 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
          *arrow_function_expression.params()) {
       VisitPattern(*param);
     }
-    switch (arrow_function_expression.body().index()) {
-      case 0:
-        VisitBlockStatement(*std::get<0>(arrow_function_expression.body()));
-        break;
-      case 1:
-        VisitExpression(*std::get<1>(arrow_function_expression.body()));
-        break;
-      default:
-        LOG(FATAL) << "Unreachable code.";
+    if (auto block =
+            dynamic_cast<JsBlockStatement*>(arrow_function_expression.body())) {
+      VisitBlockStatement(*block);
+    } else if (auto expr = dynamic_cast<JsExpression*>(
+                   arrow_function_expression.body())) {
+      VisitExpression(*expr);
+    } else {
+      LOG(FATAL) << "Unreachable code.";
     }
 
     if (postorder_callback_) {
