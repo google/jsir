@@ -121,6 +121,11 @@ struct DenseMapInfo<maldoca::LivenessInfo> {
   using ValueInfo =
       llvm::DenseMapInfo<llvm::PointerUnion<mlir::Value, mlir::Attribute>>;
 
+  static maldoca::LivenessInfo getEmptyKey() {
+    auto [kind, values] = TupleInfo::getEmptyKey();
+    return maldoca::LivenessInfo{.kind = kind, .values = std::move(values)};
+  }
+
   static llvm::hash_code getHashValue(maldoca::LivenessInfo info) {
     auto kind_hash = KindInfo::getHashValue(info.kind);
     for (auto value : info.values) {
