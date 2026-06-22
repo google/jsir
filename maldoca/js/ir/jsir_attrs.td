@@ -233,7 +233,7 @@ def JsirLocationAttr : AttrDef<Jsir_Dialect, "JsirLocation", [],
       OptionalParameter<"std::optional<int64_t>">: $end_index,
       OptionalParameter<"std::optional<int64_t>">: $scope_uid
   );
-  let assemblyFormat = "params";
+  let assemblyFormat = "`<` struct(params) `>`";
 }
 
 def JsirCommentBlockAttr : AttrDef<
@@ -264,9 +264,10 @@ def JsirSymbolIdAttr : AttrDef<Jsir_Dialect, "JsirSymbolId", []> {
   let mnemonic = "symbol_id";
   let parameters = (ins
     "::mlir::StringAttr": $name,
-    "std::optional<int64_t>": $def_scope_id
+    OptionalParameter<"std::optional<int64_t>">: $def_scope_id,
+    OptionalParameter<"std::optional<int64_t>">: $binding_uid
   );
-  let assemblyFormat = "params";
+  let assemblyFormat = "`<` $name ( `S` $def_scope_id^ )? ( `B` $binding_uid^ )? `>`";
 }
 
 def JsirTriviaAttr : AttrDef<Jsir_Dialect, "JsirTrivia", [],
@@ -281,7 +282,7 @@ def JsirTriviaAttr : AttrDef<Jsir_Dialect, "JsirTrivia", [],
       OptionalParameter<"JsirSymbolIdAttr">: $referenced_symbol,
       OptionalArrayRefParameter<"JsirSymbolIdAttr">: $defined_symbols
   );
-  let assemblyFormat = "params";
+  let assemblyFormat = "`<` struct(params) `>`";
 }
 
 def JsirInterpreterDirectiveAttr : AttrDef<Jsir_Dialect, "JsirInterpreterDirective", []> {

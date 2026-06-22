@@ -39,6 +39,7 @@ cc_library(
         "//maldoca/js/ir",
         "//maldoca/js/ir:utf16",
         "//maldoca/js/ir/analyses/constant_propagation:analysis",
+        "@abseil-cpp//absl/base:no_destructor",
         "@abseil-cpp//absl/base:nullability",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",

@@ -14,6 +14,7 @@
 
 #include "maldoca/js/ir/analyses/analysis.h"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -26,11 +27,15 @@
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Value.h"
 #include "mlir/Support/LogicalResult.h"
+#include "absl/base/no_destructor.h"
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "third_party/llvm/llvm-project/llvm/include/llvm/ADT/DenseMap.h"
+#include "third_party/llvm/llvm-project/mlir/include/mlir/IR/Location.h"
+#include "third_party/llvm/llvm-project/mlir/include/mlir/Support/LLVM.h"
 #include "maldoca/base/ret_check.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"

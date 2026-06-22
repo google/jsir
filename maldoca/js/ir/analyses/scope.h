@@ -37,20 +37,25 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &os,
 // Searches all scopes from the one `op` is in to the global scope for a symbol.
 // Returns the uid of the scope where the symbol is defined.
 std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
-                                  mlir::Operation *op, absl::string_view name);
+                                  mlir::Operation *op, absl::string_view name,
+                                  bool is_var_declaration = false);
 
 // Turns a symbol name into a JsSymbolId, by searching all scopes from
 // the one `op` is in to the global scope. If the symbol is not found, assume it
 // has `scope_uid` 0.
 JsSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
-                       absl::string_view name);
+                       absl::string_view name,
+                       bool is_var_declaration = false);
 
 // Turns an op / attr into a JsSymbolId, by searching all scopes from
 // the one op / attr is in to the global scope. If the symbol is not found,
 // assume it has `scope_uid` 0.
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op);
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierRefOp op);
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op,
+                       bool is_var_declaration = false);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierRefOp op,
+                       bool is_var_declaration = false);
+JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr,
+                       bool is_var_declaration = false);
 
 }  // namespace maldoca
 

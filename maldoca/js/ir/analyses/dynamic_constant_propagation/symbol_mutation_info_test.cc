@@ -91,7 +91,8 @@ INSTANTIATE_TEST_SUITE_P(
             )js",
             .root_symbols =
                 LvalueRootSymbols{
-                    .assignment_symbols = {JsSymbolId{"a", std::nullopt}},
+                    .assignment_symbols = {JsSymbolId{"a", std::nullopt,
+                                                      std::nullopt}},
                     .mutation_symbols = {},
                 },
         },
@@ -102,7 +103,8 @@ INSTANTIATE_TEST_SUITE_P(
             .root_symbols =
                 LvalueRootSymbols{
                     .assignment_symbols = {},
-                    .mutation_symbols = {JsSymbolId{"a", std::nullopt}},
+                    .mutation_symbols = {JsSymbolId{"a", std::nullopt,
+                                                    std::nullopt}},
                 },
         },
         LvalueRootSymbolsTestCase{
@@ -112,7 +114,8 @@ INSTANTIATE_TEST_SUITE_P(
             .root_symbols =
                 LvalueRootSymbols{
                     .assignment_symbols = {},
-                    .mutation_symbols = {JsSymbolId{"a", std::nullopt}},
+                    .mutation_symbols = {JsSymbolId{"a", std::nullopt,
+                                                    std::nullopt}},
                 },
         },
         LvalueRootSymbolsTestCase{
@@ -121,7 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
             )js",
             .root_symbols =
                 LvalueRootSymbols{
-                    .assignment_symbols = {JsSymbolId{"a", 0}},
+                    .assignment_symbols = {JsSymbolId{"a", 0, std::nullopt}},
                     .mutation_symbols = {},
                 },
         },
@@ -159,68 +162,69 @@ TEST_P(GetSymbolMutationInfosTest, GetSymbolMutationInfos) {
   EXPECT_THAT(infos, UnorderedElementsAreArray(test_case.infos));
 }
 
-INSTANTIATE_TEST_SUITE_P(GetSymbolMutationInfosTest, GetSymbolMutationInfosTest,
-                         ::testing::ValuesIn({
-                             GetSymbolMutationInfosTestCase{
-                                 .source = R"js(
+INSTANTIATE_TEST_SUITE_P(
+    GetSymbolMutationInfosTest, GetSymbolMutationInfosTest,
+    ::testing::ValuesIn({
+        GetSymbolMutationInfosTestCase{
+            .source = R"js(
               a = b;
             )js",
-                                 .infos =
-                                     {
-                                         {
-                                             JsSymbolId{"a", std::nullopt},
-                                             SymbolMutationInfo{
-                                                 .num_assignments = 1,
-                                                 .num_mutations = 0,
-                                             },
-                                         },
-                                     }},
-                             GetSymbolMutationInfosTestCase{
-                                 .source = R"js(
+            .infos =
+                {
+                    {
+                        JsSymbolId{"a", std::nullopt, std::nullopt},
+                        SymbolMutationInfo{
+                            .num_assignments = 1,
+                            .num_mutations = 0,
+                        },
+                    },
+                }},
+        GetSymbolMutationInfosTestCase{
+            .source = R"js(
               a.b = c;
             )js",
-                                 .infos =
-                                     {
-                                         {
-                                             JsSymbolId{"a", std::nullopt},
-                                             SymbolMutationInfo{
-                                                 .num_assignments = 0,
-                                                 .num_mutations = 1,
-                                             },
-                                         },
-                                     },
-                             },
-                             GetSymbolMutationInfosTestCase{
-                                 .source = R"js(
+            .infos =
+                {
+                    {
+                        JsSymbolId{"a", std::nullopt, std::nullopt},
+                        SymbolMutationInfo{
+                            .num_assignments = 0,
+                            .num_mutations = 1,
+                        },
+                    },
+                },
+        },
+        GetSymbolMutationInfosTestCase{
+            .source = R"js(
               a.b.c = d;
             )js",
-                                 .infos =
-                                     {
-                                         {
-                                             JsSymbolId{"a", std::nullopt},
-                                             SymbolMutationInfo{
-                                                 .num_assignments = 0,
-                                                 .num_mutations = 1,
-                                             },
-                                         },
-                                     },
-                             },
-                             GetSymbolMutationInfosTestCase{
-                                 .source = R"js(
+            .infos =
+                {
+                    {
+                        JsSymbolId{"a", std::nullopt, std::nullopt},
+                        SymbolMutationInfo{
+                            .num_assignments = 0,
+                            .num_mutations = 1,
+                        },
+                    },
+                },
+        },
+        GetSymbolMutationInfosTestCase{
+            .source = R"js(
               let {key: a} = {key: 0};
             )js",
-                                 .infos =
-                                     {
-                                         {
-                                             JsSymbolId{"a", 0},
-                                             SymbolMutationInfo{
-                                                 .num_assignments = 1,
-                                                 .num_mutations = 0,
-                                             },
-                                         },
-                                     },
-                             },
-                         }));
+            .infos =
+                {
+                    {
+                        JsSymbolId{"a", 0, std::nullopt},
+                        SymbolMutationInfo{
+                            .num_assignments = 1,
+                            .num_mutations = 0,
+                        },
+                    },
+                },
+        },
+    }));
 
 }  // namespace
 }  // namespace maldoca
