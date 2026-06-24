@@ -29,7 +29,23 @@ config.suffixes = [".js", ".lit", ".mlir", ".txt"]
 config.test_format = lit.formats.ShTest(execute_external=True)
 
 runfiles_dir = pathlib.Path(os.environ["RUNFILES_DIR"])
-llvm_dir = runfiles_dir.joinpath("llvm-project/llvm")
+
+
+# In bzlmod, external repos use canonical names (e.g.
+# "+_repo_rules+llvm-project") rather than apparent names. Parse _repo_mapping
+# to resolve "llvm-project" from the root module's perspective so this works in
+# both WORKSPACE and bzlmod mode.
+def _canonical_repo(apparent_name):
+  repo_mapping = runfiles_dir / "_repo_mapping"
+  if repo_mapping.exists():
+    for line in repo_mapping.read_text().splitlines():
+      parts = line.split(",")
+      if len(parts) == 3 and not parts[0] and parts[1] == apparent_name:
+        return parts[2]
+  return apparent_name
+
+
+llvm_dir = runfiles_dir.joinpath(_canonical_repo("llvm-project"), "llvm")
 jsir_dir = runfiles_dir.joinpath("_main/maldoca/js/ir")
 
 config.environment["PATH"] = (

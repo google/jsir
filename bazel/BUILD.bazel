@@ -5,14 +5,8 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 package(default_applicable_licenses = ["//:license"])
 
 bzl_library(
-    name = "import_llvm_bzl",
-    srcs = ["import_llvm.bzl"],
-    visibility = ["//visibility:private"],
-)
-
-bzl_library(
-    name = "setup_llvm_bzl",
-    srcs = ["setup_llvm.bzl"],
+    name = "extensions_bzl",
+    srcs = ["extensions.bzl"],
     visibility = ["//visibility:private"],
 )
 
