@@ -1,3 +1,4 @@
+// jetski test
 // JSHIR:      "jsir.file"() <{comments = []}> ({
 // JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSHIR-NEXT:     "jsir.function_declaration"() <{async = false, generator = true, id = #jsir<identifier <L 1 C 10>, <L 1 C 13>, "gen", 10, 13, 1, "gen">}> ({
