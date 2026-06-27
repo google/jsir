@@ -17,7 +17,7 @@
 #include <system_error>  // NOLINT(build/c++11): open source
 
 #include "absl/status/status.h"
-#include "maldoca/base/status_builder.h"
+#include "absl/status/status_builder.h"
 
 namespace maldoca {
 
@@ -197,12 +197,13 @@ absl::StatusCode ErrorCodeToStatusCode(const std::error_code& ec) {
   }
 }
 
-StatusBuilder ErrorCodeToStatus(const std::error_code& ec) {
-  return StatusBuilder(absl::Status(ErrorCodeToStatusCode(ec), ec.message()));
+absl::StatusBuilder ErrorCodeToStatus(const std::error_code& ec) {
+  return absl::StatusBuilder(
+      absl::Status(ErrorCodeToStatusCode(ec), ec.message()));
 }
 
-StatusBuilder ErrnoToStatus(int errno_value) {
-  return StatusBuilder(
+absl::StatusBuilder ErrnoToStatus(int errno_value) {
+  return absl::StatusBuilder(
       ErrorCodeToStatus(std::error_code(errno_value, std::generic_category())));
 }
 

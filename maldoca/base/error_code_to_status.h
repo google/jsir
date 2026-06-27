@@ -18,16 +18,16 @@
 #include <system_error>  // NOLINT(build/c++11): open source
 
 #include "absl/status/status.h"
-#include "maldoca/base/status_builder.h"
+#include "absl/status/status_builder.h"
 
 namespace maldoca {
 
 absl::StatusCode ErrorCodeToStatusCode(const std::error_code& ec);
 
-StatusBuilder ErrorCodeToStatus(const std::error_code& ec);
+absl::StatusBuilder ErrorCodeToStatus(const std::error_code& ec);
 
 // Converts an `errno` value into an absl::Status.
-StatusBuilder ErrnoToStatus(int errno_value);
+absl::StatusBuilder ErrnoToStatus(int errno_value);
 
 }  // namespace maldoca
 

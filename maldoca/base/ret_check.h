@@ -46,33 +46,33 @@
 #include "absl/base/attributes.h"
 #include "absl/base/optimization.h"
 #include "absl/status/status.h"
+#include "absl/status/status_builder.h"
 #include "absl/status/statusor.h"
-#include "maldoca/base/source_location.h"
-#include "maldoca/base/status_builder.h"
+#include "absl/types/source_location.h"
 #include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace internal_status_macros_ret_check {
 
 // Returns a StatusBuilder that corresponds to a `MALDOCA_RET_CHECK` failure.
-StatusBuilder RetCheckFailSlowPath(SourceLocation location);
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
-                                   const char* condition);
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
-                                   const char* condition,
-                                   const absl::Status& s);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         const char* condition);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         const char* condition,
+                                         const absl::Status& s);
 
 // Takes ownership of `condition`.  This API is a little quirky because it is
 // designed to make use of the `::Check_*Impl` methods that implement `CHECK_*`
 // and `DCHECK_*`.
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
-                                   std::string* condition);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         std::string* condition);
 
-inline StatusBuilder RetCheckImpl(const absl::Status& status,
-                                  const char* condition,
-                                  SourceLocation location) {
+inline absl::StatusBuilder RetCheckImpl(const absl::Status& status,
+                                        const char* condition,
+                                        absl::SourceLocation location) {
   if (ABSL_PREDICT_TRUE(status.ok())) {
-    return StatusBuilder(absl::OkStatus(), location);
+    return absl::StatusBuilder(absl::OkStatus(), location);
   }
   return RetCheckFailSlowPath(location, condition, status);
 }
@@ -214,11 +214,11 @@ inline unsigned long long GetReferenceableValue(  // NOLINT: runtime/int
 #define MALDOCA_RET_CHECK(cond)                                             \
   while (ABSL_PREDICT_FALSE(!(cond)))                                       \
   return ::maldoca::internal_status_macros_ret_check::RetCheckFailSlowPath( \
-      MALDOCA_LOC, #cond)
+      absl::SourceLocation::current(), #cond)
 
 #define MALDOCA_RET_CHECK_FAIL()                                            \
   return ::maldoca::internal_status_macros_ret_check::RetCheckFailSlowPath( \
-      MALDOCA_LOC)
+      absl::SourceLocation::current())
 
 // Takes an expression returning absl::Status and asserts that the status is
 // `ok()`.  If not, it returns an internal error.
@@ -235,7 +235,7 @@ inline unsigned long long GetReferenceableValue(  // NOLINT: runtime/int
   MALDOCA_RETURN_IF_ERROR(                                               \
       ::maldoca::internal_status_macros_ret_check::RetCheckImpl(         \
           ::maldoca::internal_status_macros_ret_check::AsStatus(status), \
-          #status, MALDOCA_LOC))
+          #status, absl::SourceLocation::current()))
 
 #if defined(STATIC_ANALYSIS) || defined(PORTABLE_STATUS)
 #define MALDOCA_COMMON_MACROS_INTERNAL_RET_CHECK_OP(name, op, lhs, rhs) \
@@ -250,7 +250,7 @@ inline unsigned long long GetReferenceableValue(  // NOLINT: runtime/int
                      GetReferenceableValue(rhs),                              \
                  #lhs " " #op " " #rhs))                                      \
   return ::maldoca::internal_status_macros_ret_check::RetCheckFailSlowPath(   \
-      MALDOCA_LOC, _result)
+      absl::SourceLocation::current(), _result)
 #endif
 
 #define MALDOCA_RET_CHECK_EQ(lhs, rhs) \

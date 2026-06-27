@@ -22,34 +22,34 @@
 
 #include "absl/base/log_severity.h"
 #include "absl/status/status.h"
-#include "maldoca/base/source_location.h"
-#include "maldoca/base/status_builder.h"
+#include "absl/status/status_builder.h"
+#include "absl/types/source_location.h"
 
 namespace maldoca {
 namespace internal_status_macros_ret_check {
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location) {
-  return InternalErrorBuilder(location)
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location) {
+  return absl::StatusBuilder(absl::StatusCode::kInternal, location)
              .Log(absl::LogSeverity::kError)
              .EmitStackTrace()
          << "MALDOCA_RET_CHECK failure (" << location.file_name() << ":"
          << location.line() << ") ";
 }
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
-                                   std::string* condition) {
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         std::string* condition) {
   std::unique_ptr<std::string> cleanup(condition);
   return RetCheckFailSlowPath(location) << *condition << " ";
 }
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
-                                   const char* condition) {
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         const char* condition) {
   return RetCheckFailSlowPath(location) << condition << " ";
 }
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
-                                   const char* condition,
-                                   const absl::Status& status) {
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         const char* condition,
+                                         const absl::Status& status) {
   return RetCheckFailSlowPath(location)
          << condition << " returned " << status.ToString() << " ";
 }

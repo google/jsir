@@ -21,8 +21,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/status_builder.h"
 #include "absl/strings/str_cat.h"
-#include "maldoca/base/status_builder.h"
 
 namespace maldoca {
 namespace testing {
@@ -100,7 +100,7 @@ bool CanonicalStatusIsMatcherCommonImpl::MatchAndExplain(
 }
 
 void AddFatalFailure(std::string_view expression,
-                     const maldoca::StatusBuilder& builder) {
+                     const absl::StatusBuilder& builder) {
   GTEST_MESSAGE_AT_(
       builder.source_location().file_name(), builder.source_location().line(),
       ::absl::StrCat(expression,
