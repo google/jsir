@@ -46,33 +46,33 @@
 #include "absl/base/attributes.h"
 #include "absl/base/optimization.h"
 #include "absl/status/status.h"
+#include "absl/status/status_builder.h"
 #include "absl/status/statusor.h"
 #include "absl/types/source_location.h"
-#include "maldoca/base/status_builder.h"
 #include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace internal_status_macros_ret_check {
 
 // Returns a StatusBuilder that corresponds to a `MALDOCA_RET_CHECK` failure.
-StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location);
-StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
-                                   const char* condition);
-StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
-                                   const char* condition,
-                                   const absl::Status& s);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         const char* condition);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         const char* condition,
+                                         const absl::Status& s);
 
 // Takes ownership of `condition`.  This API is a little quirky because it is
 // designed to make use of the `::Check_*Impl` methods that implement `CHECK_*`
 // and `DCHECK_*`.
-StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
-                                   std::string* condition);
+absl::StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
+                                         std::string* condition);
 
-inline StatusBuilder RetCheckImpl(const absl::Status& status,
-                                  const char* condition,
-                                  absl::SourceLocation location) {
+inline absl::StatusBuilder RetCheckImpl(const absl::Status& status,
+                                        const char* condition,
+                                        absl::SourceLocation location) {
   if (ABSL_PREDICT_TRUE(status.ok())) {
-    return StatusBuilder(absl::OkStatus(), location);
+    return absl::StatusBuilder(absl::OkStatus(), location);
   }
   return RetCheckFailSlowPath(location, condition, status);
 }

@@ -19,8 +19,8 @@
 
 #include "absl/base/optimization.h"
 #include "absl/status/status.h"
+#include "absl/status/status_builder.h"  // IWYU pragma: export
 #include "absl/types/source_location.h"
-#include "maldoca/base/status_builder.h"  // IWYU pragma: export
 
 // Evaluates an expression that produces a `absl::Status`. If the status is not
 // ok, returns it from the current function.
@@ -150,8 +150,8 @@
                                                      error_expression)     \
   auto statusor = (rexpr);                                                 \
   if (ABSL_PREDICT_FALSE(!statusor.ok())) {                                \
-    ::maldoca::StatusBuilder _(std::move(statusor).status(),               \
-                               absl::SourceLocation::current());           \
+    absl::StatusBuilder _(std::move(statusor).status(),                    \
+                          absl::SourceLocation::current());                \
     (void)_; /* error_expression is allowed to not use this variable */    \
     return (error_expression);                                             \
   }                                                                        \
@@ -241,10 +241,12 @@ class StatusAdaptorForMacros {
   StatusAdaptorForMacros(absl::Status&& status, absl::SourceLocation loc)
       : builder_(std::move(status), loc) {}
 
-  StatusAdaptorForMacros(const StatusBuilder& builder, absl::SourceLocation loc)
+  StatusAdaptorForMacros(const absl::StatusBuilder& builder,
+                         absl::SourceLocation loc)
       : builder_(builder) {}
 
-  StatusAdaptorForMacros(StatusBuilder&& builder, absl::SourceLocation loc)
+  StatusAdaptorForMacros(absl::StatusBuilder&& builder,
+                         absl::SourceLocation loc)
       : builder_(std::move(builder)) {}
 
   StatusAdaptorForMacros(const StatusAdaptorForMacros&) = delete;
@@ -252,10 +254,10 @@ class StatusAdaptorForMacros {
 
   explicit operator bool() const { return ABSL_PREDICT_TRUE(builder_.ok()); }
 
-  StatusBuilder&& Consume() { return std::move(builder_); }
+  absl::StatusBuilder&& Consume() { return std::move(builder_); }
 
  private:
-  StatusBuilder builder_;
+  absl::StatusBuilder builder_;
 };
 
 }  // namespace status_macro_internal
