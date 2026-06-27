@@ -54,8 +54,10 @@ TEST(BabelJsonTest, BabelScopes) {
       BabelBinding binding;
       binding.set_kind(BabelBinding::KIND_VAR);
       binding.set_name("global");
+      binding.set_uid(1);
 
-      scope.mutable_bindings()->insert({binding.name(), binding});
+      scopes.mutable_bindings()->insert({binding.uid(), binding});
+      scope.mutable_binding_uids()->insert({binding.name(), binding.uid()});
     }
 
     scopes.mutable_scopes()->insert({scope.uid(), scope});
@@ -73,12 +75,16 @@ TEST(BabelJsonTest, BabelScopes) {
  "scopes": {
   "0": {
    "uid": 0,
-   "bindings": {
-    "global": {
-     "kind": "KIND_VAR",
-     "name": "global"
-    }
+   "bindingUids": {
+    "global": 1
    }
+  }
+ },
+ "bindings": {
+  "1": {
+   "kind": "KIND_VAR",
+   "name": "global",
+   "uid": 1
   }
  }
 }

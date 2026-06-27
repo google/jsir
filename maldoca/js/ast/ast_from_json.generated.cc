@@ -246,6 +246,15 @@ JsSymbolId::GetDefScopeUid(const nlohmann::json& json) {
   );
 }
 
+absl::StatusOr<std::optional<int64_t>>
+JsSymbolId::GetBindingUid(const nlohmann::json& json) {
+  return GetOptionalField<int64_t>(
+      json,
+      "bindingUid",
+      JsonToInt64
+  );
+}
+
 absl::StatusOr<std::unique_ptr<JsSymbolId>>
 JsSymbolId::FromJson(const nlohmann::json& json) {
   if (!json.is_object()) {
@@ -254,10 +263,12 @@ JsSymbolId::FromJson(const nlohmann::json& json) {
 
   MALDOCA_ASSIGN_OR_RETURN(auto name, JsSymbolId::GetName(json));
   MALDOCA_ASSIGN_OR_RETURN(auto def_scope_uid, JsSymbolId::GetDefScopeUid(json));
+  MALDOCA_ASSIGN_OR_RETURN(auto binding_uid, JsSymbolId::GetBindingUid(json));
 
   return absl::make_unique<JsSymbolId>(
       std::move(name),
-      std::move(def_scope_uid));
+      std::move(def_scope_uid),
+      std::move(binding_uid));
 }
 
 // =============================================================================

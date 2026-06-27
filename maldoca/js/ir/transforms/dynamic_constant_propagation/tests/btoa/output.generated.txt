@@ -55,37 +55,37 @@
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %14 = jsir.variable_declarator (%12, %13)
 // SOURCE-NEXT:                   // %14 = <uninitialized>
-// SOURCE-NEXT:                   // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:                   // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:                 jsir.exprs_region_end (%14)
-// SOURCE-NEXT:                   // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:                   // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             })
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %6 = jsir.identifier {"console"}
 // SOURCE-NEXT:               // %6 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %7 = jsir.member_expression (%6) {#jsir<identifier <L 4 C 10>, <L 4 C 13>, "log", 58, 61, 1, "log">}
 // SOURCE-NEXT:               // %7 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %8 = jsir.identifier {"btoa"}
 // SOURCE-NEXT:               // %8 = #jsir_builtin<builtin_function "atob">
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %9 = jsir.string_literal {#jsir<string_literal_extra "'aGk='", "aGk=">, "aGk="}
 // SOURCE-NEXT:               // %9 = "aGk="
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %10 = jsir.call_expression (%8, %9)
 // SOURCE-NEXT:               // %10 = "hi"
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %11 = jsir.call_expression (%7, %10)
 // SOURCE-NEXT:               // %11 = <unknown>
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             jsir.expression_statement (%11)
-// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:               // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:         }, {
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:         })
-// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#1 : #jsir_builtin<builtin_function "atob">> }
+// SOURCE-NEXT:           // State [default = <unknown>] { <btoa#s1 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:     }, {
 // SOURCE-NEXT:       ^bb0:
 // SOURCE-NEXT:           // <executable>
@@ -99,7 +99,7 @@
 // SOURCE-NEXT: ================================================================
 // SOURCE-NEXT: Bindings:
 // SOURCE-NEXT: ================================================================
-// SOURCE-NEXT: btoa#1:
+// SOURCE-NEXT: btoa#s1:
 // SOURCE-NEXT:     atob#undeclared
 // SOURCE-NEXT: ================================================================
 // SOURCE-EMPTY:
