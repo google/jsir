@@ -29,8 +29,8 @@ cc_library(
     srcs = ["error_code_to_status.cc"],
     hdrs = ["error_code_to_status.h"],
     deps = [
-        ":status",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_builder",
     ],
 )
 
@@ -64,6 +64,7 @@ cc_library(
         ":status",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
@@ -85,23 +86,17 @@ cc_library(
 )
 
 cc_library(
-    name = "source_location",
-    hdrs = ["source_location.h"],
-    deps = [
-    ],
-)
-
-cc_library(
     name = "ret_check",
     srcs = ["ret_check.cc"],
     hdrs = ["ret_check.h"],
     deps = [
-        ":source_location",
         ":status",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:log_severity",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:source_location",
     ],
 )
 
@@ -127,25 +122,10 @@ cc_test(
 
 cc_library(
     name = "status",
-    srcs = ["status_builder.cc"],
     hdrs = [
-        "status_builder.h",
         "status_macros.h",
     ],
     deps = [
-        ":source_location",
-        ":symbolized_stacktrace",
-        "@abseil-cpp//absl/base:core_headers",
-        "@abseil-cpp//absl/base:log_severity",
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/log:log_entry",
-        "@abseil-cpp//absl/log:log_sink",
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/strings",
-        "@abseil-cpp//absl/strings:cord",
-        "@abseil-cpp//absl/synchronization",
-        "@abseil-cpp//absl/time",
-        "@abseil-cpp//absl/types:span",
+        "@abseil-cpp//absl/status:status_macros",
     ],
 )

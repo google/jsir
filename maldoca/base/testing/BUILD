@@ -49,6 +49,7 @@ cc_library(
     deps = [
         "//maldoca/base:status",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@googletest//:gtest",

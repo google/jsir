@@ -145,8 +145,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/status_builder.h"
 #include "absl/status/statusor.h"
-#include "maldoca/base/status_builder.h"
 #include "maldoca/base/status_macros.h"
 
 namespace maldoca {
@@ -459,7 +459,7 @@ class IsOkMatcher {
 };
 
 void AddFatalFailure(std::string_view expression,
-                     const maldoca::StatusBuilder& builder);
+                     const absl::StatusBuilder& builder);
 
 }  // namespace internal_status
 
