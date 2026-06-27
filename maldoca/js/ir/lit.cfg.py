@@ -26,7 +26,7 @@ import lit.formats
 
 config.name = "JSIR"
 config.suffixes = [".js", ".lit", ".mlir", ".txt"]
-config.test_format = lit.formats.ShTest(execute_external=True)
+config.test_format = lit.formats.ShTest(execute_external=True, force_execute_external=True)
 
 runfiles_dir = pathlib.Path(os.environ["RUNFILES_DIR"])
 
