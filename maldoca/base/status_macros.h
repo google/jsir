@@ -19,8 +19,8 @@
 
 #include "absl/base/optimization.h"
 #include "absl/status/status.h"
-#include "maldoca/base/source_location.h"
-#include "maldoca/base/status_builder.h"  // IWYU pragma: export
+#include "absl/status/status_builder.h"  // IWYU pragma: export
+#include "absl/types/source_location.h"
 
 // Evaluates an expression that produces a `absl::Status`. If the status is not
 // ok, returns it from the current function.
@@ -53,11 +53,12 @@
 //     MALDOCA_RETURN_IF_ERROR(foo.Method(args...));
 //     return absl::OkStatus();
 //   }
-#define MALDOCA_RETURN_IF_ERROR(expr)                              \
-  MALDOCA_STATUS_MACROS_IMPL_ELSE_BLOCKER_                         \
-  if (::maldoca::status_macro_internal::StatusAdaptorForMacros     \
-          status_macro_internal_adaptor = {(expr), MALDOCA_LOC}) { \
-  } else /* NOLINT */                                              \
+#define MALDOCA_RETURN_IF_ERROR(expr)                                          \
+  MALDOCA_STATUS_MACROS_IMPL_ELSE_BLOCKER_                                     \
+  if (::maldoca::status_macro_internal::StatusAdaptorForMacros                 \
+          status_macro_internal_adaptor = {(expr),                             \
+                                           absl::SourceLocation::current()}) { \
+  } else /* NOLINT */                                                          \
     return status_macro_internal_adaptor.Consume()
 
 // Executes an expression `rexpr` that returns a `StatusOr<T>`. On OK, moves its
@@ -149,7 +150,8 @@
                                                      error_expression)     \
   auto statusor = (rexpr);                                                 \
   if (ABSL_PREDICT_FALSE(!statusor.ok())) {                                \
-    ::maldoca::StatusBuilder _(std::move(statusor).status(), MALDOCA_LOC); \
+    absl::StatusBuilder _(std::move(statusor).status(),                    \
+                          absl::SourceLocation::current());                \
     (void)_; /* error_expression is allowed to not use this variable */    \
     return (error_expression);                                             \
   }                                                                        \
@@ -233,16 +235,18 @@ constexpr bool HasPotentialConditionalOperator(const char* lhs, int index) {
 // that declares a variable.
 class StatusAdaptorForMacros {
  public:
-  StatusAdaptorForMacros(const absl::Status& status, SourceLocation loc)
+  StatusAdaptorForMacros(const absl::Status& status, absl::SourceLocation loc)
       : builder_(status, loc) {}
 
-  StatusAdaptorForMacros(absl::Status&& status, SourceLocation loc)
+  StatusAdaptorForMacros(absl::Status&& status, absl::SourceLocation loc)
       : builder_(std::move(status), loc) {}
 
-  StatusAdaptorForMacros(const StatusBuilder& builder, SourceLocation loc)
+  StatusAdaptorForMacros(const absl::StatusBuilder& builder,
+                         absl::SourceLocation loc)
       : builder_(builder) {}
 
-  StatusAdaptorForMacros(StatusBuilder&& builder, SourceLocation loc)
+  StatusAdaptorForMacros(absl::StatusBuilder&& builder,
+                         absl::SourceLocation loc)
       : builder_(std::move(builder)) {}
 
   StatusAdaptorForMacros(const StatusAdaptorForMacros&) = delete;
@@ -250,10 +254,10 @@ class StatusAdaptorForMacros {
 
   explicit operator bool() const { return ABSL_PREDICT_TRUE(builder_.ok()); }
 
-  StatusBuilder&& Consume() { return std::move(builder_); }
+  absl::StatusBuilder&& Consume() { return std::move(builder_); }
 
  private:
-  StatusBuilder builder_;
+  absl::StatusBuilder builder_;
 };
 
 }  // namespace status_macro_internal
