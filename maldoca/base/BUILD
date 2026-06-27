@@ -85,23 +85,16 @@ cc_library(
 )
 
 cc_library(
-    name = "source_location",
-    hdrs = ["source_location.h"],
-    deps = [
-    ],
-)
-
-cc_library(
     name = "ret_check",
     srcs = ["ret_check.cc"],
     hdrs = ["ret_check.h"],
     deps = [
-        ":source_location",
         ":status",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:log_severity",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:source_location",
     ],
 )
 
@@ -133,7 +126,6 @@ cc_library(
         "status_macros.h",
     ],
     deps = [
-        ":source_location",
         ":symbolized_stacktrace",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:log_severity",
@@ -146,6 +138,7 @@ cc_library(
         "@abseil-cpp//absl/strings:cord",
         "@abseil-cpp//absl/synchronization",
         "@abseil-cpp//absl/time",
+        "@abseil-cpp//absl/types:source_location",
         "@abseil-cpp//absl/types:span",
     ],
 )

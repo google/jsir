@@ -27,8 +27,8 @@
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
+#include "absl/types/source_location.h"
 #include "absl/types/span.h"
-#include "maldoca/base/source_location.h"
 
 namespace maldoca {
 
@@ -66,17 +66,20 @@ class ABSL_MUST_USE_RESULT StatusBuilder {
   // enabled, it will use `location` as the location from which the log message
   // occurs.  A typical user will not specify `location`, allowing it to default
   // to the current location.
-  explicit StatusBuilder(const absl::Status& original_status,
-                         SourceLocation location = SourceLocation::current());
-  explicit StatusBuilder(absl::Status&& original_status,
-                         SourceLocation location = SourceLocation::current());
+  explicit StatusBuilder(
+      const absl::Status& original_status,
+      absl::SourceLocation location = absl::SourceLocation::current());
+  explicit StatusBuilder(
+      absl::Status&& original_status,
+      absl::SourceLocation location = absl::SourceLocation::current());
 
   // Creates a `StatusBuilder` from a status code.  If logging is enabled, it
   // will use `location` as the location from which the log message occurs.  A
   // typical user will not specify `location`, allowing it to default to the
   // current location.
-  explicit StatusBuilder(absl::StatusCode code,
-                         SourceLocation location = SourceLocation::current());
+  explicit StatusBuilder(
+      absl::StatusCode code,
+      absl::SourceLocation location = absl::SourceLocation::current());
 
   StatusBuilder(const StatusBuilder& sb);
   StatusBuilder& operator=(const StatusBuilder& sb);
@@ -289,7 +292,7 @@ class ABSL_MUST_USE_RESULT StatusBuilder {
   operator absl::Status() &&;      // NOLINT: Builder converts implicitly.
 
   // Returns the source location used to create this builder.
-  SourceLocation source_location() const;
+  absl::SourceLocation source_location() const;
 
  private:
   // Specifies how to join the error message in the original status and any
@@ -399,7 +402,7 @@ class ABSL_MUST_USE_RESULT StatusBuilder {
   absl::Status status_;
 
   // The location to record if this status is logged.
-  SourceLocation loc_;
+  absl::SourceLocation loc_;
 
   // nullptr if the result status will be OK.  Extra fields moved to the heap to
   // minimize stack space.
@@ -410,11 +413,11 @@ class ABSL_MUST_USE_RESULT StatusBuilder {
   // Status implementation).
   //
   // This is only for internal use by the StatusBuilder.
-  static void AddSourceLocation(absl::Status& status, SourceLocation loc);
+  static void AddSourceLocation(absl::Status& status, absl::SourceLocation loc);
   // Get the current source-location set for the given status.
   //
   // This is only for internal use by the StatusBuilder.
-  static absl::Span<const SourceLocation> GetSourceLocations(
+  static absl::Span<const absl::SourceLocation> GetSourceLocations(
       const absl::Status& status);
 };
 
@@ -425,50 +428,50 @@ std::ostream& operator<<(std::ostream& os, StatusBuilder&& builder);
 // Each of the functions below creates StatusBuilder with a canonical error.
 // The error code of the StatusBuilder matches the name of the function.
 StatusBuilder AbortedErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder AlreadyExistsErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder CancelledErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder DataLossErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder DeadlineExceededErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder FailedPreconditionErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder InternalErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder InvalidArgumentErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder NotFoundErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder OutOfRangeErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder PermissionDeniedErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder UnauthenticatedErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder ResourceExhaustedErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder UnavailableErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder UnimplementedErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 StatusBuilder UnknownErrorBuilder(
-    SourceLocation location = SourceLocation::current());
+    absl::SourceLocation location = absl::SourceLocation::current());
 
 // Implementation details follow; clients should ignore.
 
 inline StatusBuilder::StatusBuilder(const absl::Status& original_status,
-                                    SourceLocation location)
+                                    absl::SourceLocation location)
     : status_(original_status), loc_(location) {}
 
 inline StatusBuilder::StatusBuilder(absl::Status&& original_status,
-                                    SourceLocation location)
+                                    absl::SourceLocation location)
     : status_(std::move(original_status)), loc_(location) {}
 
 inline StatusBuilder::StatusBuilder(absl::StatusCode code,
-                                    SourceLocation location)
+                                    absl::SourceLocation location)
     : status_(code, ""), loc_(location) {}
 
 inline StatusBuilder::StatusBuilder(const StatusBuilder& sb)
@@ -677,7 +680,9 @@ inline StatusBuilder::operator absl::Status() && {
   return std::move(*this).CreateStatusAndConditionallyLog();
 }
 
-inline SourceLocation StatusBuilder::source_location() const { return loc_; }
+inline absl::SourceLocation StatusBuilder::source_location() const {
+  return loc_;
+}
 
 }  // namespace maldoca
 

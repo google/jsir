@@ -22,13 +22,13 @@
 
 #include "absl/base/log_severity.h"
 #include "absl/status/status.h"
-#include "maldoca/base/source_location.h"
+#include "absl/types/source_location.h"
 #include "maldoca/base/status_builder.h"
 
 namespace maldoca {
 namespace internal_status_macros_ret_check {
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location) {
+StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location) {
   return InternalErrorBuilder(location)
              .Log(absl::LogSeverity::kError)
              .EmitStackTrace()
@@ -36,18 +36,18 @@ StatusBuilder RetCheckFailSlowPath(SourceLocation location) {
          << location.line() << ") ";
 }
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
+StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
                                    std::string* condition) {
   std::unique_ptr<std::string> cleanup(condition);
   return RetCheckFailSlowPath(location) << *condition << " ";
 }
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
+StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
                                    const char* condition) {
   return RetCheckFailSlowPath(location) << condition << " ";
 }
 
-StatusBuilder RetCheckFailSlowPath(SourceLocation location,
+StatusBuilder RetCheckFailSlowPath(absl::SourceLocation location,
                                    const char* condition,
                                    const absl::Status& status) {
   return RetCheckFailSlowPath(location)

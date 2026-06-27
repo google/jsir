@@ -34,8 +34,8 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "absl/types/source_location.h"
 #include "absl/types/span.h"
-#include "maldoca/base/source_location.h"
 #include "maldoca/base/symbolized_stacktrace.h"
 
 namespace maldoca {
@@ -195,13 +195,14 @@ absl::Status StatusBuilder::WithMessage(const absl::Status& status,
   // the beginning. We manually try to trim them out but we can't actually
   // remove the first one.
   auto ret = absl::Status(status.code(), msg);
-  std::optional<SourceLocation> first =
+  std::optional<absl::SourceLocation> first =
       StatusBuilder::GetSourceLocations(ret).empty()
           ? std::nullopt
-          : std::make_optional<SourceLocation>(
+          : std::make_optional<absl::SourceLocation>(
                 StatusBuilder::GetSourceLocations(ret).front());
   bool first_non_duplicate = false;
-  for (const SourceLocation& sl : StatusBuilder::GetSourceLocations(status)) {
+  for (const absl::SourceLocation& sl :
+       StatusBuilder::GetSourceLocations(status)) {
     if (!first_non_duplicate && first && first->line() == sl.line() &&
         absl::string_view(first->file_name()) ==
             absl::string_view(sl.file_name())) {
@@ -245,12 +246,12 @@ absl::Status StatusBuilder::CreateStatusAndConditionallyLog() && {
 }
 
 /* static */ void StatusBuilder::AddSourceLocation(absl::Status& status,
-                                                   SourceLocation loc) {
+                                                   absl::SourceLocation loc) {
 }
 
-/* static */ absl::Span<const SourceLocation> StatusBuilder::GetSourceLocations(
-    const absl::Status& status) {
-  absl::Span<const SourceLocation> result;
+/* static */ absl::Span<const absl::SourceLocation>
+StatusBuilder::GetSourceLocations(const absl::Status& status) {
+  absl::Span<const absl::SourceLocation> result;
   return result;
 }
 
@@ -262,67 +263,67 @@ std::ostream& operator<<(std::ostream& os, StatusBuilder&& builder) {
   return os << static_cast<absl::Status>(std::move(builder));
 }
 
-StatusBuilder AbortedErrorBuilder(SourceLocation location) {
+StatusBuilder AbortedErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kAborted, location);
 }
 
-StatusBuilder AlreadyExistsErrorBuilder(SourceLocation location) {
+StatusBuilder AlreadyExistsErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kAlreadyExists, location);
 }
 
-StatusBuilder CancelledErrorBuilder(SourceLocation location) {
+StatusBuilder CancelledErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kCancelled, location);
 }
 
-StatusBuilder DataLossErrorBuilder(SourceLocation location) {
+StatusBuilder DataLossErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kDataLoss, location);
 }
 
-StatusBuilder DeadlineExceededErrorBuilder(SourceLocation location) {
+StatusBuilder DeadlineExceededErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kDeadlineExceeded, location);
 }
 
-StatusBuilder FailedPreconditionErrorBuilder(SourceLocation location) {
+StatusBuilder FailedPreconditionErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kFailedPrecondition, location);
 }
 
-StatusBuilder InternalErrorBuilder(SourceLocation location) {
+StatusBuilder InternalErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kInternal, location);
 }
 
-StatusBuilder InvalidArgumentErrorBuilder(SourceLocation location) {
+StatusBuilder InvalidArgumentErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kInvalidArgument, location);
 }
 
-StatusBuilder NotFoundErrorBuilder(SourceLocation location) {
+StatusBuilder NotFoundErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kNotFound, location);
 }
 
-StatusBuilder OutOfRangeErrorBuilder(SourceLocation location) {
+StatusBuilder OutOfRangeErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kOutOfRange, location);
 }
 
-StatusBuilder PermissionDeniedErrorBuilder(SourceLocation location) {
+StatusBuilder PermissionDeniedErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kPermissionDenied, location);
 }
 
-StatusBuilder UnauthenticatedErrorBuilder(SourceLocation location) {
+StatusBuilder UnauthenticatedErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kUnauthenticated, location);
 }
 
-StatusBuilder ResourceExhaustedErrorBuilder(SourceLocation location) {
+StatusBuilder ResourceExhaustedErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kResourceExhausted, location);
 }
 
-StatusBuilder UnavailableErrorBuilder(SourceLocation location) {
+StatusBuilder UnavailableErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kUnavailable, location);
 }
 
-StatusBuilder UnimplementedErrorBuilder(SourceLocation location) {
+StatusBuilder UnimplementedErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kUnimplemented, location);
 }
 
-StatusBuilder UnknownErrorBuilder(SourceLocation location) {
+StatusBuilder UnknownErrorBuilder(absl::SourceLocation location) {
   return StatusBuilder(absl::StatusCode::kUnknown, location);
 }
 
