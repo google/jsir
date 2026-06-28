@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def _llvm_deps_impl(_):
     """Implementation of the llvm_deps module extension."""
-    LLVM_COMMIT = "030e74c2808a9af58c6b4ef461fd0c2c7039d647"
+    LLVM_COMMIT = "go/google3-llvm-commit"
 
     # LLVM is pinned to the same commit used in the Google monorepo.
     # The build files from the LLVM monorepo are overlaid via llvm_configure
