@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -69,8 +69,8 @@ MSourceLocation::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto start, MSourceLocation::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, MSourceLocation::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, MSourceLocation::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, MSourceLocation::GetEnd(json));
 
   return absl::make_unique<MSourceLocation>(
       std::move(start),
@@ -96,7 +96,7 @@ MNode::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ObjectMethod") {
     return MObjectMethod::FromJson(json);
@@ -127,7 +127,7 @@ MFunction::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ObjectMethod") {
     return MObjectMethod::FromJson(json);
@@ -154,7 +154,7 @@ MObjectMember::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ObjectMethod") {
     return MObjectMethod::FromJson(json);
@@ -172,9 +172,9 @@ MObjectMethod::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, MNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, MObjectMember::GetComputed(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, MFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, MNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, MObjectMember::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, MFunction::GetId(json));
 
   return absl::make_unique<MObjectMethod>(
       std::move(loc),

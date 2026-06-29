@@ -44,12 +44,12 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/ir_to_ast_util.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/list/ast.generated.h"
 #include "maldoca/astgen/test/list/ir.h"
 
@@ -69,7 +69,7 @@ LiirToAst::VisitClass2(LiirClass2Op op) {
 
 absl::StatusOr<std::unique_ptr<LiSimpleList>>
 LiirToAst::VisitSimpleList(LiirSimpleListOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto strings,
       Convert(
           op.getStringsAttr(),
@@ -78,7 +78,7 @@ LiirToAst::VisitSimpleList(LiirSimpleListOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operations,
       Convert(
           op.getOperations(),
@@ -95,7 +95,7 @@ LiirToAst::VisitSimpleList(LiirSimpleListOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalList>>
 LiirToAst::VisitOptionalList(LiirOptionalListOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto strings,
       Convert(
           op.getStringsAttr(),
@@ -113,7 +113,7 @@ LiirToAst::VisitOptionalList(LiirOptionalListOp op) {
 
 absl::StatusOr<std::unique_ptr<LiListOfOptional>>
 LiirToAst::VisitListOfOptional(LiirListOfOptionalOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto strings,
       Convert(
           op.getStringsAttr(),
@@ -124,7 +124,7 @@ LiirToAst::VisitListOfOptional(LiirListOfOptionalOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operations,
       Convert(
           op.getOperations(),
@@ -143,7 +143,7 @@ LiirToAst::VisitListOfOptional(LiirListOfOptionalOp op) {
 
 absl::StatusOr<std::unique_ptr<LiListOfVariant>>
 LiirToAst::VisitListOfVariant(LiirListOfVariantOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto variants,
       Convert(
           op.getVariantsAttr(),
@@ -155,7 +155,7 @@ LiirToAst::VisitListOfVariant(LiirListOfVariantOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operations,
       Convert(
           op.getOperations(),
@@ -175,7 +175,7 @@ LiirToAst::VisitListOfVariant(LiirListOfVariantOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfOptional>>
 LiirToAst::VisitOptionalListOfOptional(LiirOptionalListOfOptionalOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto variants,
       Convert(
           op.getVariantsAttr(),
@@ -195,7 +195,7 @@ LiirToAst::VisitOptionalListOfOptional(LiirOptionalListOfOptionalOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfVariant>>
 LiirToAst::VisitOptionalListOfVariant(LiirOptionalListOfVariantOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto variants,
       Convert(
           op.getVariantsAttr(),
@@ -216,7 +216,7 @@ LiirToAst::VisitOptionalListOfVariant(LiirOptionalListOfVariantOp op) {
 
 absl::StatusOr<std::unique_ptr<LiListOfOptionalVariant>>
 LiirToAst::VisitListOfOptionalVariant(LiirListOfOptionalVariantOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto variants,
       Convert(
           op.getVariantsAttr(),
@@ -230,7 +230,7 @@ LiirToAst::VisitListOfOptionalVariant(LiirListOfOptionalVariantOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operations,
       Convert(
           op.getOperations(),
@@ -252,7 +252,7 @@ LiirToAst::VisitListOfOptionalVariant(LiirListOfOptionalVariantOp op) {
 
 absl::StatusOr<std::unique_ptr<LiOptionalListOfOptionalVariant>>
 LiirToAst::VisitOptionalListOfOptionalVariant(LiirOptionalListOfOptionalVariantOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto variants,
       Convert(
           op.getVariantsAttr(),

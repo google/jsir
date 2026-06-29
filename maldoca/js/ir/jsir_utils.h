@@ -22,8 +22,8 @@
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "absl/log/log.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ir/cast.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -58,14 +58,13 @@ absl::StatusOr<mlir::ValueRange> GetExprsRegionValues(mlir::Region &region);
 
 template <typename OpT>
 absl::StatusOr<OpT> GetStmtRegionOp(mlir::Region &region) {
-  MALDOCA_ASSIGN_OR_RETURN(mlir::Operation * op,
-                           GetStmtRegionOperation(region));
+  ABSL_ASSIGN_OR_RETURN(mlir::Operation * op, GetStmtRegionOperation(region));
   return Cast<OpT>(op);
 }
 
 template <typename OpT>
 absl::StatusOr<OpT> GetExprRegionOp(mlir::Region &region) {
-  MALDOCA_ASSIGN_OR_RETURN(mlir::Value value, GetExprRegionValue(region));
+  ABSL_ASSIGN_OR_RETURN(mlir::Value value, GetExprRegionValue(region));
   return Cast<OpT>(value.getDefiningOp());
 }
 

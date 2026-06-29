@@ -30,6 +30,8 @@
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "absl/types/span.h"
+#include "absl/status/status_macros.h"
+#include "absl/status/statusor.h"
 #include "maldoca/base/status_macros.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/internal/conversions.h"
@@ -159,8 +161,8 @@ absl::Status RunPasses(const JsPassConfigs &pass_configs,
   std::vector<std::unique_ptr<JsPass>> passes;
 
   for (const JsPassConfig &pass_config : pass_configs.passes()) {
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsPass> pass,
-                             JsPass::Create(pass_config, babel, mlir_context));
+    ABSL_ASSIGN_OR_RETURN(std::unique_ptr<JsPass> pass,
+                          JsPass::Create(pass_config, babel, mlir_context));
     passes.push_back(std::move(pass));
   }
 
@@ -189,8 +191,8 @@ absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
     DLOG(ERROR) << "In UnsandboxedJsPassRunner, timeout must be infinite. The "
                    "provided timeout is ignored.";
   }
-  MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<JsRepr> input_repr,
-                           JsRepr::FromProto(input_repr_pb));
+  ABSL_ASSIGN_OR_RETURN(std::unique_ptr<JsRepr> input_repr,
+                        JsRepr::FromProto(input_repr_pb));
 
   JsPassContext context{
       .original_source = std::string(original_source),
@@ -204,7 +206,7 @@ absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
 
   MALDOCA_RETURN_IF_ERROR(RunPasses(passes, context, babel_, &mlir_context));
 
-  MALDOCA_ASSIGN_OR_RETURN(JsReprPb output_repr_pb, context.repr->ToProto());
+  ABSL_ASSIGN_OR_RETURN(JsReprPb output_repr_pb, context.repr->ToProto());
 
   return JsPassRunner::Result{
       .output_repr_pb = std::move(output_repr_pb),

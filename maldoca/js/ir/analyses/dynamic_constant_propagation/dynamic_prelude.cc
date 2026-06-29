@@ -23,10 +23,10 @@
 #include "absl/cleanup/cleanup.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/quickjs/quickjs.h"
@@ -42,14 +42,14 @@ absl::StatusOr<DynamicPrelude> DynamicPrelude::Create(
   std::unique_ptr<JSContext, QjsContextDeleter> qjs_context{
       JS_NewContext(qjs_runtime.get())};
 
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       BabelParseResult parse_result,
       babel.Parse(config.prelude_source(), BabelParseRequest{},
                   absl::InfiniteDuration()));
 
   BabelGenerateOptions generate_options;
   generate_options.set_compact(true);
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       BabelGenerateResult generate_result,
       babel.Generate(parse_result.ast_string, generate_options,
                      absl::InfiniteDuration()));

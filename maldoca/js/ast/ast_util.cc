@@ -24,13 +24,13 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ast/ast_visitor.h"
 #include "maldoca/js/ast/ast_walker.h"
@@ -42,8 +42,8 @@ namespace maldoca {
 absl::StatusOr<BabelAstString> GetAstStringFromSource(
     Babel& babel, std::string_view source, const BabelParseRequest& request,
     absl::Duration timeout) {
-  MALDOCA_ASSIGN_OR_RETURN(auto babel_parse_result,
-                           babel.Parse(source, request, timeout));
+  ABSL_ASSIGN_OR_RETURN(auto babel_parse_result,
+                        babel.Parse(source, request, timeout));
   if (!babel_parse_result.errors.errors().empty()) {
     std::vector<std::string> error_strings;
     error_strings.reserve(babel_parse_result.errors.errors().size());
@@ -59,10 +59,10 @@ absl::StatusOr<std::tuple<std::unique_ptr<JsFile>, BabelScopes>>
 GetFileAstFromSource(Babel& babel, std::string_view source,
                      const BabelParseRequest& request, absl::Duration timeout,
                      std::optional<const int> recursion_depth_limit_op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       BabelAstString babel_ast_string,
       GetAstStringFromSource(babel, source, request, timeout));
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto file_ast,
       GetFileAstFromAstString(babel_ast_string, recursion_depth_limit_op));
   return std::tuple{std::move(file_ast), babel_ast_string.scopes()};
@@ -79,7 +79,7 @@ GetFileAstFromSource(Babel& babel, std::string_view source,
 absl::StatusOr<std::unique_ptr<JsFile>> GetFileAstFromAstString(
     const BabelAstString& babel_ast_string,
     std::optional<const int> recursion_depth_limit_op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto json_ast,
       GetAstJsonFromAstString(babel_ast_string, recursion_depth_limit_op));
   return JsFile::FromJson(json_ast);
@@ -130,7 +130,7 @@ BabelAstString GetAstStringFromFileAst(const JsFile& file) {
 absl::StatusOr<std::string> PrettyPrintSourceFromAstString(
     Babel& babel, const BabelAstString& babel_ast_string,
     absl::Duration timeout) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto result,
       babel.Generate(babel_ast_string, BabelGenerateOptions{}, timeout));
   return result.source_code;
@@ -145,7 +145,7 @@ absl::StatusOr<std::string> PrettyPrintSourceFromFileAst(
 absl::StatusOr<std::string> PrettyPrintSourceFromSourceString(
     Babel& babel, std::string_view source_string,
     const BabelParseRequest& request, absl::Duration timeout) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       BabelAstString babel_ast_string,
       GetAstStringFromSource(babel, source_string, request, timeout));
   return PrettyPrintSourceFromAstString(babel, babel_ast_string, timeout);

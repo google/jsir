@@ -37,6 +37,7 @@
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/path.h"
+#include "absl/status/status_macros.h"
 #include "maldoca/base/status_macros.h"
 
 ABSL_FLAG(std::string, ast_def_path, "",
@@ -61,7 +62,7 @@ absl::Status AstGenMain() {
 
   AstDefPb ast_def_pb;
   MALDOCA_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
-  MALDOCA_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
+  ABSL_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
 
   std::string ast_hdr = PrintAstHeader(ast_def, cc_namespace, ast_path);
   auto ast_hdr_path = JoinPath(ast_path, "ast.generated.h");

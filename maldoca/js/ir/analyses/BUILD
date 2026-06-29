@@ -31,7 +31,6 @@ cc_library(
     deps = [
         ":dataflow_analysis",
         "//maldoca/base:ret_check",
-        "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/babel",
         "//maldoca/js/babel:babel_cc_proto",
@@ -42,6 +41,7 @@ cc_library(
         "@abseil-cpp//absl/base:nullability",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
         "@llvm-project//llvm:Support",

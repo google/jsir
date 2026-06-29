@@ -102,12 +102,12 @@ void IrToAstSourcePrinter::PrintAst(const AstDef& ast,
       "absl/log/check.h",
       "absl/log/log.h",
       "absl/status/status.h",
+      "absl/status/status_macros.h",
       "absl/status/statusor.h",
       "absl/strings/str_cat.h",
       "absl/types/optional.h",
       "absl/types/variant.h",
       "maldoca/astgen/ir_to_ast_util.h",
-      "maldoca/base/status_macros.h",
       std::string(ast_header_path),
       absl::StrCat(ir_path, "/ir.h"),
   });
@@ -285,7 +285,7 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
       {"rhs", rhs},
   });
 
-  Println("MALDOCA_ASSIGN_OR_RETURN(");
+  Println("ABSL_ASSIGN_OR_RETURN(");
   {
     auto indent = WithIndent(4);
     Println("auto $lhs$,");
@@ -340,7 +340,7 @@ void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
       {"mlirGetter", field.name().ToMlirGetter()},
   });
 
-  Println("MALDOCA_ASSIGN_OR_RETURN(");
+  Println("ABSL_ASSIGN_OR_RETURN(");
   {
     auto indent = WithIndent(4);
     Println("auto $lhs$,");

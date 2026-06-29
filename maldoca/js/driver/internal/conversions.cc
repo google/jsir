@@ -23,10 +23,10 @@
 #include "mlir/IR/OwningOpRef.h"
 #include "absl/base/nullability.h"
 #include "absl/log/log.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/time/time.h"
 #include "maldoca/base/ret_check.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast_util.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/driver.h"
@@ -89,8 +89,8 @@ absl::StatusOr<std::unique_ptr<JsConversion>> JsConversion::Create(
 
 absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsSourceToAstString::Convert(
     const JsSourceRepr &from) {
-  MALDOCA_ASSIGN_OR_RETURN(auto parse_result,
-                           babel_.Parse(from.source, request_, timeout_));
+  ABSL_ASSIGN_OR_RETURN(auto parse_result,
+                        babel_.Parse(from.source, request_, timeout_));
   return std::make_unique<JsAstStringRepr>(std::move(parse_result.ast_string),
                                            from.source_map);
 }
@@ -112,7 +112,7 @@ JsSourceToAstString::Create(const JsSourceToAstStringConfig &config,
 
 absl::StatusOr<std::unique_ptr<JsSourceRepr>> JsAstStringToSource::Convert(
     const JsAstStringRepr &from) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto generate_result,
       babel_.Generate(from.ast_string, options_, timeout_));
   return std::make_unique<JsSourceRepr>(
@@ -137,7 +137,7 @@ JsAstStringToSource::Create(const JsAstStringToSourceConfig &config,
 
 absl::StatusOr<std::unique_ptr<JsAstRepr>> JsAstStringToAst::Convert(
     const JsAstStringRepr &from) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto ast,
       GetFileAstFromAstString(from.ast_string, recursion_depth_limit_));
   return std::make_unique<JsAstRepr>(std::move(ast), from.ast_string.scopes(),
@@ -170,7 +170,7 @@ absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsAstToAstString::Convert(
 
 absl::StatusOr<std::unique_ptr<JsHirRepr>> JsAstToHir::Convert(
     const JsAstRepr &from) {
-  MALDOCA_ASSIGN_OR_RETURN(auto op, AstToJshirFile(*from.ast, mlir_context_));
+  ABSL_ASSIGN_OR_RETURN(auto op, AstToJshirFile(*from.ast, mlir_context_));
   return std::make_unique<JsHirRepr>(std::move(op), from.scopes,
                                      from.source_map);
 }
@@ -181,7 +181,7 @@ absl::StatusOr<std::unique_ptr<JsHirRepr>> JsAstToHir::Convert(
 
 absl::StatusOr<std::unique_ptr<JsAstRepr>> JsHirToAst::Convert(
     const JsHirRepr &from) {
-  MALDOCA_ASSIGN_OR_RETURN(auto ast, JshirFileToAst(*from.op));
+  ABSL_ASSIGN_OR_RETURN(auto ast, JshirFileToAst(*from.op));
   return std::make_unique<JsAstRepr>(std::move(ast), from.scopes,
                                      from.source_map);
 }

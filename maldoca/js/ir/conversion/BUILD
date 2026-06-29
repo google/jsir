@@ -62,7 +62,6 @@ cc_library(
     ],
     deps = [
         "//maldoca/astgen:ir_to_ast_util",
-        "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/ir",
         "//maldoca/js/ir:cast",
@@ -72,6 +71,7 @@ cc_library(
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:optional",

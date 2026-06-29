@@ -44,12 +44,12 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/ir_to_ast_util.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/region/ast.generated.h"
 #include "maldoca/astgen/test/region/ir.h"
 
@@ -63,7 +63,7 @@ RirToAst::VisitExpr(RirExprOp op) {
 
 absl::StatusOr<std::unique_ptr<RStmt>>
 RirToAst::VisitStmt(RirStmtOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto expr,
       Convert(
           op.getExpr(),
@@ -77,7 +77,7 @@ RirToAst::VisitStmt(RirStmtOp op) {
 
 absl::StatusOr<std::unique_ptr<RNode>>
 RirToAst::VisitNode(RirNodeOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto expr,
       Convert(
           op.getExpr(),
@@ -86,7 +86,7 @@ RirToAst::VisitNode(RirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto optional_expr,
       Convert(
           op.getOptionalExpr(),
@@ -97,7 +97,7 @@ RirToAst::VisitNode(RirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto exprs,
       Convert(
           op.getExprs(),
@@ -108,7 +108,7 @@ RirToAst::VisitNode(RirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto stmt,
       Convert(
           op.getStmt(),
@@ -117,7 +117,7 @@ RirToAst::VisitNode(RirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto optional_stmt,
       Convert(
           op.getOptionalStmt(),
@@ -128,7 +128,7 @@ RirToAst::VisitNode(RirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto stmts,
       Convert(
           op.getStmts(),

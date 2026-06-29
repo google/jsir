@@ -104,7 +104,6 @@ cc_library(
     srcs = ["dynamic_prelude.cc"],
     hdrs = ["dynamic_prelude.h"],
     deps = [
-        "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/babel",
         "//maldoca/js/driver:driver_cc_proto",
@@ -112,6 +111,7 @@ cc_library(
         "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/time",

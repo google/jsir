@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -75,7 +75,7 @@ RStmt::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto expr, RStmt::GetExpr(json));
+  ABSL_ASSIGN_OR_RETURN(auto expr, RStmt::GetExpr(json));
 
   return absl::make_unique<RStmt>(
       std::move(expr));
@@ -149,12 +149,12 @@ RNode::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto expr, RNode::GetExpr(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto optional_expr, RNode::GetOptionalExpr(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto exprs, RNode::GetExprs(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto stmt, RNode::GetStmt(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto optional_stmt, RNode::GetOptionalStmt(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto stmts, RNode::GetStmts(json));
+  ABSL_ASSIGN_OR_RETURN(auto expr, RNode::GetExpr(json));
+  ABSL_ASSIGN_OR_RETURN(auto optional_expr, RNode::GetOptionalExpr(json));
+  ABSL_ASSIGN_OR_RETURN(auto exprs, RNode::GetExprs(json));
+  ABSL_ASSIGN_OR_RETURN(auto stmt, RNode::GetStmt(json));
+  ABSL_ASSIGN_OR_RETURN(auto optional_stmt, RNode::GetOptionalStmt(json));
+  ABSL_ASSIGN_OR_RETURN(auto stmts, RNode::GetStmts(json));
 
   return absl::make_unique<RNode>(
       std::move(expr),

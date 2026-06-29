@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/log/log.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
 #include "maldoca/astgen/ast_def.h"
@@ -43,7 +44,7 @@ absl::StatusOr<AstDef> AstGenTest::LoadAstDef() const {
       GetDataDependencyFilepath(GetParam().ast_def_path);
   AstDefPb ast_def_pb;
   MALDOCA_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
-  MALDOCA_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
+  ABSL_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
   return ast_def;
 }
 

@@ -34,9 +34,9 @@
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 
@@ -397,7 +397,7 @@ inline absl::StatusOr<mlir::Block*> GetStmtsRegionBlock(mlir::Region& region) {
 template <typename EndOpT, typename OpT, typename T>
 ToRegionConverter<T> ExprRegion(ToOpConverter<OpT, T> converter) {
   return ToRegionConverter<T>([=](mlir::Region& region) -> absl::StatusOr<T> {
-    MALDOCA_ASSIGN_OR_RETURN(auto val, GetExprRegionValue<EndOpT>(region));
+    ABSL_ASSIGN_OR_RETURN(auto val, GetExprRegionValue<EndOpT>(region));
     return Convert(val, converter);
   });
 }
@@ -406,8 +406,7 @@ template <typename EndOpT, typename T>
 ToRegionConverter<std::vector<T>> ExprsRegion(ToOpsConverter<T> converter) {
   return ToRegionConverter<std::vector<T>>(
       [=](mlir::Region& region) -> absl::StatusOr<std::vector<T>> {
-        MALDOCA_ASSIGN_OR_RETURN(auto vals,
-                                 GetExprsRegionValues<EndOpT>(region));
+        ABSL_ASSIGN_OR_RETURN(auto vals, GetExprsRegionValues<EndOpT>(region));
         return Convert(vals, converter);
       });
 }
@@ -415,7 +414,7 @@ ToRegionConverter<std::vector<T>> ExprsRegion(ToOpsConverter<T> converter) {
 template <typename OpT, typename T>
 ToRegionConverter<T> StmtRegion(ToOpConverter<OpT, T> converter) {
   return ToRegionConverter<T>([=](mlir::Region& region) -> absl::StatusOr<T> {
-    MALDOCA_ASSIGN_OR_RETURN(auto op, GetStmtRegionOperation(region));
+    ABSL_ASSIGN_OR_RETURN(auto op, GetStmtRegionOperation(region));
     return Convert(op, converter);
   });
 }
@@ -424,7 +423,7 @@ template <typename T>
 ToRegionConverter<std::vector<T>> StmtsRegion(ToOpsConverter<T> converter) {
   return ToRegionConverter<std::vector<T>>(
       [=](mlir::Region& region) -> absl::StatusOr<std::vector<T>> {
-        MALDOCA_ASSIGN_OR_RETURN(auto block, GetStmtsRegionBlock(region));
+        ABSL_ASSIGN_OR_RETURN(auto block, GetStmtsRegionBlock(region));
         return Convert(block, converter);
       });
 }
@@ -475,7 +474,7 @@ ToAttrConverter<mlir::ArrayAttr, std::vector<T>> List(
         std::vector<T> result;
         result.reserve(attr.size());
         for (mlir::Attribute element : attr.getValue()) {
-          MALDOCA_ASSIGN_OR_RETURN(T value, elem_converter(element));
+          ABSL_ASSIGN_OR_RETURN(T value, elem_converter(element));
           result.push_back(std::move(value));
         }
         return result;
@@ -490,7 +489,7 @@ ToOpsConverter<T> List(ToOpConverter<OpT, T> elem_converter) {
         std::vector<T> result;
         result.reserve(values.size());
         for (mlir::Value element : values) {
-          MALDOCA_ASSIGN_OR_RETURN(T value, elem_converter(element));
+          ABSL_ASSIGN_OR_RETURN(T value, elem_converter(element));
           result.push_back(std::move(value));
         }
         return result;
@@ -512,7 +511,7 @@ ToOpsConverter<T> List(ToOpConverter<OpT, T> elem_converter) {
           if (!casted) {
             continue;
           }
-          MALDOCA_ASSIGN_OR_RETURN(T value, elem_converter(casted));
+          ABSL_ASSIGN_OR_RETURN(T value, elem_converter(casted));
           result.push_back(std::move(value));
         }
         return result;

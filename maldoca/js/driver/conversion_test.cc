@@ -25,6 +25,7 @@
 #include "mlir/Support/DebugStringHelper.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
@@ -92,11 +93,11 @@ absl::StatusOr<TestCase> GetTestCase() {
     return GetFileContents(JoinPath(dir, file_name));
   };
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string source,
-                           load_content("test_source.js.test"));
+  ABSL_ASSIGN_OR_RETURN(std::string source,
+                        load_content("test_source.js.test"));
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string parsed_ast_json_str,
-                           load_content("test_parsed_ast.json"));
+  ABSL_ASSIGN_OR_RETURN(std::string parsed_ast_json_str,
+                        load_content("test_parsed_ast.json"));
   auto parsed_ast_json = nlohmann::ordered_json::parse(parsed_ast_json_str);
 
   BabelScopes scopes;
@@ -109,21 +110,20 @@ absl::StatusOr<TestCase> GetTestCase() {
   babel_ast_string.set_string_literals_base64_encoded(false);
   *babel_ast_string.mutable_scopes() = scopes;
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string serialized_ast_json_str,
-                           load_content("test_serialized_ast.json"));
+  ABSL_ASSIGN_OR_RETURN(std::string serialized_ast_json_str,
+                        load_content("test_serialized_ast.json"));
   auto serialized_ast_json =
       nlohmann::ordered_json::parse(serialized_ast_json_str);
 
-  MALDOCA_ASSIGN_OR_RETURN(auto ast, JsFile::FromJson(serialized_ast_json));
+  ABSL_ASSIGN_OR_RETURN(auto ast, JsFile::FromJson(serialized_ast_json));
   JsAstRepr ast_repr{std::move(ast), scopes, std::nullopt};
 
   auto mlir_context = std::make_unique<mlir::MLIRContext>();
   LoadNecessaryDialects(*mlir_context);
 
-  MALDOCA_ASSIGN_OR_RETURN(
-      JsHirRepr hir_repr,
-      ToJsHirRepr::FromJsAstRepr(ast_repr, *mlir_context));
-  MALDOCA_ASSIGN_OR_RETURN(auto hir_str, load_content("test_hir.mlir.test"));
+  ABSL_ASSIGN_OR_RETURN(JsHirRepr hir_repr,
+                        ToJsHirRepr::FromJsAstRepr(ast_repr, *mlir_context));
+  ABSL_ASSIGN_OR_RETURN(auto hir_str, load_content("test_hir.mlir.test"));
 
   BabelAstString lifted_babel_ast_string;
   lifted_babel_ast_string.set_value(CompactJsonString(serialized_ast_json_str));

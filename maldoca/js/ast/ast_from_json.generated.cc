@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -69,8 +69,8 @@ JsPosition::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto line, JsPosition::GetLine(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto column, JsPosition::GetColumn(json));
+  ABSL_ASSIGN_OR_RETURN(auto line, JsPosition::GetLine(json));
+  ABSL_ASSIGN_OR_RETURN(auto column, JsPosition::GetColumn(json));
 
   return absl::make_unique<JsPosition>(
       std::move(line),
@@ -114,9 +114,9 @@ JsSourceLocation::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsSourceLocation::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsSourceLocation::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto identifier_name, JsSourceLocation::GetIdentifierName(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsSourceLocation::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsSourceLocation::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto identifier_name, JsSourceLocation::GetIdentifierName(json));
 
   return absl::make_unique<JsSourceLocation>(
       std::move(start),
@@ -170,7 +170,7 @@ JsComment::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "CommentBlock") {
     return JsCommentBlock::FromJson(json);
@@ -190,10 +190,10 @@ JsCommentBlock::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsComment::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsComment::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsComment::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsComment::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsComment::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsComment::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsComment::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsComment::GetEnd(json));
 
   return absl::make_unique<JsCommentBlock>(
       std::move(loc),
@@ -212,10 +212,10 @@ JsCommentLine::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsComment::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsComment::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsComment::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsComment::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsComment::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsComment::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsComment::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsComment::GetEnd(json));
 
   return absl::make_unique<JsCommentLine>(
       std::move(loc),
@@ -252,8 +252,8 @@ JsSymbolId::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto name, JsSymbolId::GetName(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto def_scope_uid, JsSymbolId::GetDefScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto name, JsSymbolId::GetName(json));
+  ABSL_ASSIGN_OR_RETURN(auto def_scope_uid, JsSymbolId::GetDefScopeUid(json));
 
   return absl::make_unique<JsSymbolId>(
       std::move(name),
@@ -359,7 +359,7 @@ JsNode::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "File") {
     return JsFile::FromJson(json);
@@ -580,16 +580,16 @@ JsInterpreterDirective::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsInterpreterDirective::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsInterpreterDirective::GetValue(json));
 
   return absl::make_unique<JsInterpreterDirective>(
       std::move(loc),
@@ -614,7 +614,7 @@ JsProgramBodyElement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ExpressionStatement") {
     return JsExpressionStatement::FromJson(json);
@@ -704,8 +704,8 @@ JsDirectiveLiteralExtra::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto raw, JsDirectiveLiteralExtra::GetRaw(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto raw_value, JsDirectiveLiteralExtra::GetRawValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw, JsDirectiveLiteralExtra::GetRaw(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsDirectiveLiteralExtra::GetRawValue(json));
 
   return absl::make_unique<JsDirectiveLiteralExtra>(
       std::move(raw),
@@ -740,17 +740,17 @@ JsDirectiveLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsDirectiveLiteral::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto extra, JsDirectiveLiteral::GetExtra(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsDirectiveLiteral::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsDirectiveLiteral::GetExtra(json));
 
   return absl::make_unique<JsDirectiveLiteral>(
       std::move(loc),
@@ -785,16 +785,16 @@ JsDirective::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsDirective::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsDirective::GetValue(json));
 
   return absl::make_unique<JsDirective>(
       std::move(loc),
@@ -859,19 +859,19 @@ JsProgram::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto interpreter, JsProgram::GetInterpreter(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto source_type, JsProgram::GetSourceType(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsProgram::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto directives, JsProgram::GetDirectives(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto interpreter, JsProgram::GetInterpreter(json));
+  ABSL_ASSIGN_OR_RETURN(auto source_type, JsProgram::GetSourceType(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsProgram::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto directives, JsProgram::GetDirectives(json));
 
   return absl::make_unique<JsProgram>(
       std::move(loc),
@@ -919,17 +919,17 @@ JsFile::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto program, JsFile::GetProgram(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto comments, JsFile::GetComments(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto program, JsFile::GetProgram(json));
+  ABSL_ASSIGN_OR_RETURN(auto comments, JsFile::GetComments(json));
 
   return absl::make_unique<JsFile>(
       std::move(loc),
@@ -1005,7 +1005,7 @@ JsExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Identifier") {
     return JsIdentifier::FromJson(json);
@@ -1111,7 +1111,7 @@ JsPattern::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Identifier") {
     return JsIdentifier::FromJson(json);
@@ -1167,7 +1167,7 @@ JsLVal::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Identifier") {
     return JsIdentifier::FromJson(json);
@@ -1222,16 +1222,16 @@ JsIdentifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto name, JsIdentifier::GetName(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto name, JsIdentifier::GetName(json));
 
   return absl::make_unique<JsIdentifier>(
       std::move(loc),
@@ -1281,16 +1281,16 @@ JsPrivateName::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsPrivateName::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsPrivateName::GetId(json));
 
   return absl::make_unique<JsPrivateName>(
       std::move(loc),
@@ -1315,7 +1315,7 @@ JsLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "RegExpLiteral") {
     return JsRegExpLiteral::FromJson(json);
@@ -1352,7 +1352,7 @@ JsRegExpLiteralExtra::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto raw, JsRegExpLiteralExtra::GetRaw(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw, JsRegExpLiteralExtra::GetRaw(json));
 
   return absl::make_unique<JsRegExpLiteralExtra>(
       std::move(raw));
@@ -1395,18 +1395,18 @@ JsRegExpLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto pattern, JsRegExpLiteral::GetPattern(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto flags, JsRegExpLiteral::GetFlags(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto extra, JsRegExpLiteral::GetExtra(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto pattern, JsRegExpLiteral::GetPattern(json));
+  ABSL_ASSIGN_OR_RETURN(auto flags, JsRegExpLiteral::GetFlags(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsRegExpLiteral::GetExtra(json));
 
   return absl::make_unique<JsRegExpLiteral>(
       std::move(loc),
@@ -1433,15 +1433,15 @@ JsNullLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
   return absl::make_unique<JsNullLiteral>(
       std::move(loc),
@@ -1483,8 +1483,8 @@ JsStringLiteralExtra::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto raw, JsStringLiteralExtra::GetRaw(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto raw_value, JsStringLiteralExtra::GetRawValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw, JsStringLiteralExtra::GetRaw(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsStringLiteralExtra::GetRawValue(json));
 
   return absl::make_unique<JsStringLiteralExtra>(
       std::move(raw),
@@ -1535,17 +1535,17 @@ JsStringLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsStringLiteral::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto extra, JsStringLiteral::GetExtra(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsStringLiteral::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsStringLiteral::GetExtra(json));
 
   return absl::make_unique<JsStringLiteral>(
       std::move(loc),
@@ -1580,16 +1580,16 @@ JsBooleanLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsBooleanLiteral::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsBooleanLiteral::GetValue(json));
 
   return absl::make_unique<JsBooleanLiteral>(
       std::move(loc),
@@ -1632,8 +1632,8 @@ JsNumericLiteralExtra::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto raw, JsNumericLiteralExtra::GetRaw(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto raw_value, JsNumericLiteralExtra::GetRawValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw, JsNumericLiteralExtra::GetRaw(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsNumericLiteralExtra::GetRawValue(json));
 
   return absl::make_unique<JsNumericLiteralExtra>(
       std::move(raw),
@@ -1668,17 +1668,17 @@ JsNumericLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsNumericLiteral::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto extra, JsNumericLiteral::GetExtra(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsNumericLiteral::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNumericLiteral::GetExtra(json));
 
   return absl::make_unique<JsNumericLiteral>(
       std::move(loc),
@@ -1722,8 +1722,8 @@ JsBigIntLiteralExtra::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto raw, JsBigIntLiteralExtra::GetRaw(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto raw_value, JsBigIntLiteralExtra::GetRawValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw, JsBigIntLiteralExtra::GetRaw(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsBigIntLiteralExtra::GetRawValue(json));
 
   return absl::make_unique<JsBigIntLiteralExtra>(
       std::move(raw),
@@ -1758,17 +1758,17 @@ JsBigIntLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsBigIntLiteral::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto extra, JsBigIntLiteral::GetExtra(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsBigIntLiteral::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsBigIntLiteral::GetExtra(json));
 
   return absl::make_unique<JsBigIntLiteral>(
       std::move(loc),
@@ -1832,7 +1832,7 @@ JsFunction::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "FunctionDeclaration") {
     return JsFunctionDeclaration::FromJson(json);
@@ -1862,7 +1862,7 @@ JsStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ExpressionStatement") {
     return JsExpressionStatement::FromJson(json);
@@ -1960,17 +1960,17 @@ JsBlockStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsBlockStatement::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto directives, JsBlockStatement::GetDirectives(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto directives, JsBlockStatement::GetDirectives(json));
 
   return absl::make_unique<JsBlockStatement>(
       std::move(loc),
@@ -2005,7 +2005,7 @@ JsBlockStatementFunction::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "FunctionDeclaration") {
     return JsFunctionDeclaration::FromJson(json);
@@ -2040,16 +2040,16 @@ JsExpressionStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto expression, JsExpressionStatement::GetExpression(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto expression, JsExpressionStatement::GetExpression(json));
 
   return absl::make_unique<JsExpressionStatement>(
       std::move(loc),
@@ -2074,15 +2074,15 @@ JsEmptyStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
   return absl::make_unique<JsEmptyStatement>(
       std::move(loc),
@@ -2106,15 +2106,15 @@ JsDebuggerStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
   return absl::make_unique<JsDebuggerStatement>(
       std::move(loc),
@@ -2156,17 +2156,17 @@ JsWithStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto object, JsWithStatement::GetObject(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsWithStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto object, JsWithStatement::GetObject(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsWithStatement::GetBody(json));
 
   return absl::make_unique<JsWithStatement>(
       std::move(loc),
@@ -2201,16 +2201,16 @@ JsReturnStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsReturnStatement::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsReturnStatement::GetArgument(json));
 
   return absl::make_unique<JsReturnStatement>(
       std::move(loc),
@@ -2253,17 +2253,17 @@ JsLabeledStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto label, JsLabeledStatement::GetLabel(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsLabeledStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto label, JsLabeledStatement::GetLabel(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsLabeledStatement::GetBody(json));
 
   return absl::make_unique<JsLabeledStatement>(
       std::move(loc),
@@ -2298,16 +2298,16 @@ JsBreakStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto label, JsBreakStatement::GetLabel(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto label, JsBreakStatement::GetLabel(json));
 
   return absl::make_unique<JsBreakStatement>(
       std::move(loc),
@@ -2341,16 +2341,16 @@ JsContinueStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto label, JsContinueStatement::GetLabel(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto label, JsContinueStatement::GetLabel(json));
 
   return absl::make_unique<JsContinueStatement>(
       std::move(loc),
@@ -2402,18 +2402,18 @@ JsIfStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsIfStatement::GetTest(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto consequent, JsIfStatement::GetConsequent(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto alternate, JsIfStatement::GetAlternate(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto test, JsIfStatement::GetTest(json));
+  ABSL_ASSIGN_OR_RETURN(auto consequent, JsIfStatement::GetConsequent(json));
+  ABSL_ASSIGN_OR_RETURN(auto alternate, JsIfStatement::GetAlternate(json));
 
   return absl::make_unique<JsIfStatement>(
       std::move(loc),
@@ -2460,17 +2460,17 @@ JsSwitchCase::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsSwitchCase::GetTest(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto consequent, JsSwitchCase::GetConsequent(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto test, JsSwitchCase::GetTest(json));
+  ABSL_ASSIGN_OR_RETURN(auto consequent, JsSwitchCase::GetConsequent(json));
 
   return absl::make_unique<JsSwitchCase>(
       std::move(loc),
@@ -2516,17 +2516,17 @@ JsSwitchStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto discriminant, JsSwitchStatement::GetDiscriminant(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto cases, JsSwitchStatement::GetCases(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto discriminant, JsSwitchStatement::GetDiscriminant(json));
+  ABSL_ASSIGN_OR_RETURN(auto cases, JsSwitchStatement::GetCases(json));
 
   return absl::make_unique<JsSwitchStatement>(
       std::move(loc),
@@ -2561,16 +2561,16 @@ JsThrowStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsThrowStatement::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsThrowStatement::GetArgument(json));
 
   return absl::make_unique<JsThrowStatement>(
       std::move(loc),
@@ -2613,17 +2613,17 @@ JsCatchClause::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto param, JsCatchClause::GetParam(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsCatchClause::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto param, JsCatchClause::GetParam(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsCatchClause::GetBody(json));
 
   return absl::make_unique<JsCatchClause>(
       std::move(loc),
@@ -2676,18 +2676,18 @@ JsTryStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto block, JsTryStatement::GetBlock(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto handler, JsTryStatement::GetHandler(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto finalizer, JsTryStatement::GetFinalizer(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto block, JsTryStatement::GetBlock(json));
+  ABSL_ASSIGN_OR_RETURN(auto handler, JsTryStatement::GetHandler(json));
+  ABSL_ASSIGN_OR_RETURN(auto finalizer, JsTryStatement::GetFinalizer(json));
 
   return absl::make_unique<JsTryStatement>(
       std::move(loc),
@@ -2732,17 +2732,17 @@ JsWhileStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsWhileStatement::GetTest(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsWhileStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto test, JsWhileStatement::GetTest(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsWhileStatement::GetBody(json));
 
   return absl::make_unique<JsWhileStatement>(
       std::move(loc),
@@ -2786,17 +2786,17 @@ JsDoWhileStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsDoWhileStatement::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsDoWhileStatement::GetTest(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsDoWhileStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto test, JsDoWhileStatement::GetTest(json));
 
   return absl::make_unique<JsDoWhileStatement>(
       std::move(loc),
@@ -2822,7 +2822,7 @@ JsDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "FunctionDeclaration") {
     return JsFunctionDeclaration::FromJson(json);
@@ -2862,17 +2862,17 @@ JsVariableDeclarator::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsVariableDeclarator::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto init, JsVariableDeclarator::GetInit(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsVariableDeclarator::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto init, JsVariableDeclarator::GetInit(json));
 
   return absl::make_unique<JsVariableDeclarator>(
       std::move(loc),
@@ -2934,17 +2934,17 @@ JsVariableDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto declarations, JsVariableDeclaration::GetDeclarations(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto kind, JsVariableDeclaration::GetKind(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto declarations, JsVariableDeclaration::GetDeclarations(json));
+  ABSL_ASSIGN_OR_RETURN(auto kind, JsVariableDeclaration::GetKind(json));
 
   return absl::make_unique<JsVariableDeclaration>(
       std::move(loc),
@@ -3014,19 +3014,19 @@ JsForStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto init, JsForStatement::GetInit(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsForStatement::GetTest(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto update, JsForStatement::GetUpdate(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsForStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto init, JsForStatement::GetInit(json));
+  ABSL_ASSIGN_OR_RETURN(auto test, JsForStatement::GetTest(json));
+  ABSL_ASSIGN_OR_RETURN(auto update, JsForStatement::GetUpdate(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsForStatement::GetBody(json));
 
   return absl::make_unique<JsForStatement>(
       std::move(loc),
@@ -3089,18 +3089,18 @@ JsForInStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto left, JsForInStatement::GetLeft(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto right, JsForInStatement::GetRight(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsForInStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto left, JsForInStatement::GetLeft(json));
+  ABSL_ASSIGN_OR_RETURN(auto right, JsForInStatement::GetRight(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsForInStatement::GetBody(json));
 
   return absl::make_unique<JsForInStatement>(
       std::move(loc),
@@ -3171,19 +3171,19 @@ JsForOfStatement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto left, JsForOfStatement::GetLeft(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto right, JsForOfStatement::GetRight(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsForOfStatement::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto await, JsForOfStatement::GetAwait(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto left, JsForOfStatement::GetLeft(json));
+  ABSL_ASSIGN_OR_RETURN(auto right, JsForOfStatement::GetRight(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsForOfStatement::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto await, JsForOfStatement::GetAwait(json));
 
   return absl::make_unique<JsForOfStatement>(
       std::move(loc),
@@ -3227,20 +3227,20 @@ JsFunctionDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
+  ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
+  ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
 
   return absl::make_unique<JsFunctionDeclaration>(
       std::move(loc),
@@ -3285,15 +3285,15 @@ JsSuper::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
   return absl::make_unique<JsSuper>(
       std::move(loc),
@@ -3333,15 +3333,15 @@ JsImport::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
   return absl::make_unique<JsImport>(
       std::move(loc),
@@ -3365,15 +3365,15 @@ JsThisExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
   return absl::make_unique<JsThisExpression>(
       std::move(loc),
@@ -3414,20 +3414,20 @@ JsArrowFunctionExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsArrowFunctionExpression::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
+  ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
+  ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsArrowFunctionExpression::GetBody(json));
 
   return absl::make_unique<JsArrowFunctionExpression>(
       std::move(loc),
@@ -3474,17 +3474,17 @@ JsYieldExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsYieldExpression::GetArgument(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto delegate, JsYieldExpression::GetDelegate(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsYieldExpression::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto delegate, JsYieldExpression::GetDelegate(json));
 
   return absl::make_unique<JsYieldExpression>(
       std::move(loc),
@@ -3519,16 +3519,16 @@ JsAwaitExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsAwaitExpression::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsAwaitExpression::GetArgument(json));
 
   return absl::make_unique<JsAwaitExpression>(
       std::move(loc),
@@ -3578,16 +3578,16 @@ JsSpreadElement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsSpreadElement::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsSpreadElement::GetArgument(json));
 
   return absl::make_unique<JsSpreadElement>(
       std::move(loc),
@@ -3633,16 +3633,16 @@ JsArrayExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto elements, JsArrayExpression::GetElements(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto elements, JsArrayExpression::GetElements(json));
 
   return absl::make_unique<JsArrayExpression>(
       std::move(loc),
@@ -3685,7 +3685,7 @@ JsObjectMember::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ObjectProperty") {
     return JsObjectProperty::FromJson(json);
@@ -3747,19 +3747,19 @@ JsObjectProperty::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsObjectMember::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsObjectMember::GetComputed(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto shorthand, JsObjectProperty::GetShorthand(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsObjectProperty::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsObjectMember::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsObjectMember::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto shorthand, JsObjectProperty::GetShorthand(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsObjectProperty::GetValue(json));
 
   return absl::make_unique<JsObjectProperty>(
       std::move(loc),
@@ -3812,23 +3812,23 @@ JsObjectMethod::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsObjectMember::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsObjectMember::GetComputed(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto kind, JsObjectMethod::GetKind(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsObjectMember::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsObjectMember::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
+  ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
+  ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto kind, JsObjectMethod::GetKind(json));
 
   return absl::make_unique<JsObjectMethod>(
       std::move(loc),
@@ -3883,16 +3883,16 @@ JsObjectExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto properties_, JsObjectExpression::GetProperties(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto properties_, JsObjectExpression::GetProperties(json));
 
   return absl::make_unique<JsObjectExpression>(
       std::move(loc),
@@ -3917,20 +3917,20 @@ JsFunctionExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
+  ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
+  ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
 
   return absl::make_unique<JsFunctionExpression>(
       std::move(loc),
@@ -3986,18 +3986,18 @@ JsUnaryExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operator_, JsUnaryExpression::GetOperator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto prefix, JsUnaryExpression::GetPrefix(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsUnaryExpression::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto operator_, JsUnaryExpression::GetOperator(json));
+  ABSL_ASSIGN_OR_RETURN(auto prefix, JsUnaryExpression::GetPrefix(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsUnaryExpression::GetArgument(json));
 
   return absl::make_unique<JsUnaryExpression>(
       std::move(loc),
@@ -4051,18 +4051,18 @@ JsUpdateExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operator_, JsUpdateExpression::GetOperator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsUpdateExpression::GetArgument(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto prefix, JsUpdateExpression::GetPrefix(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto operator_, JsUpdateExpression::GetOperator(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsUpdateExpression::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto prefix, JsUpdateExpression::GetPrefix(json));
 
   return absl::make_unique<JsUpdateExpression>(
       std::move(loc),
@@ -4124,18 +4124,18 @@ JsBinaryExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operator_, JsBinaryExpression::GetOperator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto left, JsBinaryExpression::GetLeft(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto right, JsBinaryExpression::GetRight(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto operator_, JsBinaryExpression::GetOperator(json));
+  ABSL_ASSIGN_OR_RETURN(auto left, JsBinaryExpression::GetLeft(json));
+  ABSL_ASSIGN_OR_RETURN(auto right, JsBinaryExpression::GetRight(json));
 
   return absl::make_unique<JsBinaryExpression>(
       std::move(loc),
@@ -4189,18 +4189,18 @@ JsAssignmentExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operator_, JsAssignmentExpression::GetOperator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto left, JsAssignmentExpression::GetLeft(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto right, JsAssignmentExpression::GetRight(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto operator_, JsAssignmentExpression::GetOperator(json));
+  ABSL_ASSIGN_OR_RETURN(auto left, JsAssignmentExpression::GetLeft(json));
+  ABSL_ASSIGN_OR_RETURN(auto right, JsAssignmentExpression::GetRight(json));
 
   return absl::make_unique<JsAssignmentExpression>(
       std::move(loc),
@@ -4254,18 +4254,18 @@ JsLogicalExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operator_, JsLogicalExpression::GetOperator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto left, JsLogicalExpression::GetLeft(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto right, JsLogicalExpression::GetRight(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto operator_, JsLogicalExpression::GetOperator(json));
+  ABSL_ASSIGN_OR_RETURN(auto left, JsLogicalExpression::GetLeft(json));
+  ABSL_ASSIGN_OR_RETURN(auto right, JsLogicalExpression::GetRight(json));
 
   return absl::make_unique<JsLogicalExpression>(
       std::move(loc),
@@ -4335,18 +4335,18 @@ JsMemberExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto object, JsMemberExpression::GetObject(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto property, JsMemberExpression::GetProperty(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsMemberExpression::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto object, JsMemberExpression::GetObject(json));
+  ABSL_ASSIGN_OR_RETURN(auto property, JsMemberExpression::GetProperty(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsMemberExpression::GetComputed(json));
 
   return absl::make_unique<JsMemberExpression>(
       std::move(loc),
@@ -4417,19 +4417,19 @@ JsOptionalMemberExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto object, JsOptionalMemberExpression::GetObject(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto property, JsOptionalMemberExpression::GetProperty(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsOptionalMemberExpression::GetComputed(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto optional, JsOptionalMemberExpression::GetOptional(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto object, JsOptionalMemberExpression::GetObject(json));
+  ABSL_ASSIGN_OR_RETURN(auto property, JsOptionalMemberExpression::GetProperty(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsOptionalMemberExpression::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto optional, JsOptionalMemberExpression::GetOptional(json));
 
   return absl::make_unique<JsOptionalMemberExpression>(
       std::move(loc),
@@ -4484,18 +4484,18 @@ JsConditionalExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto test, JsConditionalExpression::GetTest(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto alternate, JsConditionalExpression::GetAlternate(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto consequent, JsConditionalExpression::GetConsequent(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto test, JsConditionalExpression::GetTest(json));
+  ABSL_ASSIGN_OR_RETURN(auto alternate, JsConditionalExpression::GetAlternate(json));
+  ABSL_ASSIGN_OR_RETURN(auto consequent, JsConditionalExpression::GetConsequent(json));
 
   return absl::make_unique<JsConditionalExpression>(
       std::move(loc),
@@ -4562,17 +4562,17 @@ JsCallExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto callee, JsCallExpression::GetCallee(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto arguments, JsCallExpression::GetArguments(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto callee, JsCallExpression::GetCallee(json));
+  ABSL_ASSIGN_OR_RETURN(auto arguments, JsCallExpression::GetArguments(json));
 
   return absl::make_unique<JsCallExpression>(
       std::move(loc),
@@ -4635,18 +4635,18 @@ JsOptionalCallExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto callee, JsOptionalCallExpression::GetCallee(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto arguments, JsOptionalCallExpression::GetArguments(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto optional, JsOptionalCallExpression::GetOptional(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto callee, JsOptionalCallExpression::GetCallee(json));
+  ABSL_ASSIGN_OR_RETURN(auto arguments, JsOptionalCallExpression::GetArguments(json));
+  ABSL_ASSIGN_OR_RETURN(auto optional, JsOptionalCallExpression::GetOptional(json));
 
   return absl::make_unique<JsOptionalCallExpression>(
       std::move(loc),
@@ -4713,17 +4713,17 @@ JsNewExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto callee, JsNewExpression::GetCallee(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto arguments, JsNewExpression::GetArguments(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto callee, JsNewExpression::GetCallee(json));
+  ABSL_ASSIGN_OR_RETURN(auto arguments, JsNewExpression::GetArguments(json));
 
   return absl::make_unique<JsNewExpression>(
       std::move(loc),
@@ -4760,16 +4760,16 @@ JsSequenceExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto expressions, JsSequenceExpression::GetExpressions(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto expressions, JsSequenceExpression::GetExpressions(json));
 
   return absl::make_unique<JsSequenceExpression>(
       std::move(loc),
@@ -4803,16 +4803,16 @@ JsParenthesizedExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto expression, JsParenthesizedExpression::GetExpression(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto expression, JsParenthesizedExpression::GetExpression(json));
 
   return absl::make_unique<JsParenthesizedExpression>(
       std::move(loc),
@@ -4855,8 +4855,8 @@ JsTemplateElementValue::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto cooked, JsTemplateElementValue::GetCooked(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto raw, JsTemplateElementValue::GetRaw(json));
+  ABSL_ASSIGN_OR_RETURN(auto cooked, JsTemplateElementValue::GetCooked(json));
+  ABSL_ASSIGN_OR_RETURN(auto raw, JsTemplateElementValue::GetRaw(json));
 
   return absl::make_unique<JsTemplateElementValue>(
       std::move(cooked),
@@ -4891,17 +4891,17 @@ JsTemplateElement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto tail, JsTemplateElement::GetTail(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsTemplateElement::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto tail, JsTemplateElement::GetTail(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsTemplateElement::GetValue(json));
 
   return absl::make_unique<JsTemplateElement>(
       std::move(loc),
@@ -4949,17 +4949,17 @@ JsTemplateLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto quasis, JsTemplateLiteral::GetQuasis(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto expressions, JsTemplateLiteral::GetExpressions(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto quasis, JsTemplateLiteral::GetQuasis(json));
+  ABSL_ASSIGN_OR_RETURN(auto expressions, JsTemplateLiteral::GetExpressions(json));
 
   return absl::make_unique<JsTemplateLiteral>(
       std::move(loc),
@@ -5003,17 +5003,17 @@ JsTaggedTemplateExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto tag, JsTaggedTemplateExpression::GetTag(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto quasi, JsTaggedTemplateExpression::GetQuasi(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto tag, JsTaggedTemplateExpression::GetTag(json));
+  ABSL_ASSIGN_OR_RETURN(auto quasi, JsTaggedTemplateExpression::GetQuasi(json));
 
   return absl::make_unique<JsTaggedTemplateExpression>(
       std::move(loc),
@@ -5064,16 +5064,16 @@ JsRestElement::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, JsRestElement::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, JsRestElement::GetArgument(json));
 
   return absl::make_unique<JsRestElement>(
       std::move(loc),
@@ -5117,16 +5117,16 @@ JsObjectPattern::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto properties_, JsObjectPattern::GetProperties(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto properties_, JsObjectPattern::GetProperties(json));
 
   return absl::make_unique<JsObjectPattern>(
       std::move(loc),
@@ -5164,16 +5164,16 @@ JsArrayPattern::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto elements, JsArrayPattern::GetElements(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto elements, JsArrayPattern::GetElements(json));
 
   return absl::make_unique<JsArrayPattern>(
       std::move(loc),
@@ -5216,17 +5216,17 @@ JsAssignmentPattern::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto left, JsAssignmentPattern::GetLeft(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto right, JsAssignmentPattern::GetRight(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto left, JsAssignmentPattern::GetLeft(json));
+  ABSL_ASSIGN_OR_RETURN(auto right, JsAssignmentPattern::GetRight(json));
 
   return absl::make_unique<JsAssignmentPattern>(
       std::move(loc),
@@ -5304,24 +5304,24 @@ JsClassMethod::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsClassMethod::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto kind, JsClassMethod::GetKind(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsClassMethod::GetComputed(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto static_, JsClassMethod::GetStatic(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
+  ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
+  ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsClassMethod::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto kind, JsClassMethod::GetKind(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsClassMethod::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto static_, JsClassMethod::GetStatic(json));
 
   return absl::make_unique<JsClassMethod>(
       std::move(loc),
@@ -5406,24 +5406,24 @@ JsClassPrivateMethod::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsClassPrivateMethod::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto kind, JsClassPrivateMethod::GetKind(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto static_, JsClassPrivateMethod::GetStatic(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsClassPrivateMethod::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
+  ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
+  ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsClassPrivateMethod::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto kind, JsClassPrivateMethod::GetKind(json));
+  ABSL_ASSIGN_OR_RETURN(auto static_, JsClassPrivateMethod::GetStatic(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsClassPrivateMethod::GetComputed(json));
 
   return absl::make_unique<JsClassPrivateMethod>(
       std::move(loc),
@@ -5508,19 +5508,19 @@ JsClassProperty::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsClassProperty::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsClassProperty::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto static_, JsClassProperty::GetStatic(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto computed, JsClassProperty::GetComputed(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsClassProperty::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsClassProperty::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto static_, JsClassProperty::GetStatic(json));
+  ABSL_ASSIGN_OR_RETURN(auto computed, JsClassProperty::GetComputed(json));
 
   return absl::make_unique<JsClassProperty>(
       std::move(loc),
@@ -5591,18 +5591,18 @@ JsClassPrivateProperty::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsClassPrivateProperty::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsClassPrivateProperty::GetValue(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto static_, JsClassPrivateProperty::GetStatic(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsClassPrivateProperty::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsClassPrivateProperty::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto static_, JsClassPrivateProperty::GetStatic(json));
 
   return absl::make_unique<JsClassPrivateProperty>(
       std::move(loc),
@@ -5656,16 +5656,16 @@ JsClassBody::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsClassBody::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsClassBody::GetBody(json));
 
   return absl::make_unique<JsClassBody>(
       std::move(loc),
@@ -5708,7 +5708,7 @@ JsClass::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ClassDeclaration") {
     return JsClassDeclaration::FromJson(json);
@@ -5753,18 +5753,18 @@ JsClassDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto super_class, JsClass::GetSuperClass(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsClassDeclaration::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto super_class, JsClass::GetSuperClass(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsClassDeclaration::GetId(json));
 
   return absl::make_unique<JsClassDeclaration>(
       std::move(loc),
@@ -5800,18 +5800,18 @@ JsClassExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto super_class, JsClass::GetSuperClass(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto id, JsClassExpression::GetId(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto super_class, JsClass::GetSuperClass(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto id, JsClassExpression::GetId(json));
 
   return absl::make_unique<JsClassExpression>(
       std::move(loc),
@@ -5856,17 +5856,17 @@ JsMetaProperty::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto meta, JsMetaProperty::GetMeta(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto property, JsMetaProperty::GetProperty(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto meta, JsMetaProperty::GetMeta(json));
+  ABSL_ASSIGN_OR_RETURN(auto property, JsMetaProperty::GetProperty(json));
 
   return absl::make_unique<JsMetaProperty>(
       std::move(loc),
@@ -5892,7 +5892,7 @@ JsModuleDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ImportDeclaration") {
     return JsImportDeclaration::FromJson(json);
@@ -5916,7 +5916,7 @@ JsModuleSpecifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "ImportSpecifier") {
     return JsImportSpecifier::FromJson(json);
@@ -5982,17 +5982,17 @@ JsImportSpecifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto imported, JsImportSpecifier::GetImported(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto local, JsImportSpecifier::GetLocal(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto imported, JsImportSpecifier::GetImported(json));
+  ABSL_ASSIGN_OR_RETURN(auto local, JsImportSpecifier::GetLocal(json));
 
   return absl::make_unique<JsImportSpecifier>(
       std::move(loc),
@@ -6043,16 +6043,16 @@ JsImportDefaultSpecifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto local, JsImportDefaultSpecifier::GetLocal(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto local, JsImportDefaultSpecifier::GetLocal(json));
 
   return absl::make_unique<JsImportDefaultSpecifier>(
       std::move(loc),
@@ -6102,16 +6102,16 @@ JsImportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto local, JsImportNamespaceSpecifier::GetLocal(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto local, JsImportNamespaceSpecifier::GetLocal(json));
 
   return absl::make_unique<JsImportNamespaceSpecifier>(
       std::move(loc),
@@ -6154,17 +6154,17 @@ JsImportAttribute::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto key, JsImportAttribute::GetKey(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto value, JsImportAttribute::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto key, JsImportAttribute::GetKey(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, JsImportAttribute::GetValue(json));
 
   return absl::make_unique<JsImportAttribute>(
       std::move(loc),
@@ -6231,18 +6231,18 @@ JsImportDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto specifiers, JsImportDeclaration::GetSpecifiers(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto source, JsImportDeclaration::GetSource(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto assertions, JsImportDeclaration::GetAssertions(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto specifiers, JsImportDeclaration::GetSpecifiers(json));
+  ABSL_ASSIGN_OR_RETURN(auto source, JsImportDeclaration::GetSource(json));
+  ABSL_ASSIGN_OR_RETURN(auto assertions, JsImportDeclaration::GetAssertions(json));
 
   return absl::make_unique<JsImportDeclaration>(
       std::move(loc),
@@ -6303,17 +6303,17 @@ JsExportSpecifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto exported, JsExportSpecifier::GetExported(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto local, JsExportSpecifier::GetLocal(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto exported, JsExportSpecifier::GetExported(json));
+  ABSL_ASSIGN_OR_RETURN(auto local, JsExportSpecifier::GetLocal(json));
 
   return absl::make_unique<JsExportSpecifier>(
       std::move(loc),
@@ -6379,19 +6379,19 @@ JsExportNamedDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto declaration, JsExportNamedDeclaration::GetDeclaration(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto specifiers, JsExportNamedDeclaration::GetSpecifiers(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto source, JsExportNamedDeclaration::GetSource(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto assertions, JsExportNamedDeclaration::GetAssertions(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto declaration, JsExportNamedDeclaration::GetDeclaration(json));
+  ABSL_ASSIGN_OR_RETURN(auto specifiers, JsExportNamedDeclaration::GetSpecifiers(json));
+  ABSL_ASSIGN_OR_RETURN(auto source, JsExportNamedDeclaration::GetSource(json));
+  ABSL_ASSIGN_OR_RETURN(auto assertions, JsExportNamedDeclaration::GetAssertions(json));
 
   return absl::make_unique<JsExportNamedDeclaration>(
       std::move(loc),
@@ -6440,16 +6440,16 @@ JsExportDefaultDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto declaration, JsExportDefaultDeclaration::GetDeclaration(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto declaration, JsExportDefaultDeclaration::GetDeclaration(json));
 
   return absl::make_unique<JsExportDefaultDeclaration>(
       std::move(loc),
@@ -6494,17 +6494,17 @@ JsExportAllDeclaration::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto source, JsExportAllDeclaration::GetSource(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto assertions, JsExportAllDeclaration::GetAssertions(json));
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto source, JsExportAllDeclaration::GetSource(json));
+  ABSL_ASSIGN_OR_RETURN(auto assertions, JsExportAllDeclaration::GetAssertions(json));
 
   return absl::make_unique<JsExportAllDeclaration>(
       std::move(loc),

@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -117,8 +117,8 @@ LiSimpleList::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto strings, LiSimpleList::GetStrings(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operations, LiSimpleList::GetOperations(json));
+  ABSL_ASSIGN_OR_RETURN(auto strings, LiSimpleList::GetStrings(json));
+  ABSL_ASSIGN_OR_RETURN(auto operations, LiSimpleList::GetOperations(json));
 
   return absl::make_unique<LiSimpleList>(
       std::move(strings),
@@ -146,7 +146,7 @@ LiOptionalList::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto strings, LiOptionalList::GetStrings(json));
+  ABSL_ASSIGN_OR_RETURN(auto strings, LiOptionalList::GetStrings(json));
 
   return absl::make_unique<LiOptionalList>(
       std::move(strings));
@@ -188,8 +188,8 @@ LiListOfOptional::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto strings, LiListOfOptional::GetStrings(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operations, LiListOfOptional::GetOperations(json));
+  ABSL_ASSIGN_OR_RETURN(auto strings, LiListOfOptional::GetStrings(json));
+  ABSL_ASSIGN_OR_RETURN(auto operations, LiListOfOptional::GetOperations(json));
 
   return absl::make_unique<LiListOfOptional>(
       std::move(strings),
@@ -244,8 +244,8 @@ LiListOfVariant::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto variants, LiListOfVariant::GetVariants(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operations, LiListOfVariant::GetOperations(json));
+  ABSL_ASSIGN_OR_RETURN(auto variants, LiListOfVariant::GetVariants(json));
+  ABSL_ASSIGN_OR_RETURN(auto operations, LiListOfVariant::GetOperations(json));
 
   return absl::make_unique<LiListOfVariant>(
       std::move(variants),
@@ -275,7 +275,7 @@ LiOptionalListOfOptional::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfOptional::GetVariants(json));
+  ABSL_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfOptional::GetVariants(json));
 
   return absl::make_unique<LiOptionalListOfOptional>(
       std::move(variants));
@@ -310,7 +310,7 @@ LiOptionalListOfVariant::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfVariant::GetVariants(json));
+  ABSL_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfVariant::GetVariants(json));
 
   return absl::make_unique<LiOptionalListOfVariant>(
       std::move(variants));
@@ -368,8 +368,8 @@ LiListOfOptionalVariant::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto variants, LiListOfOptionalVariant::GetVariants(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto operations, LiListOfOptionalVariant::GetOperations(json));
+  ABSL_ASSIGN_OR_RETURN(auto variants, LiListOfOptionalVariant::GetVariants(json));
+  ABSL_ASSIGN_OR_RETURN(auto operations, LiListOfOptionalVariant::GetOperations(json));
 
   return absl::make_unique<LiListOfOptionalVariant>(
       std::move(variants),
@@ -407,7 +407,7 @@ LiOptionalListOfOptionalVariant::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfOptionalVariant::GetVariants(json));
+  ABSL_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfOptionalVariant::GetVariants(json));
 
   return absl::make_unique<LiOptionalListOfOptionalVariant>(
       std::move(variants));

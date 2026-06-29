@@ -27,6 +27,7 @@
 #include "absl/log/log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -35,7 +36,6 @@
 #include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/symbol.h"
 #include "maldoca/astgen/type.pb.h"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace {
@@ -145,7 +145,7 @@ absl::StatusOr<std::unique_ptr<ListType>> FromListTypePb(
       break;
 
     case NonListTypePb::kVariant: {
-      MALDOCA_ASSIGN_OR_RETURN(
+      ABSL_ASSIGN_OR_RETURN(
           element_type,
           FromVariantTypePb(pb.element_type().variant(), lang_name));
       break;

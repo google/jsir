@@ -34,10 +34,10 @@
 #include "absl/log/log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/trivia.h"
@@ -165,7 +165,7 @@ class JsirToAst {
         continue;
       }
       auto statement_op = llvm::cast<JsirStatementOpInterface>(op);
-      MALDOCA_ASSIGN_OR_RETURN(auto statement, VisitStatement(statement_op));
+      ABSL_ASSIGN_OR_RETURN(auto statement, VisitStatement(statement_op));
       statements.push_back(std::move(statement));
     }
 
@@ -204,8 +204,7 @@ class JsirToAst {
   template <typename NodeT, typename OpT>
   static absl::StatusOr<std::unique_ptr<NodeT>> VisitExprRegion(
       mlir::Region& region, VisitFunc<NodeT, OpT> visit) {
-    MALDOCA_ASSIGN_OR_RETURN(mlir::Value mlir_value,
-                             GetExprRegionValue(region));
+    ABSL_ASSIGN_OR_RETURN(mlir::Value mlir_value, GetExprRegionValue(region));
     auto mlir_op = llvm::dyn_cast<OpT>(mlir_value.getDefiningOp());
     if (mlir_op == nullptr) {
       return absl::InvalidArgumentError(
@@ -265,8 +264,8 @@ class JsirToAst {
   template <typename NodeT, typename OpT>
   static absl::StatusOr<std::unique_ptr<NodeT>> VisitStmtRegion(
       mlir::Region& region, VisitFunc<NodeT, OpT> visit) {
-    MALDOCA_ASSIGN_OR_RETURN(mlir::Operation * mlir_operation,
-                             GetStmtRegionOperation(region));
+    ABSL_ASSIGN_OR_RETURN(mlir::Operation * mlir_operation,
+                          GetStmtRegionOperation(region));
     auto mlir_op = llvm::dyn_cast<OpT>(mlir_operation);
     if (mlir_op == nullptr) {
       return absl::InvalidArgumentError(
@@ -291,7 +290,7 @@ class JsirToAst {
   VisitStmtOrExprRegion(mlir::Region& region,
                         VisitFunc<Stmt, StmtOp> visit_stmt,
                         VisitFunc<Expr, ExprOp> visit_expr) {
-    MALDOCA_ASSIGN_OR_RETURN(auto mlir_end, GetStmtRegionOperation(region));
+    ABSL_ASSIGN_OR_RETURN(auto mlir_end, GetStmtRegionOperation(region));
     if (auto mlir_stmt_op = llvm::dyn_cast<StmtOp>(mlir_end)) {
       return visit_stmt(mlir_stmt_op);
     } else if (auto mlir_end_op =

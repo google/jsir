@@ -26,8 +26,8 @@
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
@@ -84,8 +84,8 @@ absl::StatusOr<JsirExprsRegionEndOp> GetExprsRegionEndOp(mlir::Region &region) {
 }
 
 absl::StatusOr<mlir::ValueRange> GetExprsRegionValues(mlir::Region &region) {
-  MALDOCA_ASSIGN_OR_RETURN(JsirExprsRegionEndOp exprs_region_end,
-                           GetExprsRegionEndOp(region));
+  ABSL_ASSIGN_OR_RETURN(JsirExprsRegionEndOp exprs_region_end,
+                        GetExprsRegionEndOp(region));
   return exprs_region_end.getArguments();
 }
 

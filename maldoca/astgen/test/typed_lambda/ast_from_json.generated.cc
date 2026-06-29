@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -51,7 +51,7 @@ TlNode::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Literal") {
     return TlLiteral::FromJson(json);
@@ -83,7 +83,7 @@ TlExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Literal") {
     return TlLiteral::FromJson(json);
@@ -107,7 +107,7 @@ TlType::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "LiteralType") {
     return TlLiteralType::FromJson(json);
@@ -152,7 +152,7 @@ TlLiteral::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto value, TlLiteral::GetValue(json));
+  ABSL_ASSIGN_OR_RETURN(auto value, TlLiteral::GetValue(json));
 
   return absl::make_unique<TlLiteral>(
       std::move(value));
@@ -177,7 +177,7 @@ TlVariable::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto identifier, TlVariable::GetIdentifier(json));
+  ABSL_ASSIGN_OR_RETURN(auto identifier, TlVariable::GetIdentifier(json));
 
   return absl::make_unique<TlVariable>(
       std::move(identifier));
@@ -220,9 +220,9 @@ TlFunctionDefinition::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto parameter, TlFunctionDefinition::GetParameter(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto parameter_type, TlFunctionDefinition::GetParameterType(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, TlFunctionDefinition::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto parameter, TlFunctionDefinition::GetParameter(json));
+  ABSL_ASSIGN_OR_RETURN(auto parameter_type, TlFunctionDefinition::GetParameterType(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, TlFunctionDefinition::GetBody(json));
 
   return absl::make_unique<TlFunctionDefinition>(
       std::move(parameter),
@@ -258,8 +258,8 @@ TlFunctionCall::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto caller, TlFunctionCall::GetCaller(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto callee, TlFunctionCall::GetCallee(json));
+  ABSL_ASSIGN_OR_RETURN(auto caller, TlFunctionCall::GetCaller(json));
+  ABSL_ASSIGN_OR_RETURN(auto callee, TlFunctionCall::GetCallee(json));
 
   return absl::make_unique<TlFunctionCall>(
       std::move(caller),
@@ -309,8 +309,8 @@ TlFunctionType::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto parameter_type, TlFunctionType::GetParameterType(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body_type, TlFunctionType::GetBodyType(json));
+  ABSL_ASSIGN_OR_RETURN(auto parameter_type, TlFunctionType::GetParameterType(json));
+  ABSL_ASSIGN_OR_RETURN(auto body_type, TlFunctionType::GetBodyType(json));
 
   return absl::make_unique<TlFunctionType>(
       std::move(parameter_type),

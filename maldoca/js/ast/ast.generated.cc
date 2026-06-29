@@ -38,7 +38,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 

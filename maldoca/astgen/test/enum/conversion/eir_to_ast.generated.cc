@@ -44,12 +44,12 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/ir_to_ast_util.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/enum/ast.generated.h"
 #include "maldoca/astgen/test/enum/ir.h"
 
@@ -57,14 +57,14 @@ namespace maldoca {
 
 absl::StatusOr<std::unique_ptr<ENode>>
 EirToAst::VisitNode(EirNodeOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto unary_operator,
       Convert(
           op.getUnaryOperatorAttr(),
           Enum<EUnaryOperator>(StringToEUnaryOperator)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto escaped_char,
       Convert(
           op.getEscapedCharAttr(),

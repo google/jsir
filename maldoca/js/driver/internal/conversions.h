@@ -25,9 +25,9 @@
 #include "absl/base/nullability.h"
 #include "absl/log/check.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/time/time.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/driver.h"
 #include "maldoca/js/driver/driver.pb.h"
@@ -61,8 +61,8 @@ class JsConversionTmpl : public JsConversion {
 
  protected:
   absl::Status Convert(std::unique_ptr<JsRepr> &repr) override {
-    MALDOCA_ASSIGN_OR_RETURN(auto *from, JsRepr::Cast<FromRepr>(repr.get()));
-    MALDOCA_ASSIGN_OR_RETURN(repr, Convert(*from));
+    ABSL_ASSIGN_OR_RETURN(auto *from, JsRepr::Cast<FromRepr>(repr.get()));
+    ABSL_ASSIGN_OR_RETURN(repr, Convert(*from));
     return absl::OkStatus();
   }
 };

@@ -64,7 +64,6 @@ void AstSerializePrinter::PrintAst(const AstDef& ast,
       "absl/status/status.h",
       "absl/strings/string_view.h",
       "nlohmann/json.hpp",
-      "maldoca/base/status_macros.h",
   });
   Println();
 

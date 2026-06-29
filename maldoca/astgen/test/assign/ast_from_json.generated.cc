@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -51,7 +51,7 @@ AExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Identifier") {
     return AIdentifier::FromJson(json);
@@ -80,7 +80,7 @@ AIdentifier::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto name, AIdentifier::GetName(json));
+  ABSL_ASSIGN_OR_RETURN(auto name, AIdentifier::GetName(json));
 
   return absl::make_unique<AIdentifier>(
       std::move(name));
@@ -114,8 +114,8 @@ AAssignment::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto lhs, AAssignment::GetLhs(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto rhs, AAssignment::GetRhs(json));
+  ABSL_ASSIGN_OR_RETURN(auto lhs, AAssignment::GetLhs(json));
+  ABSL_ASSIGN_OR_RETURN(auto rhs, AAssignment::GetRhs(json));
 
   return absl::make_unique<AAssignment>(
       std::move(lhs),

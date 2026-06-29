@@ -44,12 +44,12 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/ir_to_ast_util.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/variant/ast.generated.h"
 #include "maldoca/astgen/test/variant/ir.h"
 
@@ -84,7 +84,7 @@ VirToAst::VisitDerivedClass2(VirDerivedClass2Op op) {
 
 absl::StatusOr<std::unique_ptr<VNode>>
 VirToAst::VisitNode(VirNodeOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto simple_variant_builtin,
       Convert(
           op.getSimpleVariantBuiltinAttr(),
@@ -94,7 +94,7 @@ VirToAst::VisitNode(VirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto nullable_variant_builtin,
       Convert(
           op.getNullableVariantBuiltinAttr(),
@@ -106,7 +106,7 @@ VirToAst::VisitNode(VirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto optional_variant_builtin,
       Convert(
           op.getOptionalVariantBuiltinAttr(),
@@ -118,7 +118,7 @@ VirToAst::VisitNode(VirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto simple_variant_class,
       Convert(
           op.getSimpleVariantClass(),
@@ -128,7 +128,7 @@ VirToAst::VisitNode(VirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto nullable_variant_class,
       Convert(
           op.getNullableVariantClass(),
@@ -140,7 +140,7 @@ VirToAst::VisitNode(VirNodeOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto optional_variant_class,
       Convert(
           op.getOptionalVariantClass(),

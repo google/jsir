@@ -29,6 +29,7 @@
 #include "absl/log/log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -36,7 +37,6 @@
 #include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/symbol.h"
 #include "maldoca/astgen/type.h"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace {
@@ -175,8 +175,8 @@ absl::StatusOr<EnumDef> EnumDef::FromEnumDefPb(const EnumDefPb& enum_pb) {
 
   std::vector<EnumMemberDef> members;
   for (const EnumMemberDefPb& member_pb : enum_pb.members()) {
-    MALDOCA_ASSIGN_OR_RETURN(auto member,
-                             EnumMemberDef::FromEnumMemberDefPb(member_pb));
+    ABSL_ASSIGN_OR_RETURN(auto member,
+                          EnumMemberDef::FromEnumMemberDefPb(member_pb));
     members.push_back(std::move(member));
   }
 
@@ -194,7 +194,7 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
         absl::StrCat("Field '", field_pb.name(), "' is not in camelCase."));
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(field.type_, FromTypePb(field_pb.type(), lang_name));
+  ABSL_ASSIGN_OR_RETURN(field.type_, FromTypePb(field_pb.type(), lang_name));
 
   if (field_pb.optionalness() == OPTIONALNESS_UNSPECIFIED) {
     return absl::InvalidArgumentError(
@@ -284,8 +284,8 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
 absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
   std::vector<EnumDef> enum_defs;
   for (const EnumDefPb& enum_def_pb : pb.enums()) {
-    MALDOCA_ASSIGN_OR_RETURN(EnumDef enum_def,
-                             EnumDef::FromEnumDefPb(enum_def_pb));
+    ABSL_ASSIGN_OR_RETURN(EnumDef enum_def,
+                          EnumDef::FromEnumDefPb(enum_def_pb));
     enum_defs.push_back(std::move(enum_def));
   }
 
@@ -307,8 +307,8 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     }
 
     for (const FieldDefPb& field_pb : node_pb.fields()) {
-      MALDOCA_ASSIGN_OR_RETURN(
-          FieldDef field, FieldDef::FromFieldDefPb(field_pb, pb.lang_name()));
+      ABSL_ASSIGN_OR_RETURN(FieldDef field,
+                            FieldDef::FromFieldDefPb(field_pb, pb.lang_name()));
       node->fields_.push_back(std::move(field));
     }
 

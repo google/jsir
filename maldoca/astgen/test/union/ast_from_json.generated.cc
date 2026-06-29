@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -51,7 +51,7 @@ EUnionType::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "SubNodeA") {
     return ESubNodeA::FromJson(json);
@@ -89,8 +89,8 @@ ENode::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto name, ENode::GetName(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto content, ENode::GetContent(json));
+  ABSL_ASSIGN_OR_RETURN(auto name, ENode::GetName(json));
+  ABSL_ASSIGN_OR_RETURN(auto content, ENode::GetContent(json));
 
   return absl::make_unique<ENode>(
       std::move(name),
@@ -116,7 +116,7 @@ ESubNodeA::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto value_a, ESubNodeA::GetValueA(json));
+  ABSL_ASSIGN_OR_RETURN(auto value_a, ESubNodeA::GetValueA(json));
 
   return absl::make_unique<ESubNodeA>(
       std::move(value_a));
@@ -141,7 +141,7 @@ ESubNodeB::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto value_b, ESubNodeB::GetValueB(json));
+  ABSL_ASSIGN_OR_RETURN(auto value_b, ESubNodeB::GetValueB(json));
 
   return absl::make_unique<ESubNodeB>(
       std::move(value_b));

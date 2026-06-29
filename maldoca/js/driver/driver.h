@@ -31,6 +31,7 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -316,8 +317,7 @@ class JsAnalysisTmpl : public JsAnalysis {
   absl::Status Analyze(std::optional<absl::string_view> original_source,
                        const JsRepr& repr,
                        JsAnalysisOutputs& outputs) override {
-    MALDOCA_ASSIGN_OR_RETURN(const ReprT* repr_cast,
-                             JsRepr::Cast<ReprT>(&repr));
+    ABSL_ASSIGN_OR_RETURN(const ReprT* repr_cast, JsRepr::Cast<ReprT>(&repr));
     return Analyze(original_source, *repr_cast, outputs);
   }
 };
@@ -338,9 +338,9 @@ class JsirAnalysis : public JsAnalysisTmpl<JsirRepr> {
     if (original_source_u8.has_value()) {
       original_source_u16 = Utf8ToUtf16(*original_source_u8);
     }
-    MALDOCA_ASSIGN_OR_RETURN(JsirAnalysisResult result,
-                             RunJsirAnalysis(*repr.op, original_source_u16,
-                                             repr.scopes, config_, babel_));
+    ABSL_ASSIGN_OR_RETURN(JsirAnalysisResult result,
+                          RunJsirAnalysis(*repr.op, original_source_u16,
+                                          repr.scopes, config_, babel_));
     *outputs.add_outputs()->mutable_jsir_analysis() = std::move(result);
     return absl::OkStatus();
   }
@@ -379,7 +379,7 @@ class JsTransformTmpl : public JsTransform {
  protected:
   absl::Status Transform(std::optional<absl::string_view> original_source,
                          JsRepr& repr, JsAnalysisOutputs& outputs) override {
-    MALDOCA_ASSIGN_OR_RETURN(ReprT * repr_cast, JsRepr::Cast<ReprT>(&repr));
+    ABSL_ASSIGN_OR_RETURN(ReprT * repr_cast, JsRepr::Cast<ReprT>(&repr));
     return Transform(original_source, *repr_cast, outputs);
   }
 };

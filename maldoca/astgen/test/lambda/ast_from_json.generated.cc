@@ -32,11 +32,11 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_from_json_utils.h"
-#include "maldoca/base/status_macros.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -51,7 +51,7 @@ LaExpression::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(std::string type, GetType(json));
+  ABSL_ASSIGN_OR_RETURN(std::string type, GetType(json));
 
   if (type == "Variable") {
     return LaVariable::FromJson(json);
@@ -82,7 +82,7 @@ LaVariable::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto identifier, LaVariable::GetIdentifier(json));
+  ABSL_ASSIGN_OR_RETURN(auto identifier, LaVariable::GetIdentifier(json));
 
   return absl::make_unique<LaVariable>(
       std::move(identifier));
@@ -116,8 +116,8 @@ LaFunctionDefinition::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto parameter, LaFunctionDefinition::GetParameter(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto body, LaFunctionDefinition::GetBody(json));
+  ABSL_ASSIGN_OR_RETURN(auto parameter, LaFunctionDefinition::GetParameter(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, LaFunctionDefinition::GetBody(json));
 
   return absl::make_unique<LaFunctionDefinition>(
       std::move(parameter),
@@ -152,8 +152,8 @@ LaFunctionCall::FromJson(const nlohmann::json& json) {
     return absl::InvalidArgumentError("JSON is not an object.");
   }
 
-  MALDOCA_ASSIGN_OR_RETURN(auto function, LaFunctionCall::GetFunction(json));
-  MALDOCA_ASSIGN_OR_RETURN(auto argument, LaFunctionCall::GetArgument(json));
+  ABSL_ASSIGN_OR_RETURN(auto function, LaFunctionCall::GetFunction(json));
+  ABSL_ASSIGN_OR_RETURN(auto argument, LaFunctionCall::GetArgument(json));
 
   return absl::make_unique<LaFunctionCall>(
       std::move(function),

@@ -112,11 +112,11 @@ void AstFromJsonPrinter::PrintAst(const AstDef& ast,
       "absl/container/flat_hash_set.h",
       "absl/memory/memory.h",
       "absl/status/status.h",
+      "absl/status/status_macros.h",
       "absl/status/statusor.h",
       "absl/strings/str_cat.h",
       "absl/strings/string_view.h",
       "maldoca/astgen/ast_from_json_utils.h",
-      "maldoca/base/status_macros.h",
       "nlohmann/json.hpp",
   });
   Println();
@@ -465,8 +465,7 @@ void AstFromJsonPrinter::PrintFromJsonFunction(const NodeDef& node,
       // function.
 
       Println(
-          "MALDOCA_ASSIGN_OR_RETURN"
-          "(std::string type, GetType($json_variable$));");
+          "ABSL_ASSIGN_OR_RETURN(std::string type, GetType($json_variable$));");
       Println();
 
       IfStmtPrinter if_stmt_printer(this);
@@ -514,7 +513,7 @@ void AstFromJsonPrinter::PrintFromJsonFunction(const NodeDef& node,
             {"FieldName", node_field_pair.field_name.ToPascalCase()},
         });
         Println(
-            "MALDOCA_ASSIGN_OR_RETURN(auto $field_name$, "
+            "ABSL_ASSIGN_OR_RETURN(auto $field_name$, "
             "$NodeType$::Get$FieldName$($json_variable$));");
       }
 

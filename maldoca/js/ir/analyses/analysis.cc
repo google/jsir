@@ -29,10 +29,10 @@
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/base/ret_check.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/babel.pb.h"
@@ -71,7 +71,7 @@ absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
     }
 
     case JsirAnalysisConfig::kConstantPropagation: {
-      MALDOCA_ASSIGN_OR_RETURN(
+      ABSL_ASSIGN_OR_RETURN(
           JsirAnalysisResult::DataFlow detailed_result,
           RunJsirDataFlowAnalysis<JsirConstantPropagationAnalysis>(op,
                                                                    &scopes));

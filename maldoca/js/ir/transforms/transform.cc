@@ -25,6 +25,7 @@
 #include "absl/base/nullability.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "maldoca/base/ret_check.h"
 #include "maldoca/base/status_macros.h"
@@ -133,9 +134,9 @@ absl::Status TransformJsir(JsirFileOp jsir_file, const BabelScopes &scopes,
   pass_manager.enableVerifier(false);
 
   for (auto &&config : configs) {
-    MALDOCA_ASSIGN_OR_RETURN(std::unique_ptr<mlir::Pass> pass,
-                             CreateJsirTransformPass(&scopes, std::move(config),
-                                                     babel, analysis_outputs));
+    ABSL_ASSIGN_OR_RETURN(std::unique_ptr<mlir::Pass> pass,
+                          CreateJsirTransformPass(&scopes, std::move(config),
+                                                  babel, analysis_outputs));
     pass_manager.addPass(std::move(pass));
   }
 
@@ -151,7 +152,7 @@ absl::StatusOr<std::unique_ptr<JsFile>> TransformJsAst(
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
-  MALDOCA_ASSIGN_OR_RETURN(auto jshir_file, AstToJshirFile(ast, mlir_context));
+  ABSL_ASSIGN_OR_RETURN(auto jshir_file, AstToJshirFile(ast, mlir_context));
 
   JsAnalysisOutputs analysis_outputs;
   MALDOCA_RETURN_IF_ERROR(TransformJsir(*jshir_file, scopes, std::move(configs),

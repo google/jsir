@@ -44,12 +44,12 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/ir_to_ast_util.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -141,14 +141,14 @@ JsirToAst::VisitProgramBodyElement(JsirProgramBodyElementOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsDirectiveLiteral>>
 JsirToAst::VisitDirectiveLiteral(JsirDirectiveLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValueAttr(),
           ToString()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto extra,
       Convert(
           op.getExtraAttr(),
@@ -165,7 +165,7 @@ JsirToAst::VisitDirectiveLiteral(JsirDirectiveLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsDirective>>
 JsirToAst::VisitDirective(JsirDirectiveOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValue(),
@@ -179,7 +179,7 @@ JsirToAst::VisitDirective(JsirDirectiveOp op) {
 
 absl::StatusOr<std::unique_ptr<JsProgram>>
 JsirToAst::VisitProgram(JsirProgramOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto interpreter,
       Convert(
           op.getInterpreterAttr(),
@@ -188,14 +188,14 @@ JsirToAst::VisitProgram(JsirProgramOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto source_type,
       Convert(
           op.getSourceTypeAttr(),
           ToString()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -206,7 +206,7 @@ JsirToAst::VisitProgram(JsirProgramOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto directives,
       Convert(
           op.getDirectives(),
@@ -227,7 +227,7 @@ JsirToAst::VisitProgram(JsirProgramOp op) {
 
 absl::StatusOr<std::unique_ptr<JsFile>>
 JsirToAst::VisitFile(JsirFileOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto program,
       Convert(
           op.getProgram(),
@@ -236,7 +236,7 @@ JsirToAst::VisitFile(JsirFileOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto comments,
       Convert(
           op.getCommentsAttr(),
@@ -417,7 +417,7 @@ JsirToAst::VisitLValRef(JsirLValRefOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsirToAst::VisitIdentifier(JsirIdentifierOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto name,
       Convert(
           op.getNameAttr(),
@@ -431,7 +431,7 @@ JsirToAst::VisitIdentifier(JsirIdentifierOp op) {
 
 absl::StatusOr<std::unique_ptr<JsIdentifier>>
 JsirToAst::VisitIdentifierRef(JsirIdentifierRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto name,
       Convert(
           op.getNameAttr(),
@@ -445,7 +445,7 @@ JsirToAst::VisitIdentifierRef(JsirIdentifierRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsPrivateName>>
 JsirToAst::VisitPrivateName(JsirPrivateNameOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto id,
       Convert(
           op.getIdAttr(),
@@ -486,21 +486,21 @@ JsirToAst::VisitLiteral(JsirLiteralOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsRegExpLiteral>>
 JsirToAst::VisitRegExpLiteral(JsirRegExpLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto pattern,
       Convert(
           op.getPatternAttr(),
           ToString()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto flags,
       Convert(
           op.getFlagsAttr(),
           ToString()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto extra,
       Convert(
           op.getExtraAttr(),
@@ -524,14 +524,14 @@ JsirToAst::VisitNullLiteral(JsirNullLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsirToAst::VisitStringLiteral(JsirStringLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValueAttr(),
           ToString()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto extra,
       Convert(
           op.getExtraAttr(),
@@ -548,7 +548,7 @@ JsirToAst::VisitStringLiteral(JsirStringLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsBooleanLiteral>>
 JsirToAst::VisitBooleanLiteral(JsirBooleanLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValueAttr(),
@@ -562,14 +562,14 @@ JsirToAst::VisitBooleanLiteral(JsirBooleanLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsNumericLiteral>>
 JsirToAst::VisitNumericLiteral(JsirNumericLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValueAttr(),
           ToDouble()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto extra,
       Convert(
           op.getExtraAttr(),
@@ -586,14 +586,14 @@ JsirToAst::VisitNumericLiteral(JsirNumericLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteral>>
 JsirToAst::VisitBigIntLiteral(JsirBigIntLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValueAttr(),
           ToString()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto extra,
       Convert(
           op.getExtraAttr(),
@@ -682,7 +682,7 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
 JsirToAst::VisitBlockStatement(JshirBlockStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -693,7 +693,7 @@ JsirToAst::VisitBlockStatement(JshirBlockStatementOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto directives,
       Convert(
           op.getDirectives(),
@@ -712,7 +712,7 @@ JsirToAst::VisitBlockStatement(JshirBlockStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExpressionStatement>>
 JsirToAst::VisitExpressionStatement(JsirExpressionStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto expression,
       Convert(
           op.getExpression(),
@@ -738,14 +738,14 @@ JsirToAst::VisitDebuggerStatement(JsirDebuggerStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsWithStatement>>
 JsirToAst::VisitWithStatement(JshirWithStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto object,
       Convert(
           op.getObject(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -762,7 +762,7 @@ JsirToAst::VisitWithStatement(JshirWithStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsReturnStatement>>
 JsirToAst::VisitReturnStatement(JsirReturnStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -778,14 +778,14 @@ JsirToAst::VisitReturnStatement(JsirReturnStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsLabeledStatement>>
 JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto label,
       Convert(
           op.getLabelAttr(),
           ToAttrConverter(VisitIdentifierAttr)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -802,14 +802,14 @@ JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsIfStatement>>
 JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
           op.getTest(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto consequent,
       Convert(
           op.getConsequent(),
@@ -818,7 +818,7 @@ JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto alternate,
       Convert(
           op.getAlternate(),
@@ -838,7 +838,7 @@ JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSwitchCase>>
 JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
           op.getTest(),
@@ -849,7 +849,7 @@ JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto consequent,
       Convert(
           op.getConsequent(),
@@ -868,14 +868,14 @@ JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSwitchStatement>>
 JsirToAst::VisitSwitchStatement(JshirSwitchStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto discriminant,
       Convert(
           op.getDiscriminant(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto cases,
       Convert(
           op.getCases(),
@@ -894,7 +894,7 @@ JsirToAst::VisitSwitchStatement(JshirSwitchStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsThrowStatement>>
 JsirToAst::VisitThrowStatement(JsirThrowStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -908,7 +908,7 @@ JsirToAst::VisitThrowStatement(JsirThrowStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsCatchClause>>
 JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto param,
       Convert(
           op.getParam(),
@@ -917,7 +917,7 @@ JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -934,7 +934,7 @@ JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTryStatement>>
 JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto block,
       Convert(
           op.getBlock(),
@@ -943,7 +943,7 @@ JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto handler,
       Convert(
           op.getHandler(),
@@ -954,7 +954,7 @@ JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto finalizer,
       Convert(
           op.getFinalizer(),
@@ -974,7 +974,7 @@ JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsWhileStatement>>
 JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
           op.getTest(),
@@ -983,7 +983,7 @@ JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1000,7 +1000,7 @@ JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsDoWhileStatement>>
 JsirToAst::VisitDoWhileStatement(JshirDoWhileStatementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1009,7 +1009,7 @@ JsirToAst::VisitDoWhileStatement(JshirDoWhileStatementOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
           op.getTest(),
@@ -1044,14 +1044,14 @@ JsirToAst::VisitDeclaration(JsirDeclarationOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<JsVariableDeclarator>>
 JsirToAst::VisitVariableDeclarator(JsirVariableDeclaratorOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto id,
       Convert(
           op.getId(),
           ToOpConverter(VisitLValRef)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto init,
       Convert(
           op.getInit(),
@@ -1068,7 +1068,7 @@ JsirToAst::VisitVariableDeclarator(JsirVariableDeclaratorOp op) {
 
 absl::StatusOr<std::unique_ptr<JsVariableDeclaration>>
 JsirToAst::VisitVariableDeclaration(JsirVariableDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto declarations,
       Convert(
           op.getDeclarations(),
@@ -1079,7 +1079,7 @@ JsirToAst::VisitVariableDeclaration(JsirVariableDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto kind,
       Convert(
           op.getKindAttr(),
@@ -1094,7 +1094,7 @@ JsirToAst::VisitVariableDeclaration(JsirVariableDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsFunctionDeclaration>>
 JsirToAst::VisitFunctionDeclaration(JsirFunctionDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto id,
       Convert(
           op.getIdAttr(),
@@ -1103,7 +1103,7 @@ JsirToAst::VisitFunctionDeclaration(JsirFunctionDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto params,
       Convert(
           op.getParams(),
@@ -1114,21 +1114,21 @@ JsirToAst::VisitFunctionDeclaration(JsirFunctionDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto generator,
       Convert(
           op.getGeneratorAttr(),
           ToBool()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto async,
       Convert(
           op.getAsyncAttr(),
           ToBool()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1166,7 +1166,7 @@ JsirToAst::VisitThisExpression(JsirThisExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsYieldExpression>>
 JsirToAst::VisitYieldExpression(JsirYieldExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -1175,7 +1175,7 @@ JsirToAst::VisitYieldExpression(JsirYieldExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto delegate,
       Convert(
           op.getDelegateAttr(),
@@ -1190,7 +1190,7 @@ JsirToAst::VisitYieldExpression(JsirYieldExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsAwaitExpression>>
 JsirToAst::VisitAwaitExpression(JsirAwaitExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -1206,7 +1206,7 @@ JsirToAst::VisitAwaitExpression(JsirAwaitExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSpreadElement>>
 JsirToAst::VisitSpreadElement(JsirSpreadElementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -1220,7 +1220,7 @@ JsirToAst::VisitSpreadElement(JsirSpreadElementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsArrayExpression>>
 JsirToAst::VisitArrayExpression(JsirArrayExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto elements,
       Convert(
           op.getElements(),
@@ -1241,7 +1241,7 @@ JsirToAst::VisitArrayExpression(JsirArrayExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsFunctionExpression>>
 JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto id,
       Convert(
           op.getIdAttr(),
@@ -1250,7 +1250,7 @@ JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto params,
       Convert(
           op.getParams(),
@@ -1261,21 +1261,21 @@ JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto generator,
       Convert(
           op.getGeneratorAttr(),
           ToBool()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto async,
       Convert(
           op.getAsyncAttr(),
           ToBool()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1295,21 +1295,21 @@ JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsUnaryExpression>>
 JsirToAst::VisitUnaryExpression(JsirUnaryExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operator_,
       Convert(
           op.getOperator_Attr(),
           Enum<JsUnaryOperator>(StringToJsUnaryOperator)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto prefix,
       Convert(
           op.getPrefixAttr(),
           ToBool()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -1325,21 +1325,21 @@ JsirToAst::VisitUnaryExpression(JsirUnaryExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsUpdateExpression>>
 JsirToAst::VisitUpdateExpression(JsirUpdateExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operator_,
       Convert(
           op.getOperator_Attr(),
           Enum<JsUpdateOperator>(StringToJsUpdateOperator)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
           ToOpConverter(VisitLValRef)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto prefix,
       Convert(
           op.getPrefixAttr(),
@@ -1355,14 +1355,14 @@ JsirToAst::VisitUpdateExpression(JsirUpdateExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsBinaryExpression>>
 JsirToAst::VisitBinaryExpression(JsirBinaryExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operator_,
       Convert(
           op.getOperator_Attr(),
           Enum<JsBinaryOperator>(StringToJsBinaryOperator)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto left,
       Convert(
           op.getLeft(),
@@ -1372,7 +1372,7 @@ JsirToAst::VisitBinaryExpression(JsirBinaryExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto right,
       Convert(
           op.getRight(),
@@ -1388,21 +1388,21 @@ JsirToAst::VisitBinaryExpression(JsirBinaryExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsAssignmentExpression>>
 JsirToAst::VisitAssignmentExpression(JsirAssignmentExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operator_,
       Convert(
           op.getOperator_Attr(),
           Enum<JsAssignmentOperator>(StringToJsAssignmentOperator)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto left,
       Convert(
           op.getLeft(),
           ToOpConverter(VisitLValRef)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto right,
       Convert(
           op.getRight(),
@@ -1418,21 +1418,21 @@ JsirToAst::VisitAssignmentExpression(JsirAssignmentExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsLogicalExpression>>
 JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto operator_,
       Convert(
           op.getOperator_Attr(),
           Enum<JsLogicalOperator>(StringToJsLogicalOperator)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto left,
       Convert(
           op.getLeft(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto right,
       Convert(
           op.getRight(),
@@ -1450,14 +1450,14 @@ JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsConditionalExpression>>
 JsirToAst::VisitConditionalExpression(JshirConditionalExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
           op.getTest(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto alternate,
       Convert(
           op.getAlternate(),
@@ -1466,7 +1466,7 @@ JsirToAst::VisitConditionalExpression(JshirConditionalExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto consequent,
       Convert(
           op.getConsequent(),
@@ -1484,7 +1484,7 @@ JsirToAst::VisitConditionalExpression(JshirConditionalExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsCallExpression>>
 JsirToAst::VisitCallExpression(JsirCallExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto callee,
       Convert(
           op.getCallee(),
@@ -1495,7 +1495,7 @@ JsirToAst::VisitCallExpression(JsirCallExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto arguments,
       Convert(
           op.getArguments(),
@@ -1515,14 +1515,14 @@ JsirToAst::VisitCallExpression(JsirCallExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsOptionalCallExpression>>
 JsirToAst::VisitOptionalCallExpression(JsirOptionalCallExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto callee,
       Convert(
           op.getCallee(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto arguments,
       Convert(
           op.getArguments(),
@@ -1534,7 +1534,7 @@ JsirToAst::VisitOptionalCallExpression(JsirOptionalCallExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto optional,
       Convert(
           op.getOptionalAttr(),
@@ -1550,7 +1550,7 @@ JsirToAst::VisitOptionalCallExpression(JsirOptionalCallExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsNewExpression>>
 JsirToAst::VisitNewExpression(JsirNewExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto callee,
       Convert(
           op.getCallee(),
@@ -1561,7 +1561,7 @@ JsirToAst::VisitNewExpression(JsirNewExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto arguments,
       Convert(
           op.getArguments(),
@@ -1581,7 +1581,7 @@ JsirToAst::VisitNewExpression(JsirNewExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsSequenceExpression>>
 JsirToAst::VisitSequenceExpression(JsirSequenceExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto expressions,
       Convert(
           op.getExpressions(),
@@ -1597,7 +1597,7 @@ JsirToAst::VisitSequenceExpression(JsirSequenceExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTemplateElementValue>>
 JsirToAst::VisitTemplateElementValue(JsirTemplateElementValueOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto cooked,
       Convert(
           op.getCookedAttr(),
@@ -1606,7 +1606,7 @@ JsirToAst::VisitTemplateElementValue(JsirTemplateElementValueOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto raw,
       Convert(
           op.getRawAttr(),
@@ -1621,14 +1621,14 @@ JsirToAst::VisitTemplateElementValue(JsirTemplateElementValueOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTemplateElement>>
 JsirToAst::VisitTemplateElement(JsirTemplateElementOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto tail,
       Convert(
           op.getTailAttr(),
           ToBool()
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValue(),
@@ -1643,7 +1643,7 @@ JsirToAst::VisitTemplateElement(JsirTemplateElementOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTemplateLiteral>>
 JsirToAst::VisitTemplateLiteral(JsirTemplateLiteralOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto quasis,
       Convert(
           op.getQuasis(),
@@ -1652,7 +1652,7 @@ JsirToAst::VisitTemplateLiteral(JsirTemplateLiteralOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto expressions,
       Convert(
           op.getExpressions(),
@@ -1669,14 +1669,14 @@ JsirToAst::VisitTemplateLiteral(JsirTemplateLiteralOp op) {
 
 absl::StatusOr<std::unique_ptr<JsTaggedTemplateExpression>>
 JsirToAst::VisitTaggedTemplateExpression(JsirTaggedTemplateExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto tag,
       Convert(
           op.getTag(),
           ToOpConverter(VisitExpression)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto quasi,
       Convert(
           op.getQuasi(),
@@ -1691,7 +1691,7 @@ JsirToAst::VisitTaggedTemplateExpression(JsirTaggedTemplateExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsRestElement>>
 JsirToAst::VisitRestElementRef(JsirRestElementRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto argument,
       Convert(
           op.getArgument(),
@@ -1705,7 +1705,7 @@ JsirToAst::VisitRestElementRef(JsirRestElementRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsObjectPattern>>
 JsirToAst::VisitObjectPatternRef(JsirObjectPatternRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto properties_,
       Convert(
           op.getProperties_(),
@@ -1726,7 +1726,7 @@ JsirToAst::VisitObjectPatternRef(JsirObjectPatternRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsArrayPattern>>
 JsirToAst::VisitArrayPatternRef(JsirArrayPatternRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto elements,
       Convert(
           op.getElements(),
@@ -1744,14 +1744,14 @@ JsirToAst::VisitArrayPatternRef(JsirArrayPatternRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsAssignmentPattern>>
 JsirToAst::VisitAssignmentPatternRef(JsirAssignmentPatternRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto left,
       Convert(
           op.getLeft(),
           ToOpConverter(VisitPatternRef)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto right,
       Convert(
           op.getRight(),
@@ -1766,14 +1766,14 @@ JsirToAst::VisitAssignmentPatternRef(JsirAssignmentPatternRefOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassPrivateProperty>>
 JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto key,
       Convert(
           op.getKeyAttr(),
           ToAttrConverter(VisitPrivateNameAttr)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto value,
       Convert(
           op.getValue(),
@@ -1784,7 +1784,7 @@ JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto static_,
       Convert(
           op.getStatic_Attr(),
@@ -1800,7 +1800,7 @@ JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassBody>>
 JsirToAst::VisitClassBody(JsirClassBodyOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1823,7 +1823,7 @@ JsirToAst::VisitClassBody(JsirClassBodyOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassDeclaration>>
 JsirToAst::VisitClassDeclaration(JsirClassDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto super_class,
       Convert(
           op.getSuperClass(),
@@ -1832,7 +1832,7 @@ JsirToAst::VisitClassDeclaration(JsirClassDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1841,7 +1841,7 @@ JsirToAst::VisitClassDeclaration(JsirClassDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto id,
       Convert(
           op.getIdAttr(),
@@ -1859,7 +1859,7 @@ JsirToAst::VisitClassDeclaration(JsirClassDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsClassExpression>>
 JsirToAst::VisitClassExpression(JsirClassExpressionOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto super_class,
       Convert(
           op.getSuperClass(),
@@ -1868,7 +1868,7 @@ JsirToAst::VisitClassExpression(JsirClassExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
           op.getBody(),
@@ -1877,7 +1877,7 @@ JsirToAst::VisitClassExpression(JsirClassExpressionOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto id,
       Convert(
           op.getIdAttr(),
@@ -1895,14 +1895,14 @@ JsirToAst::VisitClassExpression(JsirClassExpressionOp op) {
 
 absl::StatusOr<std::unique_ptr<JsMetaProperty>>
 JsirToAst::VisitMetaProperty(JsirMetaPropertyOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto meta,
       Convert(
           op.getMetaAttr(),
           ToAttrConverter(VisitIdentifierAttr)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto property,
       Convert(
           op.getPropertyAttr(),
@@ -1959,7 +1959,7 @@ JsirToAst::VisitModuleSpecifierAttr(JsirModuleSpecifierAttrInterface attr) {
 
 absl::StatusOr<std::unique_ptr<JsImportDeclaration>>
 JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto specifiers,
       Convert(
           op.getSpecifiersAttr(),
@@ -1972,14 +1972,14 @@ JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto source,
       Convert(
           op.getSourceAttr(),
           ToAttrConverter(VisitStringLiteralAttr)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto assertions,
       Convert(
           op.getAssertionsAttr(),
@@ -1997,7 +1997,7 @@ JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExportNamedDeclaration>>
 JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto declaration,
       Convert(
           op.getDeclaration(),
@@ -2008,7 +2008,7 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto specifiers,
       Convert(
           op.getSpecifiersAttr(),
@@ -2017,7 +2017,7 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto source,
       Convert(
           op.getSourceAttr(),
@@ -2026,7 +2026,7 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
           )
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto assertions,
       Convert(
           op.getAssertionsAttr(),
@@ -2047,14 +2047,14 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExportAllDeclaration>>
 JsirToAst::VisitExportAllDeclaration(JsirExportAllDeclarationOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto source,
       Convert(
           op.getSourceAttr(),
           ToAttrConverter(VisitStringLiteralAttr)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto assertions,
       Convert(
           op.getAssertionsAttr(),

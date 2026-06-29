@@ -22,7 +22,7 @@
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "absl/status/status.h"
-#include "maldoca/base/status_macros.h"
+#include "absl/status/status_macros.h"
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/jsir_utils.h"
 
@@ -72,10 +72,9 @@ void SplitDeclarationStatements(mlir::Operation *root) {
       return;
     }
 
-    MALDOCA_ASSIGN_OR_RETURN(
-        JsirExprsRegionEndOp declarators_op,
-        GetExprsRegionEndOp(declaration_op.getDeclarations()),
-        _.With([](const absl::Status &) { return; }));
+    ABSL_ASSIGN_OR_RETURN(JsirExprsRegionEndOp declarators_op,
+                          GetExprsRegionEndOp(declaration_op.getDeclarations()),
+                          _.With([](const absl::Status&) { return; }));
 
     if (declarators_op.getArguments().size() <= 1) {
       return;

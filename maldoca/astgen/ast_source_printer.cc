@@ -66,7 +66,6 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
   PrintIncludeHeader("absl/strings/str_cat.h");
   PrintIncludeHeader("absl/strings/string_view.h");
   PrintIncludeHeader("nlohmann/json.hpp");
-  PrintIncludeHeader("maldoca/base/status_macros.h");
   Println();
 
   PrintEnterNamespace(cc_namespace);

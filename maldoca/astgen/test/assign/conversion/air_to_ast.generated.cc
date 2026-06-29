@@ -44,12 +44,12 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/ir_to_ast_util.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/astgen/test/assign/ast.generated.h"
 #include "maldoca/astgen/test/assign/ir.h"
 
@@ -72,7 +72,7 @@ AirToAst::VisitExpression(AirExpressionOpInterface op) {
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
 AirToAst::VisitIdentifier(AirIdentifierOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto name,
       Convert(
           op.getNameAttr(),
@@ -86,7 +86,7 @@ AirToAst::VisitIdentifier(AirIdentifierOp op) {
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
 AirToAst::VisitIdentifierRef(AirIdentifierRefOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto name,
       Convert(
           op.getNameAttr(),
@@ -100,14 +100,14 @@ AirToAst::VisitIdentifierRef(AirIdentifierRefOp op) {
 
 absl::StatusOr<std::unique_ptr<AAssignment>>
 AirToAst::VisitAssignment(AirAssignmentOp op) {
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto lhs,
       Convert(
           op.getLhs(),
           ToOpConverter(VisitIdentifierRef)
       )
   );
-  MALDOCA_ASSIGN_OR_RETURN(
+  ABSL_ASSIGN_OR_RETURN(
       auto rhs,
       Convert(
           op.getRhs(),

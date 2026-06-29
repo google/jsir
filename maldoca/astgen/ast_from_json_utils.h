@@ -24,11 +24,11 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 
@@ -169,7 +169,7 @@ Converter<std::vector<T>> List(Converter<T> elem_converter) {
     }
     std::vector<T> result;
     for (const nlohmann::json& element : json) {
-      MALDOCA_ASSIGN_OR_RETURN(T value, elem_converter(element));
+      ABSL_ASSIGN_OR_RETURN(T value, elem_converter(element));
       result.push_back(std::move(value));
     }
     return result;
@@ -202,7 +202,7 @@ absl::StatusOr<Variant> JsonToVariantRecursive(const nlohmann::json& json,
                                                VariantOption<T> option,
                                                VariantOption<Rest>... rest) {
   if (option.predicate(json)) {
-    MALDOCA_ASSIGN_OR_RETURN(T value, option.converter(json));
+    ABSL_ASSIGN_OR_RETURN(T value, option.converter(json));
     return Variant(std::move(value));
   }
   return JsonToVariantRecursive<Variant>(json, std::move(rest)...);
