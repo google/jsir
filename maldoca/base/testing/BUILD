@@ -50,7 +50,7 @@ cc_library(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:status_macros",
-        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings",
         "@googletest//:gtest",
     ],
