@@ -86,6 +86,7 @@ cc_library(
         "//maldoca/base/testing:protocol-buffer-matchers",
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",
@@ -110,7 +111,7 @@ cc_test(
     deps = [
         ":babel_cc_proto",
         "//maldoca/base/testing:protocol-buffer-matchers",
-        "//maldoca/base/testing:status_matchers",
+        "@abseil-cpp//absl/status:status_matchers",
         "@com_google_protobuf//:json",
         "@googletest//:gtest_main",
     ],

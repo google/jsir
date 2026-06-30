@@ -28,6 +28,7 @@
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
+#include "absl/status/status_matchers.h"
 #include "absl/time/time.h"
 #include "maldoca/base/testing/status_matchers.h"
 #include "maldoca/js/ast/ast.generated.h"
@@ -184,8 +185,7 @@ TEST(JsirDynamicConstantPropagationAnalysisTest, BabelReuse) {
 
   // Use the Babel instance so that its internal scope uid counter is
   // incremented.
-  MALDOCA_ASSERT_OK(
-      babel.Parse(kSource, parse_request, absl::InfiniteDuration()));
+  ABSL_ASSERT_OK(babel.Parse(kSource, parse_request, absl::InfiniteDuration()));
 
   // Convert the **combined** source to AST.
   JsSourceRepr source_repr{kCombined, std::nullopt};

@@ -22,6 +22,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/status_matchers.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -33,8 +34,8 @@
 
 namespace maldoca {
 
+using ::absl_testing::StatusIs;
 using ::maldoca::testing::EqualsProto;
-using ::maldoca::testing::StatusIs;
 using ::testing::IsEmpty;
 using ::testing::StrEq;
 using ::testing::StrNe;

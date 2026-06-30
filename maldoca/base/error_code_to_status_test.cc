@@ -21,15 +21,15 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
-#include "maldoca/base/testing/status_matchers.h"
+#include "absl/status/status_matchers.h"
 
 namespace maldoca {
 namespace {
 
-using testing::StatusIs;
+using ::absl_testing::StatusIs;
 
 TEST(ErrorCodeToStatusTest, EmptyErrorCodeIsConvertedToOkStatus) {
-  MALDOCA_EXPECT_OK(ErrorCodeToStatus(std::error_code()));
+  ABSL_EXPECT_OK(ErrorCodeToStatus(std::error_code()));
 }
 
 TEST(ErrorCodeToStatusTest, NotFoundCodeIsConvertedToNotFoundStatus) {

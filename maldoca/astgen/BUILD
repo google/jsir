@@ -303,6 +303,7 @@ cc_test(
         "//maldoca/base:filesystem",
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/memory",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io",
         "@googletest//:gtest_main",
@@ -330,6 +331,7 @@ cc_test(
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
         "@googletest//:gtest_main",
     ],
 )

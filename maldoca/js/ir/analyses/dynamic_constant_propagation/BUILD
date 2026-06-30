@@ -225,6 +225,7 @@ cc_test(
         "//maldoca/js/quickjs_babel",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/time",
         "@googletest//:gtest_main",
         "@llvm-project//llvm:Support",

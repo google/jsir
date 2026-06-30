@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "absl/status/status_matchers.h"
 #include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/type.pb.h"
 #include "maldoca/base/filesystem.h"
@@ -44,8 +45,8 @@ struct TypeTestCase {
 
 void TestTypePbToTypeAndPrint(TypeTestCase type_test_case) {
   TypePb type_pb;
-  MALDOCA_ASSERT_OK(ParseTextProto(type_test_case.type_pb,
-                                   "type_test_case.type_pb", &type_pb));
+  ABSL_ASSERT_OK(ParseTextProto(type_test_case.type_pb,
+                                "type_test_case.type_pb", &type_pb));
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       std::unique_ptr<Type> type,
       FromTypePb(type_pb, type_test_case.cc_lang_name != nullptr
@@ -371,9 +372,11 @@ TEST(TypeTest, ConvertListType) {
 
 TEST(TypeTest, IsABuiltinType) {
   TypePb type_pb;
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-    bool {}
-  )pb", "TypePb for IsABuiltinType", &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           bool {}
+                                         )pb",
+                                         "TypePb for IsABuiltinType",
+                                         &type_pb));
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(std::unique_ptr<Type> type,
                                FromTypePb(type_pb, "TestLangName"));
@@ -391,9 +394,10 @@ TEST(TypeTest, IsABuiltinType) {
 
 TEST(TypeTest, IsAClassType) {
   TypePb type_pb;
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-    class: "Expression"
-  )pb", "TypePb for IsAClassType", &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           class: "Expression"
+                                         )pb",
+                                         "TypePb for IsAClassType", &type_pb));
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(std::unique_ptr<Type> type,
                                FromTypePb(type_pb, "TestLangName"));
@@ -411,14 +415,14 @@ TEST(TypeTest, IsAClassType) {
 
 TEST(TypeTest, IsAVariantType) {
   TypePb type_pb;
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-                                              variant {
-                                                types { bool {} }
-                                                types { string {} }
-                                              }
-                                            )pb",
-                                            "TypePb for IsAVariantType",
-                                            &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           variant {
+                                             types { bool {} }
+                                             types { string {} }
+                                           }
+                                         )pb",
+                                         "TypePb for IsAVariantType",
+                                         &type_pb));
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(std::unique_ptr<Type> type,
                                FromTypePb(type_pb, "TestLangName"));
@@ -436,11 +440,10 @@ TEST(TypeTest, IsAVariantType) {
 
 TEST(TypeTest, IsAListType) {
   TypePb type_pb;
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-                                              list { element_type { bool {} } }
-                                            )pb",
-                                            "TypePb for IsAListType",
-                                            &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           list { element_type { bool {} } }
+                                         )pb",
+                                         "TypePb for IsAListType", &type_pb));
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(std::unique_ptr<Type> type,
                                FromTypePb(type_pb, "TestLangName"));
@@ -458,33 +461,37 @@ TEST(TypeTest, IsAListType) {
 
 TEST(TypeTest, EmptyTypeIsInvalid) {
   TypePb type_pb;
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto("", "empty TypePb", &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto("", "empty TypePb", &type_pb));
   EXPECT_THAT(FromTypePb(type_pb, "TestLangName"),
-              maldoca::testing::StatusIs(absl::StatusCode::kInvalidArgument,
-                                         "Invalid TypePb: KIND_NOT_SET."));
+              absl_testing::StatusIs(absl::StatusCode::kInvalidArgument,
+                                     "Invalid TypePb: KIND_NOT_SET."));
 
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-    variant {}
-  )pb", "empty variant", &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           variant {}
+                                         )pb",
+                                         "empty variant", &type_pb));
   EXPECT_THAT(FromTypePb(type_pb, "TestLangName"),
-              maldoca::testing::StatusIs(absl::StatusCode::kInvalidArgument,
-                                         "Empty variant type."));
+              absl_testing::StatusIs(absl::StatusCode::kInvalidArgument,
+                                     "Empty variant type."));
 
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-    variant { types {} }
-  )pb", "variant with empty type", &type_pb));
-  EXPECT_THAT(FromTypePb(type_pb, "TestLangName"),
-              maldoca::testing::StatusIs(
-                  absl::StatusCode::kInvalidArgument,
-                  "Invalid variant element type: KIND_NOT_SET."));
-
-  MALDOCA_ASSERT_OK(maldoca::ParseTextProto(R"pb(
-    list { element_type {} }
-  )pb", "list with empty element type", &type_pb));
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           variant { types {} }
+                                         )pb",
+                                         "variant with empty type", &type_pb));
   EXPECT_THAT(
       FromTypePb(type_pb, "TestLangName"),
-      maldoca::testing::StatusIs(absl::StatusCode::kInvalidArgument,
-                                 "Invalid list element type: KIND_NOT_SET."));
+      absl_testing::StatusIs(absl::StatusCode::kInvalidArgument,
+                             "Invalid variant element type: KIND_NOT_SET."));
+
+  ABSL_ASSERT_OK(maldoca::ParseTextProto(R"pb(
+                                           list { element_type {} }
+                                         )pb",
+                                         "list with empty element type",
+                                         &type_pb));
+  EXPECT_THAT(
+      FromTypePb(type_pb, "TestLangName"),
+      absl_testing::StatusIs(absl::StatusCode::kInvalidArgument,
+                             "Invalid list element type: KIND_NOT_SET."));
 }
 
 }  // namespace

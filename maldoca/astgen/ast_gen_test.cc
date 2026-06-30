@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/status/status_matchers.h"
 #include "absl/strings/ascii.h"
 #include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -41,8 +42,8 @@ struct PrintFieldDefTestCase {
 
 void TestPrintFieldDef(const PrintFieldDefTestCase& test_case) {
   FieldDefPb field_def_pb;
-  MALDOCA_ASSERT_OK(ParseTextProto(test_case.field_def, "test_case.field_def",
-                                   &field_def_pb));
+  ABSL_ASSERT_OK(ParseTextProto(test_case.field_def, "test_case.field_def",
+                                &field_def_pb));
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       auto field_def, FieldDef::FromFieldDefPb(field_def_pb, "UsedLanguage"));

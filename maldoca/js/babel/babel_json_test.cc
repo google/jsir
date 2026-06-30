@@ -16,8 +16,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status_matchers.h"
 #include "maldoca/base/testing/protocol-buffer-matchers.h"
-#include "maldoca/base/testing/status_matchers.h"
 #include "maldoca/js/babel/babel.pb.h"
 #include "google/protobuf/json/json.h"
 
@@ -32,14 +32,13 @@ TEST(BabelJsonTest, BabelParseRequest) {
   request.set_source_type(BabelParseRequest::SOURCE_TYPE_SCRIPT);
 
   std::string json_string;
-  MALDOCA_ASSERT_OK(
-      google::protobuf::json::MessageToJsonString(request, &json_string, {}));
+  ABSL_ASSERT_OK(google::protobuf::json::MessageToJsonString(request, &json_string, {}));
 
   EXPECT_EQ(json_string,
             R"({"errorRecovery":true,"sourceType":"SOURCE_TYPE_SCRIPT"})");
 
   BabelParseRequest parsed_request;
-  MALDOCA_ASSERT_OK(
+  ABSL_ASSERT_OK(
       google::protobuf::json::JsonStringToMessage(json_string, &parsed_request));
 
   EXPECT_THAT(parsed_request, EqualsProto(request));
@@ -66,7 +65,7 @@ TEST(BabelJsonTest, BabelScopes) {
   };
 
   std::string json_string;
-  MALDOCA_ASSERT_OK(
+  ABSL_ASSERT_OK(
       google::protobuf::json::MessageToJsonString(scopes, &json_string, options));
 
   static const char kExpectedJsonString[] = R"json({
@@ -87,7 +86,7 @@ TEST(BabelJsonTest, BabelScopes) {
   EXPECT_EQ(json_string, kExpectedJsonString);
 
   BabelScopes parsed_scopes;
-  MALDOCA_ASSERT_OK(
+  ABSL_ASSERT_OK(
       google::protobuf::json::JsonStringToMessage(json_string, &parsed_scopes));
 
   EXPECT_THAT(parsed_scopes, EqualsProto(scopes));

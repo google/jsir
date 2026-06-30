@@ -39,8 +39,8 @@ cc_test(
     srcs = ["error_code_to_status_test.cc"],
     deps = [
         ":error_code_to_status",
-        "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_matchers",
         "@googletest//:gtest_main",
     ],
 )
