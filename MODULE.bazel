@@ -14,6 +14,16 @@ bazel_dep(name = "platforms", version = "1.1.0")
 # https://registry.bazel.build/modules/rules_cc
 bazel_dep(name = "rules_cc", version = "0.2.0")
 
+# https://registry.bazel.build/modules/rules_shell
+# Required by llvm-project's BUILD files.
+bazel_dep(name = "rules_shell", version = "0.8.0")
+
+# https://registry.bazel.build/modules/zlib-ng
+# https://registry.bazel.build/modules/zstd
+# Required by llvm-project as optional compression dependencies.
+bazel_dep(name = "zlib-ng", version = "2.3.3", repo_name = "llvm_zlib")
+bazel_dep(name = "zstd", version = "1.5.7.bcr.1", repo_name = "llvm_zstd")
+
 # https://registry.bazel.build/modules/rules_python
 bazel_dep(name = "rules_python", version = "1.0.0")
 
@@ -49,8 +59,6 @@ llvm_extensions = use_extension("//bazel:extensions.bzl", "llvm_deps")
 use_repo(
     llvm_extensions,
     "llvm-raw",
-    "llvm_zlib",
-    "llvm_zstd",
     "quickjs",
 )
 
