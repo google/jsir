@@ -47,9 +47,9 @@
 #include "absl/base/optimization.h"
 #include "absl/status/status.h"
 #include "absl/status/status_builder.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/types/source_location.h"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace internal_status_macros_ret_check {
@@ -232,7 +232,7 @@ inline unsigned long long GetReferenceableValue(  // NOLINT: runtime/int
 // `absl::Status` cannot fail, particularly when the error code itself should
 // not be surfaced.
 #define MALDOCA_RET_CHECK_OK(status)                                     \
-  MALDOCA_RETURN_IF_ERROR(                                               \
+  ABSL_RETURN_IF_ERROR(                                               \
       ::maldoca::internal_status_macros_ret_check::RetCheckImpl(         \
           ::maldoca::internal_status_macros_ret_check::AsStatus(status), \
           #status, absl::SourceLocation::current()))

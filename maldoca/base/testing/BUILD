@@ -47,9 +47,9 @@ cc_library(
     srcs = ["status_matchers.cc"],
     hdrs = ["status_matchers.h"],
     deps = [
-        "//maldoca/base:status",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_builder",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@googletest//:gtest",

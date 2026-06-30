@@ -146,8 +146,8 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/status/status_builder.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
-#include "maldoca/base/status_macros.h"
 
 namespace maldoca {
 namespace testing {
@@ -562,14 +562,14 @@ IsOkAndHolds(InnerMatcher&& inner_matcher) {
 //   MALDOCA_ASSERT_OK(status_or_value.status());
 //   value = std::move(status_or_value).value();
 //
-// WARNING: Like MALDOCA_ASSIGN_OR_RETURN, MALDOCA_ASSERT_OK_AND_ASSIGN expands
+// WARNING: Like ABSL_ASSIGN_OR_RETURN, MALDOCA_ASSERT_OK_AND_ASSIGN expands
 //   into multiple statements; it cannot be used in a single statement (e.g. as
 //   the body of an if statement without {})!
-#define MALDOCA_ASSERT_OK_AND_ASSIGN(lhs, rexpr)                 \
-  MALDOCA_ASSIGN_OR_RETURN(/* NOLINT(clang-diagnostic-shadow) */ \
-                           lhs, rexpr,                           \
-                           ::maldoca::testing::internal_status:: \
-                               AddFatalFailure(#rexpr, _))
+#define MALDOCA_ASSERT_OK_AND_ASSIGN(lhs, rexpr)                              \
+  ABSL_ASSIGN_OR_RETURN(/* NOLINT(clang-diagnostic-shadow) */                 \
+                        lhs, rexpr,                                           \
+                        ::maldoca::testing::internal_status::AddFatalFailure( \
+                            #rexpr, _))
 
 // Executes an expression that returns a absl::StatusOr, and compares the
 // contained variable to rexpr if the error code is OK.

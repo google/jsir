@@ -24,11 +24,11 @@
 #include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/status/status_builder.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/base/error_code_to_status.h"
-#include "maldoca/base/status_macros.h"
 #include "google/protobuf/io/tokenizer.h"
 #include "google/protobuf/message.h"
 #include "google/protobuf/text_format.h"
@@ -166,7 +166,7 @@ absl::Status ParseTextProto(absl::string_view contents,
 
 absl::Status ParseTextProtoFile(const std::filesystem::path& file_name,
                                 google::protobuf::Message* proto) {
-  MALDOCA_ASSIGN_OR_RETURN(std::string text_proto, GetFileContents(file_name));
+  ABSL_ASSIGN_OR_RETURN(std::string text_proto, GetFileContents(file_name));
   return ParseTextProto(text_proto, file_name, proto);
 }
 

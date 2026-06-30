@@ -61,10 +61,10 @@ cc_library(
     hdrs = ["filesystem.h"],
     deps = [
         ":error_code_to_status",
-        ":status",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_builder",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
@@ -90,30 +90,12 @@ cc_library(
     srcs = ["ret_check.cc"],
     hdrs = ["ret_check.h"],
     deps = [
-        ":status",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:log_severity",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_builder",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/types:source_location",
-    ],
-)
-
-# TODO(tzx): Remove this target once all references have been updated to
-# @abseil-cpp//absl/status.
-cc_library(
-    name = "status",
-    hdrs = [
-        "status_macros.h",
-    ],
-    visibility = [
-        "//maldoca/base:__subpackages__",
-    ],
-    deps = [
-        "@abseil-cpp//absl/base:core_headers",
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/types:source_location",
     ],
 )
