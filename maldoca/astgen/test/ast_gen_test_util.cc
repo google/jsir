@@ -34,7 +34,6 @@
 #include "maldoca/astgen/ts_interface_printer.h"
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/get_runfiles_dir.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/base/testing/status_matchers.h"
 
 namespace maldoca {
@@ -43,7 +42,7 @@ absl::StatusOr<AstDef> AstGenTest::LoadAstDef() const {
   auto ast_def_path =
       GetDataDependencyFilepath(GetParam().ast_def_path);
   AstDefPb ast_def_pb;
-  MALDOCA_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
+  ABSL_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
   ABSL_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
   return ast_def;
 }

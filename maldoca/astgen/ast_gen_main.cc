@@ -38,7 +38,6 @@
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/path.h"
 #include "absl/status/status_macros.h"
-#include "maldoca/base/status_macros.h"
 
 ABSL_FLAG(std::string, ast_def_path, "",
           "The path to the ast_def.textproto file.");
@@ -61,39 +60,36 @@ absl::Status AstGenMain() {
   auto ir_path = absl::GetFlag(FLAGS_ir_path);
 
   AstDefPb ast_def_pb;
-  MALDOCA_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
+  ABSL_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
   ABSL_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
 
   std::string ast_hdr = PrintAstHeader(ast_def, cc_namespace, ast_path);
   auto ast_hdr_path = JoinPath(ast_path, "ast.generated.h");
   std::cout << "Writing ast_hdr to " << ast_hdr_path << "\n";
-  MALDOCA_RETURN_IF_ERROR(SetFileContents(ast_hdr_path, ast_hdr));
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_hdr_path, ast_hdr));
 
   std::string ast_src = PrintAstSource(ast_def, cc_namespace, ast_path);
   auto ast_src_path = JoinPath(ast_path, "ast.generated.cc");
   std::cout << "Writing ast_src to " << ast_src_path << "\n";
-  MALDOCA_RETURN_IF_ERROR(SetFileContents(ast_src_path, ast_src));
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_src_path, ast_src));
 
   std::string ast_to_json = PrintAstToJson(ast_def, cc_namespace, ast_path);
   auto ast_to_json_path = JoinPath(ast_path, "ast_to_json.generated.cc");
   std::cout << "Writing ast_to_json to " << ast_to_json_path << "\n";
-  MALDOCA_RETURN_IF_ERROR(
-      SetFileContents(ast_to_json_path, ast_to_json));
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_to_json_path, ast_to_json));
 
   std::string ast_from_json = PrintAstFromJson(ast_def, cc_namespace, ast_path);
   auto ast_from_json_path =
       JoinPath(ast_path, "ast_from_json.generated.cc");
   std::cout << "Writing ast_from_json to " << ast_from_json_path << "\n";
-  MALDOCA_RETURN_IF_ERROR(
-      SetFileContents(ast_from_json_path, ast_from_json));
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_from_json_path, ast_from_json));
 
   if (!ir_path.empty()) {
     std::string ir_tablegen = PrintIrTableGen(ast_def, ir_path);
     auto ir_tablegen_path = JoinPath(
         ir_path, absl::StrCat(ast_def.lang_name(), "ir_ops.generated.td"));
     std::cout << "Writing ir_tablegen to " << ir_tablegen_path << "\n";
-    MALDOCA_RETURN_IF_ERROR(
-        SetFileContents(ir_tablegen_path, ir_tablegen));
+    ABSL_RETURN_IF_ERROR(SetFileContents(ir_tablegen_path, ir_tablegen));
 
     std::string ast_to_ir =
         PrintAstToIrSource(ast_def, cc_namespace, ast_path, ir_path);
@@ -101,8 +97,7 @@ absl::Status AstGenMain() {
         ir_path, "conversion",
         absl::StrCat("ast_to_", ast_def.lang_name(), "ir.generated.cc"));
     std::cout << "Writing ast_to_ir to " << ast_to_ir_path << "\n";
-    MALDOCA_RETURN_IF_ERROR(
-        SetFileContents(ast_to_ir_path, ast_to_ir));
+    ABSL_RETURN_IF_ERROR(SetFileContents(ast_to_ir_path, ast_to_ir));
 
     std::string ir_to_ast =
         PrintIrToAstSource(ast_def, cc_namespace, ast_path, ir_path);
@@ -110,8 +105,7 @@ absl::Status AstGenMain() {
         ir_path, "conversion",
         absl::StrCat(ast_def.lang_name(), "ir_to_ast.generated.cc"));
     std::cout << "Writing ir_to_ast to " << ir_to_ast_path << "\n";
-    MALDOCA_RETURN_IF_ERROR(
-        SetFileContents(ir_to_ast_path, ir_to_ast));
+    ABSL_RETURN_IF_ERROR(SetFileContents(ir_to_ast_path, ir_to_ast));
   }
 
   return absl::OkStatus();

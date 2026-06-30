@@ -40,7 +40,6 @@
 #include "absl/types/span.h"
 #include "nlohmann/json.hpp"
 #include "maldoca/base/ret_check.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ast/transforms/transform.h"
 #include "maldoca/js/babel/babel.h"
@@ -396,9 +395,8 @@ class JsAstTransform : public JsTransformTmpl<JsAstRepr> {
   absl::Status Transform(std::optional<absl::string_view> original_source,
                          JsAstRepr& repr, JsAnalysisOutputs& outputs) override {
     std::optional<JsAstAnalysisResult> optional_analysis_result;
-    MALDOCA_RETURN_IF_ERROR(TransformJsAst(original_source, repr.scopes,
-                                           config_, *repr.ast,
-                                           optional_analysis_result));
+    ABSL_RETURN_IF_ERROR(TransformJsAst(original_source, repr.scopes, config_,
+                                        *repr.ast, optional_analysis_result));
     if (optional_analysis_result.has_value()) {
       *outputs.add_outputs()->mutable_ast_analysis() =
           std::move(*optional_analysis_result);

@@ -29,7 +29,6 @@ cc_library(
     srcs = ["pass.cc"],
     hdrs = ["pass.h"],
     deps = [
-        "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/driver:driver_cc_proto",
@@ -39,6 +38,8 @@ cc_library(
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:span",

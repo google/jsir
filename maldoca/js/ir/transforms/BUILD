@@ -26,7 +26,6 @@ cc_library(
     hdrs = ["transform.h"],
     deps = [
         "//maldoca/base:ret_check",
-        "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/babel",
         "//maldoca/js/babel:babel_cc_proto",

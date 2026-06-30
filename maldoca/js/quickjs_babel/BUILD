@@ -65,7 +65,6 @@ cc_library(
     deps = [
         ":babel_standalone_cc_embed_data",
         ":native_cc_embed_data",
-        "//maldoca/base:status",
         "//maldoca/js/babel",
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/babel:babel_internal",
@@ -73,6 +72,7 @@ cc_library(
         "//maldoca/js/quickjs",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/time",

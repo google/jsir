@@ -27,11 +27,11 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/variant.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 
 namespace maldoca {
@@ -40,10 +40,10 @@ absl::Status ForEachTopLevelNode(
     const JsFile& ast,
     absl::FunctionRef<absl::Status(const JsNode&)> callback) {
   for (const auto& directive : *ast.program()->directives()) {
-    MALDOCA_RETURN_IF_ERROR(callback(*directive));
+    ABSL_RETURN_IF_ERROR(callback(*directive));
   }
   for (const auto& body : *ast.program()->body()) {
-    MALDOCA_RETURN_IF_ERROR(callback(*body));
+    ABSL_RETURN_IF_ERROR(callback(*body));
   }
   return absl::OkStatus();
 }

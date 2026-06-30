@@ -32,7 +32,6 @@
 #include "absl/types/span.h"
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/internal/conversions.h"
 #include "maldoca/js/ir/conversion/utils.h"
@@ -204,7 +203,7 @@ absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
-  MALDOCA_RETURN_IF_ERROR(RunPasses(passes, context, babel_, &mlir_context));
+  ABSL_RETURN_IF_ERROR(RunPasses(passes, context, babel_, &mlir_context));
 
   ABSL_ASSIGN_OR_RETURN(JsReprPb output_repr_pb, context.repr->ToProto());
 

@@ -284,7 +284,6 @@ cc_binary(
         ":ir_to_ast_source_printer",
         "//maldoca/base:filesystem",
         "//maldoca/base:path",
-        "//maldoca/base:status",
         "@abseil-cpp//absl/flags:flag",
         "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/strings",

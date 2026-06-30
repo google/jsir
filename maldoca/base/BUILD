@@ -100,10 +100,15 @@ cc_library(
     ],
 )
 
+# TODO(tzx): Remove this target once all references have been updated to
+# @abseil-cpp//absl/status.
 cc_library(
     name = "status",
     hdrs = [
         "status_macros.h",
+    ],
+    visibility = [
+        "//maldoca/base:__subpackages__",
     ],
     deps = [
         "@abseil-cpp//absl/base:core_headers",

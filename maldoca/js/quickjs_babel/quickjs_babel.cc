@@ -22,11 +22,11 @@
 
 #include "absl/log/check.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "nlohmann/json.hpp"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/babel_internal.h"
 #include "maldoca/js/babel/babel_internal.pb.h"
@@ -149,7 +149,7 @@ absl::StatusOr<BabelParseResult> QuickJsBabel::Parse(
   }
 
   BabelParseResponse response;
-  MALDOCA_RETURN_IF_ERROR(
+  ABSL_RETURN_IF_ERROR(
       google::protobuf::json::JsonStringToMessage(*response_string, &response));
 
   BabelAstString ast_string;
@@ -225,7 +225,7 @@ absl::StatusOr<BabelGenerateResult> QuickJsBabel::Generate(
   }
 
   BabelGenerateResponse response;
-  MALDOCA_RETURN_IF_ERROR(
+  ABSL_RETURN_IF_ERROR(
       google::protobuf::json::JsonStringToMessage(*response_string, &response));
 
   std::optional<BabelError> error;

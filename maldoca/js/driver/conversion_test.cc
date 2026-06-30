@@ -33,7 +33,6 @@
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/get_runfiles_dir.h"
 #include "maldoca/base/path.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/base/testing/status_matchers.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.pb.h"
@@ -101,7 +100,7 @@ absl::StatusOr<TestCase> GetTestCase() {
   auto parsed_ast_json = nlohmann::ordered_json::parse(parsed_ast_json_str);
 
   BabelScopes scopes;
-  MALDOCA_RETURN_IF_ERROR(ParseTextProtoFile(
+  ABSL_RETURN_IF_ERROR(ParseTextProtoFile(
       GetDataDependencyFilepath("maldoca/js/driver/test_babel_scopes.txtpb"),
       &scopes));
 

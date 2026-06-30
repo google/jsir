@@ -28,7 +28,6 @@
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "maldoca/base/ret_check.h"
-#include "maldoca/base/status_macros.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/driver.pb.h"
@@ -155,8 +154,8 @@ absl::StatusOr<std::unique_ptr<JsFile>> TransformJsAst(
   ABSL_ASSIGN_OR_RETURN(auto jshir_file, AstToJshirFile(ast, mlir_context));
 
   JsAnalysisOutputs analysis_outputs;
-  MALDOCA_RETURN_IF_ERROR(TransformJsir(*jshir_file, scopes, std::move(configs),
-                                        babel, &analysis_outputs));
+  ABSL_RETURN_IF_ERROR(TransformJsir(*jshir_file, scopes, std::move(configs),
+                                     babel, &analysis_outputs));
 
   return JshirFileToAst(*jshir_file);
 }

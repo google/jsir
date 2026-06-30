@@ -32,6 +32,7 @@ cc_library(
         "//maldoca/js/ir:jsir_utils",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
+        "@abseil-cpp//absl/status:statusor",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Pass",

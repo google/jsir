@@ -48,7 +48,6 @@ cc_library(
     deps = [
         ":driver_cc_proto",
         "//maldoca/base:ret_check",
-        "//maldoca/base:status",
         "//maldoca/js/ast",
         "//maldoca/js/ast:ast_util",
         "//maldoca/js/ast/transforms:transform",
@@ -114,7 +113,6 @@ cc_test(
         "//maldoca/base:filesystem",
         "//maldoca/base:get_runfiles_dir",
         "//maldoca/base:path",
-        "//maldoca/base:status",
         "//maldoca/base/testing:protocol-buffer-matchers",
         "//maldoca/base/testing:status_matchers",
         "//maldoca/js/ast",
