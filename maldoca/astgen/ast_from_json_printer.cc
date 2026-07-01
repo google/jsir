@@ -178,11 +178,11 @@ void AstFromJsonPrinter::PrintTypeChecker(const NodeDef& node) {
       if (type_it == $json_variable$.end()) {
         return false;
       }
-      const nlohmann::json &type_json = type_it.value();
+      const nlohmann::json& type_json = type_it.value();
       if (!type_json.is_string()) {
         return false;
       }
-      const std::string &type = type_json.get<std::string>();
+      const std::string& type = type_json.get<std::string>();
     )cc");
     Println(code);
 
