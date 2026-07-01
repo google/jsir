@@ -1,123 +1,123 @@
-// JSHIR:      "jsir.file"() <{comments = []}> ({
-// JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
-// JSHIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
-// JSHIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %2 = "jsir.assignment_expression"(%0, %1) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %3 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
-// JSHIR-NEXT:     %4 = "jsir.update_expression"(%3) <{operator_ = "++", prefix = false}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%4) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %5 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
-// JSHIR-NEXT:     %6 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %7 = "jsir.assignment_expression"(%5, %6) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%7) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %8 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
-// JSHIR-NEXT:     %9 = "jsir.update_expression"(%8) <{operator_ = "++", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%9) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %10 = "jsir.identifier_ref"() <{name = "should_be_0"}> : () -> !jsir.any
-// JSHIR-NEXT:     %11 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
-// JSHIR-NEXT:     %12 = "jsir.update_expression"(%11) <{operator_ = "--", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %13 = "jsir.assignment_expression"(%10, %12) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%13) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %14 = "jsir.identifier_ref"() <{name = "unknown"}> : () -> !jsir.any
-// JSHIR-NEXT:     %15 = "jsir.identifier"() <{name = "getUnknown"}> : () -> !jsir.any
-// JSHIR-NEXT:     %16 = "jsir.call_expression"(%15) : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %17 = "jsir.assignment_expression"(%14, %16) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%17) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %18 = "jsir.identifier_ref"() <{name = "unknown"}> : () -> !jsir.any
-// JSHIR-NEXT:     %19 = "jsir.update_expression"(%18) <{operator_ = "++", prefix = false}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%19) : (!jsir.any) -> ()
-// JSHIR-NEXT:   }, {
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:   }) : () -> ()
-// JSHIR-NEXT: }) : () -> ()
-// JSHIR-NEXT: jsir.file {[]} ({
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:       // <executable>
-// JSHIR-NEXT:       // State [default = <unknown>] { }
-// JSHIR-NEXT:     jsir.program {"script"} ({
-// JSHIR-NEXT:       ^bb0:
-// JSHIR-NEXT:           // <executable>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %0 = jsir.identifier_ref {"a"}
-// JSHIR-NEXT:           // %0 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %1 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %2 = jsir.assignment_expression (%0, %1) {"="}
-// JSHIR-NEXT:           // %2 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%2)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %3 = jsir.identifier_ref {"a"}
-// JSHIR-NEXT:           // %3 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %4 = jsir.update_expression (%3) {"++", false}
-// JSHIR-NEXT:           // %4 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%4)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %5 = jsir.identifier_ref {"b"}
-// JSHIR-NEXT:           // %5 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %6 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %6 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %7 = jsir.assignment_expression (%5, %6) {"="}
-// JSHIR-NEXT:           // %7 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%7)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %8 = jsir.identifier_ref {"b"}
-// JSHIR-NEXT:           // %8 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %9 = jsir.update_expression (%8) {"++", true}
-// JSHIR-NEXT:           // %9 = 1.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%9)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %10 = jsir.identifier_ref {"should_be_0"}
-// JSHIR-NEXT:           // %10 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %11 = jsir.identifier_ref {"a"}
-// JSHIR-NEXT:           // %11 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %12 = jsir.update_expression (%11) {"--", true}
-// JSHIR-NEXT:           // %12 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         %13 = jsir.assignment_expression (%10, %12) {"="}
-// JSHIR-NEXT:           // %13 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%13)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %14 = jsir.identifier_ref {"unknown"}
-// JSHIR-NEXT:           // %14 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %15 = jsir.identifier {"getUnknown"}
-// JSHIR-NEXT:           // %15 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %16 = jsir.call_expression (%15)
-// JSHIR-NEXT:           // %16 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %17 = jsir.assignment_expression (%14, %16) {"="}
-// JSHIR-NEXT:           // %17 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%17)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %18 = jsir.identifier_ref {"unknown"}
-// JSHIR-NEXT:           // %18 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         %19 = jsir.update_expression (%18) {"++", false}
-// JSHIR-NEXT:           // %19 = <unknown>
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:         jsir.expression_statement (%19)
-// JSHIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
-// JSHIR-NEXT:     }, {
-// JSHIR-NEXT:       ^bb0:
-// JSHIR-NEXT:           // <executable>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:     })
-// JSHIR-NEXT:       // State [default = <unknown>] { }
-// JSHIR-NEXT: })
-// JSHIR-NEXT:   // State [default = <uninitialized>] { }
+// JSIR:      "jsir.file"() <{comments = []}> ({
+// JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %2 = "jsir.assignment_expression"(%0, %1) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
+// JSIR-NEXT:     %3 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSIR-NEXT:     %4 = "jsir.update_expression"(%3) <{operator_ = "++", prefix = false}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%4) : (!jsir.any) -> ()
+// JSIR-NEXT:     %5 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
+// JSIR-NEXT:     %6 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %7 = "jsir.assignment_expression"(%5, %6) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%7) : (!jsir.any) -> ()
+// JSIR-NEXT:     %8 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
+// JSIR-NEXT:     %9 = "jsir.update_expression"(%8) <{operator_ = "++", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%9) : (!jsir.any) -> ()
+// JSIR-NEXT:     %10 = "jsir.identifier_ref"() <{name = "should_be_0"}> : () -> !jsir.any
+// JSIR-NEXT:     %11 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSIR-NEXT:     %12 = "jsir.update_expression"(%11) <{operator_ = "--", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %13 = "jsir.assignment_expression"(%10, %12) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%13) : (!jsir.any) -> ()
+// JSIR-NEXT:     %14 = "jsir.identifier_ref"() <{name = "unknown"}> : () -> !jsir.any
+// JSIR-NEXT:     %15 = "jsir.identifier"() <{name = "getUnknown"}> : () -> !jsir.any
+// JSIR-NEXT:     %16 = "jsir.call_expression"(%15) : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %17 = "jsir.assignment_expression"(%14, %16) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%17) : (!jsir.any) -> ()
+// JSIR-NEXT:     %18 = "jsir.identifier_ref"() <{name = "unknown"}> : () -> !jsir.any
+// JSIR-NEXT:     %19 = "jsir.update_expression"(%18) <{operator_ = "++", prefix = false}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%19) : (!jsir.any) -> ()
+// JSIR-NEXT:   }, {
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:   }) : () -> ()
+// JSIR-NEXT: }) : () -> ()
+// JSIR-NEXT: jsir.file {[]} ({
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:       // <executable>
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT:     jsir.program {"script"} ({
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %0 = jsir.identifier_ref {"a"}
+// JSIR-NEXT:           // %0 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %1 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %2 = jsir.assignment_expression (%0, %1) {"="}
+// JSIR-NEXT:           // %2 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%2)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %3 = jsir.identifier_ref {"a"}
+// JSIR-NEXT:           // %3 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %4 = jsir.update_expression (%3) {"++", false}
+// JSIR-NEXT:           // %4 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%4)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %5 = jsir.identifier_ref {"b"}
+// JSIR-NEXT:           // %5 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %6 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %6 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %7 = jsir.assignment_expression (%5, %6) {"="}
+// JSIR-NEXT:           // %7 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%7)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %8 = jsir.identifier_ref {"b"}
+// JSIR-NEXT:           // %8 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %9 = jsir.update_expression (%8) {"++", true}
+// JSIR-NEXT:           // %9 = 1.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%9)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %10 = jsir.identifier_ref {"should_be_0"}
+// JSIR-NEXT:           // %10 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %11 = jsir.identifier_ref {"a"}
+// JSIR-NEXT:           // %11 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 1.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %12 = jsir.update_expression (%11) {"--", true}
+// JSIR-NEXT:           // %12 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> }
+// JSIR-NEXT:         %13 = jsir.assignment_expression (%10, %12) {"="}
+// JSIR-NEXT:           // %13 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%13)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %14 = jsir.identifier_ref {"unknown"}
+// JSIR-NEXT:           // %14 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %15 = jsir.identifier {"getUnknown"}
+// JSIR-NEXT:           // %15 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %16 = jsir.call_expression (%15)
+// JSIR-NEXT:           // %16 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %17 = jsir.assignment_expression (%14, %16) {"="}
+// JSIR-NEXT:           // %17 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%17)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %18 = jsir.identifier_ref {"unknown"}
+// JSIR-NEXT:           // %18 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         %19 = jsir.update_expression (%18) {"++", false}
+// JSIR-NEXT:           // %19 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:         jsir.expression_statement (%19)
+// JSIR-NEXT:           // State [default = <unknown>] { <a#undeclared : 0.000000e+00 : f64> <b#undeclared : 1.000000e+00 : f64> <should_be_0#undeclared : 0.000000e+00 : f64> }
+// JSIR-NEXT:     }, {
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     })
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT: })
+// JSIR-NEXT:   // State [default = <uninitialized>] { }

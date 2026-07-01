@@ -1,64 +1,64 @@
-// JSHIR:      "jsir.file"() <{comments = [#jsir<comment_line  <L 1 C 0>, <L 1 C 21>, 0, 21, " regular expression">, #jsir<comment_line  <L 4 C 0>, <L 4 C 7>, 28, 35, " null">, #jsir<comment_line  <L 7 C 0>, <L 7 C 9>, 42, 51, " string">, #jsir<comment_line  <L 10 C 0>, <L 10 C 10>, 58, 68, " boolean">, #jsir<comment_line  <L 13 C 0>, <L 13 C 9>, 76, 85, " number">, #jsir<comment_line  <L 16 C 0>, <L 16 C 10>, 90, 100, " big int">]}> ({
-// JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
-// JSHIR-NEXT:     %0 = "jsir.reg_exp_literal"() <{extra = #jsir<reg_exp_literal_extra "/1/">, flags = "", pattern = "1"}> : () -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%0) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %1 = "jsir.null_literal"() : () -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%1) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %2 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "'a'", "a">, value = "a"}> : () -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %3 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%3) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %4 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%4) : (!jsir.any) -> ()
-// JSHIR-NEXT:     %5 = "jsir.big_int_literal"() <{extra = #jsir<big_int_literal_extra "1n", "1">, value = "1"}> : () -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%5) : (!jsir.any) -> ()
-// JSHIR-NEXT:   }, {
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:   }) : () -> ()
-// JSHIR-NEXT: }) : () -> ()
-// JSHIR-NEXT: jsir.file {[#jsir<comment_line  <L 1 C 0>, <L 1 C 21>, 0, 21, " regular expression">, #jsir<comment_line  <L 4 C 0>, <L 4 C 7>, 28, 35, " null">, #jsir<comment_line  <L 7 C 0>, <L 7 C 9>, 42, 51, " string">, #jsir<comment_line  <L 10 C 0>, <L 10 C 10>, 58, 68, " boolean">, #jsir<comment_line  <L 13 C 0>, <L 13 C 9>, 76, 85, " number">, #jsir<comment_line  <L 16 C 0>, <L 16 C 10>, 90, 100, " big int">]} ({
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:       // <executable>
-// JSHIR-NEXT:       // State [default = <unknown>] { }
-// JSHIR-NEXT:     jsir.program {"script"} ({
-// JSHIR-NEXT:       ^bb0:
-// JSHIR-NEXT:           // <executable>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %0 = jsir.reg_exp_literal {#jsir<reg_exp_literal_extra "/1/">, "", "1"}
-// JSHIR-NEXT:           // %0 = #jsir<reg_exp_literal "1", "">
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%0)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %1 = jsir.null_literal
-// JSHIR-NEXT:           // %1 = #jsir.null_literal
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%1)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %2 = jsir.string_literal {#jsir<string_literal_extra "'a'", "a">, "a"}
-// JSHIR-NEXT:           // %2 = "a"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%2)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %3 = jsir.boolean_literal {true}
-// JSHIR-NEXT:           // %3 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%3)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %4 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
-// JSHIR-NEXT:           // %4 = 1.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%4)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %5 = jsir.big_int_literal {#jsir<big_int_literal_extra "1n", "1">, "1"}
-// JSHIR-NEXT:           // %5 = #jsir<big_int_literal "1",  "1n", "1">
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%5)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:     }, {
-// JSHIR-NEXT:       ^bb0:
-// JSHIR-NEXT:           // <executable>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:     })
-// JSHIR-NEXT:       // State [default = <unknown>] { }
-// JSHIR-NEXT: })
-// JSHIR-NEXT:   // State [default = <uninitialized>] { }
+// JSIR:      "jsir.file"() <{comments = [#jsir<comment_line <L 1 C 0>, <L 1 C 21>, 0, 21, " regular expression">, #jsir<comment_line <L 4 C 0>, <L 4 C 7>, 28, 35, " null">, #jsir<comment_line <L 7 C 0>, <L 7 C 9>, 42, 51, " string">, #jsir<comment_line <L 10 C 0>, <L 10 C 10>, 58, 68, " boolean">, #jsir<comment_line <L 13 C 0>, <L 13 C 9>, 76, 85, " number">, #jsir<comment_line <L 16 C 0>, <L 16 C 10>, 90, 100, " big int">]}> ({
+// JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSIR-NEXT:     %0 = "jsir.reg_exp_literal"() <{extra = #jsir<reg_exp_literal_extra "/1/">, flags = "", pattern = "1"}> : () -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%0) : (!jsir.any) -> ()
+// JSIR-NEXT:     %1 = "jsir.null_literal"() : () -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%1) : (!jsir.any) -> ()
+// JSIR-NEXT:     %2 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "'a'", "a">, value = "a"}> : () -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
+// JSIR-NEXT:     %3 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%3) : (!jsir.any) -> ()
+// JSIR-NEXT:     %4 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%4) : (!jsir.any) -> ()
+// JSIR-NEXT:     %5 = "jsir.big_int_literal"() <{extra = #jsir<big_int_literal_extra "1n", "1">, value = "1"}> : () -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%5) : (!jsir.any) -> ()
+// JSIR-NEXT:   }, {
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:   }) : () -> ()
+// JSIR-NEXT: }) : () -> ()
+// JSIR-NEXT: jsir.file {[#jsir<comment_line <L 1 C 0>, <L 1 C 21>, 0, 21, " regular expression">, #jsir<comment_line <L 4 C 0>, <L 4 C 7>, 28, 35, " null">, #jsir<comment_line <L 7 C 0>, <L 7 C 9>, 42, 51, " string">, #jsir<comment_line <L 10 C 0>, <L 10 C 10>, 58, 68, " boolean">, #jsir<comment_line <L 13 C 0>, <L 13 C 9>, 76, 85, " number">, #jsir<comment_line <L 16 C 0>, <L 16 C 10>, 90, 100, " big int">]} ({
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:       // <executable>
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT:     jsir.program {"script"} ({
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %0 = jsir.reg_exp_literal {#jsir<reg_exp_literal_extra "/1/">, "", "1"}
+// JSIR-NEXT:           // %0 = #jsir<reg_exp_literal "1", "">
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%0)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %1 = jsir.null_literal
+// JSIR-NEXT:           // %1 = #jsir.null_literal
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%1)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %2 = jsir.string_literal {#jsir<string_literal_extra "'a'", "a">, "a"}
+// JSIR-NEXT:           // %2 = "a"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%2)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %3 = jsir.boolean_literal {true}
+// JSIR-NEXT:           // %3 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%3)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %4 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:           // %4 = 1.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%4)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %5 = jsir.big_int_literal {#jsir<big_int_literal_extra "1n", "1">, "1"}
+// JSIR-NEXT:           // %5 = #jsir<big_int_literal "1", "1n", "1">
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%5)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     }, {
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     })
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT: })
+// JSIR-NEXT:   // State [default = <uninitialized>] { }
