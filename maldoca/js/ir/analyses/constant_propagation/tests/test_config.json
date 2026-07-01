@@ -4,7 +4,7 @@
       "output_file": "output.generated.txt",
       "passes": "source2ast,ast2hir",
       "jsir_analysis": "constant_propagation",
-      "prefix": "JSHIR"
+      "prefix": "JSIR"
     }
   ],
   "build_template": "../../BUILD.general.template"

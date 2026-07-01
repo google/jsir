@@ -2,4 +2,4 @@
 // RUN: jsir_gen --input_file "$(dirname %s)"/input.js \
 // RUN:     --passes "source2ast,ast2hir" \
 // RUN:     --jsir_analysis constant_propagation \
-// RUN:   | FileCheck --check-prefix JSHIR "$(dirname %s)"/output.generated.txt
+// RUN:   | FileCheck --check-prefix JSIR "$(dirname %s)"/output.generated.txt
