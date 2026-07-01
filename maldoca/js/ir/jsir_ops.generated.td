@@ -296,7 +296,7 @@ def JsirBigIntLiteralOp : Jsir_Op<
   );
 }
 
-def JshirBlockStatementOp : Jshir_Op<
+def JsirBlockStatementOp : Jsir_Op<
     "block_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -328,7 +328,7 @@ def JsirDebuggerStatementOp : Jsir_Op<
     ]> {
 }
 
-def JshirWithStatementOp : Jshir_Op<
+def JsirWithStatementOp : Jsir_Op<
     "with_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -351,7 +351,7 @@ def JsirReturnStatementOp : Jsir_Op<
   );
 }
 
-def JshirLabeledStatementOp : Jshir_Op<
+def JsirLabeledStatementOp : Jsir_Op<
     "labeled_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -365,7 +365,7 @@ def JshirLabeledStatementOp : Jshir_Op<
   );
 }
 
-def JshirIfStatementOp : Jshir_Op<
+def JsirIfStatementOp : Jsir_Op<
     "if_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -380,7 +380,7 @@ def JshirIfStatementOp : Jshir_Op<
   );
 }
 
-def JshirSwitchCaseOp : Jshir_Op<
+def JsirSwitchCaseOp : Jsir_Op<
     "switch_case", [
         NoTerminator
     ]> {
@@ -390,7 +390,7 @@ def JshirSwitchCaseOp : Jshir_Op<
   );
 }
 
-def JshirSwitchStatementOp : Jshir_Op<
+def JsirSwitchStatementOp : Jsir_Op<
     "switch_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -413,7 +413,7 @@ def JsirThrowStatementOp : Jsir_Op<
   );
 }
 
-def JshirCatchClauseOp : Jshir_Op<
+def JsirCatchClauseOp : Jsir_Op<
     "catch_clause", [
         NoTerminator
     ]> {
@@ -426,7 +426,7 @@ def JshirCatchClauseOp : Jshir_Op<
   );
 }
 
-def JshirTryStatementOp : Jshir_Op<
+def JsirTryStatementOp : Jsir_Op<
     "try_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -438,7 +438,7 @@ def JshirTryStatementOp : Jshir_Op<
   );
 }
 
-def JshirWhileStatementOp : Jshir_Op<
+def JsirWhileStatementOp : Jsir_Op<
     "while_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -449,7 +449,7 @@ def JshirWhileStatementOp : Jshir_Op<
   );
 }
 
-def JshirDoWhileStatementOp : Jshir_Op<
+def JsirDoWhileStatementOp : Jsir_Op<
     "do_while_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -667,7 +667,7 @@ def JsirAssignmentExpressionOp : Jsir_Op<
   );
 }
 
-def JshirLogicalExpressionOp : Jshir_Op<
+def JsirLogicalExpressionOp : Jsir_Op<
     "logical_expression", [
         JsirExpressionOpInterfaceTraits,
         NoTerminator,
@@ -687,7 +687,7 @@ def JshirLogicalExpressionOp : Jshir_Op<
   );
 }
 
-def JshirConditionalExpressionOp : Jshir_Op<
+def JsirConditionalExpressionOp : Jsir_Op<
     "conditional_expression", [
         JsirExpressionOpInterfaceTraits,
         NoTerminator

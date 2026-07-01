@@ -37,7 +37,7 @@
 namespace maldoca {
 
 void IfStatementElimination(mlir::Operation* root_op) {
-  root_op->walk([&](JshirIfStatementOp op) {
+  root_op->walk([&](JsirIfStatementOp op) {
     auto condition = op.getTest().getDefiningOp<JsirBooleanLiteralOp>();
     if (condition == nullptr) {
       return;
@@ -72,7 +72,7 @@ void IfStatementElimination(mlir::Operation* root_op) {
 }
 
 void WhileStatementElimination(mlir::Operation* root_op) {
-  root_op->walk([&](JshirWhileStatementOp op) {
+  root_op->walk([&](JsirWhileStatementOp op) {
     auto condition_op = GetExprRegionOp<JsirBooleanLiteralOp>(op.getTest());
     if (!condition_op.ok()) {
       return;

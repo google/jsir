@@ -39,7 +39,7 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:             jsir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
@@ -75,7 +75,7 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:             jsir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
@@ -129,7 +129,7 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:             jsir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }

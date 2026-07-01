@@ -27,12 +27,11 @@ namespace maldoca {
 
 // context must contain the dialects
 //  - JsirDialect
-//  - JshirDialect
 //  - mlir::func::FuncDialect
-absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
-    const JsFile &ast, mlir::MLIRContext &context);
+absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJsirFile(
+    const JsFile& ast, mlir::MLIRContext& context);
 
-absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file);
+absl::StatusOr<std::unique_ptr<JsFile>> JsirFileToAst(JsirFileOp ir_file);
 
 void LoadNecessaryDialects(mlir::MLIRContext &context);
 

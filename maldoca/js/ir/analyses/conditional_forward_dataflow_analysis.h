@@ -114,18 +114,17 @@ void JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>::VisitOp(
   // Don't call the user-defined `VisitOp` if this is an op with a fixed
   // standard visitor.
   // TODO(b/425421947): Create MLIR trait rather than having a list of ops here.
-  if (llvm::isa<JshirBlockStatementOp>(op) ||
-      llvm::isa<JshirBreakStatementOp>(op) ||
-      llvm::isa<JshirConditionalExpressionOp>(op) ||
-      llvm::isa<JshirContinueStatementOp>(op) ||
-      llvm::isa<JshirDoWhileStatementOp>(op) ||
-      llvm::isa<JshirForStatementOp>(op) ||
-      llvm::isa<JshirLabeledStatementOp>(op) ||
-      llvm::isa<JshirLogicalExpressionOp>(op) ||
-      llvm::isa<JshirIfStatementOp>(op) || llvm::isa<JshirTryStatementOp>(op) ||
-      llvm::isa<JshirSwitchStatementOp>(op) ||
-      llvm::isa<JshirSwitchCaseOp>(op) ||
-      llvm::isa<JshirWhileStatementOp>(op)) {
+  if (llvm::isa<JsirBlockStatementOp>(op) ||
+      llvm::isa<JsirBreakStatementOp>(op) ||
+      llvm::isa<JsirConditionalExpressionOp>(op) ||
+      llvm::isa<JsirContinueStatementOp>(op) ||
+      llvm::isa<JsirDoWhileStatementOp>(op) ||
+      llvm::isa<JsirForStatementOp>(op) ||
+      llvm::isa<JsirLabeledStatementOp>(op) ||
+      llvm::isa<JsirLogicalExpressionOp>(op) ||
+      llvm::isa<JsirIfStatementOp>(op) || llvm::isa<JsirTryStatementOp>(op) ||
+      llvm::isa<JsirSwitchStatementOp>(op) || llvm::isa<JsirSwitchCaseOp>(op) ||
+      llvm::isa<JsirWhileStatementOp>(op)) {
     return;
   }
   VisitOp(op, operands, before, result_state_refs, after_state_ref);

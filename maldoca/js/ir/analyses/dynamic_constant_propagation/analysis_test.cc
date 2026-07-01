@@ -78,8 +78,8 @@ void RunTest(const JsirAnalysisConfig::DynamicConstantPropagation &config,
   mlir_context.loadDialect<JsirBuiltinDialect>();
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(mlir::OwningOpRef<JsirFileOp> op,
-                               AstToJshirFile(ast, mlir_context));
-  JsHirRepr repr{std::move(op), scopes, std::nullopt};
+                               AstToJsirFile(ast, mlir_context));
+  JsirRepr repr{std::move(op), scopes, std::nullopt};
 
   // Get the const bindings.
   absl::flat_hash_map<JsSymbolId, mlir::Attribute> const_bindings =
