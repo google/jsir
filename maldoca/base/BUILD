@@ -25,27 +25,6 @@ package(
 )
 
 cc_library(
-    name = "error_code_to_status",
-    srcs = ["error_code_to_status.cc"],
-    hdrs = ["error_code_to_status.h"],
-    deps = [
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:status_builder",
-    ],
-)
-
-cc_test(
-    name = "error_code_to_status_test",
-    srcs = ["error_code_to_status_test.cc"],
-    deps = [
-        ":error_code_to_status",
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:status_matchers",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "path",
     srcs = ["path.cc"],
     hdrs = ["path.h"],
@@ -60,10 +39,8 @@ cc_library(
     srcs = ["filesystem.cc"],
     hdrs = ["filesystem.h"],
     deps = [
-        ":error_code_to_status",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:status_builder",
         "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",

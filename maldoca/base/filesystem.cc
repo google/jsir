@@ -23,12 +23,10 @@
 
 #include "absl/log/check.h"
 #include "absl/status/status.h"
-#include "absl/status/status_builder.h"
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "maldoca/base/error_code_to_status.h"
 #include "google/protobuf/io/tokenizer.h"
 #include "google/protobuf/message.h"
 #include "google/protobuf/text_format.h"
@@ -40,9 +38,7 @@ namespace {
 // the filename.
 absl::Status ErrNoToStatusWithFilename(int errno_value,
                                        const std::filesystem::path& file_name) {
-  absl::StatusBuilder builder = ErrnoToStatus(errno);
-  builder << file_name.string();
-  return std::move(builder);
+  return absl::ErrnoToStatus(errno_value, file_name.string());
 }
 
 // For use in reading serialized protos from files.
