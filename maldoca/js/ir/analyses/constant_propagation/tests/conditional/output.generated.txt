@@ -40,17 +40,17 @@
 // JSHIR-NEXT:       "jsir.exprs_region_end"(%15) : (!jsir.any) -> ()
 // JSHIR-NEXT:     }) : () -> ()
 // JSHIR-NEXT:     %0 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
-// JSHIR-NEXT:     %1 = "jsir.member_expression"(%0) <{literal_property = #jsir<identifier   <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:     %1 = "jsir.member_expression"(%0) <{literal_property = #jsir<identifier <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}> : (!jsir.any) -> !jsir.any
 // JSHIR-NEXT:     %2 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
 // JSHIR-NEXT:     %3 = "jsir.call_expression"(%1, %2) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSHIR-NEXT:     "jsir.expression_statement"(%3) : (!jsir.any) -> ()
 // JSHIR-NEXT:     %4 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
-// JSHIR-NEXT:     %5 = "jsir.member_expression"(%4) <{literal_property = #jsir<identifier   <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:     %5 = "jsir.member_expression"(%4) <{literal_property = #jsir<identifier <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}> : (!jsir.any) -> !jsir.any
 // JSHIR-NEXT:     %6 = "jsir.identifier"() <{name = "b"}> : () -> !jsir.any
 // JSHIR-NEXT:     %7 = "jsir.call_expression"(%5, %6) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSHIR-NEXT:     "jsir.expression_statement"(%7) : (!jsir.any) -> ()
 // JSHIR-NEXT:     %8 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
-// JSHIR-NEXT:     %9 = "jsir.member_expression"(%8) <{literal_property = #jsir<identifier   <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:     %9 = "jsir.member_expression"(%8) <{literal_property = #jsir<identifier <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}> : (!jsir.any) -> !jsir.any
 // JSHIR-NEXT:     %10 = "jsir.identifier"() <{name = "c"}> : () -> !jsir.any
 // JSHIR-NEXT:     %11 = "jsir.call_expression"(%9, %10) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSHIR-NEXT:     "jsir.expression_statement"(%11) : (!jsir.any) -> ()
@@ -183,7 +183,7 @@
 // JSHIR-NEXT:         %0 = jsir.identifier {"console"}
 // JSHIR-NEXT:           // %0 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
-// JSHIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier   <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}
+// JSHIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}
 // JSHIR-NEXT:           // %1 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
 // JSHIR-NEXT:         %2 = jsir.identifier {"a"}
@@ -197,7 +197,7 @@
 // JSHIR-NEXT:         %4 = jsir.identifier {"console"}
 // JSHIR-NEXT:           // %4 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
-// JSHIR-NEXT:         %5 = jsir.member_expression (%4) {#jsir<identifier   <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}
+// JSHIR-NEXT:         %5 = jsir.member_expression (%4) {#jsir<identifier <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}
 // JSHIR-NEXT:           // %5 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
 // JSHIR-NEXT:         %6 = jsir.identifier {"b"}
@@ -211,7 +211,7 @@
 // JSHIR-NEXT:         %8 = jsir.identifier {"console"}
 // JSHIR-NEXT:           // %8 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
-// JSHIR-NEXT:         %9 = jsir.member_expression (%8) {#jsir<identifier   <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}
+// JSHIR-NEXT:         %9 = jsir.member_expression (%8) {#jsir<identifier <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}
 // JSHIR-NEXT:           // %9 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
 // JSHIR-NEXT:         %10 = jsir.identifier {"c"}
