@@ -2,7 +2,7 @@
   "tests": [
     {
       "output_file": "output.generated.txt",
-      "passes": "source2ast,erase_comments,ast2hir,peelparens,hir2ast,ast2source",
+      "passes": "source2ast,erase_comments,ast2jsir,peelparens,jsir2ast,ast2source",
       "prefix": "SOURCE"
     }
   ],
