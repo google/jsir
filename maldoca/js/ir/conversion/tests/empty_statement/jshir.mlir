@@ -1,7 +1,7 @@
-// JSHIR:      "jsir.file"() <{comments = []}> ({
-// JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
-// JSHIR-NEXT:     "jsir.empty_statement"() : () -> ()
-// JSHIR-NEXT:   }, {
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:   }) : () -> ()
-// JSHIR-NEXT: }) : () -> ()
+// JSIR:      "jsir.file"() <{comments = []}> ({
+// JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSIR-NEXT:     "jsir.empty_statement"() : () -> ()
+// JSIR-NEXT:   }, {
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:   }) : () -> ()
+// JSIR-NEXT: }) : () -> ()
