@@ -347,3 +347,13 @@ filegroup(
         "@llvm-project//llvm:FileCheck",
     ],
 )
+
+# Exposes the astgen-generated TableGen file as a standalone data dependency
+# for the Python astgen golden-diff test (see
+# docs/migrate_astgen_to_python.md) -- it's otherwise only consumed as a
+# `td_library` src, not a directly depend-able target.
+filegroup(
+    name = "jsir_ops_generated_td",
+    testonly = True,
+    srcs = ["jsir_ops.generated.td"],
+)

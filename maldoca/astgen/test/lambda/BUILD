@@ -15,6 +15,7 @@
 load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_python//python:py_test.bzl", "py_test")
 
 licenses(["notice"])
 
@@ -177,4 +178,24 @@ cc_library(
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:InferTypeOpInterface",
     ],
+)
+
+py_test(
+    name = "ast_gen_test_py",
+    srcs = ["ast_gen_test.py"],
+    main = "ast_gen_test.py",
+    deps = [
+        "//maldoca/astgen/test:ast_gen_test_util_py",
+    ],
+    data = [
+        ":testdata",
+        "//maldoca/astgen/test/lambda/conversion:testdata",
+    ],
+)
+
+filegroup(
+    name = "testdata",
+    testonly = True,
+    srcs = glob(["**"], exclude = ["BUILD"]),
+    visibility = ["//maldoca/astgen:__subpackages__"],
 )

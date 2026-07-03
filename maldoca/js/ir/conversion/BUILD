@@ -99,3 +99,15 @@ cc_library(
         "@llvm-project//mlir:IR",
     ],
 )
+
+# Exposes the astgen-generated AST<->IR conversion sources as a standalone
+# data dependency for the Python astgen golden-diff test (see
+# docs/migrate_astgen_to_python.md).
+filegroup(
+    name = "generated_conversion_sources",
+    testonly = True,
+    srcs = [
+        "ast_to_jsir.generated.cc",
+        "jsir_to_ast.generated.cc",
+    ],
+)

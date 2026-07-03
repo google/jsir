@@ -15,6 +15,7 @@
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_python//python:py_test.bzl", "py_test")
 load("//maldoca/js:allowed_users.bzl", "JSIR_ALLOWED_USERS")
 
 licenses(["notice"])
@@ -40,6 +41,35 @@ cc_test(
     deps = [
         "//maldoca/astgen/test:ast_gen_test_util",
         "@googletest//:gtest_main",
+    ],
+)
+
+# Golden input/output files for the Python astgen golden-diff test (see
+# docs/migrate_astgen_to_python.md) -- mirrors the `data` of the cc_test
+# above.
+filegroup(
+    name = "testdata",
+    testonly = True,
+    srcs = [
+        "ast.generated.cc",
+        "ast.generated.h",
+        "ast_def.textproto",
+        "ast_from_json.generated.cc",
+        "ast_to_json.generated.cc",
+    ],
+)
+
+py_test(
+    name = "ast_gen_test_py",
+    srcs = ["ast_gen_test.py"],
+    main = "ast_gen_test.py",
+    deps = [
+        "//maldoca/astgen/test:ast_gen_test_util_py",
+    ],
+    data = [
+        ":testdata",
+        "//maldoca/js/ir:jsir_ops_generated_td",
+        "//maldoca/js/ir/conversion:generated_conversion_sources",
     ],
 )
 
