@@ -250,7 +250,7 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:             jsir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
@@ -299,7 +299,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -390,7 +390,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -469,7 +469,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -512,7 +512,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -552,7 +552,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -646,7 +646,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -686,7 +686,7 @@
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             jshir.block_statement ({
+// SOURCE-NEXT:                             jsir.block_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
@@ -743,7 +743,7 @@
 // SOURCE-NEXT:                       ^bb0:
 // SOURCE-NEXT:                           // <executable>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         jshir.block_statement ({
+// SOURCE-NEXT:                         jsir.block_statement ({
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
@@ -792,7 +792,7 @@
 // SOURCE-NEXT:                                       ^bb0:
 // SOURCE-NEXT:                                           // <executable>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                         jshir.block_statement ({
+// SOURCE-NEXT:                                         jsir.block_statement ({
 // SOURCE-NEXT:                                           ^bb0:
 // SOURCE-NEXT:                                               // <executable>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { }
@@ -903,7 +903,7 @@
 // SOURCE-NEXT:                                       ^bb0:
 // SOURCE-NEXT:                                           // <executable>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                         jshir.block_statement ({
+// SOURCE-NEXT:                                         jsir.block_statement ({
 // SOURCE-NEXT:                                           ^bb0:
 // SOURCE-NEXT:                                               // <executable>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { }
@@ -985,7 +985,7 @@
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                 jshir.block_statement ({
+// SOURCE-NEXT:                                 jsir.block_statement ({
 // SOURCE-NEXT:                                   ^bb0:
 // SOURCE-NEXT:                                       // <executable>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
@@ -1034,7 +1034,7 @@
 // SOURCE-NEXT:                                               ^bb0:
 // SOURCE-NEXT:                                                   // <executable>
 // SOURCE-NEXT:                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                 jshir.block_statement ({
+// SOURCE-NEXT:                                                 jsir.block_statement ({
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
@@ -1077,7 +1077,7 @@
 // SOURCE-NEXT:                                               ^bb0:
 // SOURCE-NEXT:                                                   // <executable>
 // SOURCE-NEXT:                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                 jshir.block_statement ({
+// SOURCE-NEXT:                                                 jsir.block_statement ({
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
@@ -1204,7 +1204,7 @@
 // SOURCE-NEXT:                                         %56 = jsir.identifier {"_0xcc36bd"}
 // SOURCE-NEXT:                                           // %56 = <unknown>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { <_0x5e0f91#21 : #jsir_builtin<builtin_function "_0x4a57">> <_0xb3bca#21 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                         %57 = jshir.conditional_expression (%56) ({
+// SOURCE-NEXT:                                         %57 = jsir.conditional_expression (%56) ({
 // SOURCE-NEXT:                                           ^bb0:
 // SOURCE-NEXT:                                               // <executable>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { <_0x5e0f91#21 : #jsir_builtin<builtin_function "_0x4a57">> <_0xb3bca#21 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -1218,7 +1218,7 @@
 // SOURCE-NEXT:                                               ^bb0:
 // SOURCE-NEXT:                                                   // <executable>
 // SOURCE-NEXT:                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                 jshir.block_statement ({
+// SOURCE-NEXT:                                                 jsir.block_statement ({
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
@@ -1247,7 +1247,7 @@
 // SOURCE-NEXT:                                               ^bb0:
 // SOURCE-NEXT:                                                   // <executable>
 // SOURCE-NEXT:                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                 jshir.block_statement ({
+// SOURCE-NEXT:                                                 jsir.block_statement ({
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
@@ -1280,11 +1280,11 @@
 // SOURCE-NEXT:                                                     %60 = jsir.identifier {"_0x17e846"}
 // SOURCE-NEXT:                                                       // %60 = <unknown>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { <_0x40d5a6#24 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4d80ef#24 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                     jshir.if_statement (%60) ({
+// SOURCE-NEXT:                                                     jsir.if_statement (%60) ({
 // SOURCE-NEXT:                                                       ^bb0:
 // SOURCE-NEXT:                                                           // <executable>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { <_0x40d5a6#24 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4d80ef#24 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                         jshir.block_statement ({
+// SOURCE-NEXT:                                                         jsir.block_statement ({
 // SOURCE-NEXT:                                                           ^bb0:
 // SOURCE-NEXT:                                                               // <executable>
 // SOURCE-NEXT:                                                               // State [default = <unknown>] { <_0x40d5a6#24 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4d80ef#24 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -1336,11 +1336,11 @@
 // SOURCE-NEXT:                                                             %76 = jsir.call_expression (%65, %70, %75)
 // SOURCE-NEXT:                                                               // %76 = true
 // SOURCE-NEXT:                                                               // State [default = <unknown>] { <_0x40d5a6#24 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4d80ef#24 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                             jshir.if_statement (%76) ({
+// SOURCE-NEXT:                                                             jsir.if_statement (%76) ({
 // SOURCE-NEXT:                                                               ^bb0:
 // SOURCE-NEXT:                                                                   // <executable>
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { <_0x40d5a6#24 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4d80ef#24 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                                 jshir.block_statement ({
+// SOURCE-NEXT:                                                                 jsir.block_statement ({
 // SOURCE-NEXT:                                                                   ^bb0:
 // SOURCE-NEXT:                                                                       // <executable>
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { <_0x40d5a6#24 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4d80ef#24 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -1577,7 +1577,7 @@
 // SOURCE-NEXT:                       ^bb0:
 // SOURCE-NEXT:                           // <executable>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         jshir.block_statement ({
+// SOURCE-NEXT:                         jsir.block_statement ({
 // SOURCE-NEXT:                           ^bb0:
 // SOURCE-NEXT:                               // <executable>
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
@@ -1616,7 +1616,7 @@
 // SOURCE-NEXT:                                   ^bb0:
 // SOURCE-NEXT:                                       // <executable>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     jshir.block_statement ({
+// SOURCE-NEXT:                                     jsir.block_statement ({
 // SOURCE-NEXT:                                       ^bb0:
 // SOURCE-NEXT:                                           // <executable>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
@@ -1665,7 +1665,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                     jshir.block_statement ({
+// SOURCE-NEXT:                                                     jsir.block_statement ({
 // SOURCE-NEXT:                                                       ^bb0:
 // SOURCE-NEXT:                                                           // <executable>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
@@ -1770,11 +1770,11 @@
 // SOURCE-NEXT:                                         %107 = jsir.binary_expression (%101, %106) {"!=="}
 // SOURCE-NEXT:                                           // %107 = true
 // SOURCE-NEXT:                                           // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                         jshir.if_statement (%107) ({
+// SOURCE-NEXT:                                         jsir.if_statement (%107) ({
 // SOURCE-NEXT:                                           ^bb0:
 // SOURCE-NEXT:                                               // <executable>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                             jshir.block_statement ({
+// SOURCE-NEXT:                                             jsir.block_statement ({
 // SOURCE-NEXT:                                               ^bb0:
 // SOURCE-NEXT:                                                   // <executable>
 // SOURCE-NEXT:                                                   // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -1792,11 +1792,11 @@
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
 // SOURCE-NEXT:                                                 })
 // SOURCE-NEXT:                                                   // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                 jshir.try_statement ({
+// SOURCE-NEXT:                                                 jsir.try_statement ({
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                     jshir.block_statement ({
+// SOURCE-NEXT:                                                     jsir.block_statement ({
 // SOURCE-NEXT:                                                       ^bb0:
 // SOURCE-NEXT:                                                           // <executable>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -1827,7 +1827,7 @@
 // SOURCE-NEXT:                                                         %117 = jsir.binary_expression (%111, %116) {"==="}
 // SOURCE-NEXT:                                                           // %117 = true
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                                         jshir.if_statement (%117) ({
+// SOURCE-NEXT:                                                         jsir.if_statement (%117) ({
 // SOURCE-NEXT:                                                           ^bb0:
 // SOURCE-NEXT:                                                               // <executable>
 // SOURCE-NEXT:                                                               // State [default = <unknown>] { <_0x5aa537#29 : #jsir_builtin<builtin_function "_0x4a57">> <_0x887e8#29 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -1960,7 +1960,7 @@
 // SOURCE-NEXT:                                                           ^bb0:
 // SOURCE-NEXT:                                                               // <not executable>
 // SOURCE-NEXT:                                                               // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                             jshir.block_statement ({
+// SOURCE-NEXT:                                                             jsir.block_statement ({
 // SOURCE-NEXT:                                                               ^bb0:
 // SOURCE-NEXT:                                                                   // <not executable>
 // SOURCE-NEXT:                                                                   // State [default = <uninitialized>] { }
@@ -1978,11 +1978,11 @@
 // SOURCE-NEXT:                                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                                 })
 // SOURCE-NEXT:                                                                   // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                                 jshir.try_statement ({
+// SOURCE-NEXT:                                                                 jsir.try_statement ({
 // SOURCE-NEXT:                                                                   ^bb0:
 // SOURCE-NEXT:                                                                       // <not executable>
 // SOURCE-NEXT:                                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                                     jshir.block_statement ({
+// SOURCE-NEXT:                                                                     jsir.block_statement ({
 // SOURCE-NEXT:                                                                       ^bb0:
 // SOURCE-NEXT:                                                                           // <not executable>
 // SOURCE-NEXT:                                                                           // State [default = <uninitialized>] { }
@@ -2094,11 +2094,11 @@
 // SOURCE-NEXT:                                                                     %119 = jsir.identifier_ref {"_0x475726"}
 // SOURCE-NEXT:                                                                       // %119 = <uninitialized>
 // SOURCE-NEXT:                                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                                     jshir.catch_clause (%119) ({
+// SOURCE-NEXT:                                                                     jsir.catch_clause (%119) ({
 // SOURCE-NEXT:                                                                       ^bb0:
 // SOURCE-NEXT:                                                                           // <not executable>
 // SOURCE-NEXT:                                                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                                         jshir.block_statement ({
+// SOURCE-NEXT:                                                                         jsir.block_statement ({
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <not executable>
 // SOURCE-NEXT:                                                                               // State [default = <uninitialized>] { }
@@ -2150,11 +2150,11 @@
 // SOURCE-NEXT:                                                     %109 = jsir.identifier_ref {"_0x1ee9d2"}
 // SOURCE-NEXT:                                                       // %109 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     jshir.catch_clause (%109) ({
+// SOURCE-NEXT:                                                     jsir.catch_clause (%109) ({
 // SOURCE-NEXT:                                                       ^bb0:
 // SOURCE-NEXT:                                                           // <not executable>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                         jshir.block_statement ({
+// SOURCE-NEXT:                                                         jsir.block_statement ({
 // SOURCE-NEXT:                                                           ^bb0:
 // SOURCE-NEXT:                                                               // <not executable>
 // SOURCE-NEXT:                                                               // State [default = <uninitialized>] { }
@@ -2280,7 +2280,7 @@
 // SOURCE-NEXT:                                 %67 = jsir.member_expression (%63, %66)
 // SOURCE-NEXT:                                   // %67 = <unknown>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                 %68 = jshir.logical_expression (%67) {"||"} ({
+// SOURCE-NEXT:                                 %68 = jsir.logical_expression (%67) {"||"} ({
 // SOURCE-NEXT:                                   ^bb0:
 // SOURCE-NEXT:                                       // <executable>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -2386,7 +2386,7 @@
 // SOURCE-NEXT:                                   // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
 // SOURCE-NEXT:                             })
 // SOURCE-NEXT:                               // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                             jshir.for_statement ({
+// SOURCE-NEXT:                             jsir.for_statement ({
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -2498,7 +2498,7 @@
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                 jshir.block_statement ({
+// SOURCE-NEXT:                                 jsir.block_statement ({
 // SOURCE-NEXT:                                   ^bb0:
 // SOURCE-NEXT:                                       // <executable>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
@@ -2590,7 +2590,7 @@
 // SOURCE-NEXT:                                         %100 = jsir.member_expression (%98, %99)
 // SOURCE-NEXT:                                           // %100 = <unknown>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }
-// SOURCE-NEXT:                                         %101 = jshir.logical_expression (%100) {"||"} ({
+// SOURCE-NEXT:                                         %101 = jsir.logical_expression (%100) {"||"} ({
 // SOURCE-NEXT:                                           ^bb0:
 // SOURCE-NEXT:                                               // <executable>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { <_0x4710fc#28 : #jsir_builtin<builtin_function "_0x4a57">> <_0x9c5c81#28 : #jsir_builtin<builtin_function "_0x4a57">> }

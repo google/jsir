@@ -37,155 +37,155 @@
 // A useful macro to pass to FOR_EACH_JSIR_CLASS to ignore a kind of JSIR class.
 #define JSIR_CLASS_IGNORE(...)
 
-// A list of all JSIR and JSHIR ops and attributes:
+// A list of all JSIR ops and attributes:
 //
 // - CIR_OP: Jsir<TYPE>Op
-// - HIR_OP: Jshir<TYPE>Op
+// - HIR_OP: Unused (formerly Jshir<TYPE>Op)
 // - REF_OP: Jsir<TYPE>RefOp
 // - ATTRIB: Jsir<TYPE>Attr
 #define FOR_EACH_JSIR_CLASS(CIR_OP, HIR_OP, REF_OP, ATTRIB) \
-  /* File */                                                        \
-  CIR_OP(File)                                                      \
-                                                                    \
-  /* Identifiers */                                                 \
-  CIR_OP(Identifier)                                                \
-  REF_OP(Identifier)                                                \
-  ATTRIB(Identifier)                                                \
-  CIR_OP(PrivateName)                                               \
-  ATTRIB(PrivateName)                                               \
-                                                                    \
-  /* Literals */                                                    \
-  ATTRIB(RegExpLiteralExtra)                                        \
-  CIR_OP(RegExpLiteral)                                             \
-  CIR_OP(NullLiteral)                                               \
-  ATTRIB(StringLiteralExtra)                                        \
-  CIR_OP(StringLiteral)                                             \
-  ATTRIB(StringLiteral)                                             \
-  CIR_OP(BooleanLiteral)                                            \
-  ATTRIB(NumericLiteralExtra)                                       \
-  CIR_OP(NumericLiteral)                                            \
-  ATTRIB(NumericLiteral)                                            \
-  ATTRIB(BigIntLiteralExtra)                                        \
-  CIR_OP(BigIntLiteral)                                             \
-  ATTRIB(BigIntLiteral)                                             \
-                                                                    \
-  /* Program */                                                     \
-  CIR_OP(Program)                                                   \
-                                                                    \
-  /* Statements */                                                  \
-  CIR_OP(ExpressionStatement)                                       \
-  HIR_OP(BlockStatement)                                            \
-  CIR_OP(EmptyStatement)                                            \
-  CIR_OP(DebuggerStatement)                                         \
-  HIR_OP(WithStatement)                                             \
-  CIR_OP(ReturnStatement)                                           \
-  HIR_OP(LabeledStatement)                                          \
-  HIR_OP(BreakStatement)                                            \
-  HIR_OP(ContinueStatement)                                         \
-  HIR_OP(IfStatement)                                               \
-  HIR_OP(SwitchStatement)                                           \
-  HIR_OP(SwitchCase)                                                \
-  CIR_OP(ThrowStatement)                                            \
-  HIR_OP(TryStatement)                                              \
-  HIR_OP(CatchClause)                                               \
-  HIR_OP(WhileStatement)                                            \
-  HIR_OP(DoWhileStatement)                                          \
-  HIR_OP(ForStatement)                                              \
-  HIR_OP(ForInStatement)                                            \
-  HIR_OP(ForOfStatement)                                            \
-                                                                    \
-  /* Declarations */                                                \
-  CIR_OP(FunctionDeclaration)                                       \
-  CIR_OP(VariableDeclaration)                                       \
-  CIR_OP(VariableDeclarator)                                        \
-                                                                    \
-  /* Directives */                                                  \
-  CIR_OP(Directive)                                                 \
-  ATTRIB(DirectiveLiteralExtra)                                     \
-  CIR_OP(DirectiveLiteral)                                          \
-  ATTRIB(InterpreterDirective)                                      \
-                                                                    \
-  /* Expressions */                                                 \
-  CIR_OP(Super)                                                     \
-  CIR_OP(Import)                                                    \
-  CIR_OP(ThisExpression)                                            \
-  CIR_OP(ArrowFunctionExpression)                                   \
-  CIR_OP(YieldExpression)                                           \
-  CIR_OP(AwaitExpression)                                           \
-  CIR_OP(ArrayExpression)                                           \
-  CIR_OP(ObjectExpression)                                          \
-  CIR_OP(ObjectProperty)                                            \
-  REF_OP(ObjectProperty)                                            \
-  CIR_OP(ObjectMethod)                                              \
-  CIR_OP(FunctionExpression)                                        \
-  CIR_OP(UnaryExpression)                                           \
-  CIR_OP(UpdateExpression)                                          \
-  CIR_OP(BinaryExpression)                                          \
-  CIR_OP(AssignmentExpression)                                      \
-  HIR_OP(LogicalExpression)                                         \
-  CIR_OP(SpreadElement)                                             \
-  CIR_OP(MemberExpression)                                          \
-  REF_OP(MemberExpression)                                          \
-  CIR_OP(OptionalMemberExpression)                                  \
-  HIR_OP(ConditionalExpression)                                     \
-  CIR_OP(CallExpression)                                            \
-  CIR_OP(OptionalCallExpression)                                    \
-  CIR_OP(NewExpression)                                             \
-  CIR_OP(SequenceExpression)                                        \
-  CIR_OP(ParenthesizedExpression)                                   \
-  REF_OP(ParenthesizedExpression)                                   \
-  CIR_OP(TemplateLiteral)                                           \
-  CIR_OP(TaggedTemplateExpression)                                  \
-  CIR_OP(TemplateElementValue)                                      \
-  CIR_OP(TemplateElement)                                           \
-                                                                    \
-  /* Patterns */                                                    \
-  REF_OP(ObjectPattern)                                             \
-  REF_OP(ArrayPattern)                                              \
-  REF_OP(RestElement)                                               \
-  REF_OP(AssignmentPattern)                                         \
-                                                                    \
-  /* Classes */                                                     \
-  CIR_OP(ClassBody)                                                 \
-  CIR_OP(ClassMethod)                                               \
-  CIR_OP(ClassPrivateMethod)                                        \
-  CIR_OP(ClassProperty)                                             \
-  CIR_OP(ClassPrivateProperty)                                      \
-  CIR_OP(ClassDeclaration)                                          \
-  CIR_OP(ClassExpression)                                           \
-                                                                    \
-  /* Modules */                                                     \
-  CIR_OP(MetaProperty)                                              \
-  CIR_OP(ImportDeclaration)                                         \
-  ATTRIB(ImportSpecifier)                                           \
-  ATTRIB(ImportDefaultSpecifier)                                    \
-  ATTRIB(ImportNamespaceSpecifier)                                  \
-  ATTRIB(ImportAttribute)                                           \
-  CIR_OP(ExportNamedDeclaration)                                    \
-  ATTRIB(ExportSpecifier)                                           \
-  CIR_OP(ExportDefaultDeclaration)                                  \
+  /* File */                                                \
+  CIR_OP(File)                                              \
+                                                            \
+  /* Identifiers */                                         \
+  CIR_OP(Identifier)                                        \
+  REF_OP(Identifier)                                        \
+  ATTRIB(Identifier)                                        \
+  CIR_OP(PrivateName)                                       \
+  ATTRIB(PrivateName)                                       \
+                                                            \
+  /* Literals */                                            \
+  ATTRIB(RegExpLiteralExtra)                                \
+  CIR_OP(RegExpLiteral)                                     \
+  CIR_OP(NullLiteral)                                       \
+  ATTRIB(StringLiteralExtra)                                \
+  CIR_OP(StringLiteral)                                     \
+  ATTRIB(StringLiteral)                                     \
+  CIR_OP(BooleanLiteral)                                    \
+  ATTRIB(NumericLiteralExtra)                               \
+  CIR_OP(NumericLiteral)                                    \
+  ATTRIB(NumericLiteral)                                    \
+  ATTRIB(BigIntLiteralExtra)                                \
+  CIR_OP(BigIntLiteral)                                     \
+  ATTRIB(BigIntLiteral)                                     \
+                                                            \
+  /* Program */                                             \
+  CIR_OP(Program)                                           \
+                                                            \
+  /* Statements */                                          \
+  CIR_OP(ExpressionStatement)                               \
+  CIR_OP(BlockStatement)                                    \
+  CIR_OP(EmptyStatement)                                    \
+  CIR_OP(DebuggerStatement)                                 \
+  CIR_OP(WithStatement)                                     \
+  CIR_OP(ReturnStatement)                                   \
+  CIR_OP(LabeledStatement)                                  \
+  CIR_OP(BreakStatement)                                    \
+  CIR_OP(ContinueStatement)                                 \
+  CIR_OP(IfStatement)                                       \
+  CIR_OP(SwitchStatement)                                   \
+  CIR_OP(SwitchCase)                                        \
+  CIR_OP(ThrowStatement)                                    \
+  CIR_OP(TryStatement)                                      \
+  CIR_OP(CatchClause)                                       \
+  CIR_OP(WhileStatement)                                    \
+  CIR_OP(DoWhileStatement)                                  \
+  CIR_OP(ForStatement)                                      \
+  CIR_OP(ForInStatement)                                    \
+  CIR_OP(ForOfStatement)                                    \
+                                                            \
+  /* Declarations */                                        \
+  CIR_OP(FunctionDeclaration)                               \
+  CIR_OP(VariableDeclaration)                               \
+  CIR_OP(VariableDeclarator)                                \
+                                                            \
+  /* Directives */                                          \
+  CIR_OP(Directive)                                         \
+  ATTRIB(DirectiveLiteralExtra)                             \
+  CIR_OP(DirectiveLiteral)                                  \
+  ATTRIB(InterpreterDirective)                              \
+                                                            \
+  /* Expressions */                                         \
+  CIR_OP(Super)                                             \
+  CIR_OP(Import)                                            \
+  CIR_OP(ThisExpression)                                    \
+  CIR_OP(ArrowFunctionExpression)                           \
+  CIR_OP(YieldExpression)                                   \
+  CIR_OP(AwaitExpression)                                   \
+  CIR_OP(ArrayExpression)                                   \
+  CIR_OP(ObjectExpression)                                  \
+  CIR_OP(ObjectProperty)                                    \
+  REF_OP(ObjectProperty)                                    \
+  CIR_OP(ObjectMethod)                                      \
+  CIR_OP(FunctionExpression)                                \
+  CIR_OP(UnaryExpression)                                   \
+  CIR_OP(UpdateExpression)                                  \
+  CIR_OP(BinaryExpression)                                  \
+  CIR_OP(AssignmentExpression)                              \
+  CIR_OP(LogicalExpression)                                 \
+  CIR_OP(SpreadElement)                                     \
+  CIR_OP(MemberExpression)                                  \
+  REF_OP(MemberExpression)                                  \
+  CIR_OP(OptionalMemberExpression)                          \
+  CIR_OP(ConditionalExpression)                             \
+  CIR_OP(CallExpression)                                    \
+  CIR_OP(OptionalCallExpression)                            \
+  CIR_OP(NewExpression)                                     \
+  CIR_OP(SequenceExpression)                                \
+  CIR_OP(ParenthesizedExpression)                           \
+  REF_OP(ParenthesizedExpression)                           \
+  CIR_OP(TemplateLiteral)                                   \
+  CIR_OP(TaggedTemplateExpression)                          \
+  CIR_OP(TemplateElementValue)                              \
+  CIR_OP(TemplateElement)                                   \
+                                                            \
+  /* Patterns */                                            \
+  REF_OP(ObjectPattern)                                     \
+  REF_OP(ArrayPattern)                                      \
+  REF_OP(RestElement)                                       \
+  REF_OP(AssignmentPattern)                                 \
+                                                            \
+  /* Classes */                                             \
+  CIR_OP(ClassBody)                                         \
+  CIR_OP(ClassMethod)                                       \
+  CIR_OP(ClassPrivateMethod)                                \
+  CIR_OP(ClassProperty)                                     \
+  CIR_OP(ClassPrivateProperty)                              \
+  CIR_OP(ClassDeclaration)                                  \
+  CIR_OP(ClassExpression)                                   \
+                                                            \
+  /* Modules */                                             \
+  CIR_OP(MetaProperty)                                      \
+  CIR_OP(ImportDeclaration)                                 \
+  ATTRIB(ImportSpecifier)                                   \
+  ATTRIB(ImportDefaultSpecifier)                            \
+  ATTRIB(ImportNamespaceSpecifier)                          \
+  ATTRIB(ImportAttribute)                                   \
+  CIR_OP(ExportNamedDeclaration)                            \
+  ATTRIB(ExportSpecifier)                                   \
+  CIR_OP(ExportDefaultDeclaration)                          \
   CIR_OP(ExportAllDeclaration)
 
 // JsirStatementOpInterface
 #define FOR_EACH_JSIR_STATEMENT_OP(CIR, HIR) \
   CIR(ExpressionStatement)                   \
-  HIR(BlockStatement)                        \
+  CIR(BlockStatement)                        \
   CIR(EmptyStatement)                        \
   CIR(DebuggerStatement)                     \
-  HIR(WithStatement)                         \
+  CIR(WithStatement)                         \
   CIR(ReturnStatement)                       \
-  HIR(LabeledStatement)                      \
-  HIR(BreakStatement)                        \
-  HIR(ContinueStatement)                     \
-  HIR(IfStatement)                           \
-  HIR(SwitchStatement)                       \
+  CIR(LabeledStatement)                      \
+  CIR(BreakStatement)                        \
+  CIR(ContinueStatement)                     \
+  CIR(IfStatement)                           \
+  CIR(SwitchStatement)                       \
   CIR(ThrowStatement)                        \
-  HIR(TryStatement)                          \
-  HIR(WhileStatement)                        \
-  HIR(DoWhileStatement)                      \
-  HIR(ForStatement)                          \
-  HIR(ForInStatement)                        \
-  HIR(ForOfStatement)                        \
+  CIR(TryStatement)                          \
+  CIR(WhileStatement)                        \
+  CIR(DoWhileStatement)                      \
+  CIR(ForStatement)                          \
+  CIR(ForInStatement)                        \
+  CIR(ForOfStatement)                        \
   CIR(FunctionDeclaration)                   \
   CIR(VariableDeclaration)                   \
   CIR(ClassDeclaration)
@@ -210,10 +210,10 @@
   CIR(UpdateExpression)                       \
   CIR(BinaryExpression)                       \
   CIR(AssignmentExpression)                   \
-  HIR(LogicalExpression)                      \
+  CIR(LogicalExpression)                      \
   CIR(MemberExpression)                       \
   CIR(OptionalMemberExpression)               \
-  HIR(ConditionalExpression)                  \
+  CIR(ConditionalExpression)                  \
   CIR(CallExpression)                         \
   CIR(OptionalCallExpression)                 \
   CIR(NewExpression)                          \
@@ -317,7 +317,6 @@ QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
 
 // Include the auto-generated header file containing the declaration of the JSIR
 // dialect.
-#include "maldoca/js/ir/jshir_dialect.h.inc"
 #include "maldoca/js/ir/jsir_dialect.h.inc"
 
 // Include the auto-generated header file containing the declarations of the
@@ -343,7 +342,5 @@ QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
 // JSIR operations.
 #define GET_OP_CLASSES
 #include "maldoca/js/ir/jsir_ops.h.inc"
-#define GET_OP_CLASSES
-#include "maldoca/js/ir/jshir_ops.h.inc"
 
 #endif  // MALDOCA_JS_IR_IR_H_

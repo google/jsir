@@ -151,13 +151,13 @@ absl::StatusOr<std::unique_ptr<JsFile>> TransformJsAst(
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
-  ABSL_ASSIGN_OR_RETURN(auto jshir_file, AstToJshirFile(ast, mlir_context));
+  ABSL_ASSIGN_OR_RETURN(auto jsir_file, AstToJsirFile(ast, mlir_context));
 
   JsAnalysisOutputs analysis_outputs;
-  ABSL_RETURN_IF_ERROR(TransformJsir(*jshir_file, scopes, std::move(configs),
+  ABSL_RETURN_IF_ERROR(TransformJsir(*jsir_file, scopes, std::move(configs),
                                      babel, &analysis_outputs));
 
-  return JshirFileToAst(*jshir_file);
+  return JsirFileToAst(*jsir_file);
 }
 
 }  // namespace maldoca

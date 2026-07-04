@@ -67,7 +67,7 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
     //
     // ```
     // <state before if_statement>
-    // jshir.if_statement (%cond) {
+    // jsir.if_statement (%cond) {
     //   <state at entry of true_branch>
     // }, {
     //   <state at entry of false_branch>

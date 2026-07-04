@@ -295,9 +295,8 @@ message NodeDefPb {
   // Supported kinds. Each kind leads to a different IR op.
   repeated FieldKind kinds = 6;
 
-  // Whether this op has control flow. If so, we will define a high-level IR op,
-  // and a low-level IR op.
-  optional bool has_control_flow = 7;
+  // Deprecated: No longer used for dialect splitting. Merged HIR into IR.
+  optional bool has_control_flow = 7 [deprecated = true];
 
   // [Optional] Custom MLIR op name.
   //

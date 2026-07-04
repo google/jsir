@@ -31,8 +31,8 @@ namespace maldoca {
 enum class JsirPassKind {
   // Conversion
   kSourceToAst,
-  kAstToJshir,
-  kJshirToAst,
+  kAstToJsir,
+  kJsirToAst,
   kAstToSource,
 
   // Transform

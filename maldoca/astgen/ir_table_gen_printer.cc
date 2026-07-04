@@ -204,8 +204,6 @@ void IrTableGenPrinter::PrintAst(const AstDef& ast, absl::string_view ir_path) {
 void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
                                   FieldKind kind) {
   auto ir_name = absl::StrCat(ast.lang_name(), "ir");
-  auto hir_name =
-      absl::StrCat(ast.lang_name(), node.has_control_flow() ? "hir" : "ir");
 
   auto vars = WithVars({
       {"OpName", node.ir_op_name(ast.lang_name(), kind).value().ToPascalCase()},
@@ -213,7 +211,6 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
       {"Name", node.name()},
       {"name", Symbol(node.name()).ToCcVarName()},
       {"IrName", Symbol(ir_name).ToPascalCase()},
-      {"HirName", Symbol(hir_name).ToPascalCase()},
   });
 
   std::vector<Symbol> traits;
@@ -295,7 +292,7 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
     //     ]> {
     // ```
     Print(
-        "def $OpName$ : $HirName$_Op<\n"
+        "def $OpName$ : $IrName$_Op<\n"
         "    \"$op_mnemonic$\", [\n");
 
     {

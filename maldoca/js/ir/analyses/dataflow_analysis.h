@@ -460,8 +460,8 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
           if (getProgramPointBefore(&op) == from) {
             break;
           }
-          if (llvm::isa<JshirBreakStatementOp>(op) ||
-              llvm::isa<JshirContinueStatementOp>(op)) {
+          if (llvm::isa<JsirBreakStatementOp>(op) ||
+              llvm::isa<JsirContinueStatementOp>(op)) {
             return;
           }
         }
@@ -618,7 +618,7 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
   }
 
   static mlir::Region& GetForStatementContinueTargetRegion(
-      JshirForStatementOp for_stmt) {
+      JsirForStatementOp for_stmt) {
     if (!for_stmt.getUpdate().empty()) {
       return for_stmt.getUpdate();
     }
@@ -642,7 +642,7 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
 
   std::optional<decltype(jump_env_.WithLabel({}))> WithLabel(
       mlir::Operation* op) {
-    if (auto labeled_stmt = llvm::dyn_cast<JshirLabeledStatementOp>(op);
+    if (auto labeled_stmt = llvm::dyn_cast<JsirLabeledStatementOp>(op);
         labeled_stmt != nullptr) {
       return jump_env_.WithLabel(labeled_stmt.getLabel().getName());
     }
@@ -932,15 +932,15 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       llvm::isa<JsirObjectExpressionOp>(op) ||
       llvm::isa<JsirClassPropertyOp>(op) ||
       llvm::isa<JsirExportDefaultDeclarationOp>(op) ||
-      llvm::isa<JshirWithStatementOp>(op) ||
-      llvm::isa<JshirLabeledStatementOp>(op) ||
+      llvm::isa<JsirWithStatementOp>(op) ||
+      llvm::isa<JsirLabeledStatementOp>(op) ||
       llvm::isa<JsirObjectPatternRefOp>(op) ||
       llvm::isa<JsirClassPrivatePropertyOp>(op) ||
       llvm::isa<JsirClassBodyOp>(op) ||
       llvm::isa<JsirClassDeclarationOp>(op) /* TODO Should this be here? */
       || llvm::isa<JsirClassExpressionOp>(op) ||
       llvm::isa<JsirExportNamedDeclarationOp>(op)) {
-    if (llvm::isa<JshirWithStatementOp>(op)) {
+    if (llvm::isa<JsirWithStatementOp>(op)) {
       maybe_jump_targets = {
           .labeled_break_target = getProgramPointAfter(op),
           .unlabeled_break_target = std::nullopt,
@@ -968,7 +968,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.if_statement (
+  // │     jsir.if_statement (
   // ├─────► ┌───────────────┐
   // │       │ true region   │
   // │  ┌──◄ └───────────────┘
@@ -977,7 +977,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   //    ├──◄ └───────────────┘
   //    │  );
   //    └──►
-  if (auto if_stmt = llvm::dyn_cast<JshirIfStatementOp>(op);
+  if (auto if_stmt = llvm::dyn_cast<JsirIfStatementOp>(op);
       if_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(if_stmt),
@@ -1019,7 +1019,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.block_statement (
+  // │     jsir.block_statement (
   // └─────► ┌───────────────┐
   //         │ directives    │
   //    ┌──◄ └───────────────┘
@@ -1028,7 +1028,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ┌─────◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto block_stmt = llvm::dyn_cast<JshirBlockStatementOp>(op);
+  if (auto block_stmt = llvm::dyn_cast<JsirBlockStatementOp>(op);
       block_stmt != nullptr) {
     MaybeEmplaceCfgEdges({
         .from = Before(block_stmt),
@@ -1048,7 +1048,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.while_statement (
+  // │     jsir.while_statement (
   // ├─────► ┌───────────────┐
   // │       │ test region   │
   // │  ┌──◄ └───────────────┘
@@ -1057,7 +1057,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // └──│──◄ └───────────────┘
   //    │  );
   //    └──►
-  if (auto while_stmt = llvm::dyn_cast<JshirWhileStatementOp>(op);
+  if (auto while_stmt = llvm::dyn_cast<JsirWhileStatementOp>(op);
       while_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(while_stmt),
@@ -1091,7 +1091,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.do_while_statement (
+  // │     jsir.do_while_statement (
   // ├─────► ┌───────────────┐
   // │       │ body region   │
   // │  ┌──◄ └───────────────┘
@@ -1100,7 +1100,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ├─────◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto do_while_stmt = llvm::dyn_cast<JshirDoWhileStatementOp>(op);
+  if (auto do_while_stmt = llvm::dyn_cast<JsirDoWhileStatementOp>(op);
       do_while_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(do_while_stmt),
@@ -1135,7 +1135,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   //    ┌─────◄
-  //    │     jshir.for_statement (
+  //    │     jsir.for_statement (
   //    └─────► ┌───────────────┐
   //            │ init region   │
   // ┌────────◄ └───────────────┘
@@ -1150,7 +1150,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // └──│─────◄ └───────────────┘
   //    │     );
   //    └─────►
-  if (auto for_stmt = llvm::dyn_cast<JshirForStatementOp>(op);
+  if (auto for_stmt = llvm::dyn_cast<JsirForStatementOp>(op);
       for_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(for_stmt),
@@ -1219,13 +1219,13 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.for_in_statement (
+  // │     jsir.for_in_statement (
   // └──┬──► ┌───────────────┐
   //    │    │ body region   │
   // ┌──┴──◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto for_in_stmt = llvm::dyn_cast<JshirForInStatementOp>(op);
+  if (auto for_in_stmt = llvm::dyn_cast<JsirForInStatementOp>(op);
       for_in_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(for_in_stmt),
@@ -1251,13 +1251,13 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.for_of_statement (
+  // │     jsir.for_of_statement (
   // └──┬──► ┌───────────────┐
   //    │    │ body region   │
   // ┌──┴──◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto for_of_stmt = llvm::dyn_cast<JshirForOfStatementOp>(op);
+  if (auto for_of_stmt = llvm::dyn_cast<JsirForOfStatementOp>(op);
       for_of_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(for_of_stmt),
@@ -1283,13 +1283,13 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.logical_expression (
+  // │     jsir.logical_expression (
   // ├─────► ┌───────────────┐
   // │       │ right region  │
   // │  ┌──◄ └───────────────┘
   // │  │  );
   // └──┴──►
-  if (auto logical_expr = llvm::dyn_cast<JshirLogicalExpressionOp>(op);
+  if (auto logical_expr = llvm::dyn_cast<JsirLogicalExpressionOp>(op);
       logical_expr != nullptr) {
     mlir::Attribute comparison_attr;
     switch (*StringToJsLogicalOperator(logical_expr.getOperator_())) {
@@ -1333,7 +1333,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.conditional_expression (
+  // │     jsir.conditional_expression (
   // ├─────► ┌───────────────┐
   // │       │ true region   │
   // │  ┌──◄ └───────────────┘
@@ -1342,7 +1342,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   //    ├──◄ └───────────────┘
   //    │  );
   //    └──►
-  if (auto conditional_expr = llvm::dyn_cast<JshirConditionalExpressionOp>(op);
+  if (auto conditional_expr = llvm::dyn_cast<JsirConditionalExpressionOp>(op);
       conditional_expr != nullptr) {
     MaybeEmplaceCfgEdges({
         .from = Before(conditional_expr),
@@ -1372,7 +1372,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     });
   }
 
-  if (auto break_stmt = llvm::dyn_cast<JshirBreakStatementOp>(op);
+  if (auto break_stmt = llvm::dyn_cast<JsirBreakStatementOp>(op);
       break_stmt != nullptr) {
     absl::StatusOr<mlir::ProgramPoint*> break_target;
 
@@ -1392,7 +1392,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     }
   }
 
-  if (auto continue_stmt = llvm::dyn_cast<JshirContinueStatementOp>(op);
+  if (auto continue_stmt = llvm::dyn_cast<JsirContinueStatementOp>(op);
       continue_stmt != nullptr) {
     absl::StatusOr<mlir::ProgramPoint*> continue_target;
 
@@ -1413,7 +1413,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
-  // │     jshir.try_statement (
+  // │     jsir.try_statement (
   // └─────► ┌───────────────┐
   //         │ block         │
   //    ┌──◄ └───────────────┘
@@ -1425,7 +1425,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ┌──┴──◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto try_stmt = llvm::dyn_cast<JshirTryStatementOp>(op);
+  if (auto try_stmt = llvm::dyn_cast<JsirTryStatementOp>(op);
       try_stmt != nullptr) {
     MaybeEmplaceCfgEdges({
         .from = Before(try_stmt),
@@ -1459,7 +1459,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ┌─────◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto switch_stmt = llvm::dyn_cast<JshirSwitchStatementOp>(op);
+  if (auto switch_stmt = llvm::dyn_cast<JsirSwitchStatementOp>(op);
       switch_stmt != nullptr) {
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(switch_stmt),
@@ -1488,7 +1488,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ┌─────◄ └───────────────┘
   // │     );
   // └─────►
-  if (auto switch_case = llvm::dyn_cast<JshirSwitchCaseOp>(op);
+  if (auto switch_case = llvm::dyn_cast<JsirSwitchCaseOp>(op);
       switch_case != nullptr) {
     if (switch_case.getTest().empty()) {
       MaybeEmplaceCfgEdges({
@@ -1507,7 +1507,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
           .to = Before(switch_case.getConsequent()),
           .owner = &*switch_case,
           .liveness_info = LiveIfEqualOrUnknown(
-              switch_case->getParentOfType<JshirSwitchStatementOp>()
+              switch_case->getParentOfType<JsirSwitchStatementOp>()
                   .getDiscriminant(),
               GetExprRegionEndValuesFromRegion(switch_case.getTest())[0]),
       });
@@ -1517,7 +1517,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
           .to = After(switch_case),
           .owner = &*switch_case,
           .liveness_info = LiveIfNotEqualOrUnknown(
-              switch_case->getParentOfType<JshirSwitchStatementOp>()
+              switch_case->getParentOfType<JsirSwitchStatementOp>()
                   .getDiscriminant(),
               GetExprRegionEndValuesFromRegion(switch_case.getTest())[0]),
       });
@@ -1525,7 +1525,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
 
     // If this is not the last case, we need fall-through to the next case.
     if (auto* next_node = switch_case->getNextNode(); next_node != nullptr) {
-      if (auto successor_case = llvm::dyn_cast<JshirSwitchCaseOp>(next_node);
+      if (auto successor_case = llvm::dyn_cast<JsirSwitchCaseOp>(next_node);
           successor_case != nullptr) {
         MaybeEmplaceCfgEdges({
             .from = After(switch_case.getConsequent()),

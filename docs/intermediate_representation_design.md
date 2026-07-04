@@ -211,10 +211,10 @@ semantic meanings:
 
 ## Representing control flows
 
-As mentioned above, JSIR seeks to have a nearly one-to-one mapping from the
-AST. Therefore, to preserve all information about the original control flow
+As mentioned above, JSIR seeks to have a nearly one-to-one mapping from the AST.
+Therefore, to preserve all information about the original control flow
 structures, we define a separate op for each control flow structure (e.g.
-`jshir.if_statement`, `jshir.while_statement`, etc.). The nested code blocks are
+`jsir.if_statement`, `jsir.while_statement`, etc.). The nested code blocks are
 represented as MLIR [regions](https://mlir.llvm.org/docs/LangRef/#regions).
 
 ### Example: `if`-statement
@@ -247,7 +247,7 @@ And, its corresponding JSIR is as follows:
 
 ```mlir
 %cond = jsir.identifier {"cond"}
-jshir.if_statement (%cond) ({
+jsir.if_statement (%cond) ({
   %a = jsir.identifier {"a"}
   jsir.expression_statement (%a)
 }, {
@@ -289,7 +289,7 @@ WhileStatement {
 Its corresponding JSIR is as follows:
 
 ```mlir
-jshir.while_statement ({
+jsir.while_statement ({
   %cond_id = jsir.identifier {"cond"}
   %cond_call = jsir.call_expression (%cond_id)
   jsir.expr_region_end (%cond_call)
@@ -300,11 +300,11 @@ jshir.while_statement ({
 })
 ```
 
-Note that unlike `jshir.if_statement`, the condition in a
-`jshir.while_statement` is represented as a region rather than a normal SSA
-value (`%cond`). This is because the condition is evaluated in each iteration
-**within** the `while`-statement, whereas the condition is evaluated only once
-**before** the `if`-statement.
+Note that unlike `jsir.if_statement`, the condition in a `jsir.while_statement`
+is represented as a region rather than a normal SSA value (`%cond`). This is
+because the condition is evaluated in each iteration **within** the
+`while`-statement, whereas the condition is evaluated only once **before** the
+`if`-statement.
 
 ### Example: logical expression
 
@@ -333,7 +333,7 @@ Its corresponding JSIR is as follows:
 ```mlir
 %x_ref = jsir.identifier_ref {"x"}
 %a = jsir.identifier {"a"}
-%and = jshir.logical_expression (%a) ({
+%and = jsir.logical_expression (%a) ({
   %b = jsir.identifier {"b"}
   jsir.expr_region_end (%b)
 })
@@ -341,7 +341,7 @@ Its corresponding JSIR is as follows:
 jsir.expression_statement (%assign)
 ```
 
-Note that in `jshir.logical_expression`, `left` is an SSA value, and `right` is
-a region. This is because `left` is always evaluated first, whereas `right` is
+Note that in `jsir.logical_expression`, `left` is an SSA value, and `right` is a
+region. This is because `left` is always evaluated first, whereas `right` is
 only evaluated if the result of `left` is truthy, and omitted if `left` is falsy
 due to the short-circuit behavior.

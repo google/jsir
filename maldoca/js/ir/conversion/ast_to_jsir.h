@@ -44,9 +44,6 @@ class AstToJsir {
 //
 // static JshirBlockStatementOp VisitBlockStatement(mlir::OpBuilder &builder,
 // const JsBlockStatement *node);
-#define DECLARE_HIR_OP_VISIT_FUNCTION(TYPE)                    \
-  static Jshir##TYPE##Op Visit##TYPE(mlir::OpBuilder& builder, \
-                                     const Js##TYPE* node);
 
 // Example:
 //
@@ -65,13 +62,13 @@ class AstToJsir {
                                             const Js##TYPE* node);
 
   FOR_EACH_JSIR_CLASS(DECLARE_CIR_OP_VISIT_FUNCTION,
-                      DECLARE_HIR_OP_VISIT_FUNCTION,
+                      DECLARE_CIR_OP_VISIT_FUNCTION,
                       DECLARE_REF_OP_VISIT_FUNCTION,
                       DECLARE_ATTRIB_VISIT_FUNCTION)
 
 #undef DECLARE_CIR_OP_VISIT_FUNCTION
 #undef DECLARE_REF_OP_VISIT_FUNCTION
-#undef DECLARE_HIR_OP_VISIT_FUNCTION
+
 #undef DECLARE_ATTRIB_VISIT_FUNCTION
 
   static JsirProgramBodyElementOpInterface VisitProgramBodyElement(

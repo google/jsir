@@ -264,7 +264,7 @@ The JSIR for the code above is as follows:
 ```
 ...
 %cond = jsir.identifier{"cond"}
-jshir.if_statement (%cond) ({
+jsir.if_statement (%cond) ({
   %a_ref_true = jsir.identifier_ref{"a"}
   %1 = jsir.numeric_literal{1}
   %assign_true = jsir.assignment_expression (%a_ref_true, %1)
@@ -288,14 +288,14 @@ preserves the nested structures. We can see that the two branches of the
 > more than 1 block in any region.
 
 The JSIR dataflow analysis API understands the branching behaviors of
-`jshir.if_statement`, and builds **CFG (control flow graph) edges** to represent
+`jsir.if_statement`, and builds **CFG (control flow graph) edges** to represent
 them internally:
 
 ```
       ...
       %cond = jsir.identifier{"cond"}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       %a_ref_true = jsir.identifier_ref{"a"}
 │       %1 = jsir.numeric_literal{1}
@@ -334,7 +334,7 @@ reaching `B1`, i.e. right **B**efore the `if`-statement.
       <b>// state[%cond] = Unknown</b>
       <b>// state[B1] = {}</b>
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       &lt;IR for `a = 1;`&gt;
 │  ┌────◄
@@ -359,7 +359,7 @@ to two program points: `T0` and `F0`, which represent the entry points of the
       // state[%cond] = Unknown
       // state[B1] = {}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       <b>// state[T0] = {}</b>
 │       &lt;IR for `a = 1;`&gt;
@@ -412,7 +412,7 @@ propagation before, we will consequently visit all ops in the region.
       // state[%cond] = Unknown
       // state[B1] = {}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       // state[T0] = {}
 │       %a_ref_true = jsir.identifier_ref{"a"}
@@ -452,7 +452,7 @@ the CFG edge and propagate its state to `E0`, i.e. the end of the
       // state[%cond] = Unknown
       // state[B1] = {}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       // state[T0] = {}
 │       &lt;IR for `a = 1;`&gt;
@@ -485,7 +485,7 @@ compute states up to `state[F4]`:
       // state[%cond] = Unknown
       // state[B1] = {}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       // state[T0] = {}
 │       &lt;IR for `a = 1;`&gt;
@@ -526,7 +526,7 @@ propagate its state to `E0`.
       // state[%cond] = Unknown
       // state[B1] = {}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       // state[T0] = {}
 │       &lt;IR for `a = 1;`&gt;
@@ -604,7 +604,7 @@ The final result of the analysis, in full detail, is as follows:
       // state[%cond] = Unknown
       // state[B1] = [default = Unknown] {}
 ┌─────◄
-│     jshir.if_statement (%cond) ({
+│     jsir.if_statement (%cond) ({
 ├───────►
 │       // state[T0] = [default = Unknown] {}
 │       %a_ref_true = jsir.identifier_ref{"a"}
@@ -684,7 +684,7 @@ the combination of all iterations.
 Now, similar to the previous examples, we convert the code into JSIR:
 
 ```
-jshir.while_statement ({
+jsir.while_statement ({
   // The `test` region
   // IR for `cond()`:
   %cond_id = jsir.identifier {"cond"}
@@ -711,7 +711,7 @@ Then, we build CFG edges to represent control flow branches:
       %assign_before = jsir.assignment_expression (%a_ref_before, %1)
       jsir.expression_statement (%assign_before)
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       // IR for `cond()`:
 │       %cond = ...
@@ -739,7 +739,7 @@ Similar to the handling of the `if`-statement, we compute the states before the
       &lt;IR for `a = 1;`&gt;
       <b>// state[B4] = {a: Const{1}}</b>
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       <b>// state[T0] = {a: Const{1}}</b>
 │       // IR for `cond()`:
@@ -773,7 +773,7 @@ don't know the return value of `cond()`, so we can only assign `Unknown` to
       &lt;IR for `a = 1;`&gt;
       // state[B4] = {a: Const{1}}
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       // state[T0] = {a: Const{1}}
 │       // IR for `cond()`:
@@ -804,7 +804,7 @@ possible to enter the loop body and exit the loop. Therefore, we propagate
       &lt;IR for `a = 1;`&gt;
       // state[B4] = {a: Const{1}}
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       // state[T0] = {a: Const{1}}
 │       %cond = &lt;IR for `cond()`&gt;
@@ -840,7 +840,7 @@ first iteration of the loop body, which changes `a` from `1` to `3`.
       &lt;IR for `a = 1;`&gt;
       // state[B4] = {a: Const{1}}
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       // state[T0] = {a: Const{1}}
 │       %cond = &lt;IR for `cond()`&gt;
@@ -867,7 +867,7 @@ At the end of the loop body, we jump back to the `test` region, which `Join`s
       &lt;IR for `a = 1;`&gt;
       // state[B4] = {a: Const{1}}
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       <b>// state[T0] = {a: <del>Const{1}</del> Unknown}</b>
 │       %cond = &lt;IR for `cond()`&gt;
@@ -896,7 +896,7 @@ again with this new state, and propagate it to `I0` and `E0`.
       &lt;IR for `a = 1;`&gt;
       // state[B4] = {a: Const{1}}
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       // state[T0] = {a: Unknown}
 │       %cond = &lt;IR for `cond()`&gt;
@@ -929,7 +929,7 @@ end of the `body` region `I6` becomes `{a: Unknown}`.
       &lt;IR for `a = 1;`&gt;
       // state[B4] = {a: Const{1}}
 ┌─────◄
-│     jshir.while_statement ({
+│     jsir.while_statement ({
 ├───────►
 │       // state[T0] = {a: Unknown}
 │       // IR for `cond()`:
