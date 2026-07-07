@@ -257,22 +257,15 @@ class NodeDef {
     return aggregated_kinds_;
   }
 
-  // Whether this node has control-flow-related information.
-  //
-  // A node is considered to have control-flow-related information if it
-  // contains some branch semantics.
-  //
-  // Example: IfStatement, BreakStatement.
-  //
-  // When this is true, we define two ops, one in HIR (high-level IR), one in
-  // LIR (low-level IR).
-  bool has_control_flow() const { return has_control_flow_; }
+  // Deprecated: No longer used for dialect splitting. Merged HIR into IR.
+  [[deprecated("Merged HIR into IR")]]
+  bool has_control_flow() const {
+    return has_control_flow_;
+  }
 
   // The MLIR op name (C++ class name).
   //
-  // <IrName>:
-  //   has_control_flow:  <LangName>hir
-  //   !has_control_flow: <LangName>ir
+  // <IrName>: <LangName>ir
   //
   // - Non-leaf type: "<IrName><ClassName>OpInterface"
   // - Leaf type:

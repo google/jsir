@@ -24,6 +24,25 @@ package(
     default_visibility = JSIR_ALLOWED_USERS,
 )
 
+cc_test(
+    name = "ast_gen_test",
+    srcs = ["ast_gen_test.cc"],
+    data = [
+        "ast.generated.cc",
+        "ast.generated.h",
+        "ast_def.textproto",
+        "ast_from_json.generated.cc",
+        "ast_to_json.generated.cc",
+        "//maldoca/js/ir:jsir_ops.generated.td",
+        "//maldoca/js/ir/conversion:ast_to_jsir.generated.cc",
+        "//maldoca/js/ir/conversion:jsir_to_ast.generated.cc",
+    ],
+    deps = [
+        "//maldoca/astgen/test:ast_gen_test_util",
+        "@googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "ast",
     srcs = [

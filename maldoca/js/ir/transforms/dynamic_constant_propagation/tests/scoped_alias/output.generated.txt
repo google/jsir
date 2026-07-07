@@ -88,7 +88,7 @@
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
 // SOURCE-NEXT:         jsir.expression_statement (%9)
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
-// SOURCE-NEXT:         jshir.block_statement ({
+// SOURCE-NEXT:         jsir.block_statement ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> }
@@ -126,7 +126,7 @@
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
 // SOURCE-NEXT:             jsir.expression_statement (%14)
 // SOURCE-NEXT:               // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
-// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:             jsir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { <wrapper#0 : #jsir_builtin<builtin_function "prelude_1">> <wrapper#4 : #jsir_builtin<builtin_function "prelude_2">> }
@@ -169,7 +169,7 @@
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             jshir.block_statement ({
+// SOURCE-NEXT:             jsir.block_statement ({
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }

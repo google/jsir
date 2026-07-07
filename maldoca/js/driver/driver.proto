@@ -31,7 +31,7 @@ message JsReprPb {
   oneof kind {
     string js_source = 1;
     BabelAstString babel_ast_string = 2;
-    string js_hir = 3;
+    string js_ir = 3;
   }
 
   optional string source_map = 7;
@@ -52,8 +52,8 @@ message JsConversionConfig {
     JsAstToAstStringConfig js_ast_to_ast_string = 4;
 
     // ast <=> hir
-    JsAstToHirConfig js_ast_to_hir = 5;
-    JsHirToAstConfig js_hir_to_ast = 6;
+    JsAstToJsirConfig js_ast_to_jsir = 5;
+    JsirToAstConfig jsir_to_ast = 6;
   }
 }
 
@@ -73,9 +73,9 @@ message JsAstStringToAstConfig {
 
 message JsAstToAstStringConfig {}
 
-message JsAstToHirConfig {}
+message JsAstToJsirConfig {}
 
-message JsHirToAstConfig {}
+message JsirToAstConfig {}
 
 // =============================================================================
 // Analysis

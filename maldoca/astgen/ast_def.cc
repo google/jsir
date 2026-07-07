@@ -225,7 +225,7 @@ std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
     return std::nullopt;
   }
 
-  auto ir_name = absl::StrCat(lang_name, has_control_flow() ? "hir" : "ir");
+  auto ir_name = absl::StrCat(lang_name, "ir");
 
   Symbol result{ir_name};
 

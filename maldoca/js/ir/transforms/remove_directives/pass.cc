@@ -34,8 +34,8 @@ namespace maldoca {
 void RemoveDirectives(mlir::Operation *root) {
   mlir::OpBuilder builder(root);
 
-  root->walk([&](mlir::Operation *op) {
-    llvm::TypeSwitch<mlir::Operation *, void>(op)
+  root->walk([&](mlir::Operation* op) {
+    llvm::TypeSwitch<mlir::Operation*, void>(op)
         .Case([&](JsirProgramOp op) {
           // Remove (1)
           op.removeInterpreterAttr();
@@ -46,14 +46,14 @@ void RemoveDirectives(mlir::Operation *root) {
           }
         })
 
-        .Case([&](JshirBlockStatementOp op) {
+        .Case([&](JsirBlockStatementOp op) {
           // Remove (3)
           for (mlir::Block &block : op.getDirectives()) {
             block.clear();
           }
         })
 
-        .Default([&](mlir::Operation *op) {});
+        .Default([&](mlir::Operation* op) {});
   });
 }
 
