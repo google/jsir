@@ -110,7 +110,7 @@ JsirToAst::VisitBigIntLiteralAttr(JsirBigIntLiteralAttr attr) {
 }
 
 absl::StatusOr<std::unique_ptr<JsBreakStatement>>
-JsirToAst::VisitBreakStatement(JshirBreakStatementOp op) {
+JsirToAst::VisitBreakStatement(JsirBreakStatementOp op) {
   std::optional<std::unique_ptr<JsIdentifier>> label;
   if (op.getLabel().has_value()) {
     ABSL_ASSIGN_OR_RETURN(label, VisitIdentifierAttr(op.getLabel().value()));
@@ -119,7 +119,7 @@ JsirToAst::VisitBreakStatement(JshirBreakStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsContinueStatement>>
-JsirToAst::VisitContinueStatement(JshirContinueStatementOp op) {
+JsirToAst::VisitContinueStatement(JsirContinueStatementOp op) {
   std::optional<std::unique_ptr<JsIdentifier>> label;
   if (op.getLabel().has_value()) {
     ABSL_ASSIGN_OR_RETURN(label, VisitIdentifierAttr(op.getLabel().value()));
@@ -128,7 +128,7 @@ JsirToAst::VisitContinueStatement(JshirContinueStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsForStatement>> JsirToAst::VisitForStatement(
-    maldoca::JshirForStatementOp op) {
+    maldoca::JsirForStatementOp op) {
   std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>,
                              std::unique_ptr<JsExpression>>>
       init;
@@ -193,7 +193,7 @@ JsirToAst::VisitForInOfStatement(
 }
 
 absl::StatusOr<std::unique_ptr<JsForInStatement>>
-JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
+JsirToAst::VisitForInStatement(JsirForInStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto fields,
       VisitForInOfStatement(op.getLeftDeclaration(), op.getLeftLval(),
@@ -204,7 +204,7 @@ JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsForOfStatement>>
-JsirToAst::VisitForOfStatement(JshirForOfStatementOp op) {
+JsirToAst::VisitForOfStatement(JsirForOfStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto fields,
       VisitForInOfStatement(op.getLeftDeclaration(), op.getLeftLval(),

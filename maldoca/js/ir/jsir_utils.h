@@ -89,12 +89,12 @@ auto FilterBlockOps(mlir::Block &block) {
 // Infers if this block should contain a single statement.
 bool IsStatementBlock(mlir::Block &block);
 
-// TODO(tzx) Implement a standalone pass to add `jshir.block_statement`.
+// TODO(tzx) Implement a standalone pass to add `jsir.block_statement`.
 //
 // We shouldn't require each individual pass to maintain the invariant that
 // certain `mlir::Block`s should only contain a single statement - a
 // `mlir::Block` should always allow multiple statements, and we should
-// automatically add `jshir.block_statement`s when lifting JSHIR to AST.
+// automatically add `jsir.block_statement`s when lifting JSIR to AST.
 void WrapBlockContentWithBlockStatement(mlir::Block &block);
 
 }  // namespace maldoca

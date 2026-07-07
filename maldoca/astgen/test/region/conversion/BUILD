@@ -81,3 +81,10 @@ cc_test(
         "@llvm-project//mlir:IR",
     ],
 )
+
+filegroup(
+    name = "testdata",
+    testonly = True,
+    srcs = glob(["**"], exclude = ["BUILD"]),
+    visibility = ["//maldoca/astgen:__subpackages__"],
+)

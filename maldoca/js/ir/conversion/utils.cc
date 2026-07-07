@@ -32,11 +32,10 @@
 
 namespace maldoca {
 
-absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
-    const JsFile &ast, mlir::MLIRContext &context) {
+absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJsirFile(
+    const JsFile& ast, mlir::MLIRContext& context) {
   // Check for all the dialects
   MALDOCA_RET_CHECK_NE(context.getLoadedDialect<JsirDialect>(), nullptr);
-  MALDOCA_RET_CHECK_NE(context.getLoadedDialect<JshirDialect>(), nullptr);
   MALDOCA_RET_CHECK_NE(context.getLoadedDialect<mlir::func::FuncDialect>(),
                        nullptr);
 
@@ -48,13 +47,12 @@ absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
   return std::move(hir_file);
 }
 
-absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file) {
-  return JsirToAst::VisitFile(hir_file);
+absl::StatusOr<std::unique_ptr<JsFile>> JsirFileToAst(JsirFileOp ir_file) {
+  return JsirToAst::VisitFile(ir_file);
 }
 
 void LoadNecessaryDialects(mlir::MLIRContext &context) {
   context.getOrLoadDialect<maldoca::JsirDialect>();
-  context.getOrLoadDialect<maldoca::JshirDialect>();
   context.getOrLoadDialect<mlir::cf::ControlFlowDialect>();
   context.getOrLoadDialect<mlir::func::FuncDialect>();
 }

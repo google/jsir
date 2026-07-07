@@ -51,3 +51,10 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+filegroup(
+    name = "testdata",
+    testonly = True,
+    srcs = glob(["**"], exclude = ["BUILD"]),
+    visibility = ["//maldoca/astgen:__subpackages__"],
+)

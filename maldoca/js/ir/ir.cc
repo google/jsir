@@ -43,7 +43,6 @@
 // Dialect Definition
 // =============================================================================
 
-#include "maldoca/js/ir/jshir_dialect.cc.inc"
 #include "maldoca/js/ir/jsir_dialect.cc.inc"
 
 // Dialect initialization, the instance will be owned by the context. This is
@@ -65,13 +64,6 @@ void maldoca::JsirDialect::initialize() {
   qjs_runtime = std::unique_ptr<JSRuntime, QjsRuntimeDeleter>(JS_NewRuntime());
   qjs_context = std::unique_ptr<JSContext, QjsContextDeleter>(
       JS_NewContext(qjs_runtime.get()));
-}
-
-void maldoca::JshirDialect::initialize() {
-  addOperations<
-#define GET_OP_LIST
-#include "maldoca/js/ir/jshir_ops.cc.inc"
-      >();
 }
 
 // Hook to materialize a single constant operation from a given attribute value

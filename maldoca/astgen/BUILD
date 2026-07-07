@@ -15,6 +15,9 @@
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
+load("@rules_python//python:py_library.bzl", "py_library")
+load("@rules_python//python:py_test.bzl", "py_test")
 
 
 
@@ -35,6 +38,11 @@ proto_library(
 
 cc_proto_library(
     name = "ast_def_cc_proto",
+    deps = ["ast_def_proto"],
+)
+
+py_proto_library(
+    name = "ast_def_py_pb2",
     deps = ["ast_def_proto"],
 )
 
@@ -69,6 +77,40 @@ cc_library(
     ],
 )
 
+py_library(
+    name = "type_py",
+    srcs = ["type.py"],
+    deps = [
+        ":ast_def_py_pb2",
+        ":symbol_py",
+        ":type_py_pb2",
+    ],
+)
+
+py_test(
+    name = "type_py_test",
+    srcs = ["type_test.py"],
+    main = "type_test.py",
+    deps = [":type_py"],
+)
+
+py_library(
+    name = "ast_def_py",
+    srcs = ["ast_def.py"],
+    deps = [
+        ":ast_def_py_pb2",
+        ":symbol_py",
+        ":type_py",
+    ],
+)
+
+py_test(
+    name = "ast_def_py_test",
+    srcs = ["ast_def_test.py"],
+    main = "ast_def_test.py",
+    deps = [":ast_def_py"],
+)
+
 cc_library(
     name = "printer_base",
     hdrs = ["printer_base.h"],
@@ -76,6 +118,18 @@ cc_library(
         "@com_google_protobuf//src/google/protobuf/io",
         "@com_google_protobuf//src/google/protobuf/io:printer",
     ],
+)
+
+py_library(
+    name = "printer_base_py",
+    srcs = ["printer_base.py"],
+)
+
+py_test(
+    name = "printer_base_py_test",
+    srcs = ["printer_base_test.py"],
+    main = "printer_base_test.py",
+    deps = [":printer_base_py"],
 )
 
 cc_library(
@@ -87,6 +141,15 @@ cc_library(
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io:printer",
+    ],
+)
+
+py_library(
+    name = "ast_gen_utils_py",
+    srcs = ["ast_gen_utils.py"],
+    deps = [
+        ":ast_def_py",
+        ":printer_base_py",
     ],
 )
 
@@ -103,6 +166,22 @@ cc_library(
     ],
 )
 
+py_library(
+    name = "cc_printer_base_py",
+    srcs = ["cc_printer_base.py"],
+    deps = [
+        ":ast_def_py",
+        ":printer_base_py",
+    ],
+)
+
+py_test(
+    name = "cc_printer_base_py_test",
+    srcs = ["cc_printer_base_test.py"],
+    main = "cc_printer_base_test.py",
+    deps = [":cc_printer_base_py"],
+)
+
 cc_library(
     name = "ast_header_printer",
     srcs = ["ast_header_printer.cc"],
@@ -114,6 +193,17 @@ cc_library(
         ":symbol",
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+py_library(
+    name = "ast_header_printer_py",
+    srcs = ["ast_header_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
     ],
 )
 
@@ -133,6 +223,19 @@ cc_library(
     ],
 )
 
+py_library(
+    name = "ast_source_printer_py",
+    srcs = ["ast_source_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
+        ":type_py",
+    ],
+)
+
 cc_library(
     name = "ast_serialize_printer",
     srcs = ["ast_serialize_printer.cc"],
@@ -147,6 +250,19 @@ cc_library(
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+py_library(
+    name = "ast_serialize_printer_py",
+    srcs = ["ast_serialize_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
+        ":type_py",
     ],
 )
 
@@ -172,6 +288,19 @@ cc_library(
     ],
 )
 
+py_library(
+    name = "ast_from_json_printer_py",
+    srcs = ["ast_from_json_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
+        ":type_py",
+    ],
+)
+
 cc_library(
     name = "ts_interface_printer",
     srcs = ["ts_interface_printer.cc"],
@@ -183,6 +312,18 @@ cc_library(
         ":printer_base",
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+py_library(
+    name = "ts_interface_printer_py",
+    srcs = ["ts_interface_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":printer_base_py",
+        ":type_py",
     ],
 )
 
@@ -199,6 +340,19 @@ cc_library(
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+py_library(
+    name = "ir_table_gen_printer_py",
+    srcs = ["ir_table_gen_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
+        ":type_py",
     ],
 )
 
@@ -222,6 +376,19 @@ cc_library(
     ],
 )
 
+py_library(
+    name = "ast_to_ir_source_printer_py",
+    srcs = ["ast_to_ir_source_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
+        ":type_py",
+    ],
+)
+
 cc_library(
     name = "ir_to_ast_source_printer",
     srcs = ["ir_to_ast_source_printer.cc"],
@@ -240,6 +407,19 @@ cc_library(
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io",
         "@com_google_protobuf//src/google/protobuf/io:printer",
+    ],
+)
+
+py_library(
+    name = "ir_to_ast_source_printer_py",
+    srcs = ["ir_to_ast_source_printer.py"],
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_gen_utils_py",
+        ":cc_printer_base_py",
+        ":symbol_py",
+        ":type_py",
     ],
 )
 
@@ -290,6 +470,23 @@ cc_binary(
     ],
 )
 
+py_binary(
+    name = "ast_gen_main_py",
+    srcs = ["ast_gen_main.py"],
+    main = "ast_gen_main.py",
+    deps = [
+        ":ast_def_py",
+        ":ast_def_py_pb2",
+        ":ast_from_json_printer_py",
+        ":ast_header_printer_py",
+        ":ast_serialize_printer_py",
+        ":ast_source_printer_py",
+        ":ast_to_ir_source_printer_py",
+        ":ir_table_gen_printer_py",
+        ":ir_to_ast_source_printer_py",
+    ],
+)
+
 cc_test(
     name = "ast_gen_test",
     srcs = ["ast_gen_test.cc"],
@@ -317,6 +514,11 @@ proto_library(
 
 cc_proto_library(
     name = "type_cc_proto",
+    deps = ["type_proto"],
+)
+
+py_proto_library(
+    name = "type_py_pb2",
     deps = ["type_proto"],
 )
 
@@ -354,4 +556,17 @@ cc_test(
         ":symbol",
         "@googletest//:gtest_main",
     ],
+)
+
+# Python port of the above. See docs/migrate_astgen_to_python.md.
+py_library(
+    name = "symbol_py",
+    srcs = ["symbol.py"],
+)
+
+py_test(
+    name = "symbol_py_test",
+    srcs = ["symbol_test.py"],
+    main = "symbol_test.py",
+    deps = [":symbol_py"],
 )

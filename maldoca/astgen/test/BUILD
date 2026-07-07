@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_python//python:py_library.bzl", "py_library")
 
 licenses(["notice"])
 
@@ -20,6 +21,24 @@ package(
     default_applicable_licenses = ["//:license"],
     default_visibility = [
         "//:__subpackages__",
+    ],
+)
+
+py_library(
+    name = "ast_gen_test_util_py",
+    testonly = True,
+    srcs = ["ast_gen_test_util.py"],
+    deps = [
+        "//maldoca/astgen:ast_def_py",
+        "//maldoca/astgen:ast_def_py_pb2",
+        "//maldoca/astgen:ast_from_json_printer_py",
+        "//maldoca/astgen:ast_header_printer_py",
+        "//maldoca/astgen:ast_serialize_printer_py",
+        "//maldoca/astgen:ast_source_printer_py",
+        "//maldoca/astgen:ast_to_ir_source_printer_py",
+        "//maldoca/astgen:ir_table_gen_printer_py",
+        "//maldoca/astgen:ir_to_ast_source_printer_py",
+        "//maldoca/astgen:ts_interface_printer_py",
     ],
 )
 

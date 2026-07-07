@@ -1,0 +1,175 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Port of maldoca/astgen/cc_printer_base.{h,cc} to Python.
+
+Common functions for printing C++ code, shared by all the astgen printers.
+"""
+
+from __future__ import annotations
+
+from maldoca.astgen.ast_def import FieldDef
+from maldoca.astgen.printer_base import Printer
+
+_TITLE_SEPARATOR = "=" * 77
+
+_LICENSE_TEXT = """\
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License."""
+
+
+def _to_header_guard(header_path: str) -> str:
+  header_guard = header_path.upper()
+  header_guard = header_guard.replace("/", "_").replace(".", "_")
+  return header_guard + "_"
+
+
+class CcPrinterBase(Printer):
+  """Common functions for printing C++ code."""
+
+  def print_license(self) -> None:
+    self.println(_LICENSE_TEXT)
+
+  # Example:
+  #
+  # Input:
+  # cc_namespace == "maldoca::astgen"
+  #
+  # Output:
+  # ```
+  # namespace maldoca {
+  # namespace astgen {
+  # ```
+  def print_enter_namespace(self, cc_namespace: str) -> None:
+    for piece in cc_namespace.split("::"):
+      self.println(
+          "namespace $cc_namespace_piece$ {", cc_namespace_piece=piece
+      )
+
+  # Example:
+  #
+  # Input:
+  # cc_namespace == "maldoca::astgen"
+  #
+  # Output:
+  # ```
+  # }  // namespace astgen
+  # }  // namespace maldoca
+  # ```
+  def print_exit_namespace(self, cc_namespace: str) -> None:
+    for piece in reversed(cc_namespace.split("::")):
+      self.println(
+          "}  // namespace $cc_namespace_piece$", cc_namespace_piece=piece
+      )
+
+  # Example:
+  #
+  # Input:
+  # header_path == "maldoca/astgen/test/lambda/ast.h"
+  #
+  # Output:
+  # ```
+  # #ifndef MALDOCA_ASTGEN_TEST_LAMBDA_AST_H_
+  # #define MALDOCA_ASTGEN_TEST_LAMBDA_AST_H_
+  # ```
+  def print_enter_header_guard(self, header_path: str) -> None:
+    header_guard = _to_header_guard(header_path)
+    self.println("#ifndef $HEADER_GUARD$", HEADER_GUARD=header_guard)
+    self.println("#define $HEADER_GUARD$", HEADER_GUARD=header_guard)
+
+  # Example:
+  #
+  # Input:
+  # header_path == "maldoca/astgen/test/lambda/ast.h"
+  #
+  # Output:
+  # ```
+  # #endif  // MALDOCA_ASTGEN_TEST_LAMBDA_AST_H_
+  # ```
+  def print_exit_header_guard(self, header_path: str) -> None:
+    self.println(
+        "#endif  // $HEADER_GUARD$",
+        HEADER_GUARD=_to_header_guard(header_path),
+    )
+
+  # Example:
+  #
+  # Input:
+  # header_path == "maldoca/astgen/test/lambda/ast.h"
+  #
+  # Output:
+  # ```
+  # #include "maldoca/astgen/test/lambda/ast.h"
+  # ```
+  def print_include_header(self, header_path: str) -> None:
+    self.println('#include "$header_path$"', header_path=header_path)
+
+  # NOTE: Despite the corresponding C++ doc comment's claim ("Prints headers
+  # in alphabetical order by sorting a copy of the header paths"), the C++
+  # implementation never actually sorts -- it prints `header_paths` as-is.
+  # All call sites pass an already-alphabetized literal list, which is
+  # presumably how the comment became stale. Ported to match the real
+  # (unsorted) behavior, not the comment.
+  def print_include_headers(self, header_paths: list[str]) -> None:
+    for header_path in header_paths:
+      self.print_include_header(header_path)
+
+  # Example:
+  #
+  # Input:
+  # title == "BinaryExpression"
+  #
+  # Output:
+  # ```
+  # // ========================================================================
+  # // BinaryExpression
+  # // ========================================================================
+  # ```
+  def print_title(self, title: str) -> None:
+    commented_lines = [
+        "//" if not line else f"// {line}" for line in title.split("\n")
+    ]
+    commented_title = "\n".join(commented_lines)
+
+    self.println(
+        f"// {_TITLE_SEPARATOR}\n$CommentedTitle$\n// {_TITLE_SEPARATOR}",
+        CommentedTitle=commented_title,
+    )
+
+  # Output:
+  # // ========================================================================
+  # // STOP!! DO NOT MODIFY!! THIS FILE IS AUTOMATICALLY GENERATED.
+  # // ========================================================================
+  def print_code_generation_warning(self) -> None:
+    self.print_title("STOP!! DO NOT MODIFY!! THIS FILE IS AUTOMATICALLY GENERATED.")
+
+  # Some convenient wrappers for printing C++ types.
+  def cc_type(self, field: FieldDef) -> str:
+    return field.type.cc_type(field.optionalness)
+
+  def cc_mutable_getter_type(self, field: FieldDef) -> str:
+    return field.type.cc_mutable_getter_type(field.optionalness)
+
+  def cc_const_getter_type(self, field: FieldDef) -> str:
+    return field.type.cc_const_getter_type(field.optionalness)

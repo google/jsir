@@ -86,20 +86,6 @@ gentbl_cc_library(
             ],
             "jsir_dialect.cc.inc",
         ),
-        (
-            [
-                "-gen-dialect-decls",
-                "-dialect=jshir",
-            ],
-            "jshir_dialect.h.inc",
-        ),
-        (
-            [
-                "-gen-dialect-defs",
-                "-dialect=jshir",
-            ],
-            "jshir_dialect.cc.inc",
-        ),
     ],
     tblgen = "@llvm-project//mlir:mlir-tblgen",
     td_file = "jsir_attrs.td",
@@ -207,30 +193,14 @@ gentbl_cc_library(
         (
             [
                 "-gen-op-decls",
-                "-op-include-regex=jsir",
             ],
             "jsir_ops.h.inc",
         ),
         (
             [
                 "-gen-op-defs",
-                "-op-include-regex=jsir",
             ],
             "jsir_ops.cc.inc",
-        ),
-        (
-            [
-                "-gen-op-decls",
-                "-op-include-regex=jshir",
-            ],
-            "jshir_ops.h.inc",
-        ),
-        (
-            [
-                "-gen-op-defs",
-                "-op-include-regex=jshir",
-            ],
-            "jshir_ops.cc.inc",
         ),
     ],
     tblgen = "@llvm-project//mlir:mlir-tblgen",
@@ -244,7 +214,6 @@ cc_library(
     name = "ir",
     srcs = [
         "ir.cc",
-        "jshir_ops.cc",
         "jsir_ops.cc",
     ],
     hdrs = ["ir.h"],
@@ -377,4 +346,14 @@ filegroup(
         "//maldoca/js/ir:lit.cfg.py",
         "@llvm-project//llvm:FileCheck",
     ],
+)
+
+# Exposes the astgen-generated TableGen file as a standalone data dependency
+# for the Python astgen golden-diff test (see
+# docs/migrate_astgen_to_python.md) -- it's otherwise only consumed as a
+# `td_library` src, not a directly depend-able target.
+filegroup(
+    name = "jsir_ops_generated_td",
+    testonly = True,
+    srcs = ["jsir_ops.generated.td"],
 )

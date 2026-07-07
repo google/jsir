@@ -155,27 +155,27 @@ JsirBigIntLiteralAttr AstToJsir::VisitBigIntLiteralAttr(
                                     mlir_extra);
 }
 
-JshirBreakStatementOp AstToJsir::VisitBreakStatement(
+JsirBreakStatementOp AstToJsir::VisitBreakStatement(
     mlir::OpBuilder& builder, const JsBreakStatement* node) {
   JsirIdentifierAttr mlir_label;
   if (node->label().has_value()) {
     mlir_label = VisitIdentifierAttr(builder, node->label().value());
   }
-  return CreateStmt<JshirBreakStatementOp>(builder, node, mlir_label);
+  return CreateStmt<JsirBreakStatementOp>(builder, node, mlir_label);
 }
 
-JshirContinueStatementOp AstToJsir::VisitContinueStatement(
+JsirContinueStatementOp AstToJsir::VisitContinueStatement(
     mlir::OpBuilder& builder, const JsContinueStatement* node) {
   JsirIdentifierAttr mlir_label;
   if (node->label().has_value()) {
     mlir_label = VisitIdentifierAttr(builder, node->label().value());
   }
-  return CreateStmt<JshirContinueStatementOp>(builder, node, mlir_label);
+  return CreateStmt<JsirContinueStatementOp>(builder, node, mlir_label);
 }
 
-JshirForStatementOp AstToJsir::VisitForStatement(mlir::OpBuilder& builder,
-                                                 const JsForStatement* node) {
-  auto op = CreateStmt<JshirForStatementOp>(builder, node);
+JsirForStatementOp AstToJsir::VisitForStatement(mlir::OpBuilder& builder,
+                                                const JsForStatement* node) {
+  auto op = CreateStmt<JsirForStatementOp>(builder, node);
   mlir::Region& init_region = op.getInit();
   if (node->init().has_value()) {
     AppendNewBlockAndPopulate(builder, init_region, [&] {
@@ -251,7 +251,7 @@ static absl::StatusOr<ForInOfLeft> GetForInOfLeft(
   };
 }
 
-JshirForInStatementOp AstToJsir::VisitForInStatement(
+JsirForInStatementOp AstToJsir::VisitForInStatement(
     mlir::OpBuilder& builder, const JsForInStatement* node) {
   auto left = GetForInOfLeft(builder.getContext(), node->left());
   if (!left.ok()) {
@@ -264,7 +264,7 @@ JshirForInStatementOp AstToJsir::VisitForInStatement(
 
   mlir::Value mlir_right = VisitExpression(builder, node->right());
 
-  auto op = CreateStmt<JshirForInStatementOp>(
+  auto op = CreateStmt<JsirForInStatementOp>(
       builder, node, left->declaration_attr.value_or(nullptr), mlir_left,
       mlir_right);
 
@@ -274,7 +274,7 @@ JshirForInStatementOp AstToJsir::VisitForInStatement(
   return op;
 }
 
-JshirForOfStatementOp AstToJsir::VisitForOfStatement(
+JsirForOfStatementOp AstToJsir::VisitForOfStatement(
     mlir::OpBuilder& builder, const JsForOfStatement* node) {
   auto left = GetForInOfLeft(builder.getContext(), node->left());
   if (!left.ok()) {
@@ -289,7 +289,7 @@ JshirForOfStatementOp AstToJsir::VisitForOfStatement(
 
   mlir::Value mlir_right = VisitExpression(builder, node->right());
 
-  auto op = CreateStmt<JshirForOfStatementOp>(
+  auto op = CreateStmt<JsirForOfStatementOp>(
       builder, node, left->declaration_attr.value_or(nullptr), mlir_left,
       mlir_right, mlir_await);
 

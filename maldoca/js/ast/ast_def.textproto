@@ -1,0 +1,3408 @@
+# proto-file: third_party/maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+# To update the generated code:
+#
+# blaze build //third_party/maldoca/astgen:ast_gen_main
+#
+# ./blaze-bin/third_party/maldoca/astgen/ast_gen_main \
+#    --ast_def_path="third_party/maldoca/js/ast/ast_def.textproto" \
+#    --cc_namespace="maldoca" \
+#    --ast_path="third_party/maldoca/js/ast" \
+#    --ir_path="third_party/maldoca/js/ir"
+
+lang_name: "js"
+
+# enum UnaryOperator {
+#   "-" | "+" | "!" | "~" | "typeof" | "void" | "delete" | "throw"
+# }
+enums {
+  name: "UnaryOperator"
+  members {
+    name: "Minus"
+    string_value: "-"
+  }
+  members {
+    name: "Plus"
+    string_value: "+"
+  }
+  members {
+    name: "Not"
+    string_value: "!"
+  }
+  members {
+    name: "BitwiseNot"
+    string_value: "~"
+  }
+  members {
+    name: "TypeOf"
+    string_value: "typeof"
+  }
+  members {
+    name: "Void"
+    string_value: "void"
+  }
+  members {
+    name: "Delete"
+    string_value: "delete"
+  }
+  members {
+    name: "Throw"
+    string_value: "throw"
+  }
+}
+
+# enum UpdateOperator {
+#   "++" | "--"
+# }
+enums {
+  name: "UpdateOperator"
+  members {
+    name: "Increment"
+    string_value: "++"
+  }
+  members {
+    name: "Decrement"
+    string_value: "--"
+  }
+}
+
+# enum BinaryOperator {
+#   "==" | "!=" | "===" | "!=="
+#      | "<" | "<=" | ">" | ">="
+#      | "<<" | ">>" | ">>>"
+#      | "+" | "-" | "*" | "/" | "%"
+#      | "**" | "|" | "^" | "&" | "in"
+#      | "instanceof"
+#      | "|>"
+# }
+enums {
+  name: "BinaryOperator"
+  members {
+    name: "Equal"
+    string_value: "=="
+  }
+  members {
+    name: "NotEqual"
+    string_value: "!="
+  }
+  members {
+    name: "StrictEqual"
+    string_value: "==="
+  }
+  members {
+    name: "StrictNotEqual"
+    string_value: "!=="
+  }
+  members {
+    name: "LessThan"
+    string_value: "<"
+  }
+  members {
+    name: "LessEqual"
+    string_value: "<="
+  }
+  members {
+    name: "GreaterThan"
+    string_value: ">"
+  }
+  members {
+    name: "GreaterEqual"
+    string_value: ">="
+  }
+  members {
+    name: "LeftShift"
+    string_value: "<<"
+  }
+  members {
+    name: "RightShift"
+    string_value: ">>"
+  }
+  members {
+    name: "UnsignedRightShift"
+    string_value: ">>>"
+  }
+  members {
+    name: "Add"
+    string_value: "+"
+  }
+  members {
+    name: "Subtract"
+    string_value: "-"
+  }
+  members {
+    name: "Multiply"
+    string_value: "*"
+  }
+  members {
+    name: "Divide"
+    string_value: "/"
+  }
+  members {
+    name: "Mod"
+    string_value: "%"
+  }
+  members {
+    name: "Exp"
+    string_value: "**"
+  }
+  members {
+    name: "BitwiseOr"
+    string_value: "|"
+  }
+  members {
+    name: "BitwiseXor"
+    string_value: "^"
+  }
+  members {
+    name: "BitwiseAnd"
+    string_value: "&"
+  }
+  members {
+    name: "In"
+    string_value: "in"
+  }
+  members {
+    name: "InstanceOf"
+    string_value: "instanceof"
+  }
+  members {
+    name: "Pipeline"
+    string_value: "|>"
+  }
+}
+
+# enum AssignmentOperator {
+#   "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "**="
+#     | "<<=" | ">>=" | ">>>="
+#     | "|=" | "^=" | "&="
+#     | "||=" | "&&=" | "??="
+# }
+enums {
+  name: "AssignmentOperator"
+  members {
+    name: "Assign"
+    string_value: "="
+  }
+  members {
+    name: "AddAssign"
+    string_value: "+="
+  }
+  members {
+    name: "SubtractAssign"
+    string_value: "-="
+  }
+  members {
+    name: "MultiplyAssign"
+    string_value: "*="
+  }
+  members {
+    name: "DivideAssign"
+    string_value: "/="
+  }
+  members {
+    name: "ModAssign"
+    string_value: "%="
+  }
+  members {
+    name: "ExpAssign"
+    string_value: "**="
+  }
+  members {
+    name: "LeftShiftAssign"
+    string_value: "<<="
+  }
+  members {
+    name: "RightShiftAssign"
+    string_value: ">>="
+  }
+  members {
+    name: "UnsignedRightShiftAssign"
+    string_value: ">>>="
+  }
+  members {
+    name: "BitwiseOrAssign"
+    string_value: "|="
+  }
+  members {
+    name: "BitwiseXorAssign"
+    string_value: "^="
+  }
+  members {
+    name: "BitwiseAndAssign"
+    string_value: "&="
+  }
+  members {
+    name: "OrAssign"
+    string_value: "||="
+  }
+  members {
+    name: "AndAssign"
+    string_value: "&&="
+  }
+  members {
+    name: "NullishCoalesceAssign"
+    string_value: "??="
+  }
+}
+
+# enum LogicalOperator {
+#   "||" | "&&" | "??"
+# }
+enums {
+  name: "LogicalOperator"
+  members {
+    name: "Or"
+    string_value: "||"
+  }
+  members {
+    name: "And"
+    string_value: "&&"
+  }
+  members {
+    name: "NullishCoalesce"
+    string_value: "??"
+  }
+}
+
+# interface Comment {
+#   type: string;
+#   loc: SourceLocation;
+#   value: string;
+#   start: number;
+#   end: number;
+# }
+nodes {
+  name: "Comment"
+  fields {
+    name: "loc"
+    type { class: "SourceLocation" }
+    optionalness: OPTIONALNESS_MAYBE_NULL
+  }
+  fields {
+    name: "value"
+    type { string {} }
+  }
+  fields {
+    name: "start"
+    type { int64 {} }
+    optionalness: OPTIONALNESS_MAYBE_NULL
+  }
+  fields {
+    name: "end"
+    type { int64 {} }
+    optionalness: OPTIONALNESS_MAYBE_NULL
+  }
+}
+
+# interface CommentBlock <: Comment {
+#   type: "CommentBlock";
+# }
+nodes {
+  name: "CommentBlock"
+  type: "CommentBlock"
+  parents: "Comment"
+}
+
+# interface CommentLine <: Comment {
+#   type: "CommentLine";
+# }
+nodes {
+  name: "CommentLine"
+  type: "CommentLine"
+  parents: "Comment"
+}
+
+# interface SymbolId {
+#   name: string;
+#   defScopeUid?: number;
+# }
+nodes {
+  name: "SymbolId"
+  fields {
+    name: "name"
+    type { string {} }
+  }
+  fields {
+    name: "defScopeUid"
+    type { int64 {} }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+  }
+  should_generate_ir_op: false
+}
+
+# interface Node {
+#   type: string;
+#   loc: SourceLocation | null;
+#   start: number | null;
+#   end: number | null;
+#   leadingCommentUids?: [Comment];
+#   trailingCommentUids?: [Comment];
+#   innerCommentUids?: [Comment];
+#   scopeUid?: number;
+#   referencedSymbol?: SymbolId;
+#   definedSymbol?: SymbolId;
+# }
+nodes {
+  name: "Node"
+  fields {
+    name: "loc"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "SourceLocation" }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "start"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { int64 {} }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "end"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { int64 {} }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "leadingCommentUids"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { int64 {} }
+      }
+    }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "trailingCommentUids"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { int64 {} }
+      }
+    }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "innerCommentUids"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { int64 {} }
+      }
+    }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "scopeUid"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type { int64 {} }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "referencedSymbol"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type { class: "SymbolId" }
+    ignore_in_ir: true
+  }
+  fields {
+    name: "definedSymbols"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { class: "SymbolId" }
+      }
+    }
+    ignore_in_ir: true
+  }
+}
+
+# interface File <: Node {
+#   type: "File";
+#   program: Program;
+#   comments?: Array<CommentBlock | CommentLine> | null;
+#   tokens?: Array<any> | null;
+# }
+# TODO(tzx)
+nodes {
+  name: "File"
+  parents: "Node"
+  type: "File"
+  fields {
+    name: "program"
+    type { class: "Program" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "comments"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type {
+          class: "Comment"
+        }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_ISOLATED_FROM_ABOVE
+}
+
+# interface SourceLocation {
+#   // source: string | null;
+#   start: Position;
+#   end: Position;
+#   identifierName?: string;
+# }
+nodes {
+  name: "SourceLocation"
+  fields {
+    name: "start"
+    type { class: "Position" }
+  }
+  fields {
+    name: "end"
+    type { class: "Position" }
+  }
+  fields {
+    name: "identifierName"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type { string {} }
+  }
+}
+
+# interface Position {
+#   line: number; // >= 1
+#   column: number; // >= 0
+# }
+nodes {
+  name: "Position"
+  fields: {
+    name: "line"
+    type { int64 {} }
+  }
+  fields: {
+    name: "column"
+    type { int64 {} }
+  }
+}
+
+# // interface Identifier <: Expression, Pattern {
+# //   type: "Identifier";
+# //   name: string;
+# // }
+# interface Identifier <: Expression, Pattern, LVal {
+#   type: "Identifier";
+#   name: string;
+# }
+nodes {
+  name: "Identifier"
+  type: "Identifier"
+  parents: "Expression"
+  parents: "Pattern"
+  parents: "LVal"
+  fields {
+    name: "name"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface PrivateName <: Node {
+#   type: "PrivateName";
+#   id: Identifier;
+# }
+nodes {
+  name: "PrivateName"
+  type: "PrivateName"
+  parents: "Node"
+  fields {
+    name: "id"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface Literal <: Expression { }
+nodes {
+  name: "Literal"
+  parents: "Expression"
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface RegExpLiteral <: Literal {
+#   type: "RegExpLiteral";
+#   pattern: string;
+#   flags: string;
+#   extra?: {
+#     raw: string;
+#   }
+# }
+nodes {
+  name: "RegExpLiteralExtra"
+  type: "RegExpLiteralExtra"
+  fields {
+    name: "raw"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+}
+nodes {
+  name: "RegExpLiteral"
+  type: "RegExpLiteral"
+  parents: "Literal"
+  fields {
+    name: "pattern"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "flags"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "extra"
+    type { class: "RegExpLiteralExtra" }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# interface NullLiteral <: Literal {
+#   type: "NullLiteral";
+# }
+nodes {
+  name: "NullLiteral"
+  type: "NullLiteral"
+  parents: "Literal"
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# interface StringLiteral <: Literal {
+#   type: "StringLiteral";
+#   value: string;       // does not include quotes
+#   extra?: {
+#     raw: string;       // includes quotes
+#     rawValue: string;  // does not include quotes
+#   }
+# }
+nodes {
+  name: "StringLiteralExtra"
+  type: "StringLiteralExtra"
+  fields {
+    name: "raw"
+    type: { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "rawValue"
+    type: { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+}
+
+nodes {
+  name: "StringLiteral"
+  type: "StringLiteral"
+  parents: "Literal"
+  fields {
+    name: "value"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "extra"
+    type { class: "StringLiteralExtra" }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# interface BooleanLiteral <: Literal {
+#   type: "BooleanLiteral";
+#   value: boolean;
+# }
+nodes {
+  name: "BooleanLiteral"
+  type: "BooleanLiteral"
+  parents: "Literal"
+  fields {
+    name: "value"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# interface NumericLiteral <: Literal {
+#   type: "NumericLiteral";
+#   value: number;
+#   extra?: {
+#     raw: string;
+#     rawValue: number;
+#   }
+# }
+nodes {
+  name: "NumericLiteralExtra"
+  type: "NumericLiteralExtra"
+  fields {
+    name: "raw"
+    type: { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "rawValue"
+    type: { double {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+}
+
+nodes {
+  name: "NumericLiteral"
+  type: "NumericLiteral"
+  parents: "Literal"
+  fields {
+    name: "value"
+    type { double {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "extra"
+    type { class: "NumericLiteralExtra" }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# interface BigIntLiteral <: Literal {
+#   type: "BigIntLiteral";
+#   value: string;
+#   extra?: {
+#     raw: string;       // includes the suffix "n"
+#     rawValue: string;  // does not include the suffix "n"
+#   }
+# }
+nodes {
+  name: "BigIntLiteralExtra"
+  type: "BigIntLiteralExtra"
+  fields {
+    name: "raw"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "rawValue"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+}
+nodes {
+  name: "BigIntLiteral"
+  type: "BigIntLiteral"
+  parents: "Literal"
+  fields {
+    name: "value"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "extra"
+    type { class: "BigIntLiteralExtra" }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# // interface DecimalLiteral <: Literal {
+# //   type: "DecimalLiteral";
+# //   value: string;
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "decimal" plugin.
+# ------------------------------------------------------------------------------
+
+# interface Program <: Node {
+#   type: "Program";
+#   interpreter: InterpreterDirective | null;
+#   sourceType: "script" | "module";
+#   body: [ Statement | ModuleDeclaration ];
+#   directives: [ Directive ];
+# }
+# TODO(tzx)
+
+union_types {
+  name: "ProgramBodyElement"
+  parents: "Node"
+  types: "Statement"
+  types: "ModuleDeclaration"
+  kinds: FIELD_KIND_STMT
+  # should_generate_ir_op: true
+}
+
+nodes {
+  name: "Program"
+  parents: "Node"
+  type: "Program"
+  fields {
+    name: "interpreter"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "InterpreterDirective" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "sourceType"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "body"
+    type {
+      list {
+        element_type {
+          class: "ProgramBodyElement"
+        }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "directives"
+    type {
+      list {
+        element_type { class: "Directive" }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# // interface Function <: Node {
+# //   id: Identifier | null;
+# //   params: [ Pattern ];
+# //   body: BlockStatement;
+# //   generator: boolean;
+# //   async: boolean;
+# // }
+# ------------------------------------------------------------------------------
+# NOTE: In ArrowFunctionExpression, the type of "body" is overrideen to
+# "BlockStatement | Expression".
+#
+# interface Function <: Node {
+#   id: Identifier | null;
+#   params: [ Pattern ];
+#   generator: boolean;
+#   async: boolean;
+# }
+# interface BlockStatementFunction <: Function {
+#   body: BlockStatement;
+# }
+nodes {
+  name: "Function"
+  parents: "Node"
+  fields {
+    name: "id"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "params"
+    type {
+      list {
+        element_type { class: "Pattern" }
+      }
+    }
+    kind: FIELD_KIND_LVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "generator"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "async"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  # Note: We cannot specify FIELD_KIND_STMT here because FunctionExpression is
+  # a FIELD_KIND_EXPR
+}
+nodes {
+  name: "BlockStatementFunction"
+  parents: "Function"
+  fields {
+    name: "body"
+    type { class: "BlockStatement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+}
+
+# interface Statement <: Node { }
+nodes {
+  name: "Statement"
+  parents: "Node"
+  kinds: FIELD_KIND_STMT
+}
+
+# interface ExpressionStatement <: Statement {
+#   type: "ExpressionStatement";
+#   expression: Expression;
+# }
+nodes {
+  name: "ExpressionStatement"
+  type: "ExpressionStatement"
+  parents: "Statement"
+  fields {
+    name: "expression"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface BlockStatement <: Statement {
+#   type: "BlockStatement";
+#   body: [ Statement ];
+#   directives: [ Directive ];
+# }
+nodes {
+  name: "BlockStatement"
+  parents: "Statement"
+  type: "BlockStatement"
+  fields {
+    name: "body"
+    type {
+      list {
+        element_type { class: "Statement" }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "directives"
+    type {
+      list {
+        element_type { class: "Directive" }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface EmptyStatement <: Statement {
+#   type: "EmptyStatement";
+# }
+nodes {
+  name: "EmptyStatement"
+  parents: "Statement"
+  type: "EmptyStatement"
+  should_generate_ir_op: true
+}
+
+# interface DebuggerStatement <: Statement {
+#   type: "DebuggerStatement";
+# }
+nodes {
+  name: "DebuggerStatement"
+  parents: "Statement"
+  type: "DebuggerStatement"
+  should_generate_ir_op: true
+}
+
+# interface WithStatement <: Statement {
+#   type: "WithStatement";
+#   object: Expression;
+#   body: Statement;
+# }
+nodes {
+  name: "WithStatement"
+  parents: "Statement"
+  type: "WithStatement"
+  fields {
+    name: "object"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface ReturnStatement <: Statement {
+#   type: "ReturnStatement";
+#   argument: Expression | null;
+# }
+nodes {
+  name: "ReturnStatement"
+  parents: "Statement"
+  type: "ReturnStatement"
+  fields {
+    name: "argument"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface LabeledStatement <: Statement {
+#   type: "LabeledStatement";
+#   label: Identifier;
+#   body: Statement;
+# }
+nodes {
+  name: "LabeledStatement"
+  parents: "Statement"
+  type: "LabeledStatement"
+  fields {
+    name: "label"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface BreakStatement <: Statement {
+#   type: "BreakStatement";
+#   label: Identifier | null;
+# }
+nodes {
+  name: "BreakStatement"
+  parents: "Statement"
+  type: "BreakStatement"
+  fields {
+    name: "label"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  has_control_flow: true
+}
+
+# interface ContinueStatement <: Statement {
+#   type: "ContinueStatement";
+#   label: Identifier | null;
+# }
+nodes {
+  name: "ContinueStatement"
+  parents: "Statement"
+  type: "ContinueStatement"
+  fields {
+    name: "label"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  has_control_flow: true
+}
+
+# interface IfStatement <: Statement {
+#   type: "IfStatement";
+#   test: Expression;
+#   consequent: Statement;
+#   alternate: Statement | null;
+# }
+nodes {
+  name: "IfStatement"
+  parents: "Statement"
+  type: "IfStatement"
+  fields {
+    name: "test"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "consequent"
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "alternate"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface SwitchStatement <: Statement {
+#   type: "SwitchStatement";
+#   discriminant: Expression;
+#   cases: [ SwitchCase ];
+# }
+nodes {
+  name: "SwitchStatement"
+  parents: "Statement"
+  type: "SwitchStatement"
+  fields {
+    name: "discriminant"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "cases"
+    type {
+      list {
+        element_type { class: "SwitchCase" }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface SwitchCase <: Node {
+#   type: "SwitchCase";
+#   test: Expression | null;
+#   consequent: [ Statement ];
+# }
+nodes {
+  name: "SwitchCase"
+  parents: "Node"
+  type: "SwitchCase"
+  fields {
+    name: "test"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "consequent"
+    type {
+      list {
+        element_type { class: "Statement" }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface ThrowStatement <: Statement {
+#   type: "ThrowStatement";
+#   argument: Expression;
+# }
+nodes {
+  name: "ThrowStatement"
+  parents: "Statement"
+  type: "ThrowStatement"
+  fields {
+    name: "argument"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface TryStatement <: Statement {
+#   type: "TryStatement";
+#   block: BlockStatement;
+#   handler: CatchClause | null;
+#   finalizer: BlockStatement | null;
+# }
+nodes {
+  name: "TryStatement"
+  parents: "Statement"
+  type: "TryStatement"
+  fields {
+    name: "block"
+    type { class: "BlockStatement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "handler"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "CatchClause" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "finalizer"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "BlockStatement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# // interface CatchClause <: Node {
+# //   type: "CatchClause";
+# //   param?: Pattern;
+# //   body: BlockStatement;
+# // }
+# interface CatchClause <: Node {
+#   type: "CatchClause";
+#   param: Pattern | null;
+#   body: BlockStatement;
+# }
+nodes {
+  name: "CatchClause"
+  type: "CatchClause"
+  parents: "Node"
+  fields {
+    name: "param"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Pattern" }
+    kind: FIELD_KIND_LVAL
+  }
+  fields {
+    name: "body"
+    type { class: "BlockStatement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface WhileStatement <: Statement {
+#   type: "WhileStatement";
+#   test: Expression;
+#   body: Statement;
+# }
+nodes {
+  name: "WhileStatement"
+  parents: "Statement"
+  type: "WhileStatement"
+  fields {
+    name: "test"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface DoWhileStatement <: Statement {
+#   type: "DoWhileStatement";
+#   body: Statement;
+#   test: Expression;
+# }
+nodes {
+  name: "DoWhileStatement"
+  parents: "Statement"
+  type: "DoWhileStatement"
+  fields {
+    name: "body"
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "test"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface ForStatement <: Statement {
+#   type: "ForStatement";
+#   init: VariableDeclaration | Expression | null;
+#   test: Expression | null;
+#   update: Expression | null;
+#   body: Statement;
+# }
+nodes {
+  name: "ForStatement"
+  parents: "Statement"
+  type: "ForStatement"
+  fields {
+    name: "init"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type {
+      variant {
+        types { class: "VariableDeclaration" }
+        types { class: "Expression" }
+      }
+    }
+  }
+  fields {
+    name: "test"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+  }
+  fields {
+    name: "update"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+  }
+  has_control_flow: true
+  should_generate_ir_op: false
+}
+
+# // interface ForInStatement <: Statement {
+# //   type: "ForInStatement";
+# //   left: VariableDeclaration | Expression;
+# //   right: Expression;
+# //   body: Statement;
+# // }
+# interface ForInStatement <: Statement {
+#   type: "ForInStatement";
+#   left: VariableDeclaration | LVal;
+#   right: Expression;
+#   body: Statement;
+# }
+nodes {
+  name: "ForInStatement"
+  parents: "Statement"
+  type: "ForInStatement"
+  fields {
+    name: "left"
+    type {
+      variant {
+        types { class: "VariableDeclaration" }
+        types { class: "LVal" }
+      }
+    }
+  }
+  fields {
+    name: "right"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+  }
+  has_control_flow: true
+  should_generate_ir_op: false
+}
+
+# // interface ForOfStatement <: ForInStatement {
+# //   type: "ForOfStatement";
+# //   await: boolean;
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We shouldn't override a leaf type.
+# ------------------------------------------------------------------------------
+# interface ForOfStatement <: Statement {
+#   type: "ForOfStatement";
+#   left: VariableDeclaration | LVal;
+#   right: Expression;
+#   body: Statement;
+#   await: boolean;
+# }
+nodes {
+  name: "ForOfStatement"
+  parents: "Statement"
+  type: "ForOfStatement"
+  fields {
+    name: "left"
+    type {
+      variant {
+        types { class: "VariableDeclaration" }
+        types { class: "LVal" }
+      }
+    }
+  }
+  fields {
+    name: "right"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+  }
+  fields {
+    name: "await"
+    type { bool {} }
+  }
+  has_control_flow: true
+  should_generate_ir_op: false
+}
+
+# interface Declaration <: Statement { }
+nodes {
+  name: "Declaration"
+  parents: "Statement"
+}
+
+# // interface FunctionDeclaration <: Function, Declaration {
+# //   type: "FunctionDeclaration";
+# //   id: Identifier;
+# // }
+# ------------------------------------------------------------------------------
+# NOTE: Sometimes id is optional.
+# interface FunctionDeclaration <: BlockStatementFunction, Declaration {
+#   type: "FunctionDeclaration";
+# }
+nodes {
+  name: "FunctionDeclaration"
+  parents: "BlockStatementFunction"
+  parents: "Declaration"
+  type: "FunctionDeclaration"
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# interface VariableDeclaration <: Declaration {
+#   type: "VariableDeclaration";
+#   declarations: [ VariableDeclarator ];
+#   kind: "var" | "let" | "const";
+# }
+nodes {
+  name: "VariableDeclaration"
+  parents: "Declaration"
+  type: "VariableDeclaration"
+  fields {
+    name: "declarations"
+    type {
+      list {
+        element_type { class: "VariableDeclarator" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "kind"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# // interface VariableDeclarator <: Node {
+# //   type: "VariableDeclarator";
+# //   id: Pattern;
+# //   init: Expression | null;
+# // }
+# interface VariableDeclarator <: Node {
+#   type: "VariableDeclarator";
+#   id: LVal;
+#   init: Expression | null;
+# }
+nodes {
+  name: "VariableDeclarator"
+  parents: "Node"
+  type: "VariableDeclarator"
+  fields {
+    name: "id"
+    type { class: "LVal" }
+    kind: FIELD_KIND_LVAL
+  }
+  fields {
+    name: "init"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# // interface Decorator <: Node {
+# //   type: "Decorator";
+# //   expression: Expression;
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "decorators" plugin.
+# ------------------------------------------------------------------------------
+
+# interface Directive <: Node {
+#   type: "Directive";
+#   value: DirectiveLiteral;
+# }
+# ------------------------------------------------------------------------------
+# Example:
+#   "use strict"
+# ------------------------------------------------------------------------------
+nodes {
+  name: "Directive"
+  parents: "Node"
+  type: "Directive"
+  fields {
+    name: "value"
+    type { class: "DirectiveLiteral" }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# // interface DirectiveLiteral <: StringLiteral {
+# //   type: "DirectiveLiteral";
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We shouldn't override a leaf type.
+# ------------------------------------------------------------------------------
+# interface DirectiveLiteral <: Node {
+#   type: "DirectiveLiteral";
+#   value: string;
+#   extra?: {
+#     raw: string;
+#     rawValue: string;
+#   }
+# }
+nodes {
+  name: "DirectiveLiteralExtra"
+  type: "DirectiveLiteralExtra"
+  fields {
+    name: "raw"
+    type: { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "rawValue"
+    type: { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+}
+
+nodes {
+  name: "DirectiveLiteral"
+  parents: "Node"
+  type: "DirectiveLiteral"
+  fields {
+    name: "value"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "extra"
+    type { class: "DirectiveLiteralExtra" }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# <del>
+# interface InterpreterDirective <: StringLiteral {
+#   type: "InterpreterDirective";
+# }
+# </del>
+# ------------------------------------------------------------------------------
+#  NOTE: We shouldn't override a leaf type.
+# ------------------------------------------------------------------------------
+# interface InterpreterDirective <: Node {
+#   type: "InterpreterDirective";
+#   value: string;
+# }
+# ------------------------------------------------------------------------------
+# Example:
+#   #!/usr/bin/env node
+# ------------------------------------------------------------------------------
+nodes {
+  name: "InterpreterDirective"
+  parents: "Node"
+  type: "InterpreterDirective"
+  fields {
+    name: "value"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+  should_generate_ir_op: false
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface Expression <: Node { }
+nodes {
+  name: "Expression"
+  parents: "Node"
+  kinds: FIELD_KIND_RVAL
+}
+
+# (From @babel/types)
+# type LVal =
+#   | Identifier (is Pattern)
+#   | MemberExpression (is Pattern)
+#   | RestElement (is Pattern)
+#   | AssignmentPattern
+#   | ArrayPattern
+#   | ObjectPattern
+#   | TSParameterProperty
+nodes {
+  name: "LVal"
+  parents: "Node"
+  kinds: FIELD_KIND_LVAL
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface Super <: Node {
+#   type: "Super";
+# }
+# ------------------------------------------------------------------------------
+# NOTE: A `super` pseudo-expression.
+#
+# Only used in:
+#  - MemberExpression::object
+#  - CallExpression::callee
+#  - NewExpression::callee
+#
+# Example:
+#   return super.foo;
+#          ~~~~~
+# ------------------------------------------------------------------------------
+nodes {
+  name: "Super"
+  parents: "Node"
+  type: "Super"
+  should_generate_ir_op: true
+  kinds: FIELD_KIND_RVAL
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface Import <: Node {
+#   type: "Import";
+# }
+# ------------------------------------------------------------------------------
+# NOTE: A `import` pseudo-expression.
+#
+# Only used in:
+#  - CallExpression::callee
+#  - NewExpression::callee
+#
+# Example:
+#   import('test.js');
+#   ~~~~~~
+# ------------------------------------------------------------------------------
+nodes {
+  name: "Import"
+  parents: "Node"
+  type: "Import"
+  should_generate_ir_op: true
+  kinds: FIELD_KIND_RVAL
+}
+
+# interface ThisExpression <: Expression {
+#   type: "ThisExpression";
+# }
+nodes {
+  name: "ThisExpression"
+  parents: "Expression"
+  type: "ThisExpression"
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface ArrowFunctionExpression <: Function, Expression {
+#   type: "ArrowFunctionExpression";
+#   body: BlockStatement | Expression;
+# }
+nodes {
+  name: "ArrowFunctionExpression"
+  parents: "Function"
+  parents: "Expression"
+  type: "ArrowFunctionExpression"
+  fields {
+    name: "body"
+    type {
+      variant {
+        types { class: "BlockStatement" }
+        types { class: "Expression" }
+      }
+    }
+  }
+  should_generate_ir_op: false
+}
+
+# interface YieldExpression <: Expression {
+#   type: "YieldExpression";
+#   argument: Expression | null;
+#   delegate: boolean;
+# }
+nodes {
+  name: "YieldExpression"
+  type: "YieldExpression"
+  parents: "Expression"
+  fields {
+    name: "argument"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "delegate"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface AwaitExpression <: Expression {
+#   type: "AwaitExpression";
+#   argument: Expression | null;
+# }
+nodes {
+  name: "AwaitExpression"
+  parents: "Expression"
+  type: "AwaitExpression"
+  fields {
+    name: "argument"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface ArrayExpression <: Expression {
+#   type: "ArrayExpression";
+#   elements: [ Expression | SpreadElement | null ];
+# }
+nodes {
+  name: "ArrayExpression"
+  parents: "Expression"
+  type: "ArrayExpression"
+  fields {
+    name: "elements"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "Expression" }
+            types { class: "SpreadElement" }
+          }
+        }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface ObjectExpression <: Expression {
+#   type: "ObjectExpression";
+#   properties: [ ObjectProperty | ObjectMethod | SpreadElement ];
+# }
+nodes {
+  name: "ObjectExpression"
+  type: "ObjectExpression"
+  parents: "Expression"
+  fields {
+    name: "properties"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "ObjectProperty" }
+            types { class: "ObjectMethod" }
+            types { class: "SpreadElement" }
+          }
+        }
+      }
+    }
+  }
+  should_generate_ir_op: false
+}
+
+# // interface ObjectMember <: Node {
+# //   key: Expression;
+# //   computed: boolean;
+# //   decorators: [ Decorator ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "decorators" plugin.
+# ------------------------------------------------------------------------------
+# interface ObjectMember <: Node {
+#   key: Expression;
+#   computed: boolean;
+# }
+nodes {
+  name: "ObjectMember"
+  parents: "Node"
+  fields {
+    name: "key"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+  }
+}
+
+# // interface ObjectProperty <: ObjectMember {
+# //   type: "ObjectProperty";
+# //   shorthand: boolean;
+# //   value: Expression;
+# // }
+# interface ObjectProperty <: ObjectMember {
+#   type: "ObjectProperty";
+#   shorthand: boolean;
+#   value: Expression | Pattern;
+# }
+nodes {
+  name: "ObjectProperty"
+  parents: "ObjectMember"
+  type: "ObjectProperty"
+  fields {
+    name: "shorthand"
+    type { bool {} }
+  }
+  fields {
+    name: "value"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "Pattern" }
+      }
+    }
+  }
+  kinds: FIELD_KIND_LVAL
+  kinds: FIELD_KIND_RVAL
+}
+
+# <del>
+# interface ObjectMethod <: ObjectMember, Function {
+#   type: "ObjectMethod";
+#   kind: "get" | "set" | "method";
+# }
+# </del>
+# ------------------------------------------------------------------------------
+# interface ObjectMethod <: ObjectMember, BlockStatementFunction {
+#   type: "ObjectMethod";
+#   kind: "get" | "set" | "method";
+# }
+nodes {
+  name: "ObjectMethod"
+  type: "ObjectMethod"
+  parents: "ObjectMember"
+  parents: "BlockStatementFunction"
+  fields {
+    name: "kind"
+    type { string {} }
+  }
+}
+
+# // interface RecordExpression <: Expression {
+# //   type: "RecordExpression";
+# //   properties: [ ObjectProperty | ObjectMethod | SpreadElement ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "recordAndTuple" plugin.
+# ------------------------------------------------------------------------------
+
+# // interface TupleExpression <: Expression {
+# //   type: "TupleExpression";
+# //   elements: [ Expression | SpreadElement | null ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "recordAndTuple" plugin.
+# ------------------------------------------------------------------------------
+
+# interface FunctionExpression <: BlockStatementFunction, Expression {
+#   type: "FunctionExpression";
+# }
+nodes {
+  name: "FunctionExpression"
+  type: "FunctionExpression"
+  parents: "BlockStatementFunction"
+  parents: "Expression"
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+
+# interface UnaryExpression <: Expression {
+#   type: "UnaryExpression";
+#   operator: UnaryOperator;
+#   prefix: boolean;
+#   argument: Expression;
+# }
+# enum UnaryOperator {
+#   "-" | "+" | "!" | "~" | "typeof" | "void" | "delete" | "throw"
+# }
+nodes {
+  name: "UnaryExpression"
+  type: "UnaryExpression"
+  parents: "Expression"
+  fields {
+    name: "operator"
+    type { enum: "UnaryOperator" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "prefix"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "argument"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+  has_fold: true
+}
+
+# // Original:
+# // interface UpdateExpression <: Expression {
+# //   type: "UpdateExpression";
+# //   operator: UpdateOperator;
+# //   argument: Expression;
+# //   prefix: boolean;
+# // }
+# interface UpdateExpression <: Expression {
+#   type: "UpdateExpression";
+#   operator: UpdateOperator;
+#   argument: LVal;
+#   prefix: boolean;
+# }
+# enum UpdateOperator {
+#   "++" | "--"
+# }
+nodes {
+  name: "UpdateExpression"
+  type: "UpdateExpression"
+  parents: "Expression"
+  fields {
+    name: "operator"
+    type { enum: "UpdateOperator" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "argument"
+    type { class: "LVal" }
+    kind: FIELD_KIND_LVAL
+  }
+  fields {
+    name: "prefix"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface BinaryExpression <: Expression {
+#   type: "BinaryExpression";
+#   operator: BinaryOperator;
+#   left: Expression | PrivateName;
+#   right: Expression;
+# }
+# enum BinaryOperator {
+#   "==" | "!=" | "===" | "!=="
+#      | "<" | "<=" | ">" | ">="
+#      | "<<" | ">>" | ">>>"
+#      | "+" | "-" | "*" | "/" | "%"
+#      | "**" | "|" | "^" | "&" | "in"
+#      | "instanceof"
+#      | "|>"
+# }
+nodes {
+  name: "BinaryExpression"
+  type: "BinaryExpression"
+  parents: "Expression"
+  fields {
+    name: "operator"
+    type { enum: "BinaryOperator" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "left"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "PrivateName" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "right"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+  has_fold: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# // interface AssignmentExpression <: Expression {
+# //   type: "AssignmentExpression";
+# //   operator: AssignmentOperator;
+# //   left: Pattern | Expression;
+# //   right: Expression;
+# // }
+# interface AssignmentExpression <: Expression {
+#   type: "AssignmentExpression";
+#   operator: AssignmentOperator;
+#   left: LVal;
+#   right: Expression;
+# }
+# enum AssignmentOperator {
+#   "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "**="
+#     | "<<=" | ">>=" | ">>>="
+#     | "|=" | "^=" | "&="
+#     | "||=" | "&&=" | "??="
+# }
+nodes {
+  name: "AssignmentExpression"
+  parents: "Expression"
+  type: "AssignmentExpression"
+  fields {
+    name: "operator"
+    type { enum: "AssignmentOperator" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "left"
+    type { class: "LVal" }
+    kind: FIELD_KIND_LVAL
+  }
+  fields {
+    name: "right"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface LogicalExpression <: Expression {
+#   type: "LogicalExpression";
+#   operator: LogicalOperator;
+#   left: Expression;
+#   right: Expression;
+# }
+# enum LogicalOperator {
+#   "||" | "&&" | "??"
+# }
+nodes {
+  name: "LogicalExpression"
+  parents: "Expression"
+  type: "LogicalExpression"
+  fields {
+    name: "operator"
+    type { enum: "LogicalOperator" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "left"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "right"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  should_generate_ir_op: true
+  has_control_flow: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface SpreadElement <: Node {
+#   type: "SpreadElement";
+#   argument: Expression;
+# }
+# ------------------------------------------------------------------------------
+# Example:
+#   func(...a)
+#        ~~~~
+# ------------------------------------------------------------------------------
+nodes {
+  name: "SpreadElement"
+  parents: "Node"
+  type: "SpreadElement"
+  fields {
+    name: "argument"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# // interface ArgumentPlaceholder <: Node {
+# //   type: "ArgumentPlaceholder";
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "partialApplication" plugin.
+# ------------------------------------------------------------------------------
+
+# // interface MemberExpression <: Expression, Pattern {
+# //   type: "MemberExpression";
+# //   object: Expression | Super;
+# //   property: Expression | PrivateName;
+# //   computed: boolean;
+# // }
+# interface MemberExpression <: Expression, Pattern, LVal {
+#   type: "MemberExpression";
+#   object: Expression | Super;
+#   property: Expression | PrivateName;
+#   computed: boolean;
+# }
+# ------------------------------------------------------------------------------
+# NOTE: A member expression.
+# - If `computed` is `true`, the node corresponds to a computed (`a[b]`) member
+#   expression and `property` is an `Expression`.
+# - If `computed` is `false`, the node corresponds to a static (`a.b`) member
+#   expression and `property` is an `Identifier` or a `PrivateName`.
+# ------------------------------------------------------------------------------
+nodes {
+  name: "MemberExpression"
+  parents: "Expression"
+  parents: "Pattern"
+  parents: "LVal"
+  type: "MemberExpression"
+  fields {
+    name: "object"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "Super" }
+      }
+    }
+  }
+  fields {
+    name: "property"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "PrivateName" }
+      }
+    }
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+  }
+  should_generate_ir_op: false
+}
+
+# interface OptionalMemberExpression <: Expression {
+#   type: "OptionalMemberExpression";
+#   object: Expression;
+#   property: Expression | PrivateName;
+#   computed: boolean;
+#   optional: boolean;
+# }
+# TODO(tzx) Why not used anywhere?
+# ------------------------------------------------------------------------------
+# NOTE: An optional member expression is a part of the optional chain.
+#
+# When `optional` is `true`, it is the starting element of the optional chain.
+#
+# In `a?.b.c`:
+#   - `?.b` is an optional member expression with `optional: true`
+#   - `.c` is an optional member expression
+#
+# See https://gist.github.com/JLHwung/567fb29fa2b82bbe164ad9067ff3290f for more
+# AST examples.
+# ------------------------------------------------------------------------------
+nodes {
+  name: "OptionalMemberExpression"
+  parents: "Expression"
+  type: "OptionalMemberExpression"
+  fields {
+    name: "object"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "property"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "PrivateName" }
+      }
+    }
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+  }
+  fields {
+    name: "optional"
+    type { bool {} }
+  }
+  should_generate_ir_op: false
+}
+
+# // interface BindExpression <: Expression {
+# //   type: "BindExpression";
+# //   object: Expression | null;
+# //   callee: Expression;
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "functionBind" plugin.
+# ------------------------------------------------------------------------------
+
+# interface PipelineBody <: NodeBase {
+#   type: "PipelineBody";
+# }
+
+# interface PipelineBody <: NodeBase {
+#   type: "PipelineBareFunctionBody";
+#   callee: Expression;
+# }
+
+# interface PipelineBareConstructorBody <: NodeBase {
+#   type: "PipelineBareConstructorBody";
+#   callee: Expression;
+# }
+
+# interface PipelineBareConstructorBody <: NodeBase {
+#   type: "PipelineTopicBody";
+#   expression: Expression;
+# }
+
+# interface PipelineBareConstructorBody <: NodeBase {
+#   type: "PipelineBareAwaitedFunctionBody";
+#   callee: Expression;
+# }
+
+# interface ConditionalExpression <: Expression {
+#   type: "ConditionalExpression";
+#   test: Expression;
+#   alternate: Expression;
+#   consequent: Expression;
+# }
+nodes {
+  name: "ConditionalExpression"
+  type: "ConditionalExpression"
+  parents: "Expression"
+  fields {
+    name: "test"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "alternate"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "consequent"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  has_control_flow: true
+  should_generate_ir_op: true
+}
+
+# interface CallExpression <: Expression {
+#   type: "CallExpression";
+#   callee: Expression | Super | Import;
+#   arguments: [ Expression | SpreadElement ];
+# }
+nodes {
+  name: "CallExpression"
+  parents: "Expression"
+  type: "CallExpression"
+  fields {
+    name: "callee"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "Super" }
+        types { class: "Import" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "arguments"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "Expression" }
+            types { class: "SpreadElement" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface OptionalCallExpression <: Expression {
+#   type: "OptionalCallExpression";
+#   callee: Expression;
+#   arguments: [ Expression | SpreadElement ];
+#   optional: boolean;
+# }
+nodes {
+  name: "OptionalCallExpression"
+  parents: "Expression"
+  type: "OptionalCallExpression"
+  fields {
+    name: "callee"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "arguments"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "Expression" }
+            types { class: "SpreadElement" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "optional"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# // interface NewExpression <: CallExpression {
+# //   type: "NewExpression";
+# // }
+# interface NewExpression <: Expression {
+#   type: "NewExpression";
+#   callee: Expression | Super | Import;
+#   arguments: [ Expression | SpreadElement ];
+# }
+nodes {
+  name: "NewExpression"
+  type: "NewExpression"
+  parents: "Expression"
+  fields {
+    name: "callee"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "Super" }
+        types { class: "Import" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "arguments"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "Expression" }
+            types { class: "SpreadElement" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface SequenceExpression <: Expression {
+#   type: "SequenceExpression";
+#   expressions: [ Expression ];
+# }
+nodes {
+  name: "SequenceExpression"
+  parents: "Expression"
+  type: "SequenceExpression"
+  fields {
+    name: "expressions"
+    type {
+      list {
+        element_type { class: "Expression" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# // Original:
+# // interface ParenthesizedExpression <: Expression {
+# //   type "ParenthesizedExpression";
+# //   expression: Expression;
+# // }
+# interface ParenthesizedExpression <: Expression, Pattern, LVal {
+#   type "ParenthesizedExpression";
+#   expression: Expression;
+# }
+nodes {
+  name: "ParenthesizedExpression"
+  parents: "Expression"
+  parents: "Pattern"
+  parents: "LVal"
+  type: "ParenthesizedExpression"
+  fields {
+    name: "expression"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: false
+  has_fold: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# // interface DoExpression <: Expression {
+# //   type: "DoExpression";
+# //   body: BlockStatement;
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "doExpression" plugin.
+# ------------------------------------------------------------------------------
+
+# // interface ModuleExpression <: Expression {
+# //   type: "ModuleExpression";
+# //   body: Program
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "moduleBlocks" plugin.
+# ------------------------------------------------------------------------------
+
+# interface TemplateLiteral <: Expression {
+#   type: "TemplateLiteral";
+#   quasis: [ TemplateElement ];
+#   expressions: [ Expression ];
+# }
+# ------------------------------------------------------------------------------
+# Example:
+#   `a${b}c${d}`
+#   ~~~~~~~~~~~~ TemplateLiteral
+#    ~    ~    ~ quasis (including the last "")
+#     ~~~~ ~~~~  expressions
+# ------------------------------------------------------------------------------
+nodes {
+  name: "TemplateLiteral"
+  parents: "Expression"
+  type: "TemplateLiteral"
+  fields {
+    name: "quasis"
+    type {
+      list {
+        element_type { class: "TemplateElement" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "expressions"
+    type {
+      list {
+        element_type { class: "Expression" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface TaggedTemplateExpression <: Expression {
+#   type: "TaggedTemplateExpression";
+#   tag: Expression;
+#   quasi: TemplateLiteral;
+# }
+# ------------------------------------------------------------------------------
+# Example:
+#   raw`42`
+#   ~~~~~~~ TaggedTemplateExpression
+#   ~~~     tag
+#      ~~~~ quasi
+# ------------------------------------------------------------------------------
+nodes {
+  name: "TaggedTemplateExpression"
+  parents: "Expression"
+  type: "TaggedTemplateExpression"
+  fields {
+    name: "tag"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "quasi"
+    type { class: "TemplateLiteral" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface TemplateElement <: Node {
+#   type: "TemplateElement";
+#   tail: boolean;
+#   value: {
+#     cooked: string | null;
+#     raw: string;
+#   };
+# }
+nodes {
+  name: "TemplateElementValue"
+  fields {
+    name: "cooked"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "raw"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+}
+nodes {
+  name: "TemplateElement"
+  parents: "Node"
+  type: "TemplateElement"
+  fields {
+    name: "tail"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "value"
+    type { class: "TemplateElementValue" }
+    kind: FIELD_KIND_RVAL
+  }
+  kinds: FIELD_KIND_RVAL
+  should_generate_ir_op: true
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# interface Pattern <: Node { }
+nodes {
+  name: "Pattern"
+  parents: "Node"
+  kinds: FIELD_KIND_LVAL
+  additional_mlir_traits: MLIR_TRAIT_PURE
+}
+
+# // interface AssignmentProperty <: ObjectProperty {
+# //   value: Pattern;
+# // }
+# Note: ObjectProperty is already a leaf type. Here the spec tries to override
+# the type of "value" from "Expression" to "Pattern".
+# Therefore, we just let "value" be "Expression | Pattern" in ObjectProperty,
+# and thus delete AssignmentProperty.
+
+# // interface ObjectPattern <: Pattern {
+# //   type: "ObjectPattern";
+# //   properties: [ AssignmentProperty | RestElement ];
+# // }
+# interface ObjectPattern <: Pattern, LVal {
+#   type: "ObjectPattern";
+#   properties: [ ObjectProperty | RestElement ];
+# }
+nodes {
+  name: "ObjectPattern"
+  type: "ObjectPattern"
+  parents: "Pattern"
+  parents: "LVal"
+  fields {
+    name: "properties"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "ObjectProperty" }
+            types { class: "RestElement" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_LVAL
+    enclose_in_region: true
+  }
+  should_generate_ir_op: true
+}
+
+# // interface ArrayPattern <: Pattern {
+# //   type: "ArrayPattern";
+# //   elements: [ Pattern | null ];
+# // }
+# interface ArrayPattern <: Pattern, LVal {
+#   type: "ArrayPattern";
+#   elements: [ Pattern | null ];
+# }
+nodes {
+  name: "ArrayPattern"
+  type: "ArrayPattern"
+  parents: "Pattern"
+  parents: "LVal"
+  fields {
+    name: "elements"
+    type {
+      list {
+        element_type { class: "Pattern" }
+        element_maybe_null: true
+      }
+    }
+    kind: FIELD_KIND_LVAL
+  }
+  should_generate_ir_op: true
+}
+
+# // interface RestElement <: Pattern {
+# //   type: "RestElement";
+# //   argument: Pattern;
+# // }
+# interface RestElement <: Pattern, LVal {
+#   type: "RestElement";
+#   argument: LVal;
+# }
+nodes {
+  name: "RestElement"
+  parents: "Pattern"
+  parents: "LVal"
+  type: "RestElement"
+  fields {
+    name: "argument"
+    type { class: "LVal" }
+    kind: FIELD_KIND_LVAL
+  }
+  should_generate_ir_op: true
+}
+
+# // interface AssignmentPattern <: Pattern {
+# //   type: "AssignmentPattern";
+# //   left: Pattern;
+# //   right: Expression;
+# // }
+# interface AssignmentPattern <: Pattern, LVal {
+#   type: "AssignmentPattern";
+#   left: Pattern;
+#   right: Expression;
+# }
+nodes {
+  name: "AssignmentPattern"
+  parents: "Pattern"
+  parents: "LVal"
+  type: "AssignmentPattern"
+  fields {
+    name: "left"
+    type { class: "Pattern" }
+    kind: FIELD_KIND_LVAL
+  }
+  fields {
+    name: "right"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# // interface Class <: Node {
+# //   id: Identifier | null;
+# //   superClass: Expression | null;
+# //   body: ClassBody;
+# //   decorators: [ Decorator ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "decorators" plugin.
+# ------------------------------------------------------------------------------
+# interface Class <: Node {
+#   superClass: Expression | null;
+#   body: ClassBody;
+# }
+nodes {
+  name: "Class"
+  parents: "Node"
+  fields {
+    name: "superClass"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "body"
+    type { class: "ClassBody" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+}
+
+# // interface ClassBody <: Node {
+# //   type: "ClassBody";
+# //   body: [ ClassMethod | ClassPrivateMethod | ClassProperty | ClassPrivateProperty | StaticBlock ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "classStaticBlock" plugin.
+# ------------------------------------------------------------------------------
+# interface ClassBody <: Node {
+#   type: "ClassBody";
+#   body: [ ClassMethod | ClassPrivateMethod | ClassProperty | ClassPrivateProperty ];
+# }
+nodes {
+  name: "ClassBody"
+  type: "ClassBody"
+  parents: "Node"
+  fields {
+    name: "body"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "ClassMethod" }
+            types { class: "ClassPrivateMethod" }
+            types { class: "ClassProperty" }
+            types { class: "ClassPrivateProperty" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# // interface ClassMethod <: Function {
+# //   type: "ClassMethod";
+# //   key: Expression;
+# //   kind: "constructor" | "method" | "get" | "set";
+# //   computed: boolean;
+# //   static: boolean;
+# //   decorators: [ Decorator ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "decorators" plugin.
+# ------------------------------------------------------------------------------
+# interface ClassMethod <: BodyStatementFunction {
+#   type: "ClassMethod";
+#   key: Expression;
+#   kind: "constructor" | "method" | "get" | "set";
+#   computed: boolean;
+#   static: boolean;
+# }
+#
+# NOTE:
+# - If computed is false, key must be one of:
+#   - Identifier
+#   - StringLiteral
+#   - NumericLiteral
+#
+#   Example:
+#   ```
+#   class MyClass {
+#     foo() {}    // Identifier
+#     "bar"() {}  // StringLiteral
+#     1.0() {}    // NumericLiteral
+#   }
+#
+#   let obj = new MyClass();
+#   console.log(obj.foo);
+#   console.log(obj["foo"]);
+#   console.log(obj.bar);
+#   console.log(obj["bar"]);
+#   console.log(obj[1.0]);
+#   ```
+#
+#   Reference: https://tc39.es/ecma262/#prod-LiteralPropertyName
+#
+# - If computed is true, key can be any expression (rvalue).
+#
+#   Example:
+#   ```
+#   let foo = "oof";
+#   let bar = "rab";
+#   let baz = "zab";
+#
+#   class MyClass {
+#     [foo]() {}
+#     [bar + baz]() {}
+#     [1.0]() {}
+#   }
+#
+#   let obj = new MyClass();
+#   console.log(obj.oof);
+#   console.log(obj["oof"]);
+#   console.log(obj.zabrab);
+#   console.log(obj["zabrab"]);
+#   console.log(obj[1.0]);
+#   ```
+#
+#   Reference: https://tc39.es/ecma262/#prod-ComputedPropertyName
+nodes {
+  name: "ClassMethod"
+  parents: "BlockStatementFunction"
+  type: "ClassMethod"
+  fields {
+    name: "key"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "kind"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+  }
+  fields {
+    name: "static"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: false
+}
+
+# // interface ClassPrivateMethod <: Function {
+# //   type: "ClassPrivateMethod";
+# //   key: PrivateName;
+# //   kind: "method" | "get" | "set";
+# //   static: boolean;
+# //   decorators: [ Decorator ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "decorators" plugin.
+# ------------------------------------------------------------------------------
+# interface ClassPrivateMethod <: BlockStatementFunction {
+#   type: "ClassPrivateMethod";
+#   key: PrivateName;
+#   kind: "method" | "get" | "set";
+#   static: boolean;
+#   computed?: boolean;  # Actually always false
+# }
+nodes {
+  name: "ClassPrivateMethod"
+  parents: "BlockStatementFunction"
+  type: "ClassPrivateMethod"
+  fields {
+    name: "key"
+    type { class: "PrivateName" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "kind"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "static"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: false
+}
+
+# // interface ClassProperty <: Node {
+# //   type: "ClassProperty";
+# //   key: Expression;
+# //   value: Expression;
+# //   static: boolean;
+# //   computed: boolean;
+# // }
+# interface ClassProperty <: Node {
+#   type: "ClassProperty";
+#   key: Expression;
+#   value: Expression | null;
+#   static: boolean;
+#   computed: boolean;
+# }
+#
+# NOTE:
+# - If computed is false, key must be one of:
+#   - Identifier
+#   - StringLiteral
+#   - NumericLiteral
+#
+#   Example:
+#   ```
+#   class MyClass {
+#     foo = 1    // Identifier
+#     "bar" = 1  // StringLiteral
+#     1.0 = 1    // NumericLiteral
+#   }
+#
+#   let obj = new MyClass();
+#   console.log(obj.foo);
+#   console.log(obj["foo"]);
+#   console.log(obj.bar);
+#   console.log(obj["bar"]);
+#   console.log(obj[1.0]);
+#   ```
+#
+#   Reference: https://tc39.es/ecma262/#prod-LiteralPropertyName
+#
+# - If computed is true, key can be any expression (rvalue).
+#
+#   Example:
+#   ```
+#   let foo = "oof";
+#   let bar = "rab";
+#   let baz = "zab";
+#
+#   class MyClass {
+#     [foo] = 1
+#     [bar + baz] = 1
+#     [1.0] = 1
+#   }
+#
+#   let obj = new MyClass();
+#   console.log(obj.oof);
+#   console.log(obj["oof"]);
+#   console.log(obj.zabrab);
+#   console.log(obj["zabrab"]);
+#   console.log(obj[1.0]);
+#   ```
+#
+#   Reference: https://tc39.es/ecma262/#prod-ComputedPropertyName
+nodes {
+  name: "ClassProperty"
+  parents: "Node"
+  type: "ClassProperty"
+  fields {
+    name: "key"
+    type { class: "Expression" }
+  }
+  fields {
+    name: "value"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "static"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: false
+}
+
+# // interface ClassPrivateProperty <: Node {
+# //   type: "ClassPrivateProperty";
+# //   key: PrivateName;
+# //   value: Expression;
+# //   static: boolean;
+# // }
+# interface ClassPrivateProperty <: Node {
+#   type: "ClassPrivateProperty";
+#   key: PrivateName;
+#   value: Expression | null;
+#   static: boolean;
+# }
+nodes {
+  name: "ClassPrivateProperty"
+  parents: "Node"
+  type: "ClassPrivateProperty"
+  fields {
+    name: "key"
+    type { class: "PrivateName" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "value"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    enclose_in_region: true
+  }
+  fields {
+    name: "static"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}
+
+# // interface StaticBlock <: Node {
+# //   type: "StaticBlock";
+# //   body: [ Statement ];
+# // }
+# ------------------------------------------------------------------------------
+#  NOTE: We don't enable the Babel "classStaticBlock" plugin.
+# ------------------------------------------------------------------------------
+
+# // interface ClassDeclaration <: Class, Declaration {
+# //   type: "ClassDeclaration";
+# //   id: Identifier;
+# // }
+# ------------------------------------------------------------------------------
+# NOTE: The spec also has OptClassDeclaration where id: Identifier | null.
+# We can't support field type override.
+# Therefore, we always let id: Identifier | null, and delete
+# OptClassDeclaration.
+# ------------------------------------------------------------------------------
+# interface ClassDeclaration <: Class, Declaration {
+#   type: "ClassDeclaration";
+#   id: Identifier | null;
+# }
+nodes {
+  name: "ClassDeclaration"
+  parents: "Class"
+  parents: "Declaration"
+  type: "ClassDeclaration"
+  fields {
+    name: "id"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface ClassExpression <: Class, Expression {
+#   type: "ClassExpression";
+# }
+# ------------------------------------------------------------------------------
+#  NOTE: ???
+# ------------------------------------------------------------------------------
+# interface ClassExpression <: Class, Expression {
+#   type: "ClassExpression";
+#   id: string | null
+# }
+nodes {
+  name: "ClassExpression"
+  parents: "Class"
+  parents: "Expression"
+  type: "ClassExpression"
+  fields {
+    name: "id"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface MetaProperty <: Expression {
+#   type: "MetaProperty";
+#   meta: Identifier;
+#   property: Identifier;
+# }
+# ------------------------------------------------------------------------------
+# NOTE:
+#   MetaProperty is used for special "<id>.<id>" expressions.
+#   Normally, "<id>.<id>" would be represented by MemberExpression.
+#
+#   Currently, only the following are meta properties:
+#   - import.meta
+#   - new.target
+#   - function.sent
+#     (will be a SyntaxError, since it requires the "functionSent" Babel plugin)
+# ------------------------------------------------------------------------------
+nodes {
+  name: "MetaProperty"
+  parents: "Expression"
+  type: "MetaProperty"
+  fields {
+    name: "meta"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "property"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface ModuleDeclaration <: Node { }
+nodes {
+  name: "ModuleDeclaration"
+  parents: "Node"
+  kinds: FIELD_KIND_STMT
+}
+
+# // interface ModuleSpecifier <: Node {
+# //   local: Identifier;
+# // }
+# ------------------------------------------------------------------------------
+# Note: "ExportSpecifier", which extends "ModuleSpecifier", has
+# "local?: Identifier | StringLiteral";
+# ------------------------------------------------------------------------------
+# interface ModuleSpecifier <: Node {}
+nodes {
+  name: "ModuleSpecifier"
+  parents: "Node"
+  kinds: FIELD_KIND_ATTR
+}
+
+# // interface ImportDeclaration <: ModuleDeclaration {
+# //   type: "ImportDeclaration";
+# //   importKind: null | "type" | "typeof" | "value";
+# //   specifiers: [ ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier ];
+# //   source: StringLiteral;
+# //   assertions?: [ ImportAttribute ];
+# // }
+# ------------------------------------------------------------------------------
+# Note: "importKind" is only populated with the "flow" plugin enabled
+# ------------------------------------------------------------------------------
+# interface ImportDeclaration <: ModuleDeclaration {
+#   type: "ImportDeclaration";
+#   specifiers: [ ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier ];
+#   source: StringLiteral;
+#   assertions?: [ ImportAttribute ];
+# }
+nodes {
+  name: "ImportDeclaration"
+  type: "ImportDeclaration"
+  parents: "ModuleDeclaration"
+  fields {
+    name: "specifiers"
+    type {
+      list {
+        element_type {
+          variant {
+            types { class: "ImportSpecifier" }
+            types { class: "ImportDefaultSpecifier" }
+            types { class: "ImportNamespaceSpecifier" }
+          }
+        }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "source"
+    type { class: "StringLiteral" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "assertions"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type { class: "ImportAttribute" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# // interface ImportSpecifier <: ModuleSpecifier {
+# //   type: "ImportSpecifier";
+# //   imported: Identifier | StringLiteral;
+# // }
+# interface ImportSpecifier <: ModuleSpecifier {
+#   type: "ImportSpecifier";
+#   imported: Identifier | StringLiteral;
+#   local: Identifier;
+# }
+nodes {
+  name: "ImportSpecifier"
+  parents: "ModuleSpecifier"
+  type: "ImportSpecifier"
+  fields {
+    name: "imported"
+    type {
+      variant {
+        types { class: "Identifier" }
+        types { class: "StringLiteral" }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "local"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: false
+}
+
+# // interface ImportDefaultSpecifier <: ModuleSpecifier {
+# //   type: "ImportDefaultSpecifier";
+# // }
+# interface ImportDefaultSpecifier <: ModuleSpecifier {
+#   type: "ImportDefaultSpecifier";
+#   local: Identifier;
+# }
+nodes {
+  name: "ImportDefaultSpecifier"
+  parents: "ModuleSpecifier"
+  type: "ImportDefaultSpecifier"
+  fields {
+    name: "local"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: false
+}
+
+# // interface ImportNamespaceSpecifier <: ModuleSpecifier {
+# //   type: "ImportNamespaceSpecifier";
+# // }
+# interface ImportNamespaceSpecifier <: ModuleSpecifier {
+#   type: "ImportNamespaceSpecifier";
+#   local: Identifier;
+# }
+nodes {
+  name: "ImportNamespaceSpecifier"
+  parents: "ModuleSpecifier"
+  type: "ImportNamespaceSpecifier"
+  fields {
+    name: "local"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: false
+}
+
+# interface ImportAttribute <: Node {
+#   type: "ImportAttribute";
+#   key: Identifier;
+#   value: StringLiteral;
+# }
+nodes {
+  name: "ImportAttribute"
+  parents: "Node"
+  type: "ImportAttribute"
+  fields {
+    name: "key"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "value"
+    type { class: "StringLiteral" }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_ATTR
+  should_generate_ir_op: false
+}
+
+# interface ExportNamedDeclaration <: ModuleDeclaration {
+#   type: "ExportNamedDeclaration";
+#   declaration: Declaration | null;
+#   specifiers: [ ExportSpecifier ];
+#   source: StringLiteral | null;
+#   assertions?: [ ImportAttribute ];
+# }
+nodes {
+  name: "ExportNamedDeclaration"
+  type: "ExportNamedDeclaration"
+  parents: "ModuleDeclaration"
+  fields {
+    name: "declaration"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "Declaration" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  fields {
+    name: "specifiers"
+    type {
+      list {
+        element_type { class: "ExportSpecifier" }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "source"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    type { class: "StringLiteral" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "assertions"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { class: "ImportAttribute" }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface ExportSpecifier <: ModuleSpecifier {
+#   type: "ExportSpecifier";
+#   exported: Identifier | StringLiteral;
+#   local?: Identifier | StringLiteral;
+# }
+nodes {
+  name: "ExportSpecifier"
+  type: "ExportSpecifier"
+  parents: "ModuleSpecifier"
+  fields {
+    name: "exported"
+    type {
+      variant {
+        types {
+          class: "Identifier"
+        }
+        types {
+          class: "StringLiteral"
+        }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "local"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      variant {
+        types {
+          class: "Identifier"
+        }
+        types {
+          class: "StringLiteral"
+        }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: false
+}
+
+# // interface OptFunctionDeclaration <: FunctionDeclaration {
+# //   id: Identifier | null;
+# // }
+# NOTE: "FunctionDeclaration" is already a leaf type.
+# Here the spec tries to override the type of "id" from "Identifier" to
+# "Identifier | null".
+# However, we can't support field type override. Therefore, we let "id" to be
+# always nullable (even in FunctionDeclaration) and thus delete
+# OptFunctionDeclaration.
+
+# // interface OptClassDeclaration <: ClassDeclaration {
+# //   id: Identifier | null;
+# // }
+# NOTE: "ClassDeclaration" is already a leaf type.
+# Here the spec tries to override the type of "id" from "Identifier" to
+# "Identifier | null".
+# However, we can't support field type override. Therefore, we let "id" to be
+# always nullable (even in ClassDeclaration) and thus delete
+# OptClassDeclaration.
+
+# // interface ExportDefaultDeclaration <: ModuleDeclaration {
+# //   type: "ExportDefaultDeclaration";
+# //   declaration: OptFunctionDeclaration | OptClassDeclaration | Expression;
+# // }
+# interface ExportDefaultDeclaration <: ModuleDeclaration {
+#   type: "ExportDefaultDeclaration";
+#   declaration: FunctionDeclaration | ClassDeclaration | Expression;
+# }
+nodes {
+  name: "ExportDefaultDeclaration"
+  parents: "ModuleDeclaration"
+  type: "ExportDefaultDeclaration"
+  fields {
+    name: "declaration"
+    type {
+      variant {
+        types { class: "FunctionDeclaration" }
+        types { class: "ClassDeclaration" }
+        types { class: "Expression" }
+      }
+    }
+  }
+  should_generate_ir_op: false
+}
+
+# interface ExportAllDeclaration <: ModuleDeclaration {
+#   type: "ExportAllDeclaration";
+#   source: StringLiteral;
+#   assertions?: [ ImportAttribute ];
+# }
+nodes {
+  name: "ExportAllDeclaration"
+  type: "ExportAllDeclaration"
+  parents: "ModuleDeclaration"
+  fields {
+    name: "source"
+    type { class: "StringLiteral" }
+    kind: FIELD_KIND_ATTR
+  }
+  fields {
+    name: "assertions"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type {
+      list {
+        element_type { class: "ImportAttribute" }
+      }
+    }
+    kind: FIELD_KIND_ATTR
+  }
+  kinds: FIELD_KIND_STMT
+  should_generate_ir_op: true
+}

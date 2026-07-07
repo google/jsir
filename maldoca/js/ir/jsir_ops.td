@@ -35,9 +35,9 @@ def JsirNoneOp : Jsir_Op<"none", [Pure]> {
 
 // BreakStatement-Related Ops
 //
-// jshir.break_statement (%label optional argument)
+// jsir.break_statement (%label optional argument)
 
-def JshirBreakStatementOp : Jshir_Op<
+def JsirBreakStatementOp : Jsir_Op<
     "break_statement", [
         JsirStatementOpInterfaceTraits
     ]> {
@@ -48,9 +48,9 @@ def JshirBreakStatementOp : Jshir_Op<
 
 // ContinueStatement-Related Ops
 //
-// jshir.continue_statement (%label optional argument)
+// jsir.continue_statement (%label optional argument)
 
-def JshirContinueStatementOp : Jshir_Op<
+def JsirContinueStatementOp : Jsir_Op<
     "continue_statement", [
         JsirStatementOpInterfaceTraits
     ]> {
@@ -61,7 +61,7 @@ def JshirContinueStatementOp : Jshir_Op<
 
 // ForStatement-Related Ops
 //
-// jshir.for_statement ( {
+// jsir.for_statement ( {
 //   %init = ...
 //   jsir.expr_region_end (%init)
 // },  {
@@ -74,7 +74,7 @@ def JshirContinueStatementOp : Jshir_Op<
 //   ...  // body
 // })
 
-def JshirForStatementOp : Jshir_Op<
+def JsirForStatementOp : Jsir_Op<
     "for_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -91,15 +91,15 @@ def JshirForStatementOp : Jshir_Op<
 //
 // %left = ...
 // %right = ...
-// jshir.for_in_statement (%left, %right) {
+// jsir.for_in_statement (%left, %right) {
 //   ...  // body
 // })
 //                                   - OR -
-// jshir.for_of_statement (%left, %right) {
+// jsir.for_of_statement (%left, %right) {
 //   ...  // body
 // }) {await = true}
 
-def JshirForInStatementOp : Jshir_Op<
+def JsirForInStatementOp : Jsir_Op<
     "for_in_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
@@ -115,7 +115,7 @@ def JshirForInStatementOp : Jshir_Op<
   );
 }
 
-def JshirForOfStatementOp : Jshir_Op<
+def JsirForOfStatementOp : Jsir_Op<
     "for_of_statement", [
         JsirStatementOpInterfaceTraits,
         NoTerminator
