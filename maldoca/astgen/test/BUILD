@@ -28,6 +28,7 @@ cc_library(
     testonly = True,
     srcs = ["ast_gen_test_util.cc"],
     hdrs = ["ast_gen_test_util.h"],
+    alwayslink = True,
     deps = [
         "//maldoca/astgen:ast_def",
         "//maldoca/astgen:ast_def_cc_proto",
