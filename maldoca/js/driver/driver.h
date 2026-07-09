@@ -24,7 +24,9 @@
 #include <utility>
 
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/IR/MLIRContext.h"
+#include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/OwningOpRef.h"
 #include "mlir/Support/DebugStringHelper.h"
 #include "absl/base/nullability.h"
@@ -182,7 +184,15 @@ struct JsirRepr : JsRepr {
     return repr->kind == JsReprKind::kJshir;
   }
 
-  std::string Dump() const override { return mlir::debugString(*op); }
+  std::string Dump() const override {
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    mlir::OpPrintingFlags flags;
+    flags.enableDebugInfo(/*enable=*/true, /*prettyForm=*/false);
+    op.get().getOperation()->print(os, flags);
+    return os.str();
+    // return mlir::debugString(*op);
+  }
 
  protected:
   JsirRepr(JsReprKind kind, mlir::OwningOpRef<JsirFileOp> op,
