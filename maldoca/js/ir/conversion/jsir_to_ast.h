@@ -57,14 +57,6 @@ class JsirToAst {
 
 // Example:
 //
-// absl::StatusOr<std::unique_ptr<JsBlockStatement>>
-// VisitBlockStatement(JshirBlockStatementOp op);
-#define DECLARE_HIR_OP_VISIT_FUNCTION(TYPE)                     \
-  static absl::StatusOr<std::unique_ptr<Js##TYPE>> Visit##TYPE( \
-      Jshir##TYPE##Op op);
-
-// Example:
-//
 // absl::StatusOr<std::unique_ptr<JsIdentifier>>
 // VisitIdentifierRef(JsirIdentifierRefOp op);
 #define DECLARE_REF_OP_VISIT_FUNCTION(TYPE)                          \
@@ -80,13 +72,13 @@ class JsirToAst {
       Jsir##TYPE##Attr attr);
 
   FOR_EACH_JSIR_CLASS(DECLARE_CIR_OP_VISIT_FUNCTION,
-                      DECLARE_HIR_OP_VISIT_FUNCTION,
+                      DECLARE_CIR_OP_VISIT_FUNCTION,
                       DECLARE_REF_OP_VISIT_FUNCTION,
                       DECLARE_ATTRIB_VISIT_FUNCTION)
 
 #undef DECLARE_CIR_OP_VISIT_FUNCTION
 #undef DECLARE_REF_OP_VISIT_FUNCTION
-#undef DECLARE_HIR_OP_VISIT_FUNCTION
+
 #undef DECLARE_ATTRIB_VISIT_FUNCTION
 
   static absl::StatusOr<std::unique_ptr<JsProgramBodyElement>>

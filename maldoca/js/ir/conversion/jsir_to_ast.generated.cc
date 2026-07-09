@@ -62,7 +62,7 @@ JsirToAst::VisitProgramBodyElement(JsirProgramBodyElementOpInterface op) {
     .Case([&](JsirExpressionStatementOp op) {
       return VisitExpressionStatement(op);
     })
-    .Case([&](JshirBlockStatementOp op) {
+    .Case([&](JsirBlockStatementOp op) {
       return VisitBlockStatement(op);
     })
     .Case([&](JsirEmptyStatementOp op) {
@@ -71,46 +71,46 @@ JsirToAst::VisitProgramBodyElement(JsirProgramBodyElementOpInterface op) {
     .Case([&](JsirDebuggerStatementOp op) {
       return VisitDebuggerStatement(op);
     })
-    .Case([&](JshirWithStatementOp op) {
+    .Case([&](JsirWithStatementOp op) {
       return VisitWithStatement(op);
     })
     .Case([&](JsirReturnStatementOp op) {
       return VisitReturnStatement(op);
     })
-    .Case([&](JshirLabeledStatementOp op) {
+    .Case([&](JsirLabeledStatementOp op) {
       return VisitLabeledStatement(op);
     })
-    .Case([&](JshirBreakStatementOp op) {
+    .Case([&](JsirBreakStatementOp op) {
       return VisitBreakStatement(op);
     })
-    .Case([&](JshirContinueStatementOp op) {
+    .Case([&](JsirContinueStatementOp op) {
       return VisitContinueStatement(op);
     })
-    .Case([&](JshirIfStatementOp op) {
+    .Case([&](JsirIfStatementOp op) {
       return VisitIfStatement(op);
     })
-    .Case([&](JshirSwitchStatementOp op) {
+    .Case([&](JsirSwitchStatementOp op) {
       return VisitSwitchStatement(op);
     })
     .Case([&](JsirThrowStatementOp op) {
       return VisitThrowStatement(op);
     })
-    .Case([&](JshirTryStatementOp op) {
+    .Case([&](JsirTryStatementOp op) {
       return VisitTryStatement(op);
     })
-    .Case([&](JshirWhileStatementOp op) {
+    .Case([&](JsirWhileStatementOp op) {
       return VisitWhileStatement(op);
     })
-    .Case([&](JshirDoWhileStatementOp op) {
+    .Case([&](JsirDoWhileStatementOp op) {
       return VisitDoWhileStatement(op);
     })
-    .Case([&](JshirForStatementOp op) {
+    .Case([&](JsirForStatementOp op) {
       return VisitForStatement(op);
     })
-    .Case([&](JshirForInStatementOp op) {
+    .Case([&](JsirForInStatementOp op) {
       return VisitForInStatement(op);
     })
-    .Case([&](JshirForOfStatementOp op) {
+    .Case([&](JsirForOfStatementOp op) {
       return VisitForOfStatement(op);
     })
     .Case([&](JsirFunctionDeclarationOp op) {
@@ -311,7 +311,7 @@ JsirToAst::VisitExpression(JsirExpressionOpInterface op) {
     .Case([&](JsirAssignmentExpressionOp op) {
       return VisitAssignmentExpression(op);
     })
-    .Case([&](JshirLogicalExpressionOp op) {
+    .Case([&](JsirLogicalExpressionOp op) {
       return VisitLogicalExpression(op);
     })
     .Case([&](JsirMemberExpressionOp op) {
@@ -320,7 +320,7 @@ JsirToAst::VisitExpression(JsirExpressionOpInterface op) {
     .Case([&](JsirOptionalMemberExpressionOp op) {
       return VisitOptionalMemberExpression(op);
     })
-    .Case([&](JshirConditionalExpressionOp op) {
+    .Case([&](JsirConditionalExpressionOp op) {
       return VisitConditionalExpression(op);
     })
     .Case([&](JsirCallExpressionOp op) {
@@ -615,7 +615,7 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
     .Case([&](JsirExpressionStatementOp op) {
       return VisitExpressionStatement(op);
     })
-    .Case([&](JshirBlockStatementOp op) {
+    .Case([&](JsirBlockStatementOp op) {
       return VisitBlockStatement(op);
     })
     .Case([&](JsirEmptyStatementOp op) {
@@ -624,46 +624,46 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
     .Case([&](JsirDebuggerStatementOp op) {
       return VisitDebuggerStatement(op);
     })
-    .Case([&](JshirWithStatementOp op) {
+    .Case([&](JsirWithStatementOp op) {
       return VisitWithStatement(op);
     })
     .Case([&](JsirReturnStatementOp op) {
       return VisitReturnStatement(op);
     })
-    .Case([&](JshirLabeledStatementOp op) {
+    .Case([&](JsirLabeledStatementOp op) {
       return VisitLabeledStatement(op);
     })
-    .Case([&](JshirBreakStatementOp op) {
+    .Case([&](JsirBreakStatementOp op) {
       return VisitBreakStatement(op);
     })
-    .Case([&](JshirContinueStatementOp op) {
+    .Case([&](JsirContinueStatementOp op) {
       return VisitContinueStatement(op);
     })
-    .Case([&](JshirIfStatementOp op) {
+    .Case([&](JsirIfStatementOp op) {
       return VisitIfStatement(op);
     })
-    .Case([&](JshirSwitchStatementOp op) {
+    .Case([&](JsirSwitchStatementOp op) {
       return VisitSwitchStatement(op);
     })
     .Case([&](JsirThrowStatementOp op) {
       return VisitThrowStatement(op);
     })
-    .Case([&](JshirTryStatementOp op) {
+    .Case([&](JsirTryStatementOp op) {
       return VisitTryStatement(op);
     })
-    .Case([&](JshirWhileStatementOp op) {
+    .Case([&](JsirWhileStatementOp op) {
       return VisitWhileStatement(op);
     })
-    .Case([&](JshirDoWhileStatementOp op) {
+    .Case([&](JsirDoWhileStatementOp op) {
       return VisitDoWhileStatement(op);
     })
-    .Case([&](JshirForStatementOp op) {
+    .Case([&](JsirForStatementOp op) {
       return VisitForStatement(op);
     })
-    .Case([&](JshirForInStatementOp op) {
+    .Case([&](JsirForInStatementOp op) {
       return VisitForInStatement(op);
     })
-    .Case([&](JshirForOfStatementOp op) {
+    .Case([&](JsirForOfStatementOp op) {
       return VisitForOfStatement(op);
     })
     .Case([&](JsirFunctionDeclarationOp op) {
@@ -681,7 +681,7 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsBlockStatement>>
-JsirToAst::VisitBlockStatement(JshirBlockStatementOp op) {
+JsirToAst::VisitBlockStatement(JsirBlockStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
@@ -737,7 +737,7 @@ JsirToAst::VisitDebuggerStatement(JsirDebuggerStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsWithStatement>>
-JsirToAst::VisitWithStatement(JshirWithStatementOp op) {
+JsirToAst::VisitWithStatement(JsirWithStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto object,
       Convert(
@@ -777,7 +777,7 @@ JsirToAst::VisitReturnStatement(JsirReturnStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsLabeledStatement>>
-JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
+JsirToAst::VisitLabeledStatement(JsirLabeledStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto label,
       Convert(
@@ -801,7 +801,7 @@ JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsIfStatement>>
-JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
+JsirToAst::VisitIfStatement(JsirIfStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
@@ -837,7 +837,7 @@ JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsSwitchCase>>
-JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
+JsirToAst::VisitSwitchCase(JsirSwitchCaseOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
@@ -867,7 +867,7 @@ JsirToAst::VisitSwitchCase(JshirSwitchCaseOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsSwitchStatement>>
-JsirToAst::VisitSwitchStatement(JshirSwitchStatementOp op) {
+JsirToAst::VisitSwitchStatement(JsirSwitchStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto discriminant,
       Convert(
@@ -907,7 +907,7 @@ JsirToAst::VisitThrowStatement(JsirThrowStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsCatchClause>>
-JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
+JsirToAst::VisitCatchClause(JsirCatchClauseOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto param,
       Convert(
@@ -933,7 +933,7 @@ JsirToAst::VisitCatchClause(JshirCatchClauseOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsTryStatement>>
-JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
+JsirToAst::VisitTryStatement(JsirTryStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto block,
       Convert(
@@ -973,7 +973,7 @@ JsirToAst::VisitTryStatement(JshirTryStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsWhileStatement>>
-JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
+JsirToAst::VisitWhileStatement(JsirWhileStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(
@@ -999,7 +999,7 @@ JsirToAst::VisitWhileStatement(JshirWhileStatementOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsDoWhileStatement>>
-JsirToAst::VisitDoWhileStatement(JshirDoWhileStatementOp op) {
+JsirToAst::VisitDoWhileStatement(JsirDoWhileStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto body,
       Convert(
@@ -1417,7 +1417,7 @@ JsirToAst::VisitAssignmentExpression(JsirAssignmentExpressionOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsLogicalExpression>>
-JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
+JsirToAst::VisitLogicalExpression(JsirLogicalExpressionOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto operator_,
       Convert(
@@ -1449,7 +1449,7 @@ JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
 }
 
 absl::StatusOr<std::unique_ptr<JsConditionalExpression>>
-JsirToAst::VisitConditionalExpression(JshirConditionalExpressionOp op) {
+JsirToAst::VisitConditionalExpression(JsirConditionalExpressionOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto test,
       Convert(

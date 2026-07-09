@@ -99,22 +99,22 @@ bool IsStatementBlock(mlir::Block &block) {
     return false;
   }
 
-  return llvm::TypeSwitch<mlir::Operation *, bool>(region->getParentOp())
-      .Case([&](JshirWithStatementOp parent_op) {
+  return llvm::TypeSwitch<mlir::Operation*, bool>(region->getParentOp())
+      .Case([&](JsirWithStatementOp parent_op) {
         // interface WithStatement <: Statement {
         //   object: Expression;
         //   body: Statement;
         // }
         return region == &parent_op.getBody();
       })
-      .Case([&](JshirLabeledStatementOp parent_op) {
+      .Case([&](JsirLabeledStatementOp parent_op) {
         // interface LabeledStatement <: Statement {
         //   label: Identifier;
         //   body: Statement;
         // }
         return region == &parent_op.getBody();
       })
-      .Case([&](JshirIfStatementOp parent_op) {
+      .Case([&](JsirIfStatementOp parent_op) {
         // interface IfStatement <: Statement {
         //   test: Expression;
         //   consequent: Statement;
@@ -123,21 +123,21 @@ bool IsStatementBlock(mlir::Block &block) {
         return region == &parent_op.getConsequent() ||
                region == &parent_op.getAlternate();
       })
-      .Case([&](JshirWhileStatementOp parent_op) {
+      .Case([&](JsirWhileStatementOp parent_op) {
         // interface WhileStatement <: Statement {
         //   test: Expression;
         //   body: Statement;
         // }
         return region == &parent_op.getBody();
       })
-      .Case([&](JshirDoWhileStatementOp parent_op) {
+      .Case([&](JsirDoWhileStatementOp parent_op) {
         // interface DoWhileStatement <: Statement {
         //   body: Statement;
         //   test: Expression;
         // }
         return region == &parent_op.getBody();
       })
-      .Case([&](JshirForStatementOp parent_op) {
+      .Case([&](JsirForStatementOp parent_op) {
         // interface ForStatement <: Statement {
         //   init: VariableDeclaration | Expression | null;
         //   test: Expression | null;
@@ -146,7 +146,7 @@ bool IsStatementBlock(mlir::Block &block) {
         // }
         return region == &parent_op.getBody();
       })
-      .Case([&](JshirForInStatementOp parent_op) {
+      .Case([&](JsirForInStatementOp parent_op) {
         // interface ForInStatement <: Statement {
         //   left: VariableDeclaration | LVal;
         //   right: Expression;
@@ -154,7 +154,7 @@ bool IsStatementBlock(mlir::Block &block) {
         // }
         return region == &parent_op.getBody();
       })
-      .Case([&](JshirForOfStatementOp parent_op) {
+      .Case([&](JsirForOfStatementOp parent_op) {
         // interface ForOfStatement <: Statement {
         //   left: VariableDeclaration | LVal;
         //   right: Expression;
@@ -186,7 +186,7 @@ void WrapBlockContentWithBlockStatement(mlir::Block &block) {
   // After:
   //
   //  ^block:
-  //    JshirBlockStatement(/*directives=*/{}, /*body=*/{})
+  //    JsirBlockStatement(/*directives=*/{}, /*body=*/{})
   //
   //  ^new_block:
   //    op1
@@ -194,7 +194,7 @@ void WrapBlockContentWithBlockStatement(mlir::Block &block) {
   //    ...
   mlir::OpBuilder builder{context};
   builder.setInsertionPointToStart(&block);
-  auto block_stmt_op = JshirBlockStatementOp::create(builder, region->getLoc());
+  auto block_stmt_op = JsirBlockStatementOp::create(builder, region->getLoc());
 
   // `directives` is empty, but we need to keep an empty block in the region.
   block_stmt_op.getDirectives().emplaceBlock();
@@ -202,7 +202,7 @@ void WrapBlockContentWithBlockStatement(mlir::Block &block) {
   // After:
   //
   //  ^block:
-  //    JshirBlockStatement(
+  //    JsirBlockStatement(
   //      /*directives=*/{
   //      ^empty_block:
   //      },

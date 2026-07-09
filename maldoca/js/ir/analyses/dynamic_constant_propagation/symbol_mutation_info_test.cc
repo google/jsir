@@ -59,8 +59,8 @@ TEST_P(GetLvalueRootSymbolsTest, GetLvalueRootSymbols) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr hir_repr,
-      ToJsHirRepr::FromJsSourceRepr(
+      JsirRepr hir_repr,
+      ToJsirRepr::FromJsSourceRepr(
           source_repr, request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
@@ -148,8 +148,8 @@ TEST_P(GetSymbolMutationInfosTest, GetSymbolMutationInfos) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr hir_repr,
-      ToJsHirRepr::FromJsSourceRepr(
+      JsirRepr hir_repr,
+      ToJsirRepr::FromJsSourceRepr(
           source_repr, request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 

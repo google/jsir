@@ -63,17 +63,6 @@ class OptionalRegion<Region region> : Region<
     region.summary
 >;
 
-def Jshir_Dialect : Dialect {
-  let name = "jshir";
-  let cppNamespace = "::maldoca";
-}
 
-// Base class for JSHIR dialect operations.
-// This operation inherits from the base `Op` class in OpBase.td, and provides:
-// - The parent dialect of the operation.
-// - The mnemonic for the operation, or the name without the dialect prefix.
-// - A list of traits for the operation.
-class Jshir_Op<string mnemonic, list<Trait> traits = []> :
-    Op<Jshir_Dialect, mnemonic, traits>;
 
 #endif  // MALDOCA_JS_IR_JSIR_DIALECT_TD_

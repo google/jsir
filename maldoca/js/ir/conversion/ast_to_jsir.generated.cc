@@ -475,8 +475,8 @@ JsirStatementOpInterface AstToJsir::VisitStatement(mlir::OpBuilder &builder, con
   LOG(FATAL) << "Unreachable code.";
 }
 
-JshirBlockStatementOp AstToJsir::VisitBlockStatement(mlir::OpBuilder &builder, const JsBlockStatement *node) {
-  auto op = CreateStmt<JshirBlockStatementOp>(builder, node);
+JsirBlockStatementOp AstToJsir::VisitBlockStatement(mlir::OpBuilder &builder, const JsBlockStatement *node) {
+  auto op = CreateStmt<JsirBlockStatementOp>(builder, node);
   mlir::Region &mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     for (const auto &element : *node->body()) {
@@ -505,9 +505,9 @@ JsirDebuggerStatementOp AstToJsir::VisitDebuggerStatement(mlir::OpBuilder &build
   return CreateStmt<JsirDebuggerStatementOp>(builder, node);
 }
 
-JshirWithStatementOp AstToJsir::VisitWithStatement(mlir::OpBuilder &builder, const JsWithStatement *node) {
+JsirWithStatementOp AstToJsir::VisitWithStatement(mlir::OpBuilder &builder, const JsWithStatement *node) {
   mlir::Value mlir_object = VisitExpression(builder, node->object());
-  auto op = CreateStmt<JshirWithStatementOp>(builder, node, mlir_object);
+  auto op = CreateStmt<JsirWithStatementOp>(builder, node, mlir_object);
   mlir::Region &mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitStatement(builder, node->body());
@@ -523,9 +523,9 @@ JsirReturnStatementOp AstToJsir::VisitReturnStatement(mlir::OpBuilder &builder, 
   return CreateStmt<JsirReturnStatementOp>(builder, node, mlir_argument);
 }
 
-JshirLabeledStatementOp AstToJsir::VisitLabeledStatement(mlir::OpBuilder &builder, const JsLabeledStatement *node) {
+JsirLabeledStatementOp AstToJsir::VisitLabeledStatement(mlir::OpBuilder &builder, const JsLabeledStatement *node) {
   JsirIdentifierAttr mlir_label = VisitIdentifierAttr(builder, node->label());
-  auto op = CreateStmt<JshirLabeledStatementOp>(builder, node, mlir_label);
+  auto op = CreateStmt<JsirLabeledStatementOp>(builder, node, mlir_label);
   mlir::Region &mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitStatement(builder, node->body());
@@ -533,9 +533,9 @@ JshirLabeledStatementOp AstToJsir::VisitLabeledStatement(mlir::OpBuilder &builde
   return op;
 }
 
-JshirIfStatementOp AstToJsir::VisitIfStatement(mlir::OpBuilder &builder, const JsIfStatement *node) {
+JsirIfStatementOp AstToJsir::VisitIfStatement(mlir::OpBuilder &builder, const JsIfStatement *node) {
   mlir::Value mlir_test = VisitExpression(builder, node->test());
-  auto op = CreateStmt<JshirIfStatementOp>(builder, node, mlir_test);
+  auto op = CreateStmt<JsirIfStatementOp>(builder, node, mlir_test);
   mlir::Region &mlir_consequent_region = op.getConsequent();
   AppendNewBlockAndPopulate(builder, mlir_consequent_region, [&] {
     VisitStatement(builder, node->consequent());
@@ -549,8 +549,8 @@ JshirIfStatementOp AstToJsir::VisitIfStatement(mlir::OpBuilder &builder, const J
   return op;
 }
 
-JshirSwitchCaseOp AstToJsir::VisitSwitchCase(mlir::OpBuilder &builder, const JsSwitchCase *node) {
-  auto op = CreateStmt<JshirSwitchCaseOp>(builder, node);
+JsirSwitchCaseOp AstToJsir::VisitSwitchCase(mlir::OpBuilder &builder, const JsSwitchCase *node) {
+  auto op = CreateStmt<JsirSwitchCaseOp>(builder, node);
   if (node->test().has_value()) {
     mlir::Region &mlir_test_region = op.getTest();
     AppendNewBlockAndPopulate(builder, mlir_test_region, [&] {
@@ -567,9 +567,9 @@ JshirSwitchCaseOp AstToJsir::VisitSwitchCase(mlir::OpBuilder &builder, const JsS
   return op;
 }
 
-JshirSwitchStatementOp AstToJsir::VisitSwitchStatement(mlir::OpBuilder &builder, const JsSwitchStatement *node) {
+JsirSwitchStatementOp AstToJsir::VisitSwitchStatement(mlir::OpBuilder &builder, const JsSwitchStatement *node) {
   mlir::Value mlir_discriminant = VisitExpression(builder, node->discriminant());
-  auto op = CreateStmt<JshirSwitchStatementOp>(builder, node, mlir_discriminant);
+  auto op = CreateStmt<JsirSwitchStatementOp>(builder, node, mlir_discriminant);
   mlir::Region &mlir_cases_region = op.getCases();
   AppendNewBlockAndPopulate(builder, mlir_cases_region, [&] {
     for (const auto &element : *node->cases()) {
@@ -584,12 +584,12 @@ JsirThrowStatementOp AstToJsir::VisitThrowStatement(mlir::OpBuilder &builder, co
   return CreateStmt<JsirThrowStatementOp>(builder, node, mlir_argument);
 }
 
-JshirCatchClauseOp AstToJsir::VisitCatchClause(mlir::OpBuilder &builder, const JsCatchClause *node) {
+JsirCatchClauseOp AstToJsir::VisitCatchClause(mlir::OpBuilder &builder, const JsCatchClause *node) {
   mlir::Value mlir_param;
   if (node->param().has_value()) {
     mlir_param = VisitPatternRef(builder, node->param().value());
   }
-  auto op = CreateStmt<JshirCatchClauseOp>(builder, node, mlir_param);
+  auto op = CreateStmt<JsirCatchClauseOp>(builder, node, mlir_param);
   mlir::Region &mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitBlockStatement(builder, node->body());
@@ -597,8 +597,8 @@ JshirCatchClauseOp AstToJsir::VisitCatchClause(mlir::OpBuilder &builder, const J
   return op;
 }
 
-JshirTryStatementOp AstToJsir::VisitTryStatement(mlir::OpBuilder &builder, const JsTryStatement *node) {
-  auto op = CreateStmt<JshirTryStatementOp>(builder, node);
+JsirTryStatementOp AstToJsir::VisitTryStatement(mlir::OpBuilder &builder, const JsTryStatement *node) {
+  auto op = CreateStmt<JsirTryStatementOp>(builder, node);
   mlir::Region &mlir_block_region = op.getBlock();
   AppendNewBlockAndPopulate(builder, mlir_block_region, [&] {
     VisitBlockStatement(builder, node->block());
@@ -618,8 +618,8 @@ JshirTryStatementOp AstToJsir::VisitTryStatement(mlir::OpBuilder &builder, const
   return op;
 }
 
-JshirWhileStatementOp AstToJsir::VisitWhileStatement(mlir::OpBuilder &builder, const JsWhileStatement *node) {
-  auto op = CreateStmt<JshirWhileStatementOp>(builder, node);
+JsirWhileStatementOp AstToJsir::VisitWhileStatement(mlir::OpBuilder &builder, const JsWhileStatement *node) {
+  auto op = CreateStmt<JsirWhileStatementOp>(builder, node);
   mlir::Region &mlir_test_region = op.getTest();
   AppendNewBlockAndPopulate(builder, mlir_test_region, [&] {
     mlir::Value mlir_test = VisitExpression(builder, node->test());
@@ -632,8 +632,8 @@ JshirWhileStatementOp AstToJsir::VisitWhileStatement(mlir::OpBuilder &builder, c
   return op;
 }
 
-JshirDoWhileStatementOp AstToJsir::VisitDoWhileStatement(mlir::OpBuilder &builder, const JsDoWhileStatement *node) {
-  auto op = CreateStmt<JshirDoWhileStatementOp>(builder, node);
+JsirDoWhileStatementOp AstToJsir::VisitDoWhileStatement(mlir::OpBuilder &builder, const JsDoWhileStatement *node) {
+  auto op = CreateStmt<JsirDoWhileStatementOp>(builder, node);
   mlir::Region &mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitStatement(builder, node->body());
@@ -830,10 +830,10 @@ JsirAssignmentExpressionOp AstToJsir::VisitAssignmentExpression(mlir::OpBuilder 
   return CreateExpr<JsirAssignmentExpressionOp>(builder, node, mlir_operator, mlir_left, mlir_right);
 }
 
-JshirLogicalExpressionOp AstToJsir::VisitLogicalExpression(mlir::OpBuilder &builder, const JsLogicalExpression *node) {
+JsirLogicalExpressionOp AstToJsir::VisitLogicalExpression(mlir::OpBuilder &builder, const JsLogicalExpression *node) {
   mlir::StringAttr mlir_operator = builder.getStringAttr(JsLogicalOperatorToString(node->operator_()));
   mlir::Value mlir_left = VisitExpression(builder, node->left());
-  auto op = CreateExpr<JshirLogicalExpressionOp>(builder, node, mlir_operator, mlir_left);
+  auto op = CreateExpr<JsirLogicalExpressionOp>(builder, node, mlir_operator, mlir_left);
   mlir::Region &mlir_right_region = op.getRight();
   AppendNewBlockAndPopulate(builder, mlir_right_region, [&] {
     mlir::Value mlir_right = VisitExpression(builder, node->right());
@@ -842,9 +842,9 @@ JshirLogicalExpressionOp AstToJsir::VisitLogicalExpression(mlir::OpBuilder &buil
   return op;
 }
 
-JshirConditionalExpressionOp AstToJsir::VisitConditionalExpression(mlir::OpBuilder &builder, const JsConditionalExpression *node) {
+JsirConditionalExpressionOp AstToJsir::VisitConditionalExpression(mlir::OpBuilder &builder, const JsConditionalExpression *node) {
   mlir::Value mlir_test = VisitExpression(builder, node->test());
-  auto op = CreateExpr<JshirConditionalExpressionOp>(builder, node, mlir_test);
+  auto op = CreateExpr<JsirConditionalExpressionOp>(builder, node, mlir_test);
   mlir::Region &mlir_alternate_region = op.getAlternate();
   AppendNewBlockAndPopulate(builder, mlir_alternate_region, [&] {
     mlir::Value mlir_alternate = VisitExpression(builder, node->alternate());

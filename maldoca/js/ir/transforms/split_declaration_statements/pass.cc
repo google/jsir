@@ -48,7 +48,7 @@ std::vector<mlir::Operation *> GetDependencyOps(mlir::Operation *root) {
 
 bool BlockIsForHeader(mlir::Block &block) {
   auto for_op =
-      llvm::dyn_cast_if_present<JshirForStatementOp>(block.getParentOp());
+      llvm::dyn_cast_if_present<JsirForStatementOp>(block.getParentOp());
   if (for_op == nullptr) {
     return false;
   }

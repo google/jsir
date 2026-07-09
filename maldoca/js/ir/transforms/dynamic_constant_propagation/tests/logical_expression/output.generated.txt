@@ -19,7 +19,7 @@
 // SOURCE-NEXT:         %0 = jsir.identifier {"a"}
 // SOURCE-NEXT:           // %0 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %1 = jshir.logical_expression (%0) {"||"} ({
+// SOURCE-NEXT:         %1 = jsir.logical_expression (%0) {"||"} ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
@@ -48,7 +48,7 @@
 // SOURCE-NEXT:         %6 = jsir.identifier {"a"}
 // SOURCE-NEXT:           // %6 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %7 = jshir.logical_expression (%6) {"||"} ({
+// SOURCE-NEXT:         %7 = jsir.logical_expression (%6) {"||"} ({
 // SOURCE-NEXT:           ^bb0:
 // SOURCE-NEXT:               // <executable>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
