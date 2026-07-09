@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {
+      "output_file": "output.generated.txt",
+      "passes": "source2ast,ast2jsir,split_sequence_expressions,jsir2ast,ast2source",
+      "prefix": "SOURCE"
+    }
+  ],
+  "build_template": "BUILD.template"
+}

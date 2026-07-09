@@ -1,221 +1,221 @@
-// JSHIR:      "jsir.file"() <{comments = [#jsir<comment_line  <L 1 C 27>, <L 1 C 31>, 27, 31, " s">, #jsir<comment_line  <L 5 C 22>, <L 5 C 26>, 62, 66, " e">, #jsir<comment_line  <L 7 C 18>, <L 7 C 22>, 87, 91, " l">, #jsir<comment_line  <L 9 C 18>, <L 9 C 22>, 112, 116, " l">]}> ({
-// JSHIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
-// JSHIR-NEXT:     %0 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
-// JSHIR-NEXT:     %1 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
-// JSHIR-NEXT:     %2 = "jsir.binary_expression"(%0, %1) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %3 = "jsir.parenthesized_expression"(%2) : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %4 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
-// JSHIR-NEXT:     %5 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
-// JSHIR-NEXT:     %6 = "jsir.binary_expression"(%4, %5) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %7 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
-// JSHIR-NEXT:     %8 = "jsir.binary_expression"(%6, %7) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %9 = "jsir.member_expression"(%3, %8) : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %10 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "'h'", "h">, value = "h"}> : () -> !jsir.any
-// JSHIR-NEXT:     %11 = "jsir.binary_expression"(%9, %10) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %12 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
-// JSHIR-NEXT:     %13 = "jsir.unary_expression"(%12) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %14 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
-// JSHIR-NEXT:     %15 = "jsir.binary_expression"(%13, %14) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %16 = "jsir.parenthesized_expression"(%15) : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %17 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %18 = "jsir.unary_expression"(%17) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %19 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %20 = "jsir.unary_expression"(%19) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %21 = "jsir.binary_expression"(%18, %20) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %22 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %23 = "jsir.unary_expression"(%22) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %24 = "jsir.binary_expression"(%21, %23) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %25 = "jsir.member_expression"(%16, %24) : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %26 = "jsir.binary_expression"(%11, %25) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %27 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
-// JSHIR-NEXT:     %28 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
-// JSHIR-NEXT:     %29 = "jsir.binary_expression"(%27, %28) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %30 = "jsir.parenthesized_expression"(%29) : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %31 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %32 = "jsir.unary_expression"(%31) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %33 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %34 = "jsir.unary_expression"(%33) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %35 = "jsir.binary_expression"(%32, %34) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %36 = "jsir.member_expression"(%30, %35) : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %37 = "jsir.binary_expression"(%26, %36) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %38 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
-// JSHIR-NEXT:     %39 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
-// JSHIR-NEXT:     %40 = "jsir.binary_expression"(%38, %39) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %41 = "jsir.parenthesized_expression"(%40) : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %42 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %43 = "jsir.unary_expression"(%42) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %44 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
-// JSHIR-NEXT:     %45 = "jsir.unary_expression"(%44) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %46 = "jsir.binary_expression"(%43, %45) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %47 = "jsir.member_expression"(%41, %46) : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     %48 = "jsir.binary_expression"(%37, %47) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
-// JSHIR-NEXT:     "jsir.expression_statement"(%48) : (!jsir.any) -> ()
-// JSHIR-NEXT:   }, {
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:   }) : () -> ()
-// JSHIR-NEXT: }) : () -> ()
-// JSHIR-NEXT: jsir.file {[#jsir<comment_line  <L 1 C 27>, <L 1 C 31>, 27, 31, " s">, #jsir<comment_line  <L 5 C 22>, <L 5 C 26>, 62, 66, " e">, #jsir<comment_line  <L 7 C 18>, <L 7 C 22>, 87, 91, " l">, #jsir<comment_line  <L 9 C 18>, <L 9 C 22>, 112, 116, " l">]} ({
-// JSHIR-NEXT:   ^bb0:
-// JSHIR-NEXT:       // <executable>
-// JSHIR-NEXT:       // State [default = <unknown>] { }
-// JSHIR-NEXT:     jsir.program {"script"} ({
-// JSHIR-NEXT:       ^bb0:
-// JSHIR-NEXT:           // <executable>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %0 = jsir.boolean_literal {false}
-// JSHIR-NEXT:           // %0 = false
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %1 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
-// JSHIR-NEXT:           // %1 = ""
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %2 = jsir.binary_expression (%0, %1) {"+"}
-// JSHIR-NEXT:           // %2 = "false"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %3 = jsir.parenthesized_expression (%2)
-// JSHIR-NEXT:           // %3 = "false"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %4 = jsir.boolean_literal {true}
-// JSHIR-NEXT:           // %4 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %5 = jsir.boolean_literal {true}
-// JSHIR-NEXT:           // %5 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %6 = jsir.binary_expression (%4, %5) {"+"}
-// JSHIR-NEXT:           // %6 = 2.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %7 = jsir.boolean_literal {true}
-// JSHIR-NEXT:           // %7 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %8 = jsir.binary_expression (%6, %7) {"+"}
-// JSHIR-NEXT:           // %8 = 3.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %9 = jsir.member_expression (%3, %8)
-// JSHIR-NEXT:           // %9 = "s"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %10 = jsir.string_literal {#jsir<string_literal_extra "'h'", "h">, "h"}
-// JSHIR-NEXT:           // %10 = "h"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %11 = jsir.binary_expression (%9, %10) {"+"}
-// JSHIR-NEXT:           // %11 = "sh"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %12 = jsir.boolean_literal {false}
-// JSHIR-NEXT:           // %12 = false
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %13 = jsir.unary_expression (%12) {"!", true}
-// JSHIR-NEXT:           // %13 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %14 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
-// JSHIR-NEXT:           // %14 = ""
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %15 = jsir.binary_expression (%13, %14) {"+"}
-// JSHIR-NEXT:           // %15 = "true"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %16 = jsir.parenthesized_expression (%15)
-// JSHIR-NEXT:           // %16 = "true"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %17 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %17 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %18 = jsir.unary_expression (%17) {"!", true}
-// JSHIR-NEXT:           // %18 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %19 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %19 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %20 = jsir.unary_expression (%19) {"!", true}
-// JSHIR-NEXT:           // %20 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %21 = jsir.binary_expression (%18, %20) {"+"}
-// JSHIR-NEXT:           // %21 = 2.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %22 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %22 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %23 = jsir.unary_expression (%22) {"!", true}
-// JSHIR-NEXT:           // %23 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %24 = jsir.binary_expression (%21, %23) {"+"}
-// JSHIR-NEXT:           // %24 = 3.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %25 = jsir.member_expression (%16, %24)
-// JSHIR-NEXT:           // %25 = "e"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %26 = jsir.binary_expression (%11, %25) {"+"}
-// JSHIR-NEXT:           // %26 = "she"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %27 = jsir.boolean_literal {false}
-// JSHIR-NEXT:           // %27 = false
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %28 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
-// JSHIR-NEXT:           // %28 = ""
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %29 = jsir.binary_expression (%27, %28) {"+"}
-// JSHIR-NEXT:           // %29 = "false"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %30 = jsir.parenthesized_expression (%29)
-// JSHIR-NEXT:           // %30 = "false"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %31 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %31 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %32 = jsir.unary_expression (%31) {"!", true}
-// JSHIR-NEXT:           // %32 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %33 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %33 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %34 = jsir.unary_expression (%33) {"!", true}
-// JSHIR-NEXT:           // %34 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %35 = jsir.binary_expression (%32, %34) {"+"}
-// JSHIR-NEXT:           // %35 = 2.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %36 = jsir.member_expression (%30, %35)
-// JSHIR-NEXT:           // %36 = "l"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %37 = jsir.binary_expression (%26, %36) {"+"}
-// JSHIR-NEXT:           // %37 = "shel"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %38 = jsir.boolean_literal {false}
-// JSHIR-NEXT:           // %38 = false
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %39 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
-// JSHIR-NEXT:           // %39 = ""
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %40 = jsir.binary_expression (%38, %39) {"+"}
-// JSHIR-NEXT:           // %40 = "false"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %41 = jsir.parenthesized_expression (%40)
-// JSHIR-NEXT:           // %41 = "false"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %42 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %42 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %43 = jsir.unary_expression (%42) {"!", true}
-// JSHIR-NEXT:           // %43 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %44 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
-// JSHIR-NEXT:           // %44 = 0.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %45 = jsir.unary_expression (%44) {"!", true}
-// JSHIR-NEXT:           // %45 = true
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %46 = jsir.binary_expression (%43, %45) {"+"}
-// JSHIR-NEXT:           // %46 = 2.000000e+00 : f64
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %47 = jsir.member_expression (%41, %46)
-// JSHIR-NEXT:           // %47 = "l"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         %48 = jsir.binary_expression (%37, %47) {"+"}
-// JSHIR-NEXT:           // %48 = "shell"
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:         jsir.expression_statement (%48)
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:     }, {
-// JSHIR-NEXT:       ^bb0:
-// JSHIR-NEXT:           // <executable>
-// JSHIR-NEXT:           // State [default = <unknown>] { }
-// JSHIR-NEXT:     })
-// JSHIR-NEXT:       // State [default = <unknown>] { }
-// JSHIR-NEXT: })
-// JSHIR-NEXT:   // State [default = <uninitialized>] { }
+// JSIR:      "jsir.file"() <{comments = [#jsir<comment_line <L 1 C 27>, <L 1 C 31>, 27, 31, " s">, #jsir<comment_line <L 5 C 22>, <L 5 C 26>, 62, 66, " e">, #jsir<comment_line <L 7 C 18>, <L 7 C 22>, 87, 91, " l">, #jsir<comment_line <L 9 C 18>, <L 9 C 22>, 112, 116, " l">]}> ({
+// JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSIR-NEXT:     %0 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
+// JSIR-NEXT:     %1 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
+// JSIR-NEXT:     %2 = "jsir.binary_expression"(%0, %1) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %3 = "jsir.parenthesized_expression"(%2) : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %4 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
+// JSIR-NEXT:     %5 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
+// JSIR-NEXT:     %6 = "jsir.binary_expression"(%4, %5) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %7 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
+// JSIR-NEXT:     %8 = "jsir.binary_expression"(%6, %7) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %9 = "jsir.member_expression"(%3, %8) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %10 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "'h'", "h">, value = "h"}> : () -> !jsir.any
+// JSIR-NEXT:     %11 = "jsir.binary_expression"(%9, %10) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %12 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
+// JSIR-NEXT:     %13 = "jsir.unary_expression"(%12) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %14 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
+// JSIR-NEXT:     %15 = "jsir.binary_expression"(%13, %14) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %16 = "jsir.parenthesized_expression"(%15) : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %17 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %18 = "jsir.unary_expression"(%17) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %19 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %20 = "jsir.unary_expression"(%19) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %21 = "jsir.binary_expression"(%18, %20) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %22 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %23 = "jsir.unary_expression"(%22) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %24 = "jsir.binary_expression"(%21, %23) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %25 = "jsir.member_expression"(%16, %24) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %26 = "jsir.binary_expression"(%11, %25) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %27 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
+// JSIR-NEXT:     %28 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
+// JSIR-NEXT:     %29 = "jsir.binary_expression"(%27, %28) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %30 = "jsir.parenthesized_expression"(%29) : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %31 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %32 = "jsir.unary_expression"(%31) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %33 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %34 = "jsir.unary_expression"(%33) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %35 = "jsir.binary_expression"(%32, %34) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %36 = "jsir.member_expression"(%30, %35) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %37 = "jsir.binary_expression"(%26, %36) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %38 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
+// JSIR-NEXT:     %39 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "''", "">, value = ""}> : () -> !jsir.any
+// JSIR-NEXT:     %40 = "jsir.binary_expression"(%38, %39) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %41 = "jsir.parenthesized_expression"(%40) : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %42 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %43 = "jsir.unary_expression"(%42) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %44 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %45 = "jsir.unary_expression"(%44) <{operator_ = "!", prefix = true}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:     %46 = "jsir.binary_expression"(%43, %45) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %47 = "jsir.member_expression"(%41, %46) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     %48 = "jsir.binary_expression"(%37, %47) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:     "jsir.expression_statement"(%48) : (!jsir.any) -> ()
+// JSIR-NEXT:   }, {
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:   }) : () -> ()
+// JSIR-NEXT: }) : () -> ()
+// JSIR-NEXT: jsir.file {[#jsir<comment_line <L 1 C 27>, <L 1 C 31>, 27, 31, " s">, #jsir<comment_line <L 5 C 22>, <L 5 C 26>, 62, 66, " e">, #jsir<comment_line <L 7 C 18>, <L 7 C 22>, 87, 91, " l">, #jsir<comment_line <L 9 C 18>, <L 9 C 22>, 112, 116, " l">]} ({
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:       // <executable>
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT:     jsir.program {"script"} ({
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %0 = jsir.boolean_literal {false}
+// JSIR-NEXT:           // %0 = false
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %1 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// JSIR-NEXT:           // %1 = ""
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %2 = jsir.binary_expression (%0, %1) {"+"}
+// JSIR-NEXT:           // %2 = "false"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %3 = jsir.parenthesized_expression (%2)
+// JSIR-NEXT:           // %3 = "false"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %4 = jsir.boolean_literal {true}
+// JSIR-NEXT:           // %4 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %5 = jsir.boolean_literal {true}
+// JSIR-NEXT:           // %5 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %6 = jsir.binary_expression (%4, %5) {"+"}
+// JSIR-NEXT:           // %6 = 2.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %7 = jsir.boolean_literal {true}
+// JSIR-NEXT:           // %7 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %8 = jsir.binary_expression (%6, %7) {"+"}
+// JSIR-NEXT:           // %8 = 3.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %9 = jsir.member_expression (%3, %8)
+// JSIR-NEXT:           // %9 = "s"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %10 = jsir.string_literal {#jsir<string_literal_extra "'h'", "h">, "h"}
+// JSIR-NEXT:           // %10 = "h"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %11 = jsir.binary_expression (%9, %10) {"+"}
+// JSIR-NEXT:           // %11 = "sh"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %12 = jsir.boolean_literal {false}
+// JSIR-NEXT:           // %12 = false
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %13 = jsir.unary_expression (%12) {"!", true}
+// JSIR-NEXT:           // %13 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %14 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// JSIR-NEXT:           // %14 = ""
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %15 = jsir.binary_expression (%13, %14) {"+"}
+// JSIR-NEXT:           // %15 = "true"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %16 = jsir.parenthesized_expression (%15)
+// JSIR-NEXT:           // %16 = "true"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %17 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %17 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %18 = jsir.unary_expression (%17) {"!", true}
+// JSIR-NEXT:           // %18 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %19 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %19 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %20 = jsir.unary_expression (%19) {"!", true}
+// JSIR-NEXT:           // %20 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %21 = jsir.binary_expression (%18, %20) {"+"}
+// JSIR-NEXT:           // %21 = 2.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %22 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %22 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %23 = jsir.unary_expression (%22) {"!", true}
+// JSIR-NEXT:           // %23 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %24 = jsir.binary_expression (%21, %23) {"+"}
+// JSIR-NEXT:           // %24 = 3.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %25 = jsir.member_expression (%16, %24)
+// JSIR-NEXT:           // %25 = "e"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %26 = jsir.binary_expression (%11, %25) {"+"}
+// JSIR-NEXT:           // %26 = "she"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %27 = jsir.boolean_literal {false}
+// JSIR-NEXT:           // %27 = false
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %28 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// JSIR-NEXT:           // %28 = ""
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %29 = jsir.binary_expression (%27, %28) {"+"}
+// JSIR-NEXT:           // %29 = "false"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %30 = jsir.parenthesized_expression (%29)
+// JSIR-NEXT:           // %30 = "false"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %31 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %31 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %32 = jsir.unary_expression (%31) {"!", true}
+// JSIR-NEXT:           // %32 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %33 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %33 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %34 = jsir.unary_expression (%33) {"!", true}
+// JSIR-NEXT:           // %34 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %35 = jsir.binary_expression (%32, %34) {"+"}
+// JSIR-NEXT:           // %35 = 2.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %36 = jsir.member_expression (%30, %35)
+// JSIR-NEXT:           // %36 = "l"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %37 = jsir.binary_expression (%26, %36) {"+"}
+// JSIR-NEXT:           // %37 = "shel"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %38 = jsir.boolean_literal {false}
+// JSIR-NEXT:           // %38 = false
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %39 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// JSIR-NEXT:           // %39 = ""
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %40 = jsir.binary_expression (%38, %39) {"+"}
+// JSIR-NEXT:           // %40 = "false"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %41 = jsir.parenthesized_expression (%40)
+// JSIR-NEXT:           // %41 = "false"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %42 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %42 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %43 = jsir.unary_expression (%42) {"!", true}
+// JSIR-NEXT:           // %43 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %44 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:           // %44 = 0.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %45 = jsir.unary_expression (%44) {"!", true}
+// JSIR-NEXT:           // %45 = true
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %46 = jsir.binary_expression (%43, %45) {"+"}
+// JSIR-NEXT:           // %46 = 2.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %47 = jsir.member_expression (%41, %46)
+// JSIR-NEXT:           // %47 = "l"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %48 = jsir.binary_expression (%37, %47) {"+"}
+// JSIR-NEXT:           // %48 = "shell"
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jsir.expression_statement (%48)
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     }, {
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     })
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT: })
+// JSIR-NEXT:   // State [default = <uninitialized>] { }
