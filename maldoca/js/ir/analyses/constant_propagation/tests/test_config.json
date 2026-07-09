@@ -1,0 +1,11 @@
+{
+  "tests": [
+    {
+      "output_file": "output.generated.txt",
+      "passes": "source2ast,ast2jsir",
+      "jsir_analysis": "constant_propagation",
+      "prefix": "JSIR"
+    }
+  ],
+  "build_template": "../../BUILD.general.template"
+}
