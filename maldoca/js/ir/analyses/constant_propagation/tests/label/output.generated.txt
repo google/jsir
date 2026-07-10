@@ -6,7 +6,7 @@
 // JSHIR-NEXT:       %6 = "jsir.variable_declarator"(%4, %5) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSHIR-NEXT:       "jsir.exprs_region_end"(%6) : (!jsir.any) -> ()
 // JSHIR-NEXT:     }) : () -> ()
-// JSHIR-NEXT:     "jshir.labeled_statement"() <{label = #jsir<identifier   <L 2 C 0>, <L 2 C 8>, "my_label", 11, 19, 0, "my_label">}> ({
+// JSHIR-NEXT:     "jshir.labeled_statement"() <{label = #jsir<identifier <L 2 C 0>, <L 2 C 8>, "my_label", 11, 19, 0, "my_label">}> ({
 // JSHIR-NEXT:       "jshir.while_statement"() ({
 // JSHIR-NEXT:         %4 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
 // JSHIR-NEXT:         "jsir.expr_region_end"(%4) : (!jsir.any) -> ()
@@ -21,7 +21,7 @@
 // JSHIR-NEXT:             "jsir.expr_region_end"(%10) : (!jsir.any) -> ()
 // JSHIR-NEXT:           }, {
 // JSHIR-NEXT:             "jshir.block_statement"() ({
-// JSHIR-NEXT:               "jshir.break_statement"() <{label = #jsir<identifier   <L 5 C 10>, <L 5 C 18>, "my_label", 72, 80, 4, "my_label">}> : () -> ()
+// JSHIR-NEXT:               "jshir.break_statement"() <{label = #jsir<identifier <L 5 C 10>, <L 5 C 18>, "my_label", 72, 80, 4, "my_label">}> : () -> ()
 // JSHIR-NEXT:             }, {
 // JSHIR-NEXT:             ^bb0:
 // JSHIR-NEXT:             }) : () -> ()
@@ -36,7 +36,7 @@
 // JSHIR-NEXT:       }) : () -> ()
 // JSHIR-NEXT:     }) : () -> ()
 // JSHIR-NEXT:     %0 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
-// JSHIR-NEXT:     %1 = "jsir.member_expression"(%0) <{literal_property = #jsir<identifier   <L 9 C 8>, <L 9 C 11>, "log", 105, 108, 0, "log">}> : (!jsir.any) -> !jsir.any
+// JSHIR-NEXT:     %1 = "jsir.member_expression"(%0) <{literal_property = #jsir<identifier <L 9 C 8>, <L 9 C 11>, "log", 105, 108, 0, "log">}> : (!jsir.any) -> !jsir.any
 // JSHIR-NEXT:     %2 = "jsir.identifier"() <{name = "x"}> : () -> !jsir.any
 // JSHIR-NEXT:     %3 = "jsir.call_expression"(%1, %2) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSHIR-NEXT:     "jsir.expression_statement"(%3) : (!jsir.any) -> ()
@@ -69,7 +69,7 @@
 // JSHIR-NEXT:               // State [default = <unknown>] { <x#0 : 1.000000e+00 : f64> }
 // JSHIR-NEXT:         })
 // JSHIR-NEXT:           // State [default = <unknown>] { <x#0 : 1.000000e+00 : f64> }
-// JSHIR-NEXT:         jshir.labeled_statement {#jsir<identifier   <L 2 C 0>, <L 2 C 8>, "my_label", 11, 19, 0, "my_label">} ({
+// JSHIR-NEXT:         jshir.labeled_statement {#jsir<identifier <L 2 C 0>, <L 2 C 8>, "my_label", 11, 19, 0, "my_label">} ({
 // JSHIR-NEXT:           ^bb0:
 // JSHIR-NEXT:               // <executable>
 // JSHIR-NEXT:               // State [default = <unknown>] { <x#0 : 1.000000e+00 : f64> }
@@ -118,7 +118,7 @@
 // JSHIR-NEXT:                           ^bb0:
 // JSHIR-NEXT:                               // <executable>
 // JSHIR-NEXT:                               // State [default = <unknown>] { <x#0 : 2.000000e+00 : f64> }
-// JSHIR-NEXT:                             jshir.break_statement {#jsir<identifier   <L 5 C 10>, <L 5 C 18>, "my_label", 72, 80, 4, "my_label">}
+// JSHIR-NEXT:                             jshir.break_statement {#jsir<identifier <L 5 C 10>, <L 5 C 18>, "my_label", 72, 80, 4, "my_label">}
 // JSHIR-NEXT:                               // State [default = <uninitialized>] { }
 // JSHIR-NEXT:                         }, {
 // JSHIR-NEXT:                           ^bb0:
@@ -152,7 +152,7 @@
 // JSHIR-NEXT:         %0 = jsir.identifier {"console"}
 // JSHIR-NEXT:           // %0 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <x#0 : 2.000000e+00 : f64> }
-// JSHIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier   <L 9 C 8>, <L 9 C 11>, "log", 105, 108, 0, "log">}
+// JSHIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 9 C 8>, <L 9 C 11>, "log", 105, 108, 0, "log">}
 // JSHIR-NEXT:           // %1 = <unknown>
 // JSHIR-NEXT:           // State [default = <unknown>] { <x#0 : 2.000000e+00 : f64> }
 // JSHIR-NEXT:         %2 = jsir.identifier {"x"}
