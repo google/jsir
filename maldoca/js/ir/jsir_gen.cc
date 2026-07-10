@@ -48,8 +48,8 @@
 static auto* kStringToPassKind =
     new absl::flat_hash_map<std::string, maldoca::JsirPassKind>{
         {"source2ast", maldoca::JsirPassKind::kSourceToAst},
-        {"ast2hir", maldoca::JsirPassKind::kAstToJshir},
-        {"hir2ast", maldoca::JsirPassKind::kJshirToAst},
+        {"ast2jsir", maldoca::JsirPassKind::kAstToJshir},
+        {"jsir2ast", maldoca::JsirPassKind::kJshirToAst},
         {"ast2source", maldoca::JsirPassKind::kAstToSource},
 
         {"erase_comments", maldoca::JsirPassKind::kEraseComments},

@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "output_file": "ast.json",
+      "passes": "source2ast",
+      "prefix": "AST"
+    },
+    {
+      "output_file": "jshir.mlir",
+      "passes": "source2ast,ast2jsir",
+      "prefix": "JSIR"
+    },
+    {
+      "output_file": "output.js",
+      "passes": "source2ast,ast2source",
+      "prefix": "SOURCE"
+    }
+  ],
+  "build_template": "BUILD.template.bzl",
+  "lit_template": "run.lit.template",
+  "generate_readme": false
+}

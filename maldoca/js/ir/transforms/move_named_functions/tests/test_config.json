@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {
+      "output_file": "output.generated.txt",
+      "passes": "source2ast,erase_comments,ast2jsir,movenamedfuncs,jsir2ast,ast2source",
+      "prefix": "SOURCE"
+    }
+  ],
+  "build_template": "BUILD.template"
+}
