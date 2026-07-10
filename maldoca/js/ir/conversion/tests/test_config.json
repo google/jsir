@@ -8,7 +8,7 @@
     {
       "output_file": "jshir.mlir",
       "passes": "source2ast,ast2hir",
-      "prefix": "JSHIR"
+      "prefix": "JSIR"
     },
     {
       "output_file": "output.js",

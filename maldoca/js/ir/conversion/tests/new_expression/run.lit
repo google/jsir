@@ -1,7 +1,7 @@
 // RUN: INPUT=%s && \
 // RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
 // RUN:     --passes "source2ast,ast2hir" \
-// RUN:   | FileCheck --check-prefix JSHIR "$(dirname "${INPUT}")"/jshir.mlir
+// RUN:   | FileCheck --check-prefix JSIR "$(dirname "${INPUT}")"/jshir.mlir
 
 // RUN: INPUT=%s && \
 // RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \

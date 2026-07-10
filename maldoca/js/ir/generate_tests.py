@@ -108,7 +108,7 @@ def get_extra_args(
 
 def get_check_command(test_config: TestConfig) -> str:
   output_file = test_config.output_file
-  prefix = test_config.prefix or "JSHIR"
+  prefix = test_config.prefix or "JSIR"
   if test_config.output_type == "analysis":
     return f'diff "$(dirname %s)"/{output_file} -'
   else:
