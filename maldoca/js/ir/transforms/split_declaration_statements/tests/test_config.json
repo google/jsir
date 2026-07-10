@@ -2,7 +2,7 @@
   "tests": [
     {
       "output_file": "output.generated.txt",
-      "passes": "source2ast,ast2hir,split_declaration_statements,hir2ast,ast2source",
+      "passes": "source2ast,ast2jsir,split_declaration_statements,jsir2ast,ast2source",
       "prefix": "SOURCE"
     }
   ],

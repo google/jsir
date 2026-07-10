@@ -132,7 +132,7 @@ Convert a JavaScript source file to JSHIR:
 ```shell
 bazelisk run //maldoca/js/ir:jsir_gen --\
     --input_file=$(pwd)/maldoca/js/ir/conversion/tests/if_statement/input.js \
-    --passes=source2ast,ast2hir
+    --passes=source2ast,ast2jsir
 ```
 
 ## Other links
