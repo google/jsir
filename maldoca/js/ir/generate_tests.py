@@ -5,10 +5,18 @@ and generates test outputs, READMEs, LIT files, and BUILD files based on
 `test_config.json` found in the scanned directory.
 
 Usage:
+  # Option 1: Direct Python
   python3 maldoca/js/ir/generate_tests.py <directory_to_scan>
+
+  # Option 2: Blaze build and execute binary
+  bazel build //maldoca/js/ir:generate_tests
+  ./bazel-bin/maldoca/js/ir/generate_tests <directory_to_scan>
 
 Example:
   python3 maldoca/js/ir/generate_tests.py maldoca/js/ir
+  # or
+  bazel build //maldoca/js/ir:generate_tests
+  ./bazel-bin/maldoca/js/ir/generate_tests maldoca/js/ir
 """
 
 import argparse
