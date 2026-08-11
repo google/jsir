@@ -1,4 +1,5 @@
 #include "maldoca/js/ir/analyses/per_var_state.h"
+#include <optional>
 
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "gtest/gtest.h"
@@ -11,7 +12,7 @@ TEST(PerVarStateTest, EraseDefaultOnSet) {
   auto exec_true = JsirExecutable(true);
   auto exec_false = JsirExecutable(false);
 
-  JsSymbolId my_var("my_var", 0);
+  JsSymbolId my_var("my_var", 0, std::nullopt);
 
   auto true_default = JsirPerVarState<JsirExecutable>(exec_true);
   EXPECT_TRUE(true_default.empty());
@@ -39,7 +40,7 @@ TEST(PerVarStateTest, EraseDefaultOnJoin) {
   auto exec_true = JsirExecutable(true);
   auto exec_false = JsirExecutable(false);
 
-  JsSymbolId my_var("my_var", 0);
+  JsSymbolId my_var("my_var", 0, std::nullopt);
 
   auto true_default_1 = JsirPerVarState<JsirExecutable>(exec_true);
   EXPECT_TRUE(true_default_1.empty());
@@ -64,7 +65,7 @@ TEST(PerVarStateTest, EraseDefaultOnJoinDifferent) {
   auto exec_true = JsirExecutable(true);
   auto exec_false = JsirExecutable(false);
 
-  JsSymbolId my_var("my_var", 0);
+  JsSymbolId my_var("my_var", 0, std::nullopt);
 
   auto true_default = JsirPerVarState<JsirExecutable>(exec_true);
   EXPECT_TRUE(true_default.empty());

@@ -221,7 +221,7 @@
 // SOURCE-NEXT: ================================================================
 // SOURCE-NEXT: Bindings:
 // SOURCE-NEXT: ================================================================
-// SOURCE-NEXT: object#0:
+// SOURCE-NEXT: object#s0:
 // SOURCE-NEXT:     /* 4 properties */ {
 // SOURCE-NEXT:         ["a"]: "a",
 // SOURCE-NEXT:         ["b"]: ("" + "b"),

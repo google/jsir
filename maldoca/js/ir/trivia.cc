@@ -47,7 +47,8 @@ JsirSymbolIdAttr GetJsirSymbolIdAttr(mlir::MLIRContext* context,
                                      const JsSymbolId& symbol_id) {
   return JsirSymbolIdAttr::get(context,
                                mlir::StringAttr::get(context, symbol_id.name()),
-                               symbol_id.def_scope_uid());
+                               symbol_id.def_scope_uid(),
+                               symbol_id.binding_uid());
 }
 
 }  // namespace
@@ -200,9 +201,9 @@ JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr) {
 
   std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol;
   if (JsirSymbolIdAttr mlir_referenced_symbol = attr.getReferencedSymbol()) {
-    referenced_symbol =
-        std::make_unique<JsSymbolId>(mlir_referenced_symbol.getName().str(),
-                                     mlir_referenced_symbol.getDefScopeId());
+    referenced_symbol = std::make_unique<JsSymbolId>(
+        mlir_referenced_symbol.getName().str(),
+        mlir_referenced_symbol.getDefScopeId(), std::nullopt);
   }
 
   std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols;
@@ -211,9 +212,9 @@ JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr) {
       !mlir_defined_symbols.empty()) {
     std::vector<std::unique_ptr<JsSymbolId>> defined_symbols_vec;
     for (JsirSymbolIdAttr mlir_defined_symbol : mlir_defined_symbols) {
-      defined_symbols_vec.push_back(
-          std::make_unique<JsSymbolId>(mlir_defined_symbol.getName().str(),
-                                       mlir_defined_symbol.getDefScopeId()));
+      defined_symbols_vec.push_back(std::make_unique<JsSymbolId>(
+          mlir_defined_symbol.getName().str(),
+          mlir_defined_symbol.getDefScopeId(), std::nullopt));
     }
     defined_symbols = std::move(defined_symbols_vec);
   }

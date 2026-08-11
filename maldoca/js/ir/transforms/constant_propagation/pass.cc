@@ -18,6 +18,7 @@
 #include "maldoca/js/ir/transforms/constant_propagation/pass.h"
 
 #include <cassert>
+#include <optional>
 #include <vector>
 
 #include "llvm/ADT/PostOrderIterator.h"
@@ -48,8 +49,8 @@ namespace maldoca {
 // lattice represents a constant. Returns success if the value was replaced,
 // failure otherwise.
 static mlir::LogicalResult ReplaceUsesWithConstant(
-    JsirDialect *jsir_dialect, JsirConstantPropagationAnalysis &analysis,
-    mlir::OpBuilder &builder, mlir::OperationFolder &folder,
+    JsirDialect* jsir_dialect, JsirConstantPropagationAnalysis& analysis,
+    mlir::OpBuilder& builder, mlir::OperationFolder& folder,
     mlir::Value value) {
   // If the value is not used, then there is no need to create a substitute
   // constant op.
@@ -74,11 +75,11 @@ static mlir::LogicalResult ReplaceUsesWithConstant(
   return mlir::success();
 }
 
-mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
-                                               const BabelScopes &scopes) {
+mlir::LogicalResult PerformConstantPropagation(mlir::Operation* op,
+                                               const BabelScopes& scopes) {
   mlir::DataFlowSolver solver;
 
-  auto *analysis = solver.load<JsirConstantPropagationAnalysis>(&scopes);
+  auto* analysis = solver.load<JsirConstantPropagationAnalysis>(&scopes);
 
   mlir::LogicalResult result = solver.initializeAndRun(op);
   if (mlir::failed(result)) {
@@ -89,9 +90,8 @@ mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
 }
 
 mlir::ChangeResult TransformInlineCall(
-    mlir::Operation *op, JsirConstantPropagationAnalysis &analysis,
-    mlir::OpBuilder &builder) {
-
+    mlir::Operation* op, JsirConstantPropagationAnalysis& analysis,
+    mlir::OpBuilder& builder) {
   // obj = {
   //   key: (a, b) => a(b)
   //                  ~~~~ inline_call_expr
@@ -139,10 +139,11 @@ mlir::ChangeResult TransformInlineCall(
     }
 
     JsSymbolId symbol_id{symbol_id_attr.getName().str(),
-                         symbol_id_attr.getDefScopeId()};
+                         symbol_id_attr.getDefScopeId(), std::nullopt};
 
     for (auto [idx, param] : llvm::enumerate(inline_func_expr.getParams())) {
-      JsSymbolId param_symbol_id(param.getName().str(), param.getDefScopeId());
+      JsSymbolId param_symbol_id(param.getName().str(), param.getDefScopeId(),
+                                 std::nullopt);
       if (symbol_id == param_symbol_id) {
         if (idx >= call_expr_op.getArguments().size()) {
           return nullptr;
@@ -175,9 +176,9 @@ mlir::ChangeResult TransformInlineCall(
 }
 
 mlir::LogicalResult PerformConstantPropagation(
-    mlir::Operation *op, JsirConstantPropagationAnalysis &analysis) {
-  mlir::MLIRContext *context = op->getContext();
-  auto *jsir_dialect = context->getLoadedDialect<JsirDialect>();
+    mlir::Operation* op, JsirConstantPropagationAnalysis& analysis) {
+  mlir::MLIRContext* context = op->getContext();
+  auto* jsir_dialect = context->getLoadedDialect<JsirDialect>();
 
   mlir::DominanceInfo dominance_info{op};
 
@@ -225,9 +226,9 @@ mlir::LogicalResult PerformConstantPropagation(
   // |   %r1 = %r0 + %r0   |  |    %r1 = %c400         |
   // |                     |  |          ~~~~~         |
   // +---------------------+  +------------------------+
-  llvm::SmallVector<mlir::Block *> worklist;
+  llvm::SmallVector<mlir::Block*> worklist;
   auto add_to_worklist = [&](mlir::MutableArrayRef<mlir::Region> regions) {
-    for (mlir::Region &region : regions) {
+    for (mlir::Region& region : regions) {
       switch (region.getBlocks().size()) {
         case 0:
           break;
@@ -235,9 +236,9 @@ mlir::LogicalResult PerformConstantPropagation(
           worklist.push_back(&region.front());
           break;
         default: {
-          auto &dom_tree = dominance_info.getDomTree(&region);
-          auto *dom_root_node = dom_tree.getRootNode();
-          for (auto *node : llvm::post_order(dom_root_node)) {
+          auto& dom_tree = dominance_info.getDomTree(&region);
+          auto* dom_root_node = dom_tree.getRootNode();
+          for (auto* node : llvm::post_order(dom_root_node)) {
             worklist.push_back(node->getBlock());
           }
         }
@@ -251,9 +252,9 @@ mlir::LogicalResult PerformConstantPropagation(
 
   add_to_worklist(op->getRegions());
   while (!worklist.empty()) {
-    mlir::Block *block = worklist.pop_back_val();
+    mlir::Block* block = worklist.pop_back_val();
 
-    for (mlir::Operation &op :
+    for (mlir::Operation& op :
          llvm::make_early_inc_range(llvm::reverse(*block))) {
       builder.setInsertionPoint(&op);
 

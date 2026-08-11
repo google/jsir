@@ -32,8 +32,13 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
   }
   const auto &scope = scope_it->second;
 
-  auto binding_it = scope.bindings().find(name);
-  if (binding_it != scope.bindings().end()) {
+  auto binding_it = scope.binding_uids().find(std::string(name));
+  if (binding_it != scope.binding_uids().end()) {
+    return use_scope_uid;
+  }
+
+  auto old_binding_it = scope.bindings().find(std::string(name));
+  if (old_binding_it != scope.bindings().end()) {
     return use_scope_uid;
   }
 
@@ -54,7 +59,25 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, int64_t use_scope_uid,
                        absl::string_view name) {
-  return JsSymbolId{std::string(name), FindSymbol(scopes, use_scope_uid, name)};
+  auto def_scope_uid = FindSymbol(scopes, use_scope_uid, name);
+  std::optional<int64_t> binding_uid = std::nullopt;
+  if (def_scope_uid.has_value()) {
+    auto scope_it = scopes.scopes().find(*def_scope_uid);
+    if (scope_it != scopes.scopes().end()) {
+      auto binding_it = scope_it->second.binding_uids().find(std::string(name));
+      if (binding_it != scope_it->second.binding_uids().end()) {
+        binding_uid = binding_it->second;
+      } else {
+        auto old_binding_it =
+            scope_it->second.bindings().find(std::string(name));
+        if (old_binding_it != scope_it->second.bindings().end() &&
+            old_binding_it->second.has_uid()) {
+          binding_uid = old_binding_it->second.uid();
+        }
+      }
+    }
+  }
+  return JsSymbolId{std::string(name), def_scope_uid, binding_uid};
 }
 
 }  // namespace maldoca
