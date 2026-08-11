@@ -98,7 +98,7 @@ class Type {
     return T::IsTheClassOf(*this);
   }
 
-  static bool IsTheClassOf(const Type &type) { return true; }
+  static bool IsTheClassOf(const Type& type) { return true; }
 
   TypeKind kind() const { return kind_; }
 
@@ -363,7 +363,7 @@ class Type {
 
 class NonListType : public Type {
  public:
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kBuiltin ||
            type.kind() == TypeKind::kEnum || type.kind() == TypeKind::kClass ||
            type.kind() == TypeKind::kVariant;
@@ -405,12 +405,12 @@ class ListType : public Type {
         element_type_(std::move(element_type)),
         element_maybe_null_(element_maybe_null) {}
 
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kList;
   }
 
-  const NonListType &element_type() const { return *element_type_; }
-  NonListType &element_type() { return *element_type_; }
+  const NonListType& element_type() const { return *element_type_; }
+  NonListType& element_type() { return *element_type_; }
 
   MaybeNull element_maybe_null() const { return element_maybe_null_; }
 
@@ -436,7 +436,7 @@ class ListType : public Type {
 // Scalar type: non-variant and non-list.
 class ScalarType : public NonListType {
  public:
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kBuiltin ||
            type.kind() == TypeKind::kEnum || type.kind() == TypeKind::kClass;
   }
@@ -458,7 +458,7 @@ class VariantType : public NonListType {
                        absl::string_view lang_name)
       : NonListType(TypeKind::kVariant, lang_name), types_(std::move(types)) {}
 
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kVariant;
   }
 
@@ -497,7 +497,7 @@ class BuiltinType : public ScalarType {
       : ScalarType(TypeKind::kBuiltin, lang_name),
         builtin_kind_(builtin_kind) {}
 
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kBuiltin;
   }
 
@@ -521,14 +521,14 @@ class BuiltinType : public ScalarType {
 // Represents an enum type defined elsewhere.
 class EnumType : public ScalarType {
  public:
-  explicit EnumType(const Symbol &name, absl::string_view lang_name)
+  explicit EnumType(const Symbol& name, absl::string_view lang_name)
       : ScalarType(TypeKind::kEnum, lang_name), name_(name) {}
 
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kEnum;
   }
 
-  const Symbol &name() const { return name_; }
+  const Symbol& name() const { return name_; }
 
   std::string JsType() const override;
 
@@ -552,14 +552,14 @@ class EnumType : public ScalarType {
 // Represents an AST node type defined elsewhere.
 class ClassType : public ScalarType {
  public:
-  explicit ClassType(const Symbol &name, absl::string_view lang_name)
+  explicit ClassType(const Symbol& name, absl::string_view lang_name)
       : ScalarType(TypeKind::kClass, lang_name), name_(name) {}
 
-  static bool IsTheClassOf(const Type &type) {
+  static bool IsTheClassOf(const Type& type) {
     return type.kind() == TypeKind::kClass;
   }
 
-  const Symbol &name() const { return name_; }
+  const Symbol& name() const { return name_; }
 
   std::string JsType() const override;
 
@@ -578,13 +578,13 @@ class ClassType : public ScalarType {
 
  private:
   Symbol name_;
-  const NodeDef *absl_nullable node_def_ = nullptr;
+  const NodeDef* absl_nullable node_def_ = nullptr;
 
   friend class AstDef;
 };
 
 // Converts from TypePb to Type.
-absl::StatusOr<std::unique_ptr<Type>> FromTypePb(const TypePb &pb,
+absl::StatusOr<std::unique_ptr<Type>> FromTypePb(const TypePb& pb,
                                                  absl::string_view lang_name);
 
 }  // namespace maldoca
