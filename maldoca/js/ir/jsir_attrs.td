@@ -264,7 +264,8 @@ def JsirSymbolIdAttr : AttrDef<Jsir_Dialect, "JsirSymbolId", []> {
   let mnemonic = "symbol_id";
   let parameters = (ins
     "::mlir::StringAttr": $name,
-    "std::optional<int64_t>": $def_scope_id
+    "std::optional<int64_t>": $def_scope_id,
+    "std::optional<int64_t>": $binding_uid
   );
   let assemblyFormat = "params";
 }

@@ -111,7 +111,8 @@ H AbslHashValue(H h, const JsSymbolId& m) {
 JsSymbolId GetSymbolIdFromAttr(JsirSymbolIdAttr symbol_attr) {
   std::string name = symbol_attr.getName().str();
   std::optional<int64_t> scope_uid = symbol_attr.getDefScopeId();
-  return JsSymbolId{name, scope_uid};
+  std::optional<int64_t> binding_uid = symbol_attr.getBindingUid();
+  return JsSymbolId{name, scope_uid, binding_uid};
 }
 
 void UnusedFunctionElimination(mlir::Operation* root_op) {

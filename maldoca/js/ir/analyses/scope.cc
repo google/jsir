@@ -45,7 +45,11 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
                        absl::string_view name) {
-  return JsSymbolId{std::string(name), FindSymbol(scopes, op, name)};
+  auto use_scope_uid = FindSymbol(scopes, op, name);
+  if (!use_scope_uid.has_value()) {
+    return JsSymbolId{std::string(name), std::nullopt, std::nullopt};
+  }
+  return GetSymbolId(scopes, *use_scope_uid, name);
 }
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op) {
@@ -68,7 +72,7 @@ JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr) {
   }();
 
   if (!use_scope_uid.has_value()) {
-    return JsSymbolId{std::string(name), std::nullopt};
+    return JsSymbolId{std::string(name), std::nullopt, std::nullopt};
   }
   return GetSymbolId(scopes, *use_scope_uid, name);
 }

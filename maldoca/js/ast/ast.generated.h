@@ -295,7 +295,8 @@ class JsSymbolId {
  public:
   explicit JsSymbolId(
       std::string name,
-      std::optional<int64_t> def_scope_uid);
+      std::optional<int64_t> def_scope_uid,
+      std::optional<int64_t> binding_uid);
 
   void Serialize(std::ostream& os) const;
 
@@ -307,6 +308,9 @@ class JsSymbolId {
   std::optional<int64_t> def_scope_uid() const;
   void set_def_scope_uid(std::optional<int64_t> def_scope_uid);
 
+  std::optional<int64_t> binding_uid() const;
+  void set_binding_uid(std::optional<int64_t> binding_uid);
+
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -317,10 +321,12 @@ class JsSymbolId {
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::string> GetName(const nlohmann::json& json);
   static absl::StatusOr<std::optional<int64_t>> GetDefScopeUid(const nlohmann::json& json);
+  static absl::StatusOr<std::optional<int64_t>> GetBindingUid(const nlohmann::json& json);
 
  private:
   std::string name_;
   std::optional<int64_t> def_scope_uid_;
+  std::optional<int64_t> binding_uid_;
 };
 
 enum class JsNodeType {
