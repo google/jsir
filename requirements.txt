@@ -4,3 +4,6 @@
 #
 #    pip-compile requirements.in
 #
+tqdm==4.67.1
+    # via -r requirements.in
+
