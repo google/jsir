@@ -193,10 +193,10 @@ void JsirConstantPropagationAnalysis::VisitOpDefault(
 
     // Merge in the result of the fold, either a constant or a value.
     mlir::OpFoldResult fold_result = std::get<1>(it);
-    if (auto attr = fold_result.dyn_cast<mlir::Attribute>()) {
+    if (auto attr = llvm::dyn_cast<mlir::Attribute>(fold_result)) {
       result.Join(JsirConstantPropagationValue{attr});
     } else {
-      auto result_value = fold_result.get<mlir::Value>();
+      auto result_value = llvm::cast<mlir::Value>(fold_result);
       auto result_state_ref = GetStateAt(result_value);
       result.Join(result_state_ref.value());
     }
