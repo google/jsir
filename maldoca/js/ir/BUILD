@@ -15,6 +15,7 @@
 load("@llvm-project//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_python//python:defs.bzl", "py_binary")
 load("//maldoca/js:allowed_users.bzl", "JSIR_ALLOWED_USERS")
 
 licenses(["notice"])
@@ -376,5 +377,16 @@ filegroup(
         "//maldoca/js/ir:jsir_gen",
         "//maldoca/js/ir:lit.cfg.py",
         "@llvm-project//llvm:FileCheck",
+    ],
+)
+
+py_binary(
+    name = "generate_tests",
+    srcs = ["generate_tests.py"],
+    data = [
+        ":jsir_gen",
+    ],
+    deps = [
+        "@pypi//tqdm",
     ],
 )
