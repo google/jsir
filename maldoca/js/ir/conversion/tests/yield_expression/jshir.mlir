@@ -20,3 +20,4 @@
 // JSIR-NEXT:   ^bb0:
 // JSIR-NEXT:   }) : () -> ()
 // JSIR-NEXT: }) : () -> ()
+
