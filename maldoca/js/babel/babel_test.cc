@@ -92,12 +92,21 @@ TEST_P(BabelTest, ParseVarDef) {
                   key: 0
                   value {
                     uid: 0
-                    bindings {
+                    binding_uids {
                       key: "a"
-                      value { kind: KIND_VAR name: "a" }
+                      value: 0
                     }
                   }
-                })pb"));
+                }
+                bindings {
+                  key: 0
+                  value {
+                    kind: KIND_VAR
+                    name: "a"
+                    uid: 0
+                  }
+                }
+              )pb"));
 }
 
 TEST_P(BabelTest, ParseUndefinedVar) {
@@ -114,12 +123,21 @@ TEST_P(BabelTest, ParseUndefinedVar) {
                   key: 0
                   value {
                     uid: 0
-                    bindings {
+                    binding_uids {
                       key: "c"
-                      value { kind: KIND_LET name: "c" }
+                      value: 0
                     }
                   }
-                })pb"));
+                }
+                bindings {
+                  key: 0
+                  value {
+                    kind: KIND_LET
+                    name: "c"
+                    uid: 0
+                  }
+                }
+              )pb"));
 }
 
 
@@ -139,13 +157,13 @@ TEST_P(BabelTest, ParseFunc) {
                   key: 0
                   value {
                     uid: 0
-                    bindings {
+                    binding_uids {
                       key: "bar_0"
-                      value { kind: KIND_HOISTED name: "bar_0" }
+                      value: 1
                     }
-                    bindings {
+                    binding_uids {
                       key: "foo_0"
-                      value { kind: KIND_HOISTED name: "foo_0" }
+                      value: 0
                     }
                   }
                 }
@@ -154,13 +172,13 @@ TEST_P(BabelTest, ParseFunc) {
                   value {
                     uid: 1
                     parent_uid: 0
-                    bindings {
+                    binding_uids {
                       key: "arg_1"
-                      value { kind: KIND_PARAM name: "arg_1" }
+                      value: 2
                     }
-                    bindings {
+                    binding_uids {
                       key: "local_1"
-                      value { kind: KIND_LET name: "local_1" }
+                      value: 3
                     }
                   }
                 }
@@ -169,10 +187,50 @@ TEST_P(BabelTest, ParseFunc) {
                   value {
                     uid: 2
                     parent_uid: 0
-                    bindings {
+                    binding_uids {
                       key: "arg_2"
-                      value { kind: KIND_PARAM name: "arg_2" }
+                      value: 4
                     }
+                  }
+                }
+                bindings {
+                  key: 0
+                  value {
+                    kind: KIND_HOISTED
+                    name: "foo_0"
+                    uid: 0
+                  }
+                }
+                bindings {
+                  key: 1
+                  value {
+                    kind: KIND_HOISTED
+                    name: "bar_0"
+                    uid: 1
+                  }
+                }
+                bindings {
+                  key: 2
+                  value {
+                    kind: KIND_PARAM
+                    name: "arg_1"
+                    uid: 2
+                  }
+                }
+                bindings {
+                  key: 3
+                  value {
+                    kind: KIND_LET
+                    name: "local_1"
+                    uid: 3
+                  }
+                }
+                bindings {
+                  key: 4
+                  value {
+                    kind: KIND_PARAM
+                    name: "arg_2"
+                    uid: 4
                   }
                 }
               )pb"));

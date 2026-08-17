@@ -146,10 +146,6 @@ std::optional<QjsValue> DynamicPrelude::GetFunction(absl::string_view name) {
 }
 
 std::optional<QjsValue> DynamicPrelude::GetFunction(JsSymbolId symbol_id) {
-  if (symbol_id.def_scope_uid() != extracted_from_scope_uid_) {
-    return std::nullopt;
-  }
-
   return GetFunction(symbol_id.name());
 }
 

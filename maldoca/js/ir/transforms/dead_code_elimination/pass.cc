@@ -31,6 +31,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/log.h"
 #include "maldoca/js/ast/ast.generated.h"
+#include "maldoca/js/babel/scope.h"
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/jsir_utils.h"
 
@@ -98,20 +99,10 @@ struct SymbolInfo {
   std::vector<JsSymbolId> outer_definitions;
 };
 
-bool operator==(const JsSymbolId& lhs, const JsSymbolId& rhs) {
-  return std::forward_as_tuple(lhs.name(), lhs.def_scope_uid()) ==
-         std::forward_as_tuple(rhs.name(), rhs.def_scope_uid());
-}
-
-template <typename H>
-H AbslHashValue(H h, const JsSymbolId& m) {
-  return H::combine(std::move(h), m.name(), m.def_scope_uid());
-}
-
 JsSymbolId GetSymbolIdFromAttr(JsirSymbolIdAttr symbol_attr) {
   std::string name = symbol_attr.getName().str();
-  std::optional<int64_t> scope_uid = symbol_attr.getDefScopeId();
-  return JsSymbolId{name, scope_uid};
+  std::optional<int64_t> binding_uid = symbol_attr.getBindingUid();
+  return JsSymbolId{name, binding_uid};
 }
 
 void UnusedFunctionElimination(mlir::Operation* root_op) {

@@ -73,7 +73,7 @@ class JsirDynamicConstantPropagationAnalysis
       const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings);
 
   std::optional<mlir::Attribute> EvalIdentifier(
-      mlir::StringAttr name, std::optional<int64_t> def_scope_id,
+      mlir::StringAttr name, std::optional<int64_t> binding_uid,
       const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings);
 
   std::optional<mlir::Attribute> EvalCallExpression(

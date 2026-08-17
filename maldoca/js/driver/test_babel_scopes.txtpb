@@ -5,9 +5,17 @@ scopes {
   key: 0
   value {
     uid: 0
-    bindings {
+    binding_uids {
       key: "x"
-      value { kind: KIND_VAR name: "x" }
+      value: 0
     }
+  }
+}
+bindings {
+  key: 0
+  value {
+    kind: KIND_VAR
+    name: "x"
+    uid: 0
   }
 }
