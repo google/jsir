@@ -64,11 +64,11 @@
 // AST-NEXT:             "definedSymbols": [
 // AST-NEXT:               {
 // AST-NEXT:                 "name": "a",
-// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:                 "bindingUid": 0
 // AST-NEXT:               },
 // AST-NEXT:               {
 // AST-NEXT:                 "name": "b",
-// AST-NEXT:                 "defScopeUid": 0
+// AST-NEXT:                 "bindingUid": 1
 // AST-NEXT:               }
 // AST-NEXT:             ],
 // AST-NEXT:             "id": {

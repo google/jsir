@@ -81,7 +81,7 @@
 // AST-NEXT:               "definedSymbols": [
 // AST-NEXT:                 {
 // AST-NEXT:                   "name": "x",
-// AST-NEXT:                   "defScopeUid": 1
+// AST-NEXT:                   "bindingUid": 0
 // AST-NEXT:                 }
 // AST-NEXT:               ],
 // AST-NEXT:               "name": "x"
@@ -160,7 +160,7 @@
 // AST-NEXT:               "definedSymbols": [
 // AST-NEXT:                 {
 // AST-NEXT:                   "name": "x",
-// AST-NEXT:                   "defScopeUid": 2
+// AST-NEXT:                   "bindingUid": 1
 // AST-NEXT:                 }
 // AST-NEXT:               ],
 // AST-NEXT:               "name": "x"

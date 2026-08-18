@@ -231,7 +231,7 @@
 // AST-NEXT:         "scopeUid": 0,
 // AST-NEXT:         "referencedSymbol": {
 // AST-NEXT:           "name": "identifier_2",
-// AST-NEXT:           "defScopeUid": 0
+// AST-NEXT:           "bindingUid": 0
 // AST-NEXT:         },
 // AST-NEXT:         "declaration": {
 // AST-NEXT:           "type": "VariableDeclaration",
@@ -267,7 +267,7 @@
 // AST-NEXT:               "definedSymbols": [
 // AST-NEXT:                 {
 // AST-NEXT:                   "name": "identifier_2",
-// AST-NEXT:                   "defScopeUid": 0
+// AST-NEXT:                   "bindingUid": 0
 // AST-NEXT:                 }
 // AST-NEXT:               ],
 // AST-NEXT:               "id": {

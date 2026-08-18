@@ -161,9 +161,9 @@ void JsCommentLine::Serialize(std::ostream& os) const {
 void JsSymbolId::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
   os << "\"name\":" << (nlohmann::json(name_)).dump();
-  if (def_scope_uid_.has_value()) {
+  if (binding_uid_.has_value()) {
     MaybeAddComma(os, needs_comma);
-    os << "\"defScopeUid\":" << (nlohmann::json(def_scope_uid_.value())).dump();
+    os << "\"bindingUid\":" << (nlohmann::json(binding_uid_.value())).dump();
   }
 }
 

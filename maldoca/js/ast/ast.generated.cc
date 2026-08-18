@@ -467,9 +467,9 @@ JsCommentLine::JsCommentLine(
 
 JsSymbolId::JsSymbolId(
     std::string name,
-    std::optional<int64_t> def_scope_uid)
+    std::optional<int64_t> binding_uid)
     : name_(std::move(name)),
-      def_scope_uid_(std::move(def_scope_uid)) {}
+      binding_uid_(std::move(binding_uid)) {}
 
 absl::string_view JsSymbolId::name() const {
   return name_;
@@ -479,16 +479,16 @@ void JsSymbolId::set_name(std::string name) {
   name_ = std::move(name);
 }
 
-std::optional<int64_t> JsSymbolId::def_scope_uid() const {
-  if (!def_scope_uid_.has_value()) {
+std::optional<int64_t> JsSymbolId::binding_uid() const {
+  if (!binding_uid_.has_value()) {
     return std::nullopt;
   } else {
-    return def_scope_uid_.value();
+    return binding_uid_.value();
   }
 }
 
-void JsSymbolId::set_def_scope_uid(std::optional<int64_t> def_scope_uid) {
-  def_scope_uid_ = std::move(def_scope_uid);
+void JsSymbolId::set_binding_uid(std::optional<int64_t> binding_uid) {
+  binding_uid_ = std::move(binding_uid);
 }
 
 // =============================================================================

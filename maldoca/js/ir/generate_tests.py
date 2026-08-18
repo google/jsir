@@ -37,8 +37,9 @@ def run_command(cmd: str) -> bytes:
     return subprocess.check_output(cmd, shell=True, stderr=subprocess.PIPE)
   except subprocess.CalledProcessError as e:
     tqdm.write(
-        "Error running command, output:"
-        f" {e.output.decode('utf-8', errors='replace')}"
+        f"Error running command: {cmd}\n"
+        f"stdout: {e.output.decode('utf-8', errors='replace')}\n"
+        f"stderr: {e.stderr.decode('utf-8', errors='replace')}"
     )
     sys.exit(1)
 

@@ -204,14 +204,18 @@ message BabelBinding {
 
   optional Kind kind = 1;
   optional string name = 2;
+  optional int32 uid = 3;
 }
 
 message BabelScope {
   optional int32 uid = 1;
   optional int32 parent_uid = 2;
-  map<string, BabelBinding> bindings = 3;
+  // Deprecated: use binding_uids instead.
+  map<string, BabelBinding> bindings = 3 [deprecated = true];
+  map<string, int32> binding_uids = 4;
 }
 
 message BabelScopes {
   map<int32, BabelScope> scopes = 1;
+  map<int32, BabelBinding> bindings = 2;
 }
