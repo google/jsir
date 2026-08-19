@@ -48,9 +48,9 @@ struct ToJsSourceRepr {
       const JsAstRepr &ast_repr, BabelGenerateOptions generate_options,
       absl::Duration timeout, Babel &babel);
 
-  static absl::StatusOr<JsSourceRepr> FromJsHirRepr(
-      const JsHirRepr &hir_repr, BabelGenerateOptions generate_options,
-      absl::Duration timeout, Babel &babel);
+  static absl::StatusOr<JsSourceRepr> FromJsirRepr(
+      const JsirRepr& ir_repr, BabelGenerateOptions generate_options,
+      absl::Duration timeout, Babel& babel);
 };
 
 struct ToJsAstStringRepr {
@@ -61,8 +61,7 @@ struct ToJsAstStringRepr {
   static absl::StatusOr<JsAstStringRepr> FromJsAstRepr(
       const JsAstRepr &ast_repr);
 
-  static absl::StatusOr<JsAstStringRepr> FromJsHirRepr(
-      const JsHirRepr &hir_repr);
+  static absl::StatusOr<JsAstStringRepr> FromJsirRepr(const JsirRepr& ir_repr);
 };
 
 struct ToJsAstRepr {
@@ -75,23 +74,22 @@ struct ToJsAstRepr {
       const JsAstStringRepr &ast_string_repr,
       std::optional<int> recursion_depth_limit);
 
-  static absl::StatusOr<JsAstRepr> FromJsHirRepr(const JsHirRepr &hir_repr);
+  static absl::StatusOr<JsAstRepr> FromJsirRepr(const JsirRepr& ir_repr);
 };
 
-struct ToJsHirRepr {
-  static absl::StatusOr<JsHirRepr> FromJsSourceRepr(
-      const JsSourceRepr &source_repr, BabelParseRequest parse_request,
+struct ToJsirRepr {
+  static absl::StatusOr<JsirRepr> FromJsSourceRepr(
+      const JsSourceRepr& source_repr, BabelParseRequest parse_request,
       absl::Duration timeout, std::optional<int> recursion_depth_limit,
-      Babel &babel, mlir::MLIRContext &mlir_context);
+      Babel& babel, mlir::MLIRContext& mlir_context);
 
-  static absl::StatusOr<JsHirRepr> FromJsAstStringRepr(
-      const JsAstStringRepr &ast_string_repr,
+  static absl::StatusOr<JsirRepr> FromJsAstStringRepr(
+      const JsAstStringRepr& ast_string_repr,
       std::optional<int> recursion_depth_limit,
-      mlir::MLIRContext &mlir_context);
+      mlir::MLIRContext& mlir_context);
 
-  static absl::StatusOr<JsHirRepr> FromJsAstRepr(
-      const JsAstRepr &ast_repr,
-      mlir::MLIRContext &mlir_context);
+  static absl::StatusOr<JsirRepr> FromJsAstRepr(
+      const JsAstRepr& ast_repr, mlir::MLIRContext& mlir_context);
 };
 
 }  // namespace maldoca
