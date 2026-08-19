@@ -23,29 +23,18 @@ package(
     ],
 )
 
+# Pass class merged into constant_propagation. This target remains for
+# PerformDynamicConstantPropagation declarations used by tests.
 cc_library(
     name = "pass",
-    srcs = ["pass.cc"],
     hdrs = ["pass.h"],
     deps = [
         "//maldoca/js/babel",
-        "//maldoca/js/babel:scope",
-        "//maldoca/js/ir",
-        "//maldoca/js/ir/analyses:dataflow_analysis",
-        "//maldoca/js/ir/analyses/constant_propagation:analysis",
         "//maldoca/js/ir/analyses/dynamic_constant_propagation:analysis",
-        "//maldoca/js/ir/analyses/dynamic_constant_propagation:attrs",
         "//maldoca/js/ir/analyses/dynamic_constant_propagation:dynamic_prelude",
         "//maldoca/js/ir/transforms/constant_propagation:pass",
         "@abseil-cpp//absl/base:nullability",
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
-        "@llvm-project//llvm:Support",
-        "@llvm-project//mlir:Analysis",
         "@llvm-project//mlir:IR",
-        "@llvm-project//mlir:Pass",
         "@llvm-project//mlir:Support",
-        "@llvm-project//mlir:TransformUtils",
     ],
 )
