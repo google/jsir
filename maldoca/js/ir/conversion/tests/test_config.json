@@ -6,7 +6,7 @@
       "prefix": "AST"
     },
     {
-      "output_file": "jshir.mlir",
+      "output_file": "jsir.mlir",
       "passes": "source2ast,ast2jsir",
       "prefix": "JSIR"
     },

@@ -23,7 +23,7 @@ filegroup(
     srcs = [
         "ast.json",
         "input.js",
-        "jshir.mlir",
+        "jsir.mlir",
         "output.js",
     ],
     tags = ["ignore_srcs"],
