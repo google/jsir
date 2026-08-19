@@ -1798,6 +1798,24 @@ JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
       std::move(static_));
 }
 
+absl::StatusOr<std::unique_ptr<JsStaticBlock>>
+JsirToAst::VisitStaticBlock(JsirStaticBlockOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitStatement)
+              )
+          )
+      )
+  );
+  return Create<JsStaticBlock>(
+      op,
+      std::move(body));
+}
+
 absl::StatusOr<std::unique_ptr<JsClassBody>>
 JsirToAst::VisitClassBody(JsirClassBodyOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -1810,7 +1828,8 @@ JsirToAst::VisitClassBody(JsirClassBodyOp op) {
                       ToOpConverter(VisitClassMethod),
                       ToOpConverter(VisitClassPrivateMethod),
                       ToOpConverter(VisitClassProperty),
-                      ToOpConverter(VisitClassPrivateProperty)
+                      ToOpConverter(VisitClassPrivateProperty),
+                      ToOpConverter(VisitStaticBlock)
                   )
               )
           )

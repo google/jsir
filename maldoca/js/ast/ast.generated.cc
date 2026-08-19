@@ -649,6 +649,8 @@ absl::string_view JsNodeTypeToString(JsNodeType node_type) {
       return "ClassProperty";
     case JsNodeType::kClassPrivateProperty:
       return "ClassPrivateProperty";
+    case JsNodeType::kStaticBlock:
+      return "StaticBlock";
     case JsNodeType::kImportDeclaration:
       return "ImportDeclaration";
     case JsNodeType::kExportNamedDeclaration:
@@ -748,6 +750,7 @@ absl::StatusOr<JsNodeType> StringToJsNodeType(absl::string_view s) {
       {"ClassBody", JsNodeType::kClassBody},
       {"ClassProperty", JsNodeType::kClassProperty},
       {"ClassPrivateProperty", JsNodeType::kClassPrivateProperty},
+      {"StaticBlock", JsNodeType::kStaticBlock},
       {"ImportDeclaration", JsNodeType::kImportDeclaration},
       {"ExportNamedDeclaration", JsNodeType::kExportNamedDeclaration},
       {"ExportDefaultDeclaration", JsNodeType::kExportDefaultDeclaration},
@@ -4775,6 +4778,36 @@ void JsClassPrivateProperty::set_static_(bool static_) {
 }
 
 // =============================================================================
+// JsStaticBlock
+// =============================================================================
+
+JsStaticBlock::JsStaticBlock(
+    std::optional<std::unique_ptr<JsSourceLocation>> loc,
+    std::optional<int64_t> start,
+    std::optional<int64_t> end,
+    std::optional<std::vector<int64_t>> leading_comment_uids,
+    std::optional<std::vector<int64_t>> trailing_comment_uids,
+    std::optional<std::vector<int64_t>> inner_comment_uids,
+    std::optional<int64_t> scope_uid,
+    std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::vector<std::unique_ptr<JsStatement>> body)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+      body_(std::move(body)) {}
+
+std::vector<std::unique_ptr<JsStatement>>* JsStaticBlock::body() {
+  return &body_;
+}
+
+const std::vector<std::unique_ptr<JsStatement>>* JsStaticBlock::body() const {
+  return &body_;
+}
+
+void JsStaticBlock::set_body(std::vector<std::unique_ptr<JsStatement>> body) {
+  body_ = std::move(body);
+}
+
+// =============================================================================
 // JsClassBody
 // =============================================================================
 
@@ -4788,19 +4821,19 @@ JsClassBody::JsClassBody(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-    std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body)
+    std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body)
     : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
       body_(std::move(body)) {}
 
-std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>* JsClassBody::body() {
+std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>* JsClassBody::body() {
   return &body_;
 }
 
-const std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>* JsClassBody::body() const {
+const std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>* JsClassBody::body() const {
   return &body_;
 }
 
-void JsClassBody::set_body(std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body) {
+void JsClassBody::set_body(std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body) {
   body_ = std::move(body);
 }
 

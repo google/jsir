@@ -1066,6 +1066,17 @@ JsirClassPrivatePropertyOp AstToJsir::VisitClassPrivateProperty(mlir::OpBuilder 
   return op;
 }
 
+JsirStaticBlockOp AstToJsir::VisitStaticBlock(mlir::OpBuilder &builder, const JsStaticBlock *node) {
+  auto op = CreateStmt<JsirStaticBlockOp>(builder, node);
+  mlir::Region &mlir_body_region = op.getBody();
+  AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
+    for (const auto &element : *node->body()) {
+      VisitStatement(builder, element.get());
+    }
+  });
+  return op;
+}
+
 JsirClassBodyOp AstToJsir::VisitClassBody(mlir::OpBuilder &builder, const JsClassBody *node) {
   auto op = CreateStmt<JsirClassBodyOp>(builder, node);
   mlir::Region &mlir_body_region = op.getBody();
@@ -1086,6 +1097,10 @@ JsirClassBodyOp AstToJsir::VisitClassBody(mlir::OpBuilder &builder, const JsClas
         }
         case 3: {
           VisitClassPrivateProperty(builder, std::get<3>(element).get());
+          break;
+        }
+        case 4: {
+          VisitStaticBlock(builder, std::get<4>(element).get());
           break;
         }
         default:

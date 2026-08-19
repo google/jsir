@@ -533,6 +533,8 @@ JsNode::FromJson(const nlohmann::json& json) {
     return JsClassProperty::FromJson(json);
   } else if (type == "ClassPrivateProperty") {
     return JsClassPrivateProperty::FromJson(json);
+  } else if (type == "StaticBlock") {
+    return JsStaticBlock::FromJson(json);
   } else if (type == "ImportDeclaration") {
     return JsImportDeclaration::FromJson(json);
   } else if (type == "ExportNamedDeclaration") {
@@ -5620,15 +5622,76 @@ JsClassPrivateProperty::FromJson(const nlohmann::json& json) {
 }
 
 // =============================================================================
+// JsStaticBlock
+// =============================================================================
+
+static bool IsStaticBlock(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return false;
+  }
+  auto type_it = json.find("type");
+  if (type_it == json.end()) {
+    return false;
+  }
+  const nlohmann::json &type_json = type_it.value();
+  if (!type_json.is_string()) {
+    return false;
+  }
+  const std::string &type = type_json.get<std::string>();
+  return type == "StaticBlock";
+}
+
+absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>>
+JsStaticBlock::GetBody(const nlohmann::json& json) {
+  return GetRequiredField<std::vector<std::unique_ptr<JsStatement>>>(
+      json,
+      "body",
+      List<std::unique_ptr<JsStatement>>(
+          JsStatement::FromJson
+      )
+  );
+}
+
+absl::StatusOr<std::unique_ptr<JsStaticBlock>>
+JsStaticBlock::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto body, JsStaticBlock::GetBody(json));
+
+  return absl::make_unique<JsStaticBlock>(
+      std::move(loc),
+      std::move(start),
+      std::move(end),
+      std::move(leading_comment_uids),
+      std::move(trailing_comment_uids),
+      std::move(inner_comment_uids),
+      std::move(scope_uid),
+      std::move(referenced_symbol),
+      std::move(defined_symbols),
+      std::move(body));
+}
+
+// =============================================================================
 // JsClassBody
 // =============================================================================
 
-absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>>
+absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>>
 JsClassBody::GetBody(const nlohmann::json& json) {
-  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>>(
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>>(
       json,
       "body",
-      List<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>(
+      List<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>(
           Variant(
               VariantOption<std::unique_ptr<JsClassMethod>>{
                   .predicate = IsClassMethod,
@@ -5645,6 +5708,10 @@ JsClassBody::GetBody(const nlohmann::json& json) {
               VariantOption<std::unique_ptr<JsClassPrivateProperty>>{
                   .predicate = IsClassPrivateProperty,
                   .converter = JsClassPrivateProperty::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsStaticBlock>>{
+                  .predicate = IsStaticBlock,
+                  .converter = JsStaticBlock::FromJson,
               })
       )
   );

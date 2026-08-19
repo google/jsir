@@ -1223,6 +1223,20 @@ class JsAstWalker : public JsAstVisitor<void> {
     }
   }
 
+  void VisitStaticBlock(const JsStaticBlock &static_block) override {
+    if (preorder_callback_) {
+      preorder_callback_->VisitStaticBlock(static_block);
+    }
+
+    for (const std::unique_ptr<JsStatement> &statement : *static_block.body()) {
+      VisitStatement(*statement);
+    }
+
+    if (postorder_callback_) {
+      postorder_callback_->VisitStaticBlock(static_block);
+    }
+  }
+
   void VisitClassBody(const JsClassBody &class_body) override {
     if (preorder_callback_) {
       preorder_callback_->VisitClassBody(class_body);
@@ -1231,7 +1245,8 @@ class JsAstWalker : public JsAstVisitor<void> {
     for (const std::variant<std::unique_ptr<JsClassMethod>,
                             std::unique_ptr<JsClassPrivateMethod>,
                             std::unique_ptr<JsClassProperty>,
-                            std::unique_ptr<JsClassPrivateProperty>>
+                            std::unique_ptr<JsClassPrivateProperty>,
+                            std::unique_ptr<JsStaticBlock>>
              &body_element : *class_body.body()) {
       switch (body_element.index()) {
         case 0:
@@ -1245,6 +1260,9 @@ class JsAstWalker : public JsAstVisitor<void> {
           break;
         case 3:
           VisitClassPrivateProperty(*std::get<3>(body_element));
+          break;
+        case 4:
+          VisitStaticBlock(*std::get<4>(body_element));
           break;
         default:
           LOG(FATAL) << "Unreachable code.";
@@ -2702,6 +2720,20 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
     }
   }
 
+  void VisitStaticBlock(JsStaticBlock &static_block) override {
+    if (preorder_callback_) {
+      preorder_callback_->VisitStaticBlock(static_block);
+    }
+
+    for (std::unique_ptr<JsStatement> &statement : *static_block.body()) {
+      VisitStatement(*statement);
+    }
+
+    if (postorder_callback_) {
+      postorder_callback_->VisitStaticBlock(static_block);
+    }
+  }
+
   void VisitClassBody(JsClassBody &class_body) override {
     if (preorder_callback_) {
       preorder_callback_->VisitClassBody(class_body);
@@ -2710,7 +2742,8 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
     for (std::variant<std::unique_ptr<JsClassMethod>,
                       std::unique_ptr<JsClassPrivateMethod>,
                       std::unique_ptr<JsClassProperty>,
-                      std::unique_ptr<JsClassPrivateProperty>> &body_element :
+                      std::unique_ptr<JsClassPrivateProperty>,
+                      std::unique_ptr<JsStaticBlock>> &body_element :
          *class_body.body()) {
       switch (body_element.index()) {
         case 0:
@@ -2724,6 +2757,9 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           break;
         case 3:
           VisitClassPrivateProperty(*std::get<3>(body_element));
+          break;
+        case 4:
+          VisitStaticBlock(*std::get<4>(body_element));
           break;
         default:
           LOG(FATAL) << "Unreachable code.";

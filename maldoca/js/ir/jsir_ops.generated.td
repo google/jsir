@@ -895,6 +895,15 @@ def JsirClassPrivatePropertyOp : Jsir_Op<
   );
 }
 
+def JsirStaticBlockOp : Jsir_Op<
+    "static_block", [
+        NoTerminator
+    ]> {
+  let regions = (region
+    StmtsRegion: $body
+  );
+}
+
 def JsirClassBodyOp : Jsir_Op<
     "class_body", [
         NoTerminator

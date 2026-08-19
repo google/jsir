@@ -400,6 +400,7 @@ enum class JsNodeType {
   kClassBody,
   kClassProperty,
   kClassPrivateProperty,
+  kStaticBlock,
   kImportDeclaration,
   kExportNamedDeclaration,
   kExportDefaultDeclaration,
@@ -4240,6 +4241,46 @@ class JsClassPrivateProperty : public virtual JsNode {
   bool static__;
 };
 
+class JsStaticBlock : public virtual JsNode {
+ public:
+  explicit JsStaticBlock(
+      std::optional<std::unique_ptr<JsSourceLocation>> loc,
+      std::optional<int64_t> start,
+      std::optional<int64_t> end,
+      std::optional<std::vector<int64_t>> leading_comment_uids,
+      std::optional<std::vector<int64_t>> trailing_comment_uids,
+      std::optional<std::vector<int64_t>> inner_comment_uids,
+      std::optional<int64_t> scope_uid,
+      std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::vector<std::unique_ptr<JsStatement>> body);
+
+  JsNodeType node_type() const override {
+    return JsNodeType::kStaticBlock;
+  }
+
+  void Serialize(std::ostream& os) const override;
+
+  static absl::StatusOr<std::unique_ptr<JsStaticBlock>> FromJson(const nlohmann::json& json);
+
+  std::vector<std::unique_ptr<JsStatement>>* body();
+  const std::vector<std::unique_ptr<JsStatement>>* body() const;
+  void set_body(std::vector<std::unique_ptr<JsStatement>> body);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+
+  // Internal functions used by FromJson().
+  // Extracts a field from a JSON object.
+  static absl::StatusOr<std::vector<std::unique_ptr<JsStatement>>> GetBody(const nlohmann::json& json);
+
+ private:
+  std::vector<std::unique_ptr<JsStatement>> body_;
+};
+
 class JsClassBody : public virtual JsNode {
  public:
   explicit JsClassBody(
@@ -4252,7 +4293,7 @@ class JsClassBody : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-      std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body);
+      std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body);
 
   JsNodeType node_type() const override {
     return JsNodeType::kClassBody;
@@ -4262,9 +4303,9 @@ class JsClassBody : public virtual JsNode {
 
   static absl::StatusOr<std::unique_ptr<JsClassBody>> FromJson(const nlohmann::json& json);
 
-  std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>* body();
-  const std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>* body() const;
-  void set_body(std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body);
+  std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>* body();
+  const std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>* body() const;
+  void set_body(std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body);
 
  protected:
   // Internal function used by Serialize().
@@ -4274,10 +4315,10 @@ class JsClassBody : public virtual JsNode {
 
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
-  static absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>>> GetBody(const nlohmann::json& json);
+  static absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>> GetBody(const nlohmann::json& json);
 
  private:
-  std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>>> body_;
+  std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body_;
 };
 
 class JsClass : public virtual JsNode {

@@ -299,6 +299,8 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
   virtual R VisitClassPrivateProperty(
       const JsClassPrivateProperty &class_private_property) = 0;
 
+  virtual R VisitStaticBlock(const JsStaticBlock &static_block) = 0;
+
   virtual R VisitClassBody(const JsClassBody &class_body) = 0;
 
   virtual R VisitClassDeclaration(
@@ -722,6 +724,8 @@ class MutableJsAstVisitor {
 
   virtual R VisitClassPrivateProperty(
       JsClassPrivateProperty &class_private_property) = 0;
+
+  virtual R VisitStaticBlock(JsStaticBlock &static_block) = 0;
 
   virtual R VisitClassBody(JsClassBody &class_body) = 0;
 
@@ -1201,6 +1205,8 @@ class EmptyJsAstVisitor : public JsAstVisitor<void> {
   void VisitClassPrivateProperty(
       const JsClassPrivateProperty &class_private_property) override {}
 
+  void VisitStaticBlock(const JsStaticBlock &static_block) override {}
+
   void VisitClassBody(const JsClassBody &class_body) override {}
 
   void VisitClassDeclaration(
@@ -1582,6 +1588,10 @@ class DefaultJsAstVisitor : public EmptyJsAstVisitor {
     this->VisitNodeDefault(class_private_property);
   }
 
+  void VisitStaticBlock(const JsStaticBlock &static_block) override {
+    this->VisitNodeDefault(static_block);
+  }
+
   void VisitClassBody(const JsClassBody &class_body) override {
     this->VisitNodeDefault(class_body);
   }
@@ -1816,6 +1826,8 @@ class EmptyMutableJsAstVisitor : public MutableJsAstVisitor<void> {
 
   void VisitClassPrivateProperty(
       JsClassPrivateProperty &class_private_property) override {}
+
+  void VisitStaticBlock(JsStaticBlock &static_block) override {}
 
   void VisitClassBody(JsClassBody &class_body) override {}
 
@@ -2156,6 +2168,10 @@ class DefaultMutableJsAstVisitor : public virtual MutableJsAstVisitor<void> {
   void VisitClassPrivateProperty(
       JsClassPrivateProperty &class_private_property) override {
     this->VisitNodeDefault(class_private_property);
+  }
+
+  void VisitStaticBlock(JsStaticBlock &static_block) override {
+    this->VisitNodeDefault(static_block);
   }
 
   void VisitClassBody(JsClassBody &class_body) override {

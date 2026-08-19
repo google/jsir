@@ -153,6 +153,7 @@
   CIR_OP(ClassPrivateProperty)                                      \
   CIR_OP(ClassDeclaration)                                          \
   CIR_OP(ClassExpression)                                           \
+  CIR_OP(StaticBlock)                                              \
                                                                     \
   /* Modules */                                                     \
   CIR_OP(MetaProperty)                                              \

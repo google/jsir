@@ -2747,6 +2747,35 @@ void JsClassPrivateProperty::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
+// JsStaticBlock
+// =============================================================================
+
+void JsStaticBlock::SerializeFields(std::ostream& os, bool &needs_comma) const {
+  MaybeAddComma(os, needs_comma);
+  os << "\"body\":" << "[";
+  {
+    bool needs_comma = false;
+    for (const auto& element : body_) {
+      MaybeAddComma(os, needs_comma);
+      element->Serialize(os);
+    }
+  }
+  os << "]";
+}
+
+void JsStaticBlock::Serialize(std::ostream& os) const {
+  os << "{";
+  {
+    bool needs_comma = false;
+    MaybeAddComma(os, needs_comma);
+    os << "\"type\":\"StaticBlock\"";
+    JsNode::SerializeFields(os, needs_comma);
+    JsStaticBlock::SerializeFields(os, needs_comma);
+  }
+  os << "}";
+}
+
+// =============================================================================
 // JsClassBody
 // =============================================================================
 
@@ -2772,6 +2801,10 @@ void JsClassBody::SerializeFields(std::ostream& os, bool &needs_comma) const {
         }
         case 3: {
           std::get<3>(element)->Serialize(os);
+          break;
+        }
+        case 4: {
+          std::get<4>(element)->Serialize(os);
           break;
         }
         default:
