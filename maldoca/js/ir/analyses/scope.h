@@ -35,9 +35,10 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &os,
 }
 
 // Searches all scopes from the one `op` is in to the global scope for a symbol.
-// Returns the uid of the scope where the symbol is defined.
-std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
-                                  mlir::Operation *op, absl::string_view name);
+// Returns the uid of the binding for the symbol.
+std::optional<int64_t> FindBindingUid(const BabelScopes &scopes,
+                                      mlir::Operation *op,
+                                      absl::string_view name);
 
 // Turns a symbol name into a JsSymbolId, by searching all scopes from
 // the one `op` is in to the global scope. If the symbol is not found, assume it

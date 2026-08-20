@@ -48,7 +48,7 @@
 // AST-NEXT:         "definedSymbols": [
 // AST-NEXT:           {
 // AST-NEXT:             "name": "gen",
-// AST-NEXT:             "defScopeUid": 0
+// AST-NEXT:             "bindingUid": 0
 // AST-NEXT:           }
 // AST-NEXT:         ],
 // AST-NEXT:         "id": {

@@ -28,7 +28,7 @@
 
 namespace maldoca {
 
-std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
+std::optional<int64_t> FindBindingUid(const BabelScopes &scopes,
                                   mlir::Operation *op, absl::string_view name) {
   auto trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
   if (trivia == nullptr) {
@@ -40,12 +40,22 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
     return std::nullopt;
   }
 
-  return FindSymbol(scopes, *use_scope_uid, name);
+  return FindBindingUid(scopes, *use_scope_uid, name);
 }
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
                        absl::string_view name) {
-  return JsSymbolId{std::string(name), FindSymbol(scopes, op, name)};
+  auto trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
+  if (trivia == nullptr) {
+    return JsSymbolId{std::string(name), std::nullopt};
+  }
+
+  std::optional<int64_t> use_scope_uid = trivia.getLoc().getScopeUid();
+  if (!use_scope_uid.has_value()) {
+    return JsSymbolId{std::string(name), std::nullopt};
+  }
+
+  return GetSymbolId(scopes, *use_scope_uid, name);
 }
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op) {

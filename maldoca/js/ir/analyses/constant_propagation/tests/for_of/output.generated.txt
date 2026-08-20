@@ -8,7 +8,7 @@
 // JSIR-NEXT:     }) : () -> ()
 // JSIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "x"}> : () -> !jsir.any
 // JSIR-NEXT:     %1 = "jsir.identifier"() <{name = "array"}> : () -> !jsir.any
-// JSIR-NEXT:     "jshir.for_of_statement"(%0, %1) <{await = false, left_declaration = #jsir<for_in_of_declaration <L 2 C 5>, <L 2 C 10>, 16, 21, 1, <L 2 C 9>, <L 2 C 10>, 20, 21, 1, "x", 0, "var">}> ({
+// JSIR-NEXT:     "jshir.for_of_statement"(%0, %1) <{await = false, left_declaration = #jsir<for_in_of_declaration <L 2 C 5>, <L 2 C 10>, 16, 21, 1, <L 2 C 9>, <L 2 C 10>, 20, 21, 1, "x", 1, "var">}> ({
 // JSIR-NEXT:       "jshir.block_statement"() ({
 // JSIR-NEXT:         %6 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
 // JSIR-NEXT:         %7 = "jsir.member_expression"(%6) <{literal_property = #jsir<identifier <L 3 C 10>, <L 3 C 13>, "log", 44, 47, 2, "log">}> : (!jsir.any) -> !jsir.any
@@ -65,7 +65,7 @@
 // JSIR-NEXT:         %1 = jsir.identifier {"array"}
 // JSIR-NEXT:           // %1 = <unknown>
 // JSIR-NEXT:           // State [default = <unknown>] { <y#0 : 0.000000e+00 : f64> }
-// JSIR-NEXT:         jshir.for_of_statement (%0, %1) {false, #jsir<for_in_of_declaration <L 2 C 5>, <L 2 C 10>, 16, 21, 1, <L 2 C 9>, <L 2 C 10>, 20, 21, 1, "x", 0, "var">} ({
+// JSIR-NEXT:         jshir.for_of_statement (%0, %1) {false, #jsir<for_in_of_declaration <L 2 C 5>, <L 2 C 10>, 16, 21, 1, <L 2 C 9>, <L 2 C 10>, 20, 21, 1, "x", 1, "var">} ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:               // <executable>
 // JSIR-NEXT:               // State [default = <unknown>] { }

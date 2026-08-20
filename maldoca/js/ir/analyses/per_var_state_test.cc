@@ -1,4 +1,5 @@
 #include "maldoca/js/ir/analyses/per_var_state.h"
+#include <optional>
 
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "gtest/gtest.h"
