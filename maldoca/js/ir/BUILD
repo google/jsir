@@ -337,6 +337,7 @@ cc_library(
         "//maldoca/js/driver",
         "//maldoca/js/driver:driver_cc_proto",
         "//maldoca/js/ir/conversion:utils",
+        ":utf16",
         "//maldoca/js/quickjs_babel",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/log",
