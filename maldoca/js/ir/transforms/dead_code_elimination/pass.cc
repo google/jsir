@@ -31,6 +31,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/log.h"
 #include "maldoca/js/ast/ast.generated.h"
+#include "maldoca/js/babel/scope.h"  // IWYU pragma: keep
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/jsir_utils.h"
 
@@ -97,16 +98,6 @@ struct SymbolInfo {
   // Symbols defined in the immediate parent scope of this symbol.
   std::vector<JsSymbolId> outer_definitions;
 };
-
-bool operator==(const JsSymbolId& lhs, const JsSymbolId& rhs) {
-  return std::forward_as_tuple(lhs.name(), lhs.def_scope_uid()) ==
-         std::forward_as_tuple(rhs.name(), rhs.def_scope_uid());
-}
-
-template <typename H>
-H AbslHashValue(H h, const JsSymbolId& m) {
-  return H::combine(std::move(h), m.name(), m.def_scope_uid());
-}
 
 JsSymbolId GetSymbolIdFromAttr(JsirSymbolIdAttr symbol_attr) {
   std::string name = symbol_attr.getName().str();
