@@ -34,6 +34,7 @@ cc_library(
         "//maldoca/js/ir:jsir_utils",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Pass",

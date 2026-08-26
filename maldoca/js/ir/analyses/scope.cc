@@ -28,8 +28,9 @@
 
 namespace maldoca {
 
-std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
-                                  mlir::Operation *op, absl::string_view name) {
+std::optional<int64_t> FindSymbolBindingUid(const BabelScopes& scopes,
+                                            mlir::Operation* op,
+                                            absl::string_view name) {
   auto trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
   if (trivia == nullptr) {
     return std::nullopt;
@@ -40,23 +41,23 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
     return std::nullopt;
   }
 
-  return FindSymbol(scopes, *use_scope_uid, name);
+  return FindSymbolBindingUid(scopes, *use_scope_uid, name);
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, mlir::Operation *op,
+JsSymbolId GetSymbolId(const BabelScopes& scopes, mlir::Operation* op,
                        absl::string_view name) {
-  return JsSymbolId{std::string(name), FindSymbol(scopes, op, name)};
+  return JsSymbolId{std::string(name), FindSymbolBindingUid(scopes, op, name)};
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierOp op) {
+JsSymbolId GetSymbolId(const BabelScopes& scopes, JsirIdentifierOp op) {
   return GetSymbolId(scopes, op, op.getName());
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierRefOp op) {
+JsSymbolId GetSymbolId(const BabelScopes& scopes, JsirIdentifierRefOp op) {
   return GetSymbolId(scopes, op, op.getName());
 }
 
-JsSymbolId GetSymbolId(const BabelScopes &scopes, JsirIdentifierAttr attr) {
+JsSymbolId GetSymbolId(const BabelScopes& scopes, JsirIdentifierAttr attr) {
   absl::string_view name = attr.getName().strref();
 
   std::optional<int64_t> use_scope_uid = [&]() -> std::optional<int64_t> {

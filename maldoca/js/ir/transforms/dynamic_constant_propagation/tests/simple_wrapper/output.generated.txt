@@ -93,7 +93,7 @@
 // SOURCE-NEXT:           // %7 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %8 = jsir.identifier {"wrapper_1"}
-// SOURCE-NEXT:           // %8 = #jsir_builtin<inline_expression_function "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir<symbol_id "x", 2>>>
+// SOURCE-NEXT:           // %8 = #jsir_builtin<inline_expression_function "x", 5, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir<symbol_id "x", 5>>>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %9 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
 // SOURCE-NEXT:           // %9 = 1.000000e+00 : f64
@@ -124,7 +124,7 @@
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %24 = jsir.identifier {"wrapper_1"}
-// SOURCE-NEXT:                   // %24 = #jsir_builtin<inline_expression_function "x", 2, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir<symbol_id "x", 2>>>
+// SOURCE-NEXT:                   // %24 = #jsir_builtin<inline_expression_function "x", 5, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir<symbol_id "x", 5>>>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %25 = jsir.identifier {"x"}
 // SOURCE-NEXT:                   // %25 = <unknown>
@@ -149,7 +149,7 @@
 // SOURCE-NEXT:           // %13 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %14 = jsir.identifier {"wrapper_2"}
-// SOURCE-NEXT:           // %14 = #jsir_builtin<inline_expression_function "x", 3, #jsir_builtin<inline_expression_call #jsir<symbol_id "wrapper_1", 0>, #jsir<symbol_id "x", 3>>>
+// SOURCE-NEXT:           // %14 = #jsir_builtin<inline_expression_function "x", 6, #jsir_builtin<inline_expression_call #jsir<symbol_id "wrapper_1", 1>, #jsir<symbol_id "x", 6>>>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %15 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
 // SOURCE-NEXT:           // %15 = 2.000000e+00 : f64
@@ -211,7 +211,7 @@
 // SOURCE-NEXT:           // %19 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %20 = jsir.identifier {"wrapper_3"}
-// SOURCE-NEXT:           // %20 = #jsir_builtin<inline_expression_function "x", 4, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 4>, 1.000000e+02 : f64, "+">>>
+// SOURCE-NEXT:           // %20 = #jsir_builtin<inline_expression_function "x", 7, #jsir_builtin<inline_expression_call #jsir<symbol_id "prelude", 0>, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "x", 7>, 1.000000e+02 : f64, "+">>>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %21 = jsir.numeric_literal {#jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, 3.000000e+00 : f64}
 // SOURCE-NEXT:           // %21 = 3.000000e+00 : f64
@@ -237,12 +237,12 @@
 // SOURCE-NEXT: ================================================================
 // SOURCE-NEXT: Bindings:
 // SOURCE-NEXT: ================================================================
-// SOURCE-NEXT: wrapper_1#0:
-// SOURCE-NEXT:     (x#2) => { prelude#0(x#2) }
-// SOURCE-NEXT: wrapper_2#0:
-// SOURCE-NEXT:     (x#3) => { wrapper_1#0(x#3) }
-// SOURCE-NEXT: wrapper_3#0:
-// SOURCE-NEXT:     (x#4) => { prelude#0((x#4 + 100)) }
+// SOURCE-NEXT: wrapper_1#1:
+// SOURCE-NEXT:     (x#5) => { prelude#0(x#5) }
+// SOURCE-NEXT: wrapper_2#2:
+// SOURCE-NEXT:     (x#6) => { wrapper_1#1(x#6) }
+// SOURCE-NEXT: wrapper_3#3:
+// SOURCE-NEXT:     (x#7) => { prelude#0((x#7 + 100)) }
 // SOURCE-NEXT: ================================================================
 // SOURCE-EMPTY:
 // SOURCE-NEXT: ================================================================

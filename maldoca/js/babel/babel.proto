@@ -204,14 +204,21 @@ message BabelBinding {
 
   optional Kind kind = 1;
   optional string name = 2;
+  optional int32 uid = 3;
+
+  // TODO(550442458): Add `repeated int32 def_scope_uids = 4` to enable O(1)
+  // definition scope lookup.
 }
 
 message BabelScope {
   optional int32 uid = 1;
   optional int32 parent_uid = 2;
-  map<string, BabelBinding> bindings = 3;
+  map<string, int32> binding_uids = 4;
+
+  reserved 3;
 }
 
 message BabelScopes {
   map<int32, BabelScope> scopes = 1;
+  map<int32, BabelBinding> bindings = 2;
 }

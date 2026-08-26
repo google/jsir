@@ -324,6 +324,7 @@ function parseInternal(source, options) {
   // information would be invalid anyway, and (2) babel-traverse would crash
   // with an exception during scope computation.
   const scopes = {};
+  const bindingToId = new Map();
   if (options?.computeScopes && !('errors' in ast && ast.errors.length > 0)) {
     Babel.packages.traverse.default(ast, {
       enter(path) {
@@ -335,23 +336,35 @@ function parseInternal(source, options) {
       }
     });
 
+    let nextBindingId = 0;
+    const processedBindings = new Set();
+
     for (const scope of Object.values(scopes)) {
       for (const [name, binding] of Object.entries(scope.bindings)) {
+        let bindingId = bindingToId.get(binding);
+        if (bindingId === undefined) {
+          bindingId = nextBindingId++;
+          bindingToId.set(binding, bindingId);
+        }
+
         for (const referencePath of binding.referencePaths) {
           referencePath.node.referencedSymbol = {
             name: name,
-            defScopeUid: scope.uid,
+            bindingUid: bindingId,
           };
         }
 
-        const def_node = binding.path.node;
-        if (def_node.definedSymbols === undefined) {
-          def_node.definedSymbols = [];
+        if (!processedBindings.has(binding)) {
+          processedBindings.add(binding);
+          const def_node = binding.path.node;
+          if (def_node.definedSymbols === undefined) {
+            def_node.definedSymbols = [];
+          }
+          def_node.definedSymbols.push({
+            name,
+            bindingUid: bindingId,
+          });
         }
-        def_node.definedSymbols.push({
-          name,
-          defScopeUid: scope.uid,
-        });
       }
     }
   }
@@ -360,7 +373,7 @@ function parseInternal(source, options) {
   // the AST of TSCompiler (the other choice) cannot be directly serialized due
   // to the existence of parent pointers. Therefore, it would not be a fair
   // comparison if we serialize here for Babel.
-  return {ast: JSON.stringify(ast), scopes: Object.values(scopes)};
+  return {ast: JSON.stringify(ast), scopes: Object.values(scopes), bindingToId};
 }
 exports.parseInternal = parseInternal;
 
@@ -435,26 +448,15 @@ exports.parse = function(sourceCode, optionsSerialized) {
   }
 
   try {
-    let {ast, scopes} = parseInternal(sourceCode, options);
+    let {ast, scopes, bindingToId} = parseInternal(sourceCode, options);
 
     const scopesPb = {
       scopes: {},
+      bindings: {},
     };
 
-    for (const scope of scopes) {
-      if (scope === null) continue;
-      const uid = scope.uid;
-
-      const scopePb = {
-        uid: uid,
-        bindings: {},
-      };
-
-      if (scope.parent) {
-        scopePb.parentUid = scope.parent.uid;
-      }
-
-      for (const [name, binding] of Object.entries(scope.bindings)) {
+    if (bindingToId) {
+      for (const [binding, bindingId] of bindingToId.entries()) {
         const bindingKindPb = (() => {
           switch (binding.kind) {
             case 'var':
@@ -471,8 +473,6 @@ exports.parse = function(sourceCode, optionsSerialized) {
               return 'KIND_PARAM';
             case 'local':
               return 'KIND_LOCAL';
-            case 'unknown':
-              return 'KIND_UNKNOWN';
             default:
               return 'KIND_UNKNOWN';
           }
@@ -480,10 +480,34 @@ exports.parse = function(sourceCode, optionsSerialized) {
 
         const bindingPb = {
           kind: bindingKindPb,
-          name: name,
+          name: binding.identifier ? binding.identifier.name : undefined,
+          uid: bindingId,
         };
 
-        scopePb.bindings[name] = bindingPb;
+        scopesPb.bindings[bindingId] = bindingPb;
+      }
+    }
+
+    for (const scope of scopes) {
+      if (scope === null) continue;
+      const uid = scope.uid;
+
+      const scopePb = {
+        uid: uid,
+        bindingUids: {},
+      };
+
+      if (scope.parent) {
+        scopePb.parentUid = scope.parent.uid;
+      }
+
+      for (const [name, binding] of Object.entries(scope.bindings)) {
+        if (bindingToId) {
+          const bindingId = bindingToId.get(binding);
+          if (bindingId !== undefined) {
+            scopePb.bindingUids[name] = bindingId;
+          }
+        }
       }
 
       scopesPb.scopes[uid] = scopePb;

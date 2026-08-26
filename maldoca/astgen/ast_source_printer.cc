@@ -358,6 +358,9 @@ void AstSourcePrinter::PrintGetterBody(const Symbol& field_name,
         {"field_name", field_name.ToCcVarName()},
     });
 
+    // TODO(b/549302677): Avoid redundant has_value checks for primitive/value
+    // types where the getter returns the optional directly (e.g.
+    // std::optional<int64_t>).
     Println("if (!$field_name$_.has_value()) {");
     Println("  return std::nullopt;");
     Println("} else {");

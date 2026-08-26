@@ -139,10 +139,10 @@ mlir::ChangeResult TransformInlineCall(
     }
 
     JsSymbolId symbol_id{symbol_id_attr.getName().str(),
-                         symbol_id_attr.getDefScopeId()};
+                         symbol_id_attr.getBindingUid()};
 
     for (auto [idx, param] : llvm::enumerate(inline_func_expr.getParams())) {
-      JsSymbolId param_symbol_id(param.getName().str(), param.getDefScopeId());
+      JsSymbolId param_symbol_id(param.getName().str(), param.getBindingUid());
       if (symbol_id == param_symbol_id) {
         if (idx >= call_expr_op.getArguments().size()) {
           return nullptr;

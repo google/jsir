@@ -17,13 +17,16 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <utility>
 
+#include "absl/algorithm/container.h"
+#include "absl/container/inlined_vector.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/js/ast/ast.generated.h"
 
 namespace maldoca {
 
-std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
+std::optional<int64_t> FindSymbolBindingUid(const BabelScopes &scopes,
                                   int64_t use_scope_uid,
                                   absl::string_view name) {
   auto scope_it = scopes.scopes().find(use_scope_uid);
@@ -31,10 +34,9 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
     return std::nullopt;
   }
   const auto &scope = scope_it->second;
-
-  auto binding_it = scope.bindings().find(name);
-  if (binding_it != scope.bindings().end()) {
-    return use_scope_uid;
+  auto binding_it = scope.binding_uids().find(name);
+  if (binding_it != scope.binding_uids().end()) {
+    return binding_it->second;
   }
 
   // If this scope has no parent, then this is the root, stop searching.
@@ -49,12 +51,32 @@ std::optional<int64_t> FindSymbol(const BabelScopes &scopes,
     return std::nullopt;
   }
 
-  return FindSymbol(scopes, parent_scope_uid, name);
+  return FindSymbolBindingUid(scopes, parent_scope_uid, name);
 }
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, int64_t use_scope_uid,
                        absl::string_view name) {
-  return JsSymbolId{std::string(name), FindSymbol(scopes, use_scope_uid, name)};
+  std::optional<int64_t> binding_uid =
+      FindSymbolBindingUid(scopes, use_scope_uid, name);
+  return JsSymbolId{std::string(name), binding_uid};
+}
+
+absl::InlinedVector<int64_t, 4> FindDefScopeUids(const BabelScopes &scopes,
+                                                const JsSymbolId &symbol) {
+  if (!symbol.binding_uid().has_value()) {
+    return {};
+  }
+  absl::InlinedVector<int64_t, 4> def_scope_uids;
+  for (const auto &[scope_uid, scope] : scopes.scopes()) {
+    for (const auto &[name, binding_uid] : scope.binding_uids()) {
+      if (binding_uid == *symbol.binding_uid()) {
+        def_scope_uids.push_back(scope_uid);
+        break;
+      }
+    }
+  }
+  absl::c_sort(def_scope_uids);
+  return def_scope_uids;
 }
 
 }  // namespace maldoca

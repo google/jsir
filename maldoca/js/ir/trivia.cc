@@ -30,8 +30,6 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/memory/memory.h"
-#include "absl/strings/string_view.h"
-#include "absl/types/span.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -47,7 +45,7 @@ JsirSymbolIdAttr GetJsirSymbolIdAttr(mlir::MLIRContext* context,
                                      const JsSymbolId& symbol_id) {
   return JsirSymbolIdAttr::get(context,
                                mlir::StringAttr::get(context, symbol_id.name()),
-                               symbol_id.def_scope_uid());
+                               symbol_id.binding_uid());
 }
 
 }  // namespace
@@ -202,7 +200,7 @@ JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr) {
   if (JsirSymbolIdAttr mlir_referenced_symbol = attr.getReferencedSymbol()) {
     referenced_symbol =
         std::make_unique<JsSymbolId>(mlir_referenced_symbol.getName().str(),
-                                     mlir_referenced_symbol.getDefScopeId());
+                                     mlir_referenced_symbol.getBindingUid());
   }
 
   std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols;
@@ -211,9 +209,9 @@ JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr) {
       !mlir_defined_symbols.empty()) {
     std::vector<std::unique_ptr<JsSymbolId>> defined_symbols_vec;
     for (JsirSymbolIdAttr mlir_defined_symbol : mlir_defined_symbols) {
-      defined_symbols_vec.push_back(
-          std::make_unique<JsSymbolId>(mlir_defined_symbol.getName().str(),
-                                       mlir_defined_symbol.getDefScopeId()));
+      defined_symbols_vec.push_back(std::make_unique<JsSymbolId>(
+          mlir_defined_symbol.getName().str(),
+          mlir_defined_symbol.getBindingUid()));
     }
     defined_symbols = std::move(defined_symbols_vec);
   }

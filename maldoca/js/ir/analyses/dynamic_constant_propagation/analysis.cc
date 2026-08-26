@@ -201,7 +201,7 @@ static std::string InlineExprToString(mlir::Attribute expr, size_t indent = 0) {
                             InlineExprToString(attr.getRight()), ")");
       })
       .Case([&](JsirSymbolIdAttr attr) {
-        JsSymbolId symbol{attr.getName().str(), attr.getDefScopeId()};
+        JsSymbolId symbol{attr.getName().str(), attr.getBindingUid()};
         return absl::StrCat(symbol);
       })
       .Case([&](JsirInlineExpressionMemberExpressionAttr attr) {
@@ -365,7 +365,7 @@ SymbolDependencyGraph SymbolDependencyGraph::Create(
   for (const auto &[symbol_id, _] : bindings) {
     nodes_vec.push_back(SymbolDependencyNode(symbol_id));
   }
-  nodes_vec.push_back(SymbolDependencyNode(JsSymbolId{"", 0}));
+  nodes_vec.push_back(SymbolDependencyNode(JsSymbolId{"", std::nullopt}));
 
   absl::flat_hash_map<JsSymbolId, SymbolDependencyNode *> nodes_map;
   for (SymbolDependencyNode &node : nodes_vec) {
@@ -511,7 +511,7 @@ void GetSymbolDependencies(mlir::Attribute attr,
       })
       .Case([&](JsirSymbolIdAttr attr) {
         dependencies.insert(
-            JsSymbolId{attr.getName().str(), attr.getDefScopeId()});
+            JsSymbolId{attr.getName().str(), attr.getBindingUid()});
       })
       .Case([&](JsirInlineExpressionMemberExpressionAttr attr) {
         GetSymbolDependencies(attr.getObject(), dependencies);
@@ -691,7 +691,7 @@ std::optional<mlir::Attribute> GetInlineExpr(const BabelScopes &scopes,
   JsSymbolId symbol = GetSymbolId(scopes, op);
 
   return JsirSymbolIdAttr::get(mlir_context, op.getNameAttr(),
-                               symbol.def_scope_uid());
+                               symbol.binding_uid());
 }
 
 std::optional<mlir::StringAttr> GetInlineExprFromKey(
@@ -735,10 +735,10 @@ std::optional<JsirInlineExpressionFunctionAttr> GetInlineExpr(
   mlir::MLIRContext *context = func_info.return_value->getContext();
   std::vector<JsirSymbolIdAttr> params;
   params.reserve(func_info.param_symbols.size());
-  for (const JsSymbolId &symbol : func_info.param_symbols) {
+  for (const JsSymbolId& param_symbol : func_info.param_symbols) {
     auto param = JsirSymbolIdAttr::get(
-        context, mlir::StringAttr::get(context, symbol.name()),
-        symbol.def_scope_uid());
+        context, mlir::StringAttr::get(context, param_symbol.name()),
+        param_symbol.binding_uid());
     params.push_back(param);
   }
 
@@ -787,9 +787,9 @@ void JsirDynamicConstantPropagationAnalysis::VisitIdentifier(
   }
 
   std::optional<mlir::Attribute> inline_result =
-      EvalIdentifier(op.getNameAttr(), symbol_id.def_scope_uid(), {});
+      EvalIdentifier(op.getNameAttr(), symbol_id.binding_uid(), {});
 
-  if (!symbol_id.def_scope_uid().has_value() &&
+  if (!symbol_id.binding_uid().has_value() &&
       kBuiltins->contains(op.getNameAttr().str())) {
     inline_result =
         JsirBuiltinFunctionAttr::get(op.getContext(), op.getNameAttr());
@@ -805,11 +805,11 @@ void JsirDynamicConstantPropagationAnalysis::VisitIdentifier(
 
 std::optional<mlir::Attribute>
 JsirDynamicConstantPropagationAnalysis::EvalIdentifier(
-    mlir::StringAttr name, std::optional<int64_t> def_scope_id,
-    const absl::flat_hash_map<JsSymbolId, mlir::Attribute> &bindings) {
-  JsSymbolId symbol_id{name.str(), def_scope_id};
+    mlir::StringAttr name, std::optional<int64_t> binding_uid,
+    const absl::flat_hash_map<JsSymbolId, mlir::Attribute>& bindings) {
+  JsSymbolId symbol_id{name.str(), binding_uid};
 
-  if (dynamic_prelude_->GetFunction(symbol_id).has_value()) {
+  if (dynamic_prelude_->GetFunction(scopes_, symbol_id).has_value()) {
     return JsirBuiltinFunctionAttr::get(name.getContext(), name);
   };
 
@@ -876,7 +876,7 @@ JsirDynamicConstantPropagationAnalysis::EvalCallExpression(
         absl::flat_hash_map<JsSymbolId, mlir::Attribute> bindings;
         for (auto [param, argument] :
              llvm::zip(callee.getParams(), arguments)) {
-          JsSymbolId symbol_id{param.getName().str(), param.getDefScopeId()};
+          JsSymbolId symbol_id{param.getName().str(), param.getBindingUid()};
           bindings[symbol_id] = argument;
         }
 
@@ -919,7 +919,7 @@ std::optional<mlir::Attribute> JsirDynamicConstantPropagationAnalysis::Eval(
       })
 
       .Case([&](JsirSymbolIdAttr expr) -> Ret {
-        return EvalIdentifier(expr.getName(), expr.getDefScopeId(), bindings);
+        return EvalIdentifier(expr.getName(), expr.getBindingUid(), bindings);
       })
 
       .Case([&](JsirInlineExpressionMemberExpressionAttr expr) -> Ret {

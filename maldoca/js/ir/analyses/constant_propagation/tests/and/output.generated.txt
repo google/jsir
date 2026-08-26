@@ -125,125 +125,125 @@
 // JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> }
 // JSIR-NEXT:             %19 = jsir.variable_declarator (%16, %18)
 // JSIR-NEXT:               // %19 = <uninitialized>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             jsir.exprs_region_end (%19)
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         })
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         jsir.variable_declaration {"var"} ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:               // <executable>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %16 = jsir.identifier_ref {"c"}
 // JSIR-NEXT:               // %16 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %17 = jsir.identifier {"x"}
 // JSIR-NEXT:               // %17 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %18 = jshir.logical_expression (%17) {"&&"} ({
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:                 %20 = jsir.boolean_literal {true}
 // JSIR-NEXT:                   // %20 = true
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:                 jsir.expr_region_end (%20)
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             })
 // JSIR-NEXT:               // %18 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %19 = jsir.variable_declarator (%16, %18)
 // JSIR-NEXT:               // %19 = <uninitialized>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             jsir.exprs_region_end (%19)
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         })
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         jsir.variable_declaration {"var"} ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:               // <executable>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %16 = jsir.identifier_ref {"d"}
 // JSIR-NEXT:               // %16 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %17 = jsir.identifier {"x"}
 // JSIR-NEXT:               // %17 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %18 = jshir.logical_expression (%17) {"&&"} ({
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:                 %20 = jsir.boolean_literal {false}
 // JSIR-NEXT:                   // %20 = false
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:                 jsir.expr_region_end (%20)
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             })
 // JSIR-NEXT:               // %18 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             %19 = jsir.variable_declarator (%16, %18)
 // JSIR-NEXT:               // %19 = <uninitialized>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:             jsir.exprs_region_end (%19)
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         })
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %0 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %0 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 5 C 8>, <L 5 C 11>, "log", 93, 96, 0, "log">}
 // JSIR-NEXT:           // %1 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %2 = jsir.identifier {"a"}
 // JSIR-NEXT:           // %2 = false
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %3 = jsir.call_expression (%1, %2)
 // JSIR-NEXT:           // %3 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         jsir.expression_statement (%3)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %4 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %4 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %5 = jsir.member_expression (%4) {#jsir<identifier <L 6 C 8>, <L 6 C 11>, "log", 109, 112, 0, "log">}
 // JSIR-NEXT:           // %5 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %6 = jsir.identifier {"b"}
 // JSIR-NEXT:           // %6 = false
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %7 = jsir.call_expression (%5, %6)
 // JSIR-NEXT:           // %7 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         jsir.expression_statement (%7)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %8 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %8 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %9 = jsir.member_expression (%8) {#jsir<identifier <L 7 C 8>, <L 7 C 11>, "log", 125, 128, 0, "log">}
 // JSIR-NEXT:           // %9 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %10 = jsir.identifier {"c"}
 // JSIR-NEXT:           // %10 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %11 = jsir.call_expression (%9, %10)
 // JSIR-NEXT:           // %11 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         jsir.expression_statement (%11)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %12 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %12 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %13 = jsir.member_expression (%12) {#jsir<identifier <L 8 C 8>, <L 8 C 11>, "log", 141, 144, 0, "log">}
 // JSIR-NEXT:           // %13 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %14 = jsir.identifier {"d"}
 // JSIR-NEXT:           // %14 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         %15 = jsir.call_expression (%13, %14)
 // JSIR-NEXT:           // %15 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:         jsir.expression_statement (%15)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#0 : false> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : false> <b#1 : false> }
 // JSIR-NEXT:     }, {
 // JSIR-NEXT:       ^bb0:
 // JSIR-NEXT:           // <executable>

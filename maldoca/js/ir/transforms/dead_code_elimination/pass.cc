@@ -29,6 +29,7 @@
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Value.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/log/absl_log.h"
 #include "absl/log/log.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/scope.h"  // IWYU pragma: keep
@@ -101,8 +102,8 @@ struct SymbolInfo {
 
 JsSymbolId GetSymbolIdFromAttr(JsirSymbolIdAttr symbol_attr) {
   std::string name = symbol_attr.getName().str();
-  std::optional<int64_t> scope_uid = symbol_attr.getDefScopeId();
-  return JsSymbolId{name, scope_uid};
+  std::optional<int64_t> binding_uid = symbol_attr.getBindingUid();
+  return JsSymbolId{std::move(name), binding_uid};
 }
 
 void UnusedFunctionElimination(mlir::Operation* root_op) {
@@ -134,12 +135,12 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
 
   for (auto& [symbol, info] : symbol_infos) {
     if (info.definitions.empty()) {
-      LOG(FATAL) << "Symbol " << symbol.name()
-                 << " is referenced but not defined.";
+      ABSL_LOG(FATAL) << "Symbol " << symbol.name()
+                      << " is referenced but not defined.";
     }
     if (info.definitions.size() > 1) {
-      LOG(FATAL) << "Symbol " << symbol.name()
-                 << " is defined more than once.";
+      ABSL_LOG(FATAL) << "Symbol " << symbol.name()
+                      << " is defined more than once.";
     }
 
     mlir::Operation* def_op = info.definitions[0];
@@ -161,8 +162,7 @@ void UnusedFunctionElimination(mlir::Operation* root_op) {
         continue;
       }
 
-      for (JsirSymbolIdAttr outer_defined_symbol_attr :
-            outer_defined_symbols) {
+      for (JsirSymbolIdAttr outer_defined_symbol_attr : outer_defined_symbols) {
         JsSymbolId outer_symbol =
             GetSymbolIdFromAttr(outer_defined_symbol_attr);
         auto outer_symbol_info_it = symbol_infos.find(outer_symbol);

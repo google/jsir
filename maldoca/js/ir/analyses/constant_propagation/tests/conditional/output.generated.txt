@@ -137,91 +137,91 @@
 // JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
 // JSIR-NEXT:             %15 = jsir.variable_declarator (%12, %14)
 // JSIR-NEXT:               // %15 = <uninitialized>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             jsir.exprs_region_end (%15)
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         })
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         jsir.variable_declaration {"var"} ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:               // <executable>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             %12 = jsir.identifier_ref {"c"}
 // JSIR-NEXT:               // %12 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             %13 = jsir.identifier {"x"}
 // JSIR-NEXT:               // %13 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             %14 = jshir.conditional_expression (%13) ({
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "6", 6.000000e+00 : f64>, 6.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = 6.000000e+00 : f64
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             }, {
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, 5.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = 5.000000e+00 : f64
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
-// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             })
 // JSIR-NEXT:               // %14 = <unknown>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             %15 = jsir.variable_declarator (%12, %14)
 // JSIR-NEXT:               // %15 = <uninitialized>
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:             jsir.exprs_region_end (%15)
-// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:               // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         })
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %0 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %0 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %1 = jsir.member_expression (%0) {#jsir<identifier <L 4 C 8>, <L 4 C 11>, "log", 72, 75, 0, "log">}
 // JSIR-NEXT:           // %1 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %2 = jsir.identifier {"a"}
 // JSIR-NEXT:           // %2 = 1.000000e+00 : f64
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %3 = jsir.call_expression (%1, %2)
 // JSIR-NEXT:           // %3 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         jsir.expression_statement (%3)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %4 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %4 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %5 = jsir.member_expression (%4) {#jsir<identifier <L 5 C 8>, <L 5 C 11>, "log", 88, 91, 0, "log">}
 // JSIR-NEXT:           // %5 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %6 = jsir.identifier {"b"}
 // JSIR-NEXT:           // %6 = 4.000000e+00 : f64
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %7 = jsir.call_expression (%5, %6)
 // JSIR-NEXT:           // %7 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         jsir.expression_statement (%7)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %8 = jsir.identifier {"console"}
 // JSIR-NEXT:           // %8 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %9 = jsir.member_expression (%8) {#jsir<identifier <L 6 C 8>, <L 6 C 11>, "log", 104, 107, 0, "log">}
 // JSIR-NEXT:           // %9 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %10 = jsir.identifier {"c"}
 // JSIR-NEXT:           // %10 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         %11 = jsir.call_expression (%9, %10)
 // JSIR-NEXT:           // %11 = <unknown>
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:         jsir.expression_statement (%11)
-// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#0 : 4.000000e+00 : f64> }
+// JSIR-NEXT:           // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:     }, {
 // JSIR-NEXT:       ^bb0:
 // JSIR-NEXT:           // <executable>

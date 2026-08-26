@@ -69,6 +69,8 @@ cc_library(
     deps = [
         ":babel_cc_proto",
         "//maldoca/js/ast",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/container:inlined_vector",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
     ],
@@ -85,6 +87,7 @@ cc_library(
         ":scope",
         "//maldoca/base/testing:protocol-buffer-matchers",
         "//maldoca/base/testing:status_matchers",
+        "//maldoca/js/ast",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings",

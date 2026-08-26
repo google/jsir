@@ -46,7 +46,8 @@ class DynamicPrelude {
   // std::nullopt if the function is not found.
   std::optional<QjsValue> GetFunction(absl::string_view name);
 
-  std::optional<QjsValue> GetFunction(JsSymbolId symbol_id);
+  std::optional<QjsValue> GetFunction(const BabelScopes &scopes,
+                                      JsSymbolId symbol_id);
 
   // Returns the uid of the scope where the prelude functions are extracted
   // from.

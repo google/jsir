@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/algorithm/container.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
@@ -29,6 +30,7 @@
 #include "absl/time/time.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
+#include "maldoca/js/babel/scope.h"
 #include "maldoca/js/quickjs/quickjs.h"
 #include "quickjs/quickjs.h"
 
@@ -145,11 +147,19 @@ std::optional<QjsValue> DynamicPrelude::GetFunction(absl::string_view name) {
   return property;
 }
 
-std::optional<QjsValue> DynamicPrelude::GetFunction(JsSymbolId symbol_id) {
-  if (symbol_id.def_scope_uid() != extracted_from_scope_uid_) {
-    return std::nullopt;
+std::optional<QjsValue> DynamicPrelude::GetFunction(const BabelScopes& scopes,
+                                                    JsSymbolId symbol_id) {
+  if (extracted_from_scope_uid_.has_value()) {
+    auto def_scope_uids = FindDefScopeUids(scopes, symbol_id);
+    if (!absl::c_linear_search(def_scope_uids,
+                               *extracted_from_scope_uid_)) {
+      return std::nullopt;
+    }
+  } else {
+    if (symbol_id.binding_uid().has_value()) {
+      return std::nullopt;
+    }
   }
-
   return GetFunction(symbol_id.name());
 }
 
