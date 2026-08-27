@@ -69,9 +69,9 @@ message BabelParseRequest {
   // ```
   optional bool replace_invalid_surrogate_pairs = 2;
 
-  // Whether string literals will be base64-encoded in the AST.
+  // Whether string values will be base64-encoded in the AST.
   //
-  // base64_encode_string_literals == false:
+  // base64_encode_string_values == false:
   // ```
   // Node {
   //   type: 'StringLiteral',
@@ -80,7 +80,7 @@ message BabelParseRequest {
   // }
   // ```
   //
-  // base64_encode_string_literals == true:
+  // base64_encode_string_values == true:
   // ```
   // Node {
   //   type: 'StringLiteral',
@@ -88,7 +88,7 @@ message BabelParseRequest {
   //   value: 'YQ=='
   // }
   // ```
-  optional bool base64_encode_string_literals = 5 [default = false];
+  optional bool base64_encode_string_values = 5 [default = false];
 
   // The mode in which source code should be parsed. "unspecified" defaults to
   // "script". "unambiguous" will make @babel/parser attempt to guess, based on
@@ -148,8 +148,8 @@ message BabelAstString {
   // The actual string.
   optional string value = 1;
 
-  // Whether string literals have been base64-encoded.
-  optional bool string_literals_base64_encoded = 2;
+  // Whether string values have been base64-encoded.
+  optional bool string_values_base64_encoded = 2;
 
   optional BabelScopes scopes = 3;
 }
