@@ -1,7 +1,5 @@
 # Intermediate Representation Design
 
-[TOC]
-
 ## Overview
 
 JSIR is a next-generation JavaScript analysis tooling from Google. At its core
@@ -27,6 +25,28 @@ To achieve these design goals, JSIR is designed as a high-level IR that has a
 nearly one-to-one mapping with the abstract syntax tree (AST), and models
 control flow structures using MLIR
 [regions](https://mlir.llvm.org/docs/LangRef/#regions).
+
+## Two dialects: `jsir` and `jshir`
+
+JSIR defines two MLIR dialects that are used side by side. The `h` in `jshir`
+stands for "high-level": the two dialects are the high-level IR (HIR) and the
+low-level IR (LIR) (see `maldoca/astgen/ast_def.h`).
+
+*   `jshir` is the high-level IR (HIR). It holds the operations that carry
+    control-flow (branch) semantics: the branch and loop statements
+    (`jshir.if_statement`, `jshir.while_statement`, and friends), plus the
+    short-circuit and conditional expressions (`jshir.logical_expression`,
+    `jshir.conditional_expression`).
+
+*   `jsir` is the low-level IR (LIR). It holds the operations without
+    control-flow semantics: expressions and values (`jsir.identifier`,
+    `jsir.numeric_literal`, `jsir.binary_expression`), declarations, the region
+    terminators `jsir.expr_region_end` and `jsir.exprs_region_end`, and the
+    non-branching statements (`jsir.expression_statement`,
+    `jsir.return_statement`, `jsir.throw_statement`).
+
+In the examples below, a `jshir.` op is a control-flow construct, while a
+`jsir.` op is not.
 
 ## Achieving AST ↔ IR Roundtrip
 
@@ -207,7 +227,8 @@ semantic meanings:
 
 *   An r-value is some value.
 
-> **NOTE:** We will likely revisit how we represent symbols.
+> **NOTE:** The representation of symbols (and lvalues in particular) is under
+> review; see [issue #25](https://github.com/google/jsir/issues/25).
 
 ## Representing control flows
 
