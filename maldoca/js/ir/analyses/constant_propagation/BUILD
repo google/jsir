@@ -106,8 +106,10 @@ cc_library(
     deps = [
         "//maldoca/js/ast",
         "//maldoca/js/babel",
+        "//maldoca/js/babel:scope",
         "//maldoca/js/driver:driver_cc_proto",
         "//maldoca/js/quickjs",
+        "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/status",
