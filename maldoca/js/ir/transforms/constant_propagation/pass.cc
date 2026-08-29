@@ -92,10 +92,16 @@ static mlir::LogicalResult ReplaceUsesWithConstant(
 
 mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
                                                const BabelScopes &scopes) {
-  // Always use the dynamic analysis; with a null prelude it falls back.
-  return PerformDynamicConstantPropagation(op, scopes,
-                                           /*dynamic_prelude=*/nullptr,
-                                           /*analysis_result=*/nullptr);
+  mlir::DataFlowSolver solver;
+
+  auto *analysis = solver.load<JsirConstantPropagationAnalysis>(&scopes);
+
+  mlir::LogicalResult result = solver.initializeAndRun(op);
+  if (mlir::failed(result)) {
+    return result;
+  }
+
+  return PerformConstantPropagation(op, *analysis);
 }
 
 mlir::ChangeResult TransformInlineCall(
@@ -313,25 +319,25 @@ void JsirConstantPropagationPass::getDependentDialects(
 }
 
 void JsirConstantPropagationPass::runOnOperation() {
-  // Both constprop and dynconstprop use the dynamic analysis path. When babel
-  // is unset there is no prelude, so the analysis falls back to ordinary CP.
+  if (babel_ == nullptr) {
+    if (mlir::failed(PerformConstantPropagation(getOperation(), scopes_))) {
+      signalPassFailure();
+    }
+    return;
+  }
+
+  // dynconstprop: prelude matching runs first, then the shared rewrite.
   JsirAnalysisResult::DynamicConstantPropagation detailed_analysis_result;
   JsirAnalysisResult::DynamicConstantPropagation *analysis_result =
-      babel_ != nullptr ? &detailed_analysis_result : nullptr;
+      &detailed_analysis_result;
 
-  const mlir::LogicalResult result =
-      babel_ != nullptr
-          ? PerformDynamicConstantPropagation(
-                getOperation(), scopes_, dynamic_config_, *babel_,
-                analysis_result)
-          : PerformDynamicConstantPropagation(
-                getOperation(), scopes_, /*dynamic_prelude=*/nullptr,
-                analysis_result);
+  const mlir::LogicalResult result = PerformDynamicConstantPropagation(
+      getOperation(), scopes_, dynamic_config_, *babel_, analysis_result);
   if (mlir::failed(result)) {
     signalPassFailure();
     return;
   }
-  if (babel_ != nullptr && js_analysis_outputs_ != nullptr) {
+  if (js_analysis_outputs_ != nullptr) {
     JsAnalysisOutput *js_analysis_output = js_analysis_outputs_->add_outputs();
     JsirAnalysisResult *jsir_analysis_output =
         js_analysis_output->mutable_jsir_analysis();
