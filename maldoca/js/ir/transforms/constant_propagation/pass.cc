@@ -319,14 +319,14 @@ void JsirConstantPropagationPass::runOnOperation() {
   JsirAnalysisResult::DynamicConstantPropagation *analysis_result =
       babel_ != nullptr ? &detailed_analysis_result : nullptr;
 
-  mlir::LogicalResult result;
-  if (babel_ != nullptr) {
-    result = PerformDynamicConstantPropagation(
-        getOperation(), scopes_, dynamic_config_, *babel_, analysis_result);
-  } else {
-    result = PerformDynamicConstantPropagation(
-        getOperation(), scopes_, /*dynamic_prelude=*/nullptr, analysis_result);
-  }
+  const mlir::LogicalResult result =
+      babel_ != nullptr
+          ? PerformDynamicConstantPropagation(
+                getOperation(), scopes_, dynamic_config_, *babel_,
+                analysis_result)
+          : PerformDynamicConstantPropagation(
+                getOperation(), scopes_, /*dynamic_prelude=*/nullptr,
+                analysis_result);
   if (mlir::failed(result)) {
     signalPassFailure();
     return;
