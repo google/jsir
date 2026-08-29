@@ -40,7 +40,7 @@
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
-#include "maldoca/js/ir/analyses/dynamic_constant_propagation/attrs.h"
+#include "maldoca/js/ir/analyses/constant_propagation/attrs.h"
 #include "maldoca/js/ir/ir.h"
 #include <optional>
 #include <string>
@@ -55,8 +55,8 @@
 #include "absl/status/statusor.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/scope.h"
-#include "maldoca/js/ir/analyses/dynamic_constant_propagation/analysis.h"
-#include "maldoca/js/ir/analyses/dynamic_constant_propagation/dynamic_prelude.h"
+#include "maldoca/js/ir/analyses/constant_propagation/dynamic_analysis.h"
+#include "maldoca/js/ir/analyses/constant_propagation/dynamic_prelude.h"
 
 namespace maldoca {
 
@@ -92,16 +92,10 @@ static mlir::LogicalResult ReplaceUsesWithConstant(
 
 mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
                                                const BabelScopes &scopes) {
-  mlir::DataFlowSolver solver;
-
-  auto *analysis = solver.load<JsirConstantPropagationAnalysis>(&scopes);
-
-  mlir::LogicalResult result = solver.initializeAndRun(op);
-  if (mlir::failed(result)) {
-    return result;
-  }
-
-  return PerformConstantPropagation(op, *analysis);
+  // Always use the dynamic analysis; with a null prelude it falls back.
+  return PerformDynamicConstantPropagation(op, scopes,
+                                           /*dynamic_prelude=*/nullptr,
+                                           /*analysis_result=*/nullptr);
 }
 
 mlir::ChangeResult TransformInlineCall(
@@ -319,26 +313,30 @@ void JsirConstantPropagationPass::getDependentDialects(
 }
 
 void JsirConstantPropagationPass::runOnOperation() {
+  // Both constprop and dynconstprop use the dynamic analysis path. When babel
+  // is unset there is no prelude, so the analysis falls back to ordinary CP.
+  JsirAnalysisResult::DynamicConstantPropagation detailed_analysis_result;
+  JsirAnalysisResult::DynamicConstantPropagation *analysis_result =
+      babel_ != nullptr ? &detailed_analysis_result : nullptr;
+
+  mlir::LogicalResult result;
   if (babel_ != nullptr) {
-    JsirAnalysisResult::DynamicConstantPropagation detailed_analysis_result;
-    mlir::LogicalResult result = PerformDynamicConstantPropagation(
-        getOperation(), scopes_, dynamic_config_, *babel_,
-        &detailed_analysis_result);
-    if (mlir::failed(result)) {
-      signalPassFailure();
-    }
-    if (js_analysis_outputs_ != nullptr) {
-      JsAnalysisOutput *js_analysis_output = js_analysis_outputs_->add_outputs();
-      JsirAnalysisResult *jsir_analysis_output =
-          js_analysis_output->mutable_jsir_analysis();
-      *jsir_analysis_output->mutable_dynamic_constant_propagation() =
-          std::move(detailed_analysis_result);
-    }
+    result = PerformDynamicConstantPropagation(
+        getOperation(), scopes_, dynamic_config_, *babel_, analysis_result);
+  } else {
+    result = PerformDynamicConstantPropagation(
+        getOperation(), scopes_, /*dynamic_prelude=*/nullptr, analysis_result);
+  }
+  if (mlir::failed(result)) {
+    signalPassFailure();
     return;
   }
-
-  if (mlir::failed(PerformConstantPropagation(getOperation(), scopes_))) {
-    signalPassFailure();
+  if (babel_ != nullptr && js_analysis_outputs_ != nullptr) {
+    JsAnalysisOutput *js_analysis_output = js_analysis_outputs_->add_outputs();
+    JsirAnalysisResult *jsir_analysis_output =
+        js_analysis_output->mutable_jsir_analysis();
+    *jsir_analysis_output->mutable_dynamic_constant_propagation() =
+        std::move(detailed_analysis_result);
   }
 }
 
@@ -359,7 +357,7 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
     mlir::Operation *op, const BabelScopes &scopes,
-    DynamicPrelude *dynamic_prelude,
+    DynamicPrelude *absl_nullable dynamic_prelude,
     JsirAnalysisResult::DynamicConstantPropagation
         *absl_nullable analysis_result) {
   using ComputedConstant =

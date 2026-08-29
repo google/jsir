@@ -24,22 +24,20 @@
 #include "absl/base/nullability.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/driver/driver.pb.h"
-#include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
+#include "maldoca/js/ir/analyses/constant_propagation/dynamic_analysis.h"
 
 namespace maldoca {
 
 class DynamicPrelude;
-class JsirDynamicConstantPropagationAnalysis;
 
-
+// Always runs JsirDynamicConstantPropagationAnalysis. With no prelude, the
+// analysis falls back to ordinary constant propagation.
 mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
                                                const BabelScopes &scopes);
 
 mlir::LogicalResult PerformConstantPropagation(
     mlir::Operation *op, JsirConstantPropagationAnalysis &analysis);
 
-// Implemented in dynamic_constant_propagation/pass.cc. Same rewrite as
-// PerformConstantPropagation, using JsirDynamicConstantPropagationAnalysis.
 mlir::LogicalResult PerformDynamicConstantPropagation(
     mlir::Operation *op, const BabelScopes &scopes,
     const JsirAnalysisConfig::DynamicConstantPropagation &config, Babel &babel,
@@ -48,15 +46,15 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
     mlir::Operation *op, const BabelScopes &scopes,
-    DynamicPrelude *dynamic_prelude,
+    DynamicPrelude *absl_nullable dynamic_prelude,
     JsirAnalysisResult::DynamicConstantPropagation
         *absl_nullable analysis_result);
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
     mlir::Operation *op, JsirDynamicConstantPropagationAnalysis &analysis);
 
-// Ordinary and dynamic constant propagation share this pass. When `babel` is
-// set, prelude matching/execution runs first, then the same rewrite.
+// Ordinary (constprop) and dynamic (dynconstprop) share this pass. When babel
+// is set, prelude matching runs first; otherwise the analysis falls back.
 struct JsirConstantPropagationPass
     : public mlir::PassWrapper<JsirConstantPropagationPass,
                                mlir::OperationPass<>> {
