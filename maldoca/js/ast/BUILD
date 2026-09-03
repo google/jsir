@@ -48,9 +48,7 @@ cc_library(
 
 cc_library(
     name = "ast_visitor",
-    hdrs = [
-        "ast_visitor.h",
-    ],
+    hdrs = ["ast_visitor.generated.h"],
     deps = [
         ":ast",
         "@abseil-cpp//absl/log",
@@ -60,9 +58,7 @@ cc_library(
 
 cc_library(
     name = "ast_walker",
-    hdrs = [
-        "ast_walker.h",
-    ],
+    hdrs = ["ast_walker.generated.h"],
     deps = [
         ":ast",
         ":ast_visitor",

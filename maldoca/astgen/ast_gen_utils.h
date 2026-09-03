@@ -42,6 +42,14 @@ inline std::string GetAstHeaderPath(absl::string_view ast_path) {
   return JoinPath(ast_path, "ast.generated.h");
 }
 
+inline std::string GetAstVisitorHeaderPath(absl::string_view ast_path) {
+  return JoinPath(ast_path, "ast_visitor.generated.h");
+}
+
+inline std::string GetAstWalkerHeaderPath(absl::string_view ast_path) {
+  return JoinPath(ast_path, "ast_walker.generated.h");
+}
+
 struct TabPrinterOptions {
   std::function<void()> print_prefix = nullptr;
   std::function<void()> print_separator = nullptr;
