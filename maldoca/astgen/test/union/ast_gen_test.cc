@@ -30,6 +30,10 @@ INSTANTIATE_TEST_SUITE_P(
         .ir_path = "maldoca/astgen/test/union",
         .expected_ast_header_path =
             "maldoca/astgen/test/union/ast.generated.h",
+        .expected_ast_visitor_header_path =
+            "maldoca/astgen/test/union/ast_visitor.generated.h",
+        .expected_ast_walker_header_path =
+            "maldoca/astgen/test/union/ast_walker.generated.h",
         .expected_ast_source_path =
             "maldoca/astgen/test/union/ast.generated.cc",
         .expected_ast_to_json_path =
