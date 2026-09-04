@@ -123,7 +123,7 @@ BabelAstString GetAstStringFromFileAst(const JsFile& file) {
 
   BabelAstString result;
   result.set_value(ast_json_str);
-  result.set_string_literals_base64_encoded(false);
+  result.set_string_values_base64_encoded(false);
   return result;
 }
 
