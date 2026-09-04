@@ -38,6 +38,7 @@ namespace maldoca {
 using ::absl_testing::StatusIs;
 using ::maldoca::testing::EqualsProto;
 using ::testing::ElementsAre;
+using ::testing::HasSubstr;
 using ::testing::IsEmpty;
 using ::testing::StrEq;
 using ::testing::StrNe;
@@ -78,6 +79,32 @@ TEST_P(BabelTest, ParseSimpleCode) {
 
   EXPECT_THAT(result.ast_string.value(), StrNe(""));
   EXPECT_THAT(result.errors, EqualsProto(""));
+}
+
+static constexpr char kInvalidSurrogate[] = R"(var i = "\udf06\ud834";)";
+
+TEST_P(BabelTest, ParseInvalidSurrogate) {
+  std::unique_ptr<Babel> babel = GetParam().babel_factory();
+  BabelParseRequest request;
+  request.set_base64_encode_string_literals(true);
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      BabelParseResult parse_result,
+      babel->Parse(kInvalidSurrogate, request, absl::InfiniteDuration()));
+
+  EXPECT_THAT(parse_result.ast_string.value(), StrNe(""));
+  EXPECT_THAT(parse_result.errors, EqualsProto(""));
+  EXPECT_TRUE(parse_result.ast_string.string_literals_base64_encoded());
+  // Base64 encoding for "\udf06\ud834" (UTF-16LE: 0x06, 0xdf, 0x34, 0xd8).
+  EXPECT_THAT(parse_result.ast_string.value(), HasSubstr("Bt802A=="));
+
+  BabelGenerateOptions generate_options;
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      BabelGenerateResult generate_result,
+      babel->Generate(parse_result.ast_string, generate_options,
+                      absl::InfiniteDuration()));
+
+  EXPECT_EQ(generate_result.source_code, kInvalidSurrogate);
+  EXPECT_EQ(generate_result.error, std::nullopt);
 }
 
 TEST_P(BabelTest, ParseVarDef) {

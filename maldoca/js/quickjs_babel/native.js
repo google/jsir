@@ -16,24 +16,92 @@ exports = {};
 // |---------+--------------------+---------------------------+
 // |   C++   | absl::Base64Escape | absl::WebSafeBase64Escape |
 // +---------+--------------------+---------------------------+
+const kBase64Chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const kBase64Lookup = new Uint8Array(256);
+for (let i = 0; i < kBase64Chars.length; i++) {
+  kBase64Lookup[kBase64Chars.charCodeAt(i)] = i;
+}
+
 /**
- * Base64-encodes a string.
+ * Base64-encodes a string using UTF-16LE encoding.
  *
  * @param {string} value
  * @return {string}
  */
 function base64Encode(value) {
-  return atob(value);
+  const binary = new Uint8Array(value.length * 2);
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    binary[i * 2] = code & 0xff;
+    binary[i * 2 + 1] = (code >> 8) & 0xff;
+  }
+  const res = [];
+  let i = 0;
+  for (; i + 2 < binary.length; i += 3) {
+    const triplet = (binary[i] << 16) | (binary[i + 1] << 8) | binary[i + 2];
+    res.push(
+        kBase64Chars[(triplet >> 18) & 0b111111] +
+        kBase64Chars[(triplet >> 12) & 0b111111] +
+        kBase64Chars[(triplet >> 6) & 0b111111] +
+        kBase64Chars[triplet & 0b111111]);
+  }
+  if (i < binary.length) {
+    if (i + 1 < binary.length) {
+      const triplet = (binary[i] << 16) | (binary[i + 1] << 8);
+      res.push(
+          kBase64Chars[(triplet >> 18) & 0b111111] +
+          kBase64Chars[(triplet >> 12) & 0b111111] +
+          kBase64Chars[(triplet >> 6) & 0b111111] +
+          '=');
+    } else {
+      const triplet = binary[i] << 16;
+      res.push(
+          kBase64Chars[(triplet >> 18) & 0b111111] +
+          kBase64Chars[(triplet >> 12) & 0b111111] +
+          '==');
+    }
+  }
+  return res.join('');
 }
 
 /**
- * Base64-decodes a string.
+ * Base64-decodes a string from UTF-16LE.
  *
  * @param {string} value
  * @return {string}
  */
 function base64Decode(value) {
-  return btoa(value);
+  const buffer = [];
+  let i = 0;
+  while (i < value.length) {
+    if (value[i] === '=') break;
+    const b0 = kBase64Lookup[value.charCodeAt(i++)];
+    if (i >= value.length || value[i] === '=') break;
+    const b1 = kBase64Lookup[value.charCodeAt(i++)];
+    if (i >= value.length || value[i] === '=') {
+      const triplet = (b0 << 18) | (b1 << 12);
+      buffer.push((triplet >> 16) & 0xff);
+      break;
+    }
+    const b2 = kBase64Lookup[value.charCodeAt(i++)];
+    if (i >= value.length || value[i] === '=') {
+      const triplet = (b0 << 18) | (b1 << 12) | (b2 << 6);
+      buffer.push((triplet >> 16) & 0xff);
+      buffer.push((triplet >> 8) & 0xff);
+      break;
+    }
+    const b3 = kBase64Lookup[value.charCodeAt(i++)];
+    const triplet = (b0 << 18) | (b1 << 12) | (b2 << 6) | b3;
+    buffer.push((triplet >> 16) & 0xff);
+    buffer.push((triplet >> 8) & 0xff);
+    buffer.push(triplet & 0xff);
+  }
+  const res = [];
+  for (let j = 0; j + 1 < buffer.length; j += 2) {
+    res.push(String.fromCharCode(buffer[j] | (buffer[j + 1] << 8)));
+  }
+  return res.join('');
 }
 
 /**
@@ -48,7 +116,7 @@ function traverseObjectInternal(node, visited, callback) {
     return;
   }
 
-  if (typeof(node) !== 'object') {
+  if (typeof (node) !== 'object') {
     return;
   }
 
@@ -311,10 +379,6 @@ function parseInternal(source, options) {
     });
   }
 
-  if (options?.base64EncodeStringLiterals) {
-    base64EncodeStringLiterals(ast);
-  }
-
   convertCommentsToCommentUids(ast);
 
   // Store all scopes in a dictionary, and add a scope UID to each AST node.
@@ -369,6 +433,10 @@ function parseInternal(source, options) {
     }
   }
 
+  if (options && options.base64EncodeStringLiterals) {
+    base64EncodeStringLiterals(ast);
+  }
+
   // We don't serialize to JSON even though it's possible. The reason is that
   // the AST of TSCompiler (the other choice) cannot be directly serialized due
   // to the existence of parent pointers. Therefore, it would not be a fair
@@ -386,7 +454,7 @@ exports.parseInternal = parseInternal;
  * @return {string}
  */
 function generateInternal(ast, options) {
-  if (options.base64DecodeStringLiterals) {
+  if (options && options.base64DecodeStringLiterals) {
     base64DecodeStringLiterals(ast);
   }
 
