@@ -29,6 +29,8 @@
 #include "maldoca/astgen/ast_serialize_printer.h"
 #include "maldoca/astgen/ast_source_printer.h"
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
+#include "maldoca/astgen/ast_visitor_header_printer.h"
+#include "maldoca/astgen/ast_walker_header_printer.h"
 #include "maldoca/astgen/ir_table_gen_printer.h"
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/astgen/ts_interface_printer.h"
@@ -80,6 +82,46 @@ TEST_P(AstGenTest, AstHdrTest) {
     LOG(INFO) << " expected_ast_h_path: " << expected_ast_h_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ast_hdr),
               absl::StripAsciiWhitespace(expected_ast_hdr));
+  }
+}
+
+TEST_P(AstGenTest, AstVisitorHdrTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ast_visitor_hdr = PrintAstVisitorHeader(
+      ast_def, GetParam().cc_namespace, GetParam().ast_path);
+
+  std::cout << ast_visitor_hdr << std::endl;
+
+  if (GetParam().expected_ast_visitor_header_path.has_value()) {
+    auto expected_ast_visitor_h_path =
+        GetDataDependencyFilepath(*GetParam().expected_ast_visitor_header_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_visitor_hdr,
+                         GetFileContents(expected_ast_visitor_h_path));
+
+    LOG(INFO) << " expected_ast_visitor_h_path: "
+              << expected_ast_visitor_h_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ast_visitor_hdr),
+              absl::StripAsciiWhitespace(expected_ast_visitor_hdr));
+  }
+}
+
+TEST_P(AstGenTest, AstWalkerHdrTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ast_walker_hdr = PrintAstWalkerHeader(
+      ast_def, GetParam().cc_namespace, GetParam().ast_path);
+
+  std::cout << ast_walker_hdr << std::endl;
+
+  if (GetParam().expected_ast_walker_header_path.has_value()) {
+    auto expected_ast_walker_h_path =
+        GetDataDependencyFilepath(*GetParam().expected_ast_walker_header_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_walker_hdr,
+                         GetFileContents(expected_ast_walker_h_path));
+
+    LOG(INFO) << " expected_ast_walker_h_path: "
+              << expected_ast_walker_h_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ast_walker_hdr),
+              absl::StripAsciiWhitespace(expected_ast_walker_hdr));
   }
 }
 
