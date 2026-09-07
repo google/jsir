@@ -92,7 +92,16 @@ static mlir::LogicalResult ReplaceUsesWithConstant(
 
 mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
                                                const BabelScopes &scopes) {
-  return PerformDynamicConstantPropagation(op, scopes, nullptr, nullptr);
+  mlir::DataFlowSolver solver;
+
+  auto *analysis = solver.load<JsirConstantPropagationAnalysis>(&scopes);
+
+  mlir::LogicalResult result = solver.initializeAndRun(op);
+  if (mlir::failed(result)) {
+    return result;
+  }
+
+  return PerformConstantPropagation(op, *analysis);
 }
 
 mlir::ChangeResult TransformInlineCall(
@@ -311,8 +320,7 @@ void JsirConstantPropagationPass::getDependentDialects(
 
 void JsirConstantPropagationPass::runOnOperation() {
   if (babel_ == nullptr) {
-    if (mlir::failed(PerformDynamicConstantPropagation(
-            getOperation(), scopes_, nullptr, nullptr))) {
+    if (mlir::failed(PerformConstantPropagation(getOperation(), scopes_))) {
       signalPassFailure();
     }
     return;
