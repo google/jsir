@@ -72,13 +72,13 @@ absl::StatusOr<std::unique_ptr<JsConversion>> JsConversion::Create(
       return std::make_unique<JsAstToAstString>();
     }
 
-    case JsConversionConfig::KindCase::kJsAstToHir: {
+    case JsConversionConfig::KindCase::kJsAstToJsir: {
       MALDOCA_RET_CHECK(mlir_context != nullptr);
-      return std::make_unique<JsAstToHir>(mlir_context);
+      return std::make_unique<JsAstToJsir>(mlir_context);
     }
 
-    case JsConversionConfig::KindCase::kJsHirToAst: {
-      return std::make_unique<JsHirToAst>();
+    case JsConversionConfig::KindCase::kJsirToAst: {
+      return std::make_unique<JsirToAst>();
     }
   }
 }
@@ -168,20 +168,20 @@ absl::StatusOr<std::unique_ptr<JsAstStringRepr>> JsAstToAstString::Convert(
 // JsAstToHir
 // =============================================================================
 
-absl::StatusOr<std::unique_ptr<JsHirRepr>> JsAstToHir::Convert(
-    const JsAstRepr &from) {
-  ABSL_ASSIGN_OR_RETURN(auto op, AstToJshirFile(*from.ast, mlir_context_));
-  return std::make_unique<JsHirRepr>(std::move(op), from.scopes,
-                                     from.source_map);
+absl::StatusOr<std::unique_ptr<JsirRepr>> JsAstToJsir::Convert(
+    const JsAstRepr& from) {
+  ABSL_ASSIGN_OR_RETURN(auto op, AstToJsirFile(*from.ast, mlir_context_));
+  return std::make_unique<JsirRepr>(std::move(op), from.scopes,
+                                    from.source_map);
 }
 
 // =============================================================================
 // JsHirToAst
 // =============================================================================
 
-absl::StatusOr<std::unique_ptr<JsAstRepr>> JsHirToAst::Convert(
-    const JsHirRepr &from) {
-  ABSL_ASSIGN_OR_RETURN(auto ast, JshirFileToAst(*from.op));
+absl::StatusOr<std::unique_ptr<JsAstRepr>> JsirToAst::Convert(
+    const JsirRepr& from) {
+  ABSL_ASSIGN_OR_RETURN(auto ast, JsirFileToAst(*from.op));
   return std::make_unique<JsAstRepr>(std::move(ast), from.scopes,
                                      from.source_map);
 }
