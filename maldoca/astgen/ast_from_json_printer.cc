@@ -520,7 +520,7 @@ void AstFromJsonPrinter::PrintFromJsonFunction(const NodeDef& node,
       Println();
 
       // Call the constructor.
-      Print("return absl::make_unique<$NodeType$>(\n");
+      Print("return std::make_unique<$NodeType$>(\n");
       {
         auto indent = WithIndent(4);
         TabPrinter tab_printer{{

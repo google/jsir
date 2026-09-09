@@ -82,7 +82,7 @@ AIdentifier::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto name, AIdentifier::GetName(json));
 
-  return absl::make_unique<AIdentifier>(
+  return std::make_unique<AIdentifier>(
       std::move(name));
 }
 
@@ -117,7 +117,7 @@ AAssignment::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto lhs, AAssignment::GetLhs(json));
   ABSL_ASSIGN_OR_RETURN(auto rhs, AAssignment::GetRhs(json));
 
-  return absl::make_unique<AAssignment>(
+  return std::make_unique<AAssignment>(
       std::move(lhs),
       std::move(rhs));
 }

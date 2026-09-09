@@ -72,7 +72,7 @@ ENode::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto unary_operator, ENode::GetUnaryOperator(json));
   ABSL_ASSIGN_OR_RETURN(auto escaped_char, ENode::GetEscapedChar(json));
 
-  return absl::make_unique<ENode>(
+  return std::make_unique<ENode>(
       std::move(unary_operator),
       std::move(escaped_char));
 }
