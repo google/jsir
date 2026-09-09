@@ -92,7 +92,7 @@ ENode::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto name, ENode::GetName(json));
   ABSL_ASSIGN_OR_RETURN(auto content, ENode::GetContent(json));
 
-  return absl::make_unique<ENode>(
+  return std::make_unique<ENode>(
       std::move(name),
       std::move(content));
 }
@@ -118,7 +118,7 @@ ESubNodeA::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto value_a, ESubNodeA::GetValueA(json));
 
-  return absl::make_unique<ESubNodeA>(
+  return std::make_unique<ESubNodeA>(
       std::move(value_a));
 }
 
@@ -143,7 +143,7 @@ ESubNodeB::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto value_b, ESubNodeB::GetValueB(json));
 
-  return absl::make_unique<ESubNodeB>(
+  return std::make_unique<ESubNodeB>(
       std::move(value_b));
 }
 

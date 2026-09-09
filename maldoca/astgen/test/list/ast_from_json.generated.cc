@@ -59,7 +59,7 @@ LiClass1::FromJson(const nlohmann::json& json) {
   }
 
 
-  return absl::make_unique<LiClass1>(
+  return std::make_unique<LiClass1>(
   );
 }
 
@@ -81,7 +81,7 @@ LiClass2::FromJson(const nlohmann::json& json) {
   }
 
 
-  return absl::make_unique<LiClass2>(
+  return std::make_unique<LiClass2>(
   );
 }
 
@@ -120,7 +120,7 @@ LiSimpleList::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto strings, LiSimpleList::GetStrings(json));
   ABSL_ASSIGN_OR_RETURN(auto operations, LiSimpleList::GetOperations(json));
 
-  return absl::make_unique<LiSimpleList>(
+  return std::make_unique<LiSimpleList>(
       std::move(strings),
       std::move(operations));
 }
@@ -148,7 +148,7 @@ LiOptionalList::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto strings, LiOptionalList::GetStrings(json));
 
-  return absl::make_unique<LiOptionalList>(
+  return std::make_unique<LiOptionalList>(
       std::move(strings));
 }
 
@@ -191,7 +191,7 @@ LiListOfOptional::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto strings, LiListOfOptional::GetStrings(json));
   ABSL_ASSIGN_OR_RETURN(auto operations, LiListOfOptional::GetOperations(json));
 
-  return absl::make_unique<LiListOfOptional>(
+  return std::make_unique<LiListOfOptional>(
       std::move(strings),
       std::move(operations));
 }
@@ -247,7 +247,7 @@ LiListOfVariant::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto variants, LiListOfVariant::GetVariants(json));
   ABSL_ASSIGN_OR_RETURN(auto operations, LiListOfVariant::GetOperations(json));
 
-  return absl::make_unique<LiListOfVariant>(
+  return std::make_unique<LiListOfVariant>(
       std::move(variants),
       std::move(operations));
 }
@@ -277,7 +277,7 @@ LiOptionalListOfOptional::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfOptional::GetVariants(json));
 
-  return absl::make_unique<LiOptionalListOfOptional>(
+  return std::make_unique<LiOptionalListOfOptional>(
       std::move(variants));
 }
 
@@ -312,7 +312,7 @@ LiOptionalListOfVariant::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfVariant::GetVariants(json));
 
-  return absl::make_unique<LiOptionalListOfVariant>(
+  return std::make_unique<LiOptionalListOfVariant>(
       std::move(variants));
 }
 
@@ -371,7 +371,7 @@ LiListOfOptionalVariant::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto variants, LiListOfOptionalVariant::GetVariants(json));
   ABSL_ASSIGN_OR_RETURN(auto operations, LiListOfOptionalVariant::GetOperations(json));
 
-  return absl::make_unique<LiListOfOptionalVariant>(
+  return std::make_unique<LiListOfOptionalVariant>(
       std::move(variants),
       std::move(operations));
 }
@@ -409,7 +409,7 @@ LiOptionalListOfOptionalVariant::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto variants, LiOptionalListOfOptionalVariant::GetVariants(json));
 
-  return absl::make_unique<LiOptionalListOfOptionalVariant>(
+  return std::make_unique<LiOptionalListOfOptionalVariant>(
       std::move(variants));
 }
 
