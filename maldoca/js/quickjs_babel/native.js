@@ -146,75 +146,38 @@ function traverseObject(node, callback) {
 }
 
 /**
- * A StringLiteral looks like this:
- *
- * {
- *   type: 'StringLiteral',
- *   value: 'a',
- *   extra: {
- *     rawValue: 'a',
- *     raw: '"\u0061"',
- *   },
- * }
- *
- * We want to base64-encode/decode node.value and node.extra.rawValue.
- *
- * @param {!Object} node
- * @param {!Set<!Object>} visited
- * @param {function(string): string} mutate
- */
-function mutateStringLiteral(node, visited, mutate) {
-  if ('value' in node && typeof (node.value) === 'string') {
-    node.value = mutate(node.value);
-  }
-
-  if ('extra' in node && typeof (node.extra) === 'object') {
-    const extra = node.extra;
-
-    // Sometimes the same object appears multiple times in the AST, probably to
-    // reduce memory usage.
-    if (visited.has(extra)) {
-      return;
-    }
-    visited.add(extra);
-
-    if ('rawValue' in extra && typeof (extra.rawValue) === 'string') {
-      extra.rawValue = mutate(extra.rawValue);
-    }
-  }
-}
-
-/**
- * Base64-encode/decode all StringLiterals in the AST.
+ * Base64-encode/decode all string values in the AST.
  *
  * @param {!Object} node
  * @param {function(string): string} mutate
  */
-function mutateStringLiterals(node, mutate) {
-  const visited = new Set();
+function mutateStrings(node, mutate) {
   traverseObject(node, (n) => {
-    if ('type' in n && n.type === 'StringLiteral') {
-      mutateStringLiteral(n, visited, mutate);
+    for (const key of Object.keys(n)) {
+      const val = n[key];
+      if (typeof val === 'string') {
+        n[key] = mutate(val);
+      }
     }
   });
 }
 
 /**
- * Base64-encode all StringLiterals in the AST.
+ * Base64-encode all string values in the AST.
  *
  * @param {!Object} node
  */
-function base64EncodeStringLiterals(node) {
-  mutateStringLiterals(node, base64Encode);
+function base64EncodeStringValues(node) {
+  mutateStrings(node, base64Encode);
 }
 
 /**
- * Base64-decode all StringLiterals in the AST.
+ * Base64-decode all string values in the AST.
  *
  * @param {!Object} node
  */
-function base64DecodeStringLiterals(node) {
-  mutateStringLiterals(node, base64Decode);
+function base64DecodeStringValues(node) {
+  mutateStrings(node, base64Decode);
 }
 
 // =============================================================================
@@ -362,21 +325,7 @@ function parseInternal(source, options) {
   const ast = Babel.packages.parser.parse(source, options);
 
   if (options?.replaceInvalidSurrogatePairs) {
-    Babel.packages.traverse.default(ast, {
-      StringLiteral: (path) => {
-        const node = path.node;
-        if ('extra' in node) {
-          const extra = node.extra;
-          if ('rawValue' in extra) {
-            extra.rawValue = replaceInvalidSurrogatePairs(extra.rawValue);
-          }
-        }
-
-        if ('value' in node) {
-          node.value = replaceInvalidSurrogatePairs(node.value);
-        }
-      }
-    });
+    mutateStrings(ast, replaceInvalidSurrogatePairs);
   }
 
   convertCommentsToCommentUids(ast);
@@ -433,8 +382,8 @@ function parseInternal(source, options) {
     }
   }
 
-  if (options && options.base64EncodeStringLiterals) {
-    base64EncodeStringLiterals(ast);
+  if (options && options.base64EncodeStringValues) {
+    base64EncodeStringValues(ast);
   }
 
   // We don't serialize to JSON even though it's possible. The reason is that
@@ -454,8 +403,8 @@ exports.parseInternal = parseInternal;
  * @return {string}
  */
 function generateInternal(ast, options) {
-  if (options && options.base64DecodeStringLiterals) {
-    base64DecodeStringLiterals(ast);
+  if (options && options.base64DecodeStringValues) {
+    base64DecodeStringValues(ast);
   }
 
   convertCommentUidsToComments(ast);
@@ -546,9 +495,13 @@ exports.parse = function(sourceCode, optionsSerialized) {
           }
         })();
 
+        let name = binding.identifier ? binding.identifier.name : undefined;
+        if (name && options?.base64EncodeStringValues) {
+          name = base64Decode(name);
+        }
         const bindingPb = {
           kind: bindingKindPb,
-          name: binding.identifier ? binding.identifier.name : undefined,
+          name: name,
           uid: bindingId,
         };
 

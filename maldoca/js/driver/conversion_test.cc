@@ -106,7 +106,7 @@ absl::StatusOr<TestCase> GetTestCase() {
 
   BabelAstString babel_ast_string;
   babel_ast_string.set_value(CompactJsonString(parsed_ast_json_str));
-  babel_ast_string.set_string_literals_base64_encoded(false);
+  babel_ast_string.set_string_values_base64_encoded(false);
   *babel_ast_string.mutable_scopes() = scopes;
 
   ABSL_ASSIGN_OR_RETURN(std::string serialized_ast_json_str,
@@ -126,7 +126,7 @@ absl::StatusOr<TestCase> GetTestCase() {
 
   BabelAstString lifted_babel_ast_string;
   lifted_babel_ast_string.set_value(CompactJsonString(serialized_ast_json_str));
-  lifted_babel_ast_string.set_string_literals_base64_encoded(false);
+  lifted_babel_ast_string.set_string_values_base64_encoded(false);
   *lifted_babel_ast_string.mutable_scopes() = scopes;
 
   return TestCase{

@@ -81,21 +81,61 @@ TEST_P(BabelTest, ParseSimpleCode) {
   EXPECT_THAT(result.errors, EqualsProto(""));
 }
 
-static constexpr char kInvalidSurrogate[] = R"(var i = "\udf06\ud834";)";
+static constexpr char kInvalidSurrogate[] =
+    "var i = \"\\udf06\\ud834\";\n"
+    "var j = `\\udf06\\ud834`;";
 
 TEST_P(BabelTest, ParseInvalidSurrogate) {
   std::unique_ptr<Babel> babel = GetParam().babel_factory();
   BabelParseRequest request;
-  request.set_base64_encode_string_literals(true);
+  request.set_base64_encode_string_values(true);
+  request.set_compute_scopes(true);
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       BabelParseResult parse_result,
       babel->Parse(kInvalidSurrogate, request, absl::InfiniteDuration()));
 
   EXPECT_THAT(parse_result.ast_string.value(), StrNe(""));
   EXPECT_THAT(parse_result.errors, EqualsProto(""));
-  EXPECT_TRUE(parse_result.ast_string.string_literals_base64_encoded());
+  EXPECT_TRUE(parse_result.ast_string.string_values_base64_encoded());
   // Base64 encoding for "\udf06\ud834" (UTF-16LE: 0x06, 0xdf, 0x34, 0xd8).
   EXPECT_THAT(parse_result.ast_string.value(), HasSubstr("Bt802A=="));
+  // Base64 encoding for identifier name "i" (UTF-16LE: 0x69, 0x00).
+  EXPECT_THAT(parse_result.ast_string.value(), HasSubstr("aQA="));
+  // Base64 encoding for identifier name "j" (UTF-16LE: 0x6a, 0x00).
+  EXPECT_THAT(parse_result.ast_string.value(), HasSubstr("agA="));
+
+  EXPECT_THAT(parse_result.ast_string.scopes(), EqualsProto(R"pb(
+                scopes {
+                  key: 0
+                  value {
+                    uid: 0
+                    binding_uids {
+                      key: "i"
+                      value: 0
+                    }
+                    binding_uids {
+                      key: "j"
+                      value: 1
+                    }
+                  }
+                }
+                bindings {
+                  key: 0
+                  value {
+                    kind: KIND_VAR
+                    name: "i"
+                    uid: 0
+                  }
+                }
+                bindings {
+                  key: 1
+                  value {
+                    kind: KIND_VAR
+                    name: "j"
+                    uid: 1
+                  }
+                }
+              )pb"));
 
   BabelGenerateOptions generate_options;
   MALDOCA_ASSERT_OK_AND_ASSIGN(

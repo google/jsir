@@ -49,7 +49,7 @@ nlohmann::json BabelParseOptionsToJson(const BabelParseRequest &request) {
 
   nlohmann::json options{
       // Our custom options:
-      {"base64EncodeStringLiterals", request.base64_encode_string_literals()},
+      {"base64EncodeStringValues", request.base64_encode_string_values()},
       {"replaceInvalidSurrogatePairs",
        request.replace_invalid_surrogate_pairs()},
       {"computeScopes", request.compute_scopes()},
@@ -70,11 +70,11 @@ nlohmann::json BabelParseOptionsToJson(const BabelParseRequest &request) {
 }
 
 nlohmann::json BabelGenerateOptionsToJson(const BabelGenerateOptions &options,
-                                          bool string_literals_base64_encoded) {
+                                          bool string_values_base64_encoded) {
   nlohmann::json json{
       {"comments", options.include_comments()},
       {"compact", options.compact()},
-      {"base64DecodeStringLiterals", string_literals_base64_encoded},
+      {"base64DecodeStringValues", string_values_base64_encoded},
       {"sourceMaps", options.source_maps()},
   };
 
