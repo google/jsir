@@ -18,7 +18,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
@@ -39,8 +39,7 @@
 namespace maldoca {
 
 absl::StatusOr<AstDef> AstGenTest::LoadAstDef() const {
-  auto ast_def_path =
-      GetDataDependencyFilepath(GetParam().ast_def_path);
+  auto ast_def_path = GetDataDependencyFilepath(GetParam().ast_def_path);
   AstDefPb ast_def_pb;
   ABSL_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
   ABSL_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
@@ -56,9 +55,9 @@ TEST_P(AstGenTest, PrintTsInterfaceTest) {
     auto ts_interface_path =
         GetDataDependencyFilepath(*GetParam().ts_interface_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ts_interface,
-                         GetFileContents(ts_interface_path));
+                                 GetFileContents(ts_interface_path));
 
-    LOG(INFO) << "ts_interface_path: " << ts_interface_path;
+    ABSL_LOG(INFO) << "ts_interface_path: " << ts_interface_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ts_interface),
               absl::StripAsciiWhitespace(expected_ts_interface));
   }
@@ -75,9 +74,9 @@ TEST_P(AstGenTest, AstHdrTest) {
     auto expected_ast_h_path =
         GetDataDependencyFilepath(*GetParam().expected_ast_header_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_hdr,
-                         GetFileContents(expected_ast_h_path));
+                                 GetFileContents(expected_ast_h_path));
 
-    LOG(INFO) << " expected_ast_h_path: " << expected_ast_h_path;
+    ABSL_LOG(INFO) << " expected_ast_h_path: " << expected_ast_h_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ast_hdr),
               absl::StripAsciiWhitespace(expected_ast_hdr));
   }
@@ -94,9 +93,9 @@ TEST_P(AstGenTest, AstSrcTest) {
     auto expected_ast_src_path =
         GetDataDependencyFilepath(*GetParam().expected_ast_source_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_src,
-                         GetFileContents(expected_ast_src_path));
+                                 GetFileContents(expected_ast_src_path));
 
-    LOG(INFO) << " expected_ast_src_path: " << expected_ast_src_path;
+    ABSL_LOG(INFO) << " expected_ast_src_path: " << expected_ast_src_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ast_src),
               absl::StripAsciiWhitespace(expected_ast_src));
   }
@@ -110,12 +109,13 @@ TEST_P(AstGenTest, AstToJsonTest) {
   std::cout << ast_to_json << std::endl;
 
   if (GetParam().expected_ast_to_json_path.has_value()) {
-    auto expected_ast_to_json_path = GetDataDependencyFilepath(
-        *GetParam().expected_ast_to_json_path);
+    auto expected_ast_to_json_path =
+        GetDataDependencyFilepath(*GetParam().expected_ast_to_json_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_to_json,
-                         GetFileContents(expected_ast_to_json_path));
+                                 GetFileContents(expected_ast_to_json_path));
 
-    LOG(INFO) << " expected_ast_to_json_path: " << expected_ast_to_json_path;
+    ABSL_LOG(INFO) << " expected_ast_to_json_path: "
+                   << expected_ast_to_json_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ast_to_json),
               absl::StripAsciiWhitespace(expected_ast_to_json));
   }
@@ -129,13 +129,13 @@ TEST_P(AstGenTest, AstFromJsonTest) {
   std::cout << ast_from_json << std::endl;
 
   if (GetParam().expected_ast_from_json_path.has_value()) {
-    auto expected_ast_from_json_path = GetDataDependencyFilepath(
-        *GetParam().expected_ast_from_json_path);
+    auto expected_ast_from_json_path =
+        GetDataDependencyFilepath(*GetParam().expected_ast_from_json_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_from_json,
-                         GetFileContents(expected_ast_from_json_path));
+                                 GetFileContents(expected_ast_from_json_path));
 
-    LOG(INFO) << " expected_ast_from_json_path: "
-              << expected_ast_from_json_path;
+    ABSL_LOG(INFO) << " expected_ast_from_json_path: "
+                   << expected_ast_from_json_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ast_from_json),
               absl::StripAsciiWhitespace(expected_ast_from_json));
   }
@@ -150,12 +150,13 @@ TEST_P(AstGenTest, IrTableGenTest) {
   std::cout << ir_tablegen << std::endl;
 
   if (GetParam().expected_ir_tablegen_path.has_value()) {
-    auto expected_ir_tablegen_path = GetDataDependencyFilepath(
-        *GetParam().expected_ir_tablegen_path);
+    auto expected_ir_tablegen_path =
+        GetDataDependencyFilepath(*GetParam().expected_ir_tablegen_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ir_tablegen,
-                         GetFileContents(expected_ir_tablegen_path));
+                                 GetFileContents(expected_ir_tablegen_path));
 
-    LOG(INFO) << " expected_ir_tablegen_path: " << expected_ir_tablegen_path;
+    ABSL_LOG(INFO) << " expected_ir_tablegen_path: "
+                   << expected_ir_tablegen_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ir_tablegen),
               absl::StripAsciiWhitespace(expected_ir_tablegen));
   }
@@ -171,12 +172,12 @@ TEST_P(AstGenTest, AstToIrTest) {
   std::cout << ast_to_ir_source << std::endl;
 
   if (GetParam().expected_ast_to_ir_source_path.has_value()) {
-    auto cc_ast_to_ir_source_path = GetDataDependencyFilepath(
-        *GetParam().expected_ast_to_ir_source_path);
+    auto cc_ast_to_ir_source_path =
+        GetDataDependencyFilepath(*GetParam().expected_ast_to_ir_source_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_to_ir_source,
-                         GetFileContents(cc_ast_to_ir_source_path));
+                                 GetFileContents(cc_ast_to_ir_source_path));
 
-    LOG(INFO) << " cc_ast_to_ir_source_path: " << cc_ast_to_ir_source_path;
+    ABSL_LOG(INFO) << " cc_ast_to_ir_source_path: " << cc_ast_to_ir_source_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ast_to_ir_source),
               absl::StripAsciiWhitespace(expected_ast_to_ir_source));
   }
@@ -192,12 +193,12 @@ TEST_P(AstGenTest, IrToAstTest) {
   std::cout << ir_to_ast_source << std::endl;
 
   if (GetParam().expected_ir_to_ast_source_path.has_value()) {
-    auto cc_ir_to_ast_source_path = GetDataDependencyFilepath(
-        *GetParam().expected_ir_to_ast_source_path);
+    auto cc_ir_to_ast_source_path =
+        GetDataDependencyFilepath(*GetParam().expected_ir_to_ast_source_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ir_to_ast_source,
-                         GetFileContents(cc_ir_to_ast_source_path));
+                                 GetFileContents(cc_ir_to_ast_source_path));
 
-    LOG(INFO) << " cc_ast_to_ir_source_path: " << cc_ir_to_ast_source_path;
+    ABSL_LOG(INFO) << " cc_ast_to_ir_source_path: " << cc_ir_to_ast_source_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ir_to_ast_source),
               absl::StripAsciiWhitespace(expected_ir_to_ast_source));
   }

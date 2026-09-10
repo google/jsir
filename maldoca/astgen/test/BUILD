@@ -42,7 +42,7 @@ cc_library(
         "//maldoca/base:filesystem",
         "//maldoca/base:get_runfiles_dir",
         "//maldoca/base/testing:status_matchers",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
