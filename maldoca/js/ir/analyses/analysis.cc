@@ -37,6 +37,7 @@
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/babel.pb.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
+#include "maldoca/js/ir/analyses/constant_propagation/dynamic_analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -73,8 +74,10 @@ absl::StatusOr<JsirAnalysisResult> RunJsirAnalysis(
     case JsirAnalysisConfig::kConstantPropagation: {
       ABSL_ASSIGN_OR_RETURN(
           JsirAnalysisResult::DataFlow detailed_result,
-          RunJsirDataFlowAnalysis<JsirConstantPropagationAnalysis>(op,
-                                                                   &scopes));
+          RunJsirDataFlowAnalysis<JsirDynamicConstantPropagationAnalysis>(
+              op, &scopes, /*dynamic_prelude=*/nullptr,
+              /*const_bindings=*/
+              absl::flat_hash_map<JsSymbolId, mlir::Attribute>{}));
 
       JsirAnalysisResult result;
       result.mutable_constant_propagation()->Swap(&detailed_result);
