@@ -49,8 +49,7 @@ def JsirPositionAttr : AttrDef<Jsir_Dialect, "JsirPosition", []> {
   let assemblyFormat = "`<` `L` $line `C` $column `>`";
 }
 
-def JsirLocationAttr : AttrDef<Jsir_Dialect, "JsirLocation", [],
-                               "::mlir::LocationAttr"> {
+def JsirLocationAttr : AttrDef<Jsir_Dialect, "JsirLocation", []> {
   let mnemonic = "location";
   let parameters = (
     ins
@@ -97,8 +96,7 @@ def JsirSymbolIdAttr : AttrDef<Jsir_Dialect, "JsirSymbolId", []> {
   let assemblyFormat = "params";
 }
 
-def JsirTriviaAttr : AttrDef<Jsir_Dialect, "JsirTrivia", [],
-                             "::mlir::LocationAttr"> {
+def JsirTriviaAttr : LocationAttrDef<Jsir_Dialect, "JsirTrivia", []> {
   let mnemonic = "trivia";
   let parameters = (
     ins
