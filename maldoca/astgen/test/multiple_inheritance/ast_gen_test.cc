@@ -31,6 +31,10 @@ INSTANTIATE_TEST_SUITE_P(
         .expected_ast_header_path =
             "maldoca/astgen/test/"
             "multiple_inheritance/ast.generated.h",
+        .expected_ast_visitor_header_path =
+            "maldoca/astgen/test/multiple_inheritance/ast_visitor.generated.h",
+        .expected_ast_walker_header_path =
+            "maldoca/astgen/test/multiple_inheritance/ast_walker.generated.h",
         .expected_ast_source_path =
             "maldoca/astgen/test/"
             "multiple_inheritance/ast.generated.cc",

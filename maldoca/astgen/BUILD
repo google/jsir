@@ -118,6 +118,36 @@ cc_library(
 )
 
 cc_library(
+    name = "ast_visitor_header_printer",
+    srcs = ["ast_visitor_header_printer.cc"],
+    hdrs = ["ast_visitor_header_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ast_walker_header_printer",
+    srcs = ["ast_walker_header_printer.cc"],
+    hdrs = ["ast_walker_header_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
     name = "ast_source_printer",
     srcs = ["ast_source_printer.cc"],
     hdrs = ["ast_source_printer.h"],
@@ -280,6 +310,8 @@ cc_binary(
         ":ast_serialize_printer",
         ":ast_source_printer",
         ":ast_to_ir_source_printer",
+        ":ast_visitor_header_printer",
+        ":ast_walker_header_printer",
         ":ir_table_gen_printer",
         ":ir_to_ast_source_printer",
         "//maldoca/base:filesystem",

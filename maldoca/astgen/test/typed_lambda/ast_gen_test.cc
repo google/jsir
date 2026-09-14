@@ -30,6 +30,12 @@ INSTANTIATE_TEST_SUITE_P(
         .expected_ast_header_path =
             "maldoca/astgen/test/"
             "typed_lambda/ast.generated.h",
+        .expected_ast_visitor_header_path =
+            "maldoca/astgen/test/"
+            "typed_lambda/ast_visitor.generated.h",
+        .expected_ast_walker_header_path =
+            "maldoca/astgen/test/"
+            "typed_lambda/ast_walker.generated.h",
         .expected_ast_source_path =
             "maldoca/astgen/test/"
             "typed_lambda/ast.generated.cc",

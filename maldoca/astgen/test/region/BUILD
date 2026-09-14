@@ -35,6 +35,8 @@ cc_test(
         "ast_from_json.generated.cc",
         "ast_to_json.generated.cc",
         "ast_ts_interface.generated",
+        "ast_visitor.generated.h",
+        "ast_walker.generated.h",
         "rir_ops.generated.td",
         "//maldoca/astgen/test/region/conversion:ast_to_rir.generated.cc",
         "//maldoca/astgen/test/region/conversion:rir_to_ast.generated.cc",
@@ -42,6 +44,25 @@ cc_test(
     deps = [
         "//maldoca/astgen/test:ast_gen_test_util",
         "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "ast_visitor",
+    hdrs = ["ast_visitor.generated.h"],
+    deps = [
+        ":ast",
+        "@abseil-cpp//absl/log",
+    ],
+)
+
+cc_library(
+    name = "ast_walker",
+    hdrs = ["ast_walker.generated.h"],
+    deps = [
+        ":ast",
+        ":ast_visitor",
+        "@abseil-cpp//absl/log",
     ],
 )
 

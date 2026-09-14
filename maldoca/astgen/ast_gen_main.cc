@@ -33,6 +33,8 @@
 #include "maldoca/astgen/ast_serialize_printer.h"
 #include "maldoca/astgen/ast_source_printer.h"
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
+#include "maldoca/astgen/ast_visitor_header_printer.h"
+#include "maldoca/astgen/ast_walker_header_printer.h"
 #include "maldoca/astgen/ir_table_gen_printer.h"
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/base/filesystem.h"
@@ -101,6 +103,20 @@ absl::Status AstGenMain() {
   auto ast_hdr_path = JoinPath(ast_path, "ast.generated.h");
   std::cout << "Writing ast_hdr to " << ast_hdr_path << "\n";
   ABSL_RETURN_IF_ERROR(SetFileContents(ast_hdr_path, ast_hdr));
+
+  std::string ast_visitor_hdr =
+      PrintAstVisitorHeader(ast_def, cc_namespace, ast_path);
+  auto ast_visitor_hdr_path = JoinPath(ast_path, "ast_visitor.generated.h");
+  std::cout << "Writing ast_visitor_hdr to " << ast_visitor_hdr_path << "\n";
+  ABSL_RETURN_IF_ERROR(
+      SetFileContents(ast_visitor_hdr_path, ast_visitor_hdr));
+
+  std::string ast_walker_hdr =
+      PrintAstWalkerHeader(ast_def, cc_namespace, ast_path);
+  auto ast_walker_hdr_path = JoinPath(ast_path, "ast_walker.generated.h");
+  std::cout << "Writing ast_walker_hdr to " << ast_walker_hdr_path << "\n";
+  ABSL_RETURN_IF_ERROR(
+      SetFileContents(ast_walker_hdr_path, ast_walker_hdr));
 
   std::string ast_src = PrintAstSource(ast_def, cc_namespace, ast_path);
   auto ast_src_path = JoinPath(ast_path, "ast.generated.cc");

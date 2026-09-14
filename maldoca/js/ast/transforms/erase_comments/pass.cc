@@ -17,8 +17,8 @@
 #include <optional>
 
 #include "maldoca/js/ast/ast.generated.h"
-#include "maldoca/js/ast/ast_visitor.h"
-#include "maldoca/js/ast/ast_walker.h"
+#include "maldoca/js/ast/ast_visitor.generated.h"
+#include "maldoca/js/ast/ast_walker.generated.h"
 
 namespace maldoca {
 
