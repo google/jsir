@@ -84,7 +84,7 @@ LaVariable::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto identifier, LaVariable::GetIdentifier(json));
 
-  return absl::make_unique<LaVariable>(
+  return std::make_unique<LaVariable>(
       std::move(identifier));
 }
 
@@ -119,7 +119,7 @@ LaFunctionDefinition::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto parameter, LaFunctionDefinition::GetParameter(json));
   ABSL_ASSIGN_OR_RETURN(auto body, LaFunctionDefinition::GetBody(json));
 
-  return absl::make_unique<LaFunctionDefinition>(
+  return std::make_unique<LaFunctionDefinition>(
       std::move(parameter),
       std::move(body));
 }
@@ -155,7 +155,7 @@ LaFunctionCall::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto function, LaFunctionCall::GetFunction(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, LaFunctionCall::GetArgument(json));
 
-  return absl::make_unique<LaFunctionCall>(
+  return std::make_unique<LaFunctionCall>(
       std::move(function),
       std::move(argument));
 }

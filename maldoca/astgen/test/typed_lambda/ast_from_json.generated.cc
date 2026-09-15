@@ -154,7 +154,7 @@ TlLiteral::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto value, TlLiteral::GetValue(json));
 
-  return absl::make_unique<TlLiteral>(
+  return std::make_unique<TlLiteral>(
       std::move(value));
 }
 
@@ -179,7 +179,7 @@ TlVariable::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto identifier, TlVariable::GetIdentifier(json));
 
-  return absl::make_unique<TlVariable>(
+  return std::make_unique<TlVariable>(
       std::move(identifier));
 }
 
@@ -224,7 +224,7 @@ TlFunctionDefinition::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto parameter_type, TlFunctionDefinition::GetParameterType(json));
   ABSL_ASSIGN_OR_RETURN(auto body, TlFunctionDefinition::GetBody(json));
 
-  return absl::make_unique<TlFunctionDefinition>(
+  return std::make_unique<TlFunctionDefinition>(
       std::move(parameter),
       std::move(parameter_type),
       std::move(body));
@@ -261,7 +261,7 @@ TlFunctionCall::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto caller, TlFunctionCall::GetCaller(json));
   ABSL_ASSIGN_OR_RETURN(auto callee, TlFunctionCall::GetCallee(json));
 
-  return absl::make_unique<TlFunctionCall>(
+  return std::make_unique<TlFunctionCall>(
       std::move(caller),
       std::move(callee));
 }
@@ -277,7 +277,7 @@ TlLiteralType::FromJson(const nlohmann::json& json) {
   }
 
 
-  return absl::make_unique<TlLiteralType>(
+  return std::make_unique<TlLiteralType>(
   );
 }
 
@@ -312,7 +312,7 @@ TlFunctionType::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto parameter_type, TlFunctionType::GetParameterType(json));
   ABSL_ASSIGN_OR_RETURN(auto body_type, TlFunctionType::GetBodyType(json));
 
-  return absl::make_unique<TlFunctionType>(
+  return std::make_unique<TlFunctionType>(
       std::move(parameter_type),
       std::move(body_type));
 }

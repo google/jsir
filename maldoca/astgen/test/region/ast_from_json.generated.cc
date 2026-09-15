@@ -52,7 +52,7 @@ RExpr::FromJson(const nlohmann::json& json) {
   }
 
 
-  return absl::make_unique<RExpr>(
+  return std::make_unique<RExpr>(
   );
 }
 
@@ -77,7 +77,7 @@ RStmt::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto expr, RStmt::GetExpr(json));
 
-  return absl::make_unique<RStmt>(
+  return std::make_unique<RStmt>(
       std::move(expr));
 }
 
@@ -156,7 +156,7 @@ RNode::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto optional_stmt, RNode::GetOptionalStmt(json));
   ABSL_ASSIGN_OR_RETURN(auto stmts, RNode::GetStmts(json));
 
-  return absl::make_unique<RNode>(
+  return std::make_unique<RNode>(
       std::move(expr),
       std::move(optional_expr),
       std::move(exprs),

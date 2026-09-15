@@ -72,7 +72,7 @@ JsPosition::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto line, JsPosition::GetLine(json));
   ABSL_ASSIGN_OR_RETURN(auto column, JsPosition::GetColumn(json));
 
-  return absl::make_unique<JsPosition>(
+  return std::make_unique<JsPosition>(
       std::move(line),
       std::move(column));
 }
@@ -118,7 +118,7 @@ JsSourceLocation::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto end, JsSourceLocation::GetEnd(json));
   ABSL_ASSIGN_OR_RETURN(auto identifier_name, JsSourceLocation::GetIdentifierName(json));
 
-  return absl::make_unique<JsSourceLocation>(
+  return std::make_unique<JsSourceLocation>(
       std::move(start),
       std::move(end),
       std::move(identifier_name));
@@ -195,7 +195,7 @@ JsCommentBlock::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto start, JsComment::GetStart(json));
   ABSL_ASSIGN_OR_RETURN(auto end, JsComment::GetEnd(json));
 
-  return absl::make_unique<JsCommentBlock>(
+  return std::make_unique<JsCommentBlock>(
       std::move(loc),
       std::move(value),
       std::move(start),
@@ -217,7 +217,7 @@ JsCommentLine::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto start, JsComment::GetStart(json));
   ABSL_ASSIGN_OR_RETURN(auto end, JsComment::GetEnd(json));
 
-  return absl::make_unique<JsCommentLine>(
+  return std::make_unique<JsCommentLine>(
       std::move(loc),
       std::move(value),
       std::move(start),
@@ -255,7 +255,7 @@ JsSymbolId::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto name, JsSymbolId::GetName(json));
   ABSL_ASSIGN_OR_RETURN(auto binding_uid, JsSymbolId::GetBindingUid(json));
 
-  return absl::make_unique<JsSymbolId>(
+  return std::make_unique<JsSymbolId>(
       std::move(name),
       std::move(binding_uid));
 }
@@ -593,7 +593,7 @@ JsInterpreterDirective::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsInterpreterDirective::GetValue(json));
 
-  return absl::make_unique<JsInterpreterDirective>(
+  return std::make_unique<JsInterpreterDirective>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -709,7 +709,7 @@ JsDirectiveLiteralExtra::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto raw, JsDirectiveLiteralExtra::GetRaw(json));
   ABSL_ASSIGN_OR_RETURN(auto raw_value, JsDirectiveLiteralExtra::GetRawValue(json));
 
-  return absl::make_unique<JsDirectiveLiteralExtra>(
+  return std::make_unique<JsDirectiveLiteralExtra>(
       std::move(raw),
       std::move(raw_value));
 }
@@ -754,7 +754,7 @@ JsDirectiveLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto value, JsDirectiveLiteral::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto extra, JsDirectiveLiteral::GetExtra(json));
 
-  return absl::make_unique<JsDirectiveLiteral>(
+  return std::make_unique<JsDirectiveLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -798,7 +798,7 @@ JsDirective::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsDirective::GetValue(json));
 
-  return absl::make_unique<JsDirective>(
+  return std::make_unique<JsDirective>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -875,7 +875,7 @@ JsProgram::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsProgram::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto directives, JsProgram::GetDirectives(json));
 
-  return absl::make_unique<JsProgram>(
+  return std::make_unique<JsProgram>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -933,7 +933,7 @@ JsFile::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto program, JsFile::GetProgram(json));
   ABSL_ASSIGN_OR_RETURN(auto comments, JsFile::GetComments(json));
 
-  return absl::make_unique<JsFile>(
+  return std::make_unique<JsFile>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1235,7 +1235,7 @@ JsIdentifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto name, JsIdentifier::GetName(json));
 
-  return absl::make_unique<JsIdentifier>(
+  return std::make_unique<JsIdentifier>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1294,7 +1294,7 @@ JsPrivateName::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsPrivateName::GetId(json));
 
-  return absl::make_unique<JsPrivateName>(
+  return std::make_unique<JsPrivateName>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1356,7 +1356,7 @@ JsRegExpLiteralExtra::FromJson(const nlohmann::json& json) {
 
   ABSL_ASSIGN_OR_RETURN(auto raw, JsRegExpLiteralExtra::GetRaw(json));
 
-  return absl::make_unique<JsRegExpLiteralExtra>(
+  return std::make_unique<JsRegExpLiteralExtra>(
       std::move(raw));
 }
 
@@ -1410,7 +1410,7 @@ JsRegExpLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto flags, JsRegExpLiteral::GetFlags(json));
   ABSL_ASSIGN_OR_RETURN(auto extra, JsRegExpLiteral::GetExtra(json));
 
-  return absl::make_unique<JsRegExpLiteral>(
+  return std::make_unique<JsRegExpLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1445,7 +1445,7 @@ JsNullLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
-  return absl::make_unique<JsNullLiteral>(
+  return std::make_unique<JsNullLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1488,7 +1488,7 @@ JsStringLiteralExtra::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto raw, JsStringLiteralExtra::GetRaw(json));
   ABSL_ASSIGN_OR_RETURN(auto raw_value, JsStringLiteralExtra::GetRawValue(json));
 
-  return absl::make_unique<JsStringLiteralExtra>(
+  return std::make_unique<JsStringLiteralExtra>(
       std::move(raw),
       std::move(raw_value));
 }
@@ -1549,7 +1549,7 @@ JsStringLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto value, JsStringLiteral::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto extra, JsStringLiteral::GetExtra(json));
 
-  return absl::make_unique<JsStringLiteral>(
+  return std::make_unique<JsStringLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1593,7 +1593,7 @@ JsBooleanLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsBooleanLiteral::GetValue(json));
 
-  return absl::make_unique<JsBooleanLiteral>(
+  return std::make_unique<JsBooleanLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1637,7 +1637,7 @@ JsNumericLiteralExtra::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto raw, JsNumericLiteralExtra::GetRaw(json));
   ABSL_ASSIGN_OR_RETURN(auto raw_value, JsNumericLiteralExtra::GetRawValue(json));
 
-  return absl::make_unique<JsNumericLiteralExtra>(
+  return std::make_unique<JsNumericLiteralExtra>(
       std::move(raw),
       std::move(raw_value));
 }
@@ -1682,7 +1682,7 @@ JsNumericLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto value, JsNumericLiteral::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto extra, JsNumericLiteral::GetExtra(json));
 
-  return absl::make_unique<JsNumericLiteral>(
+  return std::make_unique<JsNumericLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1727,7 +1727,7 @@ JsBigIntLiteralExtra::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto raw, JsBigIntLiteralExtra::GetRaw(json));
   ABSL_ASSIGN_OR_RETURN(auto raw_value, JsBigIntLiteralExtra::GetRawValue(json));
 
-  return absl::make_unique<JsBigIntLiteralExtra>(
+  return std::make_unique<JsBigIntLiteralExtra>(
       std::move(raw),
       std::move(raw_value));
 }
@@ -1772,7 +1772,7 @@ JsBigIntLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto value, JsBigIntLiteral::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto extra, JsBigIntLiteral::GetExtra(json));
 
-  return absl::make_unique<JsBigIntLiteral>(
+  return std::make_unique<JsBigIntLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -1974,7 +1974,7 @@ JsBlockStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatement::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto directives, JsBlockStatement::GetDirectives(json));
 
-  return absl::make_unique<JsBlockStatement>(
+  return std::make_unique<JsBlockStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2053,7 +2053,7 @@ JsExpressionStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto expression, JsExpressionStatement::GetExpression(json));
 
-  return absl::make_unique<JsExpressionStatement>(
+  return std::make_unique<JsExpressionStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2086,7 +2086,7 @@ JsEmptyStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
-  return absl::make_unique<JsEmptyStatement>(
+  return std::make_unique<JsEmptyStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2118,7 +2118,7 @@ JsDebuggerStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
-  return absl::make_unique<JsDebuggerStatement>(
+  return std::make_unique<JsDebuggerStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2170,7 +2170,7 @@ JsWithStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto object, JsWithStatement::GetObject(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsWithStatement::GetBody(json));
 
-  return absl::make_unique<JsWithStatement>(
+  return std::make_unique<JsWithStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2214,7 +2214,7 @@ JsReturnStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsReturnStatement::GetArgument(json));
 
-  return absl::make_unique<JsReturnStatement>(
+  return std::make_unique<JsReturnStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2267,7 +2267,7 @@ JsLabeledStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto label, JsLabeledStatement::GetLabel(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsLabeledStatement::GetBody(json));
 
-  return absl::make_unique<JsLabeledStatement>(
+  return std::make_unique<JsLabeledStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2311,7 +2311,7 @@ JsBreakStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto label, JsBreakStatement::GetLabel(json));
 
-  return absl::make_unique<JsBreakStatement>(
+  return std::make_unique<JsBreakStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2354,7 +2354,7 @@ JsContinueStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto label, JsContinueStatement::GetLabel(json));
 
-  return absl::make_unique<JsContinueStatement>(
+  return std::make_unique<JsContinueStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2417,7 +2417,7 @@ JsIfStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto consequent, JsIfStatement::GetConsequent(json));
   ABSL_ASSIGN_OR_RETURN(auto alternate, JsIfStatement::GetAlternate(json));
 
-  return absl::make_unique<JsIfStatement>(
+  return std::make_unique<JsIfStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2474,7 +2474,7 @@ JsSwitchCase::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto test, JsSwitchCase::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto consequent, JsSwitchCase::GetConsequent(json));
 
-  return absl::make_unique<JsSwitchCase>(
+  return std::make_unique<JsSwitchCase>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2530,7 +2530,7 @@ JsSwitchStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto discriminant, JsSwitchStatement::GetDiscriminant(json));
   ABSL_ASSIGN_OR_RETURN(auto cases, JsSwitchStatement::GetCases(json));
 
-  return absl::make_unique<JsSwitchStatement>(
+  return std::make_unique<JsSwitchStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2574,7 +2574,7 @@ JsThrowStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsThrowStatement::GetArgument(json));
 
-  return absl::make_unique<JsThrowStatement>(
+  return std::make_unique<JsThrowStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2627,7 +2627,7 @@ JsCatchClause::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto param, JsCatchClause::GetParam(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsCatchClause::GetBody(json));
 
-  return absl::make_unique<JsCatchClause>(
+  return std::make_unique<JsCatchClause>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2691,7 +2691,7 @@ JsTryStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto handler, JsTryStatement::GetHandler(json));
   ABSL_ASSIGN_OR_RETURN(auto finalizer, JsTryStatement::GetFinalizer(json));
 
-  return absl::make_unique<JsTryStatement>(
+  return std::make_unique<JsTryStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2746,7 +2746,7 @@ JsWhileStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto test, JsWhileStatement::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsWhileStatement::GetBody(json));
 
-  return absl::make_unique<JsWhileStatement>(
+  return std::make_unique<JsWhileStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2800,7 +2800,7 @@ JsDoWhileStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsDoWhileStatement::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsDoWhileStatement::GetTest(json));
 
-  return absl::make_unique<JsDoWhileStatement>(
+  return std::make_unique<JsDoWhileStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2876,7 +2876,7 @@ JsVariableDeclarator::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto id, JsVariableDeclarator::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto init, JsVariableDeclarator::GetInit(json));
 
-  return absl::make_unique<JsVariableDeclarator>(
+  return std::make_unique<JsVariableDeclarator>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -2948,7 +2948,7 @@ JsVariableDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto declarations, JsVariableDeclaration::GetDeclarations(json));
   ABSL_ASSIGN_OR_RETURN(auto kind, JsVariableDeclaration::GetKind(json));
 
-  return absl::make_unique<JsVariableDeclaration>(
+  return std::make_unique<JsVariableDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3030,7 +3030,7 @@ JsForStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto update, JsForStatement::GetUpdate(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsForStatement::GetBody(json));
 
-  return absl::make_unique<JsForStatement>(
+  return std::make_unique<JsForStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3104,7 +3104,7 @@ JsForInStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto right, JsForInStatement::GetRight(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsForInStatement::GetBody(json));
 
-  return absl::make_unique<JsForInStatement>(
+  return std::make_unique<JsForInStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3187,7 +3187,7 @@ JsForOfStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsForOfStatement::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto await, JsForOfStatement::GetAwait(json));
 
-  return absl::make_unique<JsForOfStatement>(
+  return std::make_unique<JsForOfStatement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3244,7 +3244,7 @@ JsFunctionDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
 
-  return absl::make_unique<JsFunctionDeclaration>(
+  return std::make_unique<JsFunctionDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3297,7 +3297,7 @@ JsSuper::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
-  return absl::make_unique<JsSuper>(
+  return std::make_unique<JsSuper>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3345,7 +3345,7 @@ JsImport::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
-  return absl::make_unique<JsImport>(
+  return std::make_unique<JsImport>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3377,7 +3377,7 @@ JsThisExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
 
-  return absl::make_unique<JsThisExpression>(
+  return std::make_unique<JsThisExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3431,7 +3431,7 @@ JsArrowFunctionExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsArrowFunctionExpression::GetBody(json));
 
-  return absl::make_unique<JsArrowFunctionExpression>(
+  return std::make_unique<JsArrowFunctionExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3488,7 +3488,7 @@ JsYieldExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto argument, JsYieldExpression::GetArgument(json));
   ABSL_ASSIGN_OR_RETURN(auto delegate, JsYieldExpression::GetDelegate(json));
 
-  return absl::make_unique<JsYieldExpression>(
+  return std::make_unique<JsYieldExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3532,7 +3532,7 @@ JsAwaitExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsAwaitExpression::GetArgument(json));
 
-  return absl::make_unique<JsAwaitExpression>(
+  return std::make_unique<JsAwaitExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3591,7 +3591,7 @@ JsSpreadElement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsSpreadElement::GetArgument(json));
 
-  return absl::make_unique<JsSpreadElement>(
+  return std::make_unique<JsSpreadElement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3646,7 +3646,7 @@ JsArrayExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto elements, JsArrayExpression::GetElements(json));
 
-  return absl::make_unique<JsArrayExpression>(
+  return std::make_unique<JsArrayExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3763,7 +3763,7 @@ JsObjectProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto shorthand, JsObjectProperty::GetShorthand(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsObjectProperty::GetValue(json));
 
-  return absl::make_unique<JsObjectProperty>(
+  return std::make_unique<JsObjectProperty>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3832,7 +3832,7 @@ JsObjectMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto kind, JsObjectMethod::GetKind(json));
 
-  return absl::make_unique<JsObjectMethod>(
+  return std::make_unique<JsObjectMethod>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3896,7 +3896,7 @@ JsObjectExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto properties_, JsObjectExpression::GetProperties(json));
 
-  return absl::make_unique<JsObjectExpression>(
+  return std::make_unique<JsObjectExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -3934,7 +3934,7 @@ JsFunctionExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto async, JsFunction::GetAsync(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatementFunction::GetBody(json));
 
-  return absl::make_unique<JsFunctionExpression>(
+  return std::make_unique<JsFunctionExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4001,7 +4001,7 @@ JsUnaryExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto prefix, JsUnaryExpression::GetPrefix(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsUnaryExpression::GetArgument(json));
 
-  return absl::make_unique<JsUnaryExpression>(
+  return std::make_unique<JsUnaryExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4066,7 +4066,7 @@ JsUpdateExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto argument, JsUpdateExpression::GetArgument(json));
   ABSL_ASSIGN_OR_RETURN(auto prefix, JsUpdateExpression::GetPrefix(json));
 
-  return absl::make_unique<JsUpdateExpression>(
+  return std::make_unique<JsUpdateExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4139,7 +4139,7 @@ JsBinaryExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto left, JsBinaryExpression::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsBinaryExpression::GetRight(json));
 
-  return absl::make_unique<JsBinaryExpression>(
+  return std::make_unique<JsBinaryExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4204,7 +4204,7 @@ JsAssignmentExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto left, JsAssignmentExpression::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsAssignmentExpression::GetRight(json));
 
-  return absl::make_unique<JsAssignmentExpression>(
+  return std::make_unique<JsAssignmentExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4269,7 +4269,7 @@ JsLogicalExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto left, JsLogicalExpression::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsLogicalExpression::GetRight(json));
 
-  return absl::make_unique<JsLogicalExpression>(
+  return std::make_unique<JsLogicalExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4350,7 +4350,7 @@ JsMemberExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto property, JsMemberExpression::GetProperty(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsMemberExpression::GetComputed(json));
 
-  return absl::make_unique<JsMemberExpression>(
+  return std::make_unique<JsMemberExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4433,7 +4433,7 @@ JsOptionalMemberExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto computed, JsOptionalMemberExpression::GetComputed(json));
   ABSL_ASSIGN_OR_RETURN(auto optional, JsOptionalMemberExpression::GetOptional(json));
 
-  return absl::make_unique<JsOptionalMemberExpression>(
+  return std::make_unique<JsOptionalMemberExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4499,7 +4499,7 @@ JsConditionalExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto alternate, JsConditionalExpression::GetAlternate(json));
   ABSL_ASSIGN_OR_RETURN(auto consequent, JsConditionalExpression::GetConsequent(json));
 
-  return absl::make_unique<JsConditionalExpression>(
+  return std::make_unique<JsConditionalExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4576,7 +4576,7 @@ JsCallExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto callee, JsCallExpression::GetCallee(json));
   ABSL_ASSIGN_OR_RETURN(auto arguments, JsCallExpression::GetArguments(json));
 
-  return absl::make_unique<JsCallExpression>(
+  return std::make_unique<JsCallExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4650,7 +4650,7 @@ JsOptionalCallExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto arguments, JsOptionalCallExpression::GetArguments(json));
   ABSL_ASSIGN_OR_RETURN(auto optional, JsOptionalCallExpression::GetOptional(json));
 
-  return absl::make_unique<JsOptionalCallExpression>(
+  return std::make_unique<JsOptionalCallExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4727,7 +4727,7 @@ JsNewExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto callee, JsNewExpression::GetCallee(json));
   ABSL_ASSIGN_OR_RETURN(auto arguments, JsNewExpression::GetArguments(json));
 
-  return absl::make_unique<JsNewExpression>(
+  return std::make_unique<JsNewExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4773,7 +4773,7 @@ JsSequenceExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto expressions, JsSequenceExpression::GetExpressions(json));
 
-  return absl::make_unique<JsSequenceExpression>(
+  return std::make_unique<JsSequenceExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4816,7 +4816,7 @@ JsParenthesizedExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto expression, JsParenthesizedExpression::GetExpression(json));
 
-  return absl::make_unique<JsParenthesizedExpression>(
+  return std::make_unique<JsParenthesizedExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4860,7 +4860,7 @@ JsTemplateElementValue::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto cooked, JsTemplateElementValue::GetCooked(json));
   ABSL_ASSIGN_OR_RETURN(auto raw, JsTemplateElementValue::GetRaw(json));
 
-  return absl::make_unique<JsTemplateElementValue>(
+  return std::make_unique<JsTemplateElementValue>(
       std::move(cooked),
       std::move(raw));
 }
@@ -4905,7 +4905,7 @@ JsTemplateElement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto tail, JsTemplateElement::GetTail(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsTemplateElement::GetValue(json));
 
-  return absl::make_unique<JsTemplateElement>(
+  return std::make_unique<JsTemplateElement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -4963,7 +4963,7 @@ JsTemplateLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto quasis, JsTemplateLiteral::GetQuasis(json));
   ABSL_ASSIGN_OR_RETURN(auto expressions, JsTemplateLiteral::GetExpressions(json));
 
-  return absl::make_unique<JsTemplateLiteral>(
+  return std::make_unique<JsTemplateLiteral>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5017,7 +5017,7 @@ JsTaggedTemplateExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto tag, JsTaggedTemplateExpression::GetTag(json));
   ABSL_ASSIGN_OR_RETURN(auto quasi, JsTaggedTemplateExpression::GetQuasi(json));
 
-  return absl::make_unique<JsTaggedTemplateExpression>(
+  return std::make_unique<JsTaggedTemplateExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5077,7 +5077,7 @@ JsRestElement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsRestElement::GetArgument(json));
 
-  return absl::make_unique<JsRestElement>(
+  return std::make_unique<JsRestElement>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5130,7 +5130,7 @@ JsObjectPattern::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto properties_, JsObjectPattern::GetProperties(json));
 
-  return absl::make_unique<JsObjectPattern>(
+  return std::make_unique<JsObjectPattern>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5177,7 +5177,7 @@ JsArrayPattern::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto elements, JsArrayPattern::GetElements(json));
 
-  return absl::make_unique<JsArrayPattern>(
+  return std::make_unique<JsArrayPattern>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5230,7 +5230,7 @@ JsAssignmentPattern::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto left, JsAssignmentPattern::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsAssignmentPattern::GetRight(json));
 
-  return absl::make_unique<JsAssignmentPattern>(
+  return std::make_unique<JsAssignmentPattern>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5325,7 +5325,7 @@ JsClassMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto computed, JsClassMethod::GetComputed(json));
   ABSL_ASSIGN_OR_RETURN(auto static_, JsClassMethod::GetStatic(json));
 
-  return absl::make_unique<JsClassMethod>(
+  return std::make_unique<JsClassMethod>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5427,7 +5427,7 @@ JsClassPrivateMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto static_, JsClassPrivateMethod::GetStatic(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsClassPrivateMethod::GetComputed(json));
 
-  return absl::make_unique<JsClassPrivateMethod>(
+  return std::make_unique<JsClassPrivateMethod>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5524,7 +5524,7 @@ JsClassProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto static_, JsClassProperty::GetStatic(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsClassProperty::GetComputed(json));
 
-  return absl::make_unique<JsClassProperty>(
+  return std::make_unique<JsClassProperty>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5606,7 +5606,7 @@ JsClassPrivateProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto value, JsClassPrivateProperty::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto static_, JsClassPrivateProperty::GetStatic(json));
 
-  return absl::make_unique<JsClassPrivateProperty>(
+  return std::make_unique<JsClassPrivateProperty>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5669,7 +5669,7 @@ JsStaticBlock::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsStaticBlock::GetBody(json));
 
-  return absl::make_unique<JsStaticBlock>(
+  return std::make_unique<JsStaticBlock>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5734,7 +5734,7 @@ JsClassBody::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsClassBody::GetBody(json));
 
-  return absl::make_unique<JsClassBody>(
+  return std::make_unique<JsClassBody>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5833,7 +5833,7 @@ JsClassDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsClassDeclaration::GetId(json));
 
-  return absl::make_unique<JsClassDeclaration>(
+  return std::make_unique<JsClassDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5880,7 +5880,7 @@ JsClassExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsClassExpression::GetId(json));
 
-  return absl::make_unique<JsClassExpression>(
+  return std::make_unique<JsClassExpression>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -5935,7 +5935,7 @@ JsMetaProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto meta, JsMetaProperty::GetMeta(json));
   ABSL_ASSIGN_OR_RETURN(auto property, JsMetaProperty::GetProperty(json));
 
-  return absl::make_unique<JsMetaProperty>(
+  return std::make_unique<JsMetaProperty>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6061,7 +6061,7 @@ JsImportSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto imported, JsImportSpecifier::GetImported(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsImportSpecifier::GetLocal(json));
 
-  return absl::make_unique<JsImportSpecifier>(
+  return std::make_unique<JsImportSpecifier>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6121,7 +6121,7 @@ JsImportDefaultSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsImportDefaultSpecifier::GetLocal(json));
 
-  return absl::make_unique<JsImportDefaultSpecifier>(
+  return std::make_unique<JsImportDefaultSpecifier>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6180,7 +6180,7 @@ JsImportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsImportNamespaceSpecifier::GetLocal(json));
 
-  return absl::make_unique<JsImportNamespaceSpecifier>(
+  return std::make_unique<JsImportNamespaceSpecifier>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6233,7 +6233,7 @@ JsImportAttribute::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto key, JsImportAttribute::GetKey(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsImportAttribute::GetValue(json));
 
-  return absl::make_unique<JsImportAttribute>(
+  return std::make_unique<JsImportAttribute>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6311,7 +6311,7 @@ JsImportDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto source, JsImportDeclaration::GetSource(json));
   ABSL_ASSIGN_OR_RETURN(auto assertions, JsImportDeclaration::GetAssertions(json));
 
-  return absl::make_unique<JsImportDeclaration>(
+  return std::make_unique<JsImportDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6382,7 +6382,7 @@ JsExportSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto exported, JsExportSpecifier::GetExported(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsExportSpecifier::GetLocal(json));
 
-  return absl::make_unique<JsExportSpecifier>(
+  return std::make_unique<JsExportSpecifier>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6460,7 +6460,7 @@ JsExportNamedDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto source, JsExportNamedDeclaration::GetSource(json));
   ABSL_ASSIGN_OR_RETURN(auto assertions, JsExportNamedDeclaration::GetAssertions(json));
 
-  return absl::make_unique<JsExportNamedDeclaration>(
+  return std::make_unique<JsExportNamedDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6518,7 +6518,7 @@ JsExportDefaultDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
   ABSL_ASSIGN_OR_RETURN(auto declaration, JsExportDefaultDeclaration::GetDeclaration(json));
 
-  return absl::make_unique<JsExportDefaultDeclaration>(
+  return std::make_unique<JsExportDefaultDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),
@@ -6573,7 +6573,7 @@ JsExportAllDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto source, JsExportAllDeclaration::GetSource(json));
   ABSL_ASSIGN_OR_RETURN(auto assertions, JsExportAllDeclaration::GetAssertions(json));
 
-  return absl::make_unique<JsExportAllDeclaration>(
+  return std::make_unique<JsExportAllDeclaration>(
       std::move(loc),
       std::move(start),
       std::move(end),

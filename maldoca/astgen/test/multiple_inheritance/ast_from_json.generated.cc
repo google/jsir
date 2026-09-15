@@ -72,7 +72,7 @@ MSourceLocation::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto start, MSourceLocation::GetStart(json));
   ABSL_ASSIGN_OR_RETURN(auto end, MSourceLocation::GetEnd(json));
 
-  return absl::make_unique<MSourceLocation>(
+  return std::make_unique<MSourceLocation>(
       std::move(start),
       std::move(end));
 }
@@ -176,7 +176,7 @@ MObjectMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto computed, MObjectMember::GetComputed(json));
   ABSL_ASSIGN_OR_RETURN(auto id, MFunction::GetId(json));
 
-  return absl::make_unique<MObjectMethod>(
+  return std::make_unique<MObjectMethod>(
       std::move(loc),
       std::move(computed),
       std::move(id));

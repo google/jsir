@@ -88,7 +88,7 @@ VDerivedClass1::FromJson(const nlohmann::json& json) {
   }
 
 
-  return absl::make_unique<VDerivedClass1>(
+  return std::make_unique<VDerivedClass1>(
   );
 }
 
@@ -119,7 +119,7 @@ VDerivedClass2::FromJson(const nlohmann::json& json) {
   }
 
 
-  return absl::make_unique<VDerivedClass2>(
+  return std::make_unique<VDerivedClass2>(
   );
 }
 
@@ -242,7 +242,7 @@ VNode::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto nullable_variant_class, VNode::GetNullableVariantClass(json));
   ABSL_ASSIGN_OR_RETURN(auto optional_variant_class, VNode::GetOptionalVariantClass(json));
 
-  return absl::make_unique<VNode>(
+  return std::make_unique<VNode>(
       std::move(simple_variant_builtin),
       std::move(nullable_variant_builtin),
       std::move(optional_variant_builtin),
