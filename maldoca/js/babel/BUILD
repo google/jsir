@@ -81,6 +81,7 @@ cc_library(
     testonly = 1,
     srcs = ["babel_test.cc"],
     hdrs = ["babel_test.h"],
+    alwayslink = True,
     deps = [
         ":babel",
         ":babel_cc_proto",

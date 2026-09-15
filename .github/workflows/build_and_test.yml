@@ -1,4 +1,4 @@
-name: Build and Test (Linux)
+name: Build and Test
 permissions: read-all
 on:
   push:
@@ -8,7 +8,7 @@ on:
     branches:
       - main
 jobs:
-  build-and-test:
+  build-and-test-linux:
     runs-on: ubuntu-24.04
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -27,6 +27,37 @@ jobs:
           disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
+      - name: Test LLVM build
+        run: |
+          cd ${{ github.workspace }}
+          bazelisk build @llvm-project//llvm:Support
+      - name: Build everything
+        run: |
+          cd ${{ github.workspace }}
+          bazelisk build //...
+      - name: Test everything
+        run: |
+          cd ${{ github.workspace }}
+          bazelisk test //...
+      - run: echo "🍏 This job's status is ${JOB_STATUS}."
+
+        env:
+          JOB_STATUS: ${{ job.status }}
+
+  build-and-test-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15, macos-26]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🍎 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${GITHUB_REF} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Test LLVM build
         run: |
           cd ${{ github.workspace }}
