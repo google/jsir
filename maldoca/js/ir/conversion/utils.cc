@@ -32,7 +32,7 @@
 
 namespace maldoca {
 
-absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
+absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJsirFile(
     const JsFile &ast, mlir::MLIRContext &context) {
   // Check for all the dialects
   MALDOCA_RET_CHECK_NE(context.getLoadedDialect<JsirDialect>(), nullptr);
@@ -48,7 +48,7 @@ absl::StatusOr<mlir::OwningOpRef<JsirFileOp>> AstToJshirFile(
   return std::move(hir_file);
 }
 
-absl::StatusOr<std::unique_ptr<JsFile>> JshirFileToAst(JsirFileOp hir_file) {
+absl::StatusOr<std::unique_ptr<JsFile>> JsirFileToAst(JsirFileOp hir_file) {
   return JsirToAst::VisitFile(hir_file);
 }
 

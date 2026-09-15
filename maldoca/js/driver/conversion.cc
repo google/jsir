@@ -69,12 +69,11 @@ absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsAstStringRepr(
 // AST -> HIR
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstRepr(
-    const JsAstRepr &ast_repr,
-    mlir::MLIRContext &mlir_context) {
+absl::StatusOr<JsirRepr> ToJsirRepr::FromJsAstRepr(
+    const JsAstRepr& ast_repr, mlir::MLIRContext& mlir_context) {
   ABSL_ASSIGN_OR_RETURN(mlir::OwningOpRef<JsirFileOp> op,
-                        AstToJshirFile(*ast_repr.ast, mlir_context));
-  return JsHirRepr{std::move(op), ast_repr.scopes, ast_repr.source_map};
+                        AstToJsirFile(*ast_repr.ast, mlir_context));
+  return JsirRepr{std::move(op), ast_repr.scopes, ast_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -96,29 +95,28 @@ absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsSourceRepr(
 // Source -> AST string -> AST -> HIR
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsSourceRepr(
-    const JsSourceRepr &source_repr, BabelParseRequest parse_request,
+absl::StatusOr<JsirRepr> ToJsirRepr::FromJsSourceRepr(
+    const JsSourceRepr& source_repr, BabelParseRequest parse_request,
     absl::Duration timeout, std::optional<int> recursion_depth_limit,
-    Babel &babel, mlir::MLIRContext &mlir_context) {
+    Babel& babel, mlir::MLIRContext& mlir_context) {
   ABSL_ASSIGN_OR_RETURN(
       JsAstRepr ast,
       ToJsAstRepr::FromJsSourceRepr(source_repr, parse_request, timeout,
                                     recursion_depth_limit, babel));
-  return ToJsHirRepr::FromJsAstRepr(ast, mlir_context);
+  return ToJsirRepr::FromJsAstRepr(ast, mlir_context);
 }
 
 // -----------------------------------------------------------------------------
 // AST string -> AST -> HIR
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstStringRepr(
-    const JsAstStringRepr &ast_string_repr,
-    std::optional<int> recursion_depth_limit,
-    mlir::MLIRContext &mlir_context) {
+absl::StatusOr<JsirRepr> ToJsirRepr::FromJsAstStringRepr(
+    const JsAstStringRepr& ast_string_repr,
+    std::optional<int> recursion_depth_limit, mlir::MLIRContext& mlir_context) {
   ABSL_ASSIGN_OR_RETURN(
       JsAstRepr ast,
       ToJsAstRepr::FromJsAstStringRepr(ast_string_repr, recursion_depth_limit));
-  return ToJsHirRepr::FromJsAstRepr(ast, mlir_context);
+  return ToJsirRepr::FromJsAstRepr(ast, mlir_context);
 }
 
 // =============================================================================
@@ -129,11 +127,10 @@ absl::StatusOr<JsHirRepr> ToJsHirRepr::FromJsAstStringRepr(
 // HIR -> AST
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsHirRepr(
-    const JsHirRepr &hir_repr) {
+absl::StatusOr<JsAstRepr> ToJsAstRepr::FromJsirRepr(const JsirRepr& ir_repr) {
   ABSL_ASSIGN_OR_RETURN(std::unique_ptr<JsFile> ast,
-                        JshirFileToAst(hir_repr.op.get()));
-  return JsAstRepr{std::move(ast), hir_repr.scopes, hir_repr.source_map};
+                        JsirFileToAst(ir_repr.op.get()));
+  return JsAstRepr{std::move(ast), ir_repr.scopes, ir_repr.source_map};
 }
 
 // -----------------------------------------------------------------------------
@@ -166,9 +163,9 @@ absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsAstStringRepr(
 // HIR -> AST -> AST string
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsHirRepr(
-    const JsHirRepr &hir_repr) {
-  ABSL_ASSIGN_OR_RETURN(JsAstRepr ast, ToJsAstRepr::FromJsHirRepr(hir_repr));
+absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsirRepr(
+    const JsirRepr& ir_repr) {
+  ABSL_ASSIGN_OR_RETURN(JsAstRepr ast, ToJsAstRepr::FromJsirRepr(ir_repr));
   return ToJsAstStringRepr::FromJsAstRepr(ast);
 }
 
@@ -176,11 +173,11 @@ absl::StatusOr<JsAstStringRepr> ToJsAstStringRepr::FromJsHirRepr(
 // HIR -> AST -> AST string -> Source
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsHirRepr(
-    const JsHirRepr &hir_repr, BabelGenerateOptions generate_options,
-    absl::Duration timeout, Babel &babel) {
+absl::StatusOr<JsSourceRepr> ToJsSourceRepr::FromJsirRepr(
+    const JsirRepr& ir_repr, BabelGenerateOptions generate_options,
+    absl::Duration timeout, Babel& babel) {
   ABSL_ASSIGN_OR_RETURN(JsAstStringRepr ast_string,
-                        ToJsAstStringRepr::FromJsHirRepr(hir_repr));
+                        ToJsAstStringRepr::FromJsirRepr(ir_repr));
   return ToJsSourceRepr::FromJsAstStringRepr(ast_string,
                                              generate_options, timeout, babel);
 }

@@ -64,7 +64,7 @@ struct TestCase {
   // Note: `hir_repr` is not constructed by parsing the golden file. Instead, it
   // is constructed by converting the `ast` above. This is because the golden
   // file does not contain loc information.
-  JsHirRepr hir_repr;
+  JsirRepr hir_repr;
   std::string hir_dump;
 
   BabelAstString lifted_babel_ast_string;
@@ -120,8 +120,8 @@ absl::StatusOr<TestCase> GetTestCase() {
   auto mlir_context = std::make_unique<mlir::MLIRContext>();
   LoadNecessaryDialects(*mlir_context);
 
-  ABSL_ASSIGN_OR_RETURN(JsHirRepr hir_repr,
-                        ToJsHirRepr::FromJsAstRepr(ast_repr, *mlir_context));
+  ABSL_ASSIGN_OR_RETURN(JsirRepr hir_repr,
+                        ToJsirRepr::FromJsAstRepr(ast_repr, *mlir_context));
   ABSL_ASSIGN_OR_RETURN(auto hir_str, load_content("test_hir.mlir.test"));
 
   BabelAstString lifted_babel_ast_string;
@@ -184,14 +184,14 @@ TEST(ConversionTest, AstStringToAst) {
   CheckAst(repr, test_case);
 }
 
-TEST(ConversionTest, AstToHir) {
+TEST(ConversionTest, AstToJsir) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
   mlir::MLIRContext mlir_context;
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr repr, ToJsHirRepr::FromJsAstRepr(test_case.ast, mlir_context));
+      JsirRepr repr, ToJsirRepr::FromJsAstRepr(test_case.ast, mlir_context));
 
   EXPECT_EQ(mlir::debugString(*repr.op), test_case.hir_dump);
   EXPECT_THAT(repr.scopes, EqualsProto(test_case.scopes));
@@ -215,7 +215,7 @@ TEST(ConversionTest, SourceToAst) {
   CheckAst(repr, test_case);
 }
 
-TEST(ConversionTest, SourceToHir) {
+TEST(ConversionTest, SourceToJsir) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
   QuickJsBabel babel;
 
@@ -228,8 +228,8 @@ TEST(ConversionTest, SourceToHir) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr repr,
-      ToJsHirRepr::FromJsSourceRepr(
+      JsirRepr repr,
+      ToJsirRepr::FromJsSourceRepr(
           source_repr, parse_request, absl::InfiniteDuration(),
           /*recursion_depth_limit=*/std::nullopt, babel, mlir_context));
 
@@ -237,7 +237,7 @@ TEST(ConversionTest, SourceToHir) {
   EXPECT_THAT(repr.scopes, EqualsProto(test_case.scopes));
 }
 
-TEST(ConversionTest, AstStringToHir) {
+TEST(ConversionTest, AstStringToJsir) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
   JsAstStringRepr ast_string_repr{test_case.parsed_babel_ast_string,
@@ -247,10 +247,9 @@ TEST(ConversionTest, AstStringToHir) {
   LoadNecessaryDialects(mlir_context);
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
-      JsHirRepr repr,
-      ToJsHirRepr::FromJsAstStringRepr(ast_string_repr,
-                                       /*recursion_depth_limit=*/std::nullopt,
-                                       mlir_context));
+      JsirRepr repr, ToJsirRepr::FromJsAstStringRepr(
+                         ast_string_repr,
+                         /*recursion_depth_limit=*/std::nullopt, mlir_context));
 
   EXPECT_EQ(mlir::debugString(*repr.op), test_case.hir_dump);
   EXPECT_THAT(repr.scopes, EqualsProto(test_case.scopes));
@@ -260,11 +259,11 @@ TEST(ConversionTest, AstStringToHir) {
 // Lifting conversions
 // =============================================================================
 
-TEST(ConversionTest, HirToAst) {
+TEST(ConversionTest, JsirToAst) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(JsAstRepr repr,
-                               ToJsAstRepr::FromJsHirRepr(test_case.hir_repr));
+                               ToJsAstRepr::FromJsirRepr(test_case.hir_repr));
 
   CheckAst(repr, test_case);
 }
@@ -298,25 +297,25 @@ TEST(ConversionTest, AstStringToSource) {
   EXPECT_EQ(repr.source, test_case.source);
 }
 
-TEST(ConversionTest, HirToAstString) {
+TEST(ConversionTest, JsirToAstString) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsAstStringRepr repr,
-      ToJsAstStringRepr::FromJsHirRepr(test_case.hir_repr));
+      ToJsAstStringRepr::FromJsirRepr(test_case.hir_repr));
 
   EXPECT_THAT(repr.ast_string, EqualsProto(test_case.lifted_babel_ast_string));
 }
 
-TEST(ConversionTest, HirToSource) {
+TEST(ConversionTest, JsirToSource) {
   MALDOCA_ASSERT_OK_AND_ASSIGN(TestCase test_case, GetTestCase());
 
   QuickJsBabel babel;
 
   MALDOCA_ASSERT_OK_AND_ASSIGN(
       JsSourceRepr repr,
-      ToJsSourceRepr::FromJsHirRepr(test_case.hir_repr, BabelGenerateOptions(),
-                                    absl::InfiniteDuration(), babel));
+      ToJsSourceRepr::FromJsirRepr(test_case.hir_repr, BabelGenerateOptions(),
+                                   absl::InfiniteDuration(), babel));
   EXPECT_EQ(repr.source, test_case.source);
 }
 
