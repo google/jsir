@@ -239,6 +239,9 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
   // See: https://mlir.llvm.org/docs/OpDefinitions/#variadic-operands
   size_t num_variadic_operands = 0;
   for (const FieldDef& field : node.fields()) {
+    if (!field.in_ir()) {
+      continue;
+    }
     if (field.enclose_in_region()) {
       continue;
     }

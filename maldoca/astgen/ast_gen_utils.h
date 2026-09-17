@@ -202,11 +202,11 @@ inline std::string UnIndentedSource(absl::string_view source) {
 // See FieldDefPb::enclose_in_region for why we need to enclose certain fields
 // in a region.
 inline bool FieldIsArgument(const FieldDef* field) {
-  return !field->ignore_in_ir() && !field->enclose_in_region();
+  return field->in_ir() && !field->enclose_in_region();
 }
 
 inline bool FieldIsRegion(const FieldDef* field) {
-  return !field->ignore_in_ir() && field->enclose_in_region();
+  return field->in_ir() && field->enclose_in_region();
 }
 
 }  // namespace maldoca

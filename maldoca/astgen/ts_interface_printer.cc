@@ -80,6 +80,9 @@ void TsInterfacePrinter::PrintNode(const NodeDef& node) {
   {
     auto indent = WithIndent();
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       PrintFieldDef(field);
     }
   }

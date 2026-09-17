@@ -80,7 +80,15 @@ class FieldDef {
   const Type& type() const { return *type_; }
   Type& type() { return *type_; }
   FieldKind kind() const { return kind_; }
-  bool ignore_in_ir() const { return ignore_in_ir_; }
+  GenerationTarget generation_target() const { return generation_target_; }
+  bool in_ast() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_AST_ONLY;
+  }
+  bool in_ir() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_IR_ONLY;
+  }
   bool enclose_in_region() const { return enclose_in_region_; }
 
  private:
@@ -91,7 +99,7 @@ class FieldDef {
   Optionalness optionalness_;
   std::unique_ptr<Type> type_;
   FieldKind kind_;
-  bool ignore_in_ir_;
+  GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
   bool enclose_in_region_;
 };
 
@@ -153,6 +161,20 @@ class NodeDef {
   // All fields, including those defined by ancestors.
   absl::Span<const FieldDef* const> aggregated_fields() const {
     return aggregated_fields_;
+  }
+
+  bool has_ast_fields() const {
+    for (const auto& field : fields_) {
+      if (field.in_ast()) return true;
+    }
+    return false;
+  }
+
+  bool has_aggregated_ast_fields() const {
+    for (const auto* field : aggregated_fields_) {
+      if (field->in_ast()) return true;
+    }
+    return false;
   }
 
   // Direct children of this class.

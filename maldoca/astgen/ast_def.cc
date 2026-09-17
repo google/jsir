@@ -205,7 +205,11 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   field.optionalness_ = field_pb.optionalness();
 
   field.kind_ = field_pb.kind();
-  field.ignore_in_ir_ = field_pb.ignore_in_ir();
+  if (field_pb.generation_target() == GENERATION_TARGET_UNSPECIFIED) {
+    field.generation_target_ = GENERATION_TARGET_BOTH;
+  } else {
+    field.generation_target_ = field_pb.generation_target();
+  }
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
   return field;
@@ -516,6 +520,13 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
           dependencies.insert(dependencies.end(), node->parents_.begin(),
                               node->parents_.end());
           for (const FieldDef& field : node->fields()) {
+            // The topological order is shared by the AST and the IR printers,
+            // so a field contributes a dependency edge if it appears in either
+            // representation. In particular, an IR-only field still requires
+            // its type to be defined before the node that uses it.
+            if (!field.in_ast() && !field.in_ir()) {
+              continue;
+            }
             GetDependencies(field.type(), nodes, &dependencies);
           }
           return dependencies;

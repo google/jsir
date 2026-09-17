@@ -69,6 +69,9 @@ static absl::flat_hash_set<std::string> GetCheckedClasses(const AstDef& ast) {
   absl::flat_hash_set<std::string> checked_classes;
   for (const NodeDef* node : ast.topological_sorted_nodes()) {
     for (const FieldDef& field : node->fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       GetCheckedClasses(field.type(), /*is_part_of_variant=*/false,
                         &checked_classes);
     }
@@ -136,6 +139,9 @@ void AstFromJsonPrinter::PrintAst(const AstDef& ast,
     }
 
     for (const FieldDef& field : node->fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       PrintGetFieldFunction(node->name(), field, ast.lang_name());
       Println();
     }
@@ -498,10 +504,16 @@ void AstFromJsonPrinter::PrintFromJsonFunction(const NodeDef& node,
       std::vector<NodeFieldPair> node_field_pairs;
       for (const NodeDef* ancestor : node.ancestors()) {
         for (const FieldDef& field : ancestor->fields()) {
+          if (!field.in_ast()) {
+            continue;
+          }
           node_field_pairs.push_back({ancestor->name(), field.name()});
         }
       }
       for (const FieldDef& field : node.fields()) {
+        if (!field.in_ast()) {
+          continue;
+        }
         node_field_pairs.push_back({node.name(), field.name()});
       }
 
@@ -527,6 +539,9 @@ void AstFromJsonPrinter::PrintFromJsonFunction(const NodeDef& node,
             .print_separator = [this] { Print(",\n"); },
         }};
         for (const FieldDef* field : node.aggregated_fields()) {
+          if (!field->in_ast()) {
+            continue;
+          }
           auto vars = WithVars({
               {"field_name", field->name().ToCcVarName()},
           });

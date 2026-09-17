@@ -153,6 +153,23 @@ enum Optionalness {
   OPTIONALNESS_MAYBE_UNDEFINED = 3;
 }
 
+// Target representation for code generation of an AST field.
+enum GenerationTarget {
+  GENERATION_TARGET_UNSPECIFIED = 0;
+
+  // The field is generated in both AST and IR.
+  GENERATION_TARGET_BOTH = 1;
+
+  // The field is generated in the AST only (ignored in IR).
+  // For example, source location fields where MLIR uses builtin location
+  // mechanisms.
+  GENERATION_TARGET_AST_ONLY = 2;
+
+  // The field is generated in the IR only (ignored in AST).
+  // For example, IR-specific attributes or desugared operands.
+  GENERATION_TARGET_IR_ONLY = 3;
+}
+
 // Definition of a field in an AST node.
 message FieldDefPb {
   // Name of the field.
@@ -169,13 +186,9 @@ message FieldDefPb {
   // The field kind. E.g. LVAL.
   optional FieldKind kind = 4 [default = FIELD_KIND_UNSPECIFIED];
 
-  // Whether the field should be ignored in the IR op.
-  //
-  // For example, we might want to ignore the source location fields, since MLIR
-  // has builtin support for source location. In the AST <-> IR conversion, we
-  // need to supply some manually-written code to convert between source
-  // location fields and MLIR's source location attributes.
-  optional bool ignore_in_ir = 5 [default = false];
+  // Target representation for code generation of this field.
+  optional GenerationTarget generation_target = 5
+      [default = GENERATION_TARGET_BOTH];
 
   // Whether the field should be enclosed in a region.
   //

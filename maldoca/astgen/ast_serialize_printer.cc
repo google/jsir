@@ -320,6 +320,9 @@ void AstSerializePrinter::PrintSerializeFieldsFunction(
     auto indent = WithIndent();
 
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       // E.g. "\"fieldName\":"
       auto lhs = absl::StrFormat(R"("\"%s\":")", field.name().ToCamelCase());
 

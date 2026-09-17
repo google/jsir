@@ -142,7 +142,7 @@ void AstHeaderPrinter::PrintNode(const NodeDef& node,
     auto indent = WithIndent();
 
     // Constructor
-    if (!node.aggregated_fields().empty()) {
+    if (node.has_aggregated_ast_fields()) {
       PrintConstructor(node, lang_name);
       Println();
     }
@@ -223,6 +223,9 @@ void AstHeaderPrinter::PrintNode(const NodeDef& node,
 
     // Getters and setters.
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       PrintGetterSetterDeclarations(field, lang_name);
       Println();
     }
@@ -241,23 +244,29 @@ void AstHeaderPrinter::PrintNode(const NodeDef& node,
         "bool &needs_comma) const;");
 
     // Get<FieldName>FromJson() functions.
-    if (!node.fields().empty()) {
+    if (node.has_ast_fields()) {
       Println();
       Println("// Internal functions used by FromJson().");
       Println("// Extracts a field from a JSON object.");
       for (const FieldDef& field : node.fields()) {
+        if (!field.in_ast()) {
+          continue;
+        }
         PrintGetFromJson(field, lang_name);
       }
     }
   }
 
   // Print member variables.
-  if (!node.fields().empty()) {
+  if (node.has_ast_fields()) {
     Println();
     Println(" private:");
     {
       auto indent = WithIndent();
       for (const FieldDef& field : node.fields()) {
+        if (!field.in_ast()) {
+          continue;
+        }
         PrintMemberVariable(field, lang_name);
       }
     }
@@ -272,7 +281,7 @@ void AstHeaderPrinter::PrintConstructor(const NodeDef& node,
       {"NodeType", (Symbol(lang_name) + node.name()).ToPascalCase()},
   });
   Print("explicit $NodeType$(");
-  if (!node.aggregated_fields().empty()) {
+  if (node.has_aggregated_ast_fields()) {
     Println();
     {
       auto indent = WithIndent(4);
@@ -280,6 +289,9 @@ void AstHeaderPrinter::PrintConstructor(const NodeDef& node,
           .print_separator = [this] { Print(",\n"); },
       }};
       for (const FieldDef* field : node.aggregated_fields()) {
+        if (!field->in_ast()) {
+          continue;
+        }
         auto vars = WithVars({
             {"cc_type", CcType(*field)},
             {"field_name", field->name().ToCcVarName()},

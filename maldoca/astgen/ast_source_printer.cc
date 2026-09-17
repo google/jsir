@@ -164,12 +164,15 @@ void AstSourcePrinter::PrintNode(const NodeDef& node,
     Println();
   }
 
-  if (!node.aggregated_fields().empty()) {
+  if (node.has_aggregated_ast_fields()) {
     PrintConstructor(node, lang_name);
     Println();
   }
 
   for (const FieldDef& field : node.fields()) {
+    if (!field.in_ast()) {
+      continue;
+    }
     const Type& type = field.type();
     bool is_optional = field.optionalness() != OPTIONALNESS_REQUIRED;
 
@@ -221,7 +224,7 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
       {"NodeType", (Symbol(lang_name) + node.name()).ToPascalCase()},
   });
   Print("$NodeType$::$NodeType$(");
-  if (!node.aggregated_fields().empty()) {
+  if (node.has_aggregated_ast_fields()) {
     Println();
     auto indent = WithIndent(4);
 
@@ -229,6 +232,9 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
         .print_separator = [this] { Print(",\n"); },
     }};
     for (const FieldDef* field : node.aggregated_fields()) {
+      if (!field->in_ast()) {
+        continue;
+      }
       auto vars = WithVars({
           {"cc_type", CcType(*field)},
           {"field_name", field->name().ToCcVarName()},
@@ -261,25 +267,34 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
       });
       Print("$AncestorType$(");
 
-      TabPrinter ancestor_tab_printer{{
-          .print_separator = [&] { Print(", "); },
-      }};
-      for (const FieldDef* field : ancestor->aggregated_fields()) {
-        ancestor_tab_printer.Print();
+      bool ancestor_has_ast_fields = ancestor->has_aggregated_ast_fields();
+      if (ancestor_has_ast_fields) {
+        TabPrinter ancestor_tab_printer{{
+            .print_separator = [&] { Print(", "); },
+        }};
+        for (const FieldDef* field : ancestor->aggregated_fields()) {
+          if (!field->in_ast()) {
+            continue;
+          }
+          ancestor_tab_printer.Print();
 
-        auto vars = WithVars({
-            {"field_name", field->name().ToCcVarName()},
-        });
-        Print("std::move($field_name$)");
+          auto vars = WithVars({
+              {"field_name", field->name().ToCcVarName()},
+          });
+          Print("std::move($field_name$)");
+        }
       }
 
       Print(")");
-      if (!ancestor->aggregated_fields().empty()) {
+      if (ancestor_has_ast_fields) {
         Print(" /* NOLINT */");
       }
     }
 
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       auto vars = WithVars({
           {"field_name", field.name().ToCcVarName()},
       });
