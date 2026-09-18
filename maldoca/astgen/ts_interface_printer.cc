@@ -34,6 +34,9 @@ void TsInterfacePrinter::PrintAst(const AstDef& ast) {
 
   for (const auto& name : ast.node_names()) {
     const NodeDef& node = *ast.nodes().at(name);
+    if (!node.in_ast()) {
+      continue;
+    }
     PrintNode(node);
     Println();
   }
