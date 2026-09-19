@@ -25,7 +25,7 @@
 // JSIR-NEXT:           // <executable>
 // JSIR-NEXT:           // State [default = <unknown>] { }
 // JSIR-NEXT:         %0 = jsir.reg_exp_literal {#jsir<reg_exp_literal_extra "/1/">, "", "1"}
-// JSIR-NEXT:           // %0 = #jsir<reg_exp_literal "1", "">
+// JSIR-NEXT:           // %0 = #jsir<reg_exp_literal "1", "", "/1/">
 // JSIR-NEXT:           // State [default = <unknown>] { }
 // JSIR-NEXT:         jsir.expression_statement (%0)
 // JSIR-NEXT:           // State [default = <unknown>] { }
