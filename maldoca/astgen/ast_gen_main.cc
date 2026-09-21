@@ -25,6 +25,7 @@
 #include <iostream>
 #include <string>
 #include "absl/flags/flag.h"
+#include "absl/status/status_macros.h"
 #include "absl/strings/str_cat.h"
 #include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -39,7 +40,6 @@
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/path.h"
-#include "absl/status/status_macros.h"
 
 ABSL_FLAG(std::string, ast_def_path, "",
           "The path to the ast_def.textproto file.");
@@ -108,15 +108,13 @@ absl::Status AstGenMain() {
       PrintAstVisitorHeader(ast_def, cc_namespace, ast_path);
   auto ast_visitor_hdr_path = JoinPath(ast_path, "ast_visitor.generated.h");
   std::cout << "Writing ast_visitor_hdr to " << ast_visitor_hdr_path << "\n";
-  ABSL_RETURN_IF_ERROR(
-      SetFileContents(ast_visitor_hdr_path, ast_visitor_hdr));
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_visitor_hdr_path, ast_visitor_hdr));
 
   std::string ast_walker_hdr =
       PrintAstWalkerHeader(ast_def, cc_namespace, ast_path);
   auto ast_walker_hdr_path = JoinPath(ast_path, "ast_walker.generated.h");
   std::cout << "Writing ast_walker_hdr to " << ast_walker_hdr_path << "\n";
-  ABSL_RETURN_IF_ERROR(
-      SetFileContents(ast_walker_hdr_path, ast_walker_hdr));
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_walker_hdr_path, ast_walker_hdr));
 
   std::string ast_src = PrintAstSource(ast_def, cc_namespace, ast_path);
   auto ast_src_path = JoinPath(ast_path, "ast.generated.cc");
@@ -129,8 +127,7 @@ absl::Status AstGenMain() {
   ABSL_RETURN_IF_ERROR(SetFileContents(ast_to_json_path, ast_to_json));
 
   std::string ast_from_json = PrintAstFromJson(ast_def, cc_namespace, ast_path);
-  auto ast_from_json_path =
-      JoinPath(ast_path, "ast_from_json.generated.cc");
+  auto ast_from_json_path = JoinPath(ast_path, "ast_from_json.generated.cc");
   std::cout << "Writing ast_from_json to " << ast_from_json_path << "\n";
   ABSL_RETURN_IF_ERROR(SetFileContents(ast_from_json_path, ast_from_json));
 
