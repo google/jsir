@@ -34,7 +34,6 @@
 #include "absl/status/status.h"
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
-#include "absl/types/optional.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/cast.h"
 #include "maldoca/js/ir/ir.h"
@@ -77,8 +76,10 @@ JsirToAst::VisitStringLiteralExtraAttr(JsirStringLiteralExtraAttr attr) {
 
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsirToAst::VisitStringLiteralAttr(JsirStringLiteralAttr attr) {
-  ABSL_ASSIGN_OR_RETURN(auto extra,
-                        VisitStringLiteralExtraAttr(attr.getExtra()));
+  std::optional<std::unique_ptr<JsStringLiteralExtra>> extra;
+  if (attr.getExtra() != nullptr) {
+    ABSL_ASSIGN_OR_RETURN(extra, VisitStringLiteralExtraAttr(attr.getExtra()));
+  }
   return Create<JsStringLiteral>(attr, attr.getValue().str(), std::move(extra));
 }
 
@@ -90,8 +91,10 @@ JsirToAst::VisitNumericLiteralExtraAttr(JsirNumericLiteralExtraAttr attr) {
 
 absl::StatusOr<std::unique_ptr<JsNumericLiteral>>
 JsirToAst::VisitNumericLiteralAttr(JsirNumericLiteralAttr attr) {
-  ABSL_ASSIGN_OR_RETURN(auto extra,
-                        VisitNumericLiteralExtraAttr(attr.getExtra()));
+  std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra;
+  if (attr.getExtra() != nullptr) {
+    ABSL_ASSIGN_OR_RETURN(extra, VisitNumericLiteralExtraAttr(attr.getExtra()));
+  }
   return Create<JsNumericLiteral>(attr, attr.getValue().getValueAsDouble(),
                                   std::move(extra));
 }
@@ -104,8 +107,10 @@ JsirToAst::VisitBigIntLiteralExtraAttr(JsirBigIntLiteralExtraAttr attr) {
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteral>>
 JsirToAst::VisitBigIntLiteralAttr(JsirBigIntLiteralAttr attr) {
-  ABSL_ASSIGN_OR_RETURN(auto extra,
-                        VisitBigIntLiteralExtraAttr(attr.getExtra()));
+  std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra;
+  if (attr.getExtra() != nullptr) {
+    ABSL_ASSIGN_OR_RETURN(extra, VisitBigIntLiteralExtraAttr(attr.getExtra()));
+  }
   return Create<JsBigIntLiteral>(attr, attr.getValue().str(), std::move(extra));
 }
 
@@ -566,7 +571,7 @@ JsirToAst::VisitClassPrivateMethod(JsirClassPrivateMethodOp op) {
 
   return Create<JsClassPrivateMethod>(
       op, std::move(id), std::move(params), generator, async, std::move(body),
-      std::move(key), std::move(kind), static_, /*computed=*/absl::nullopt);
+      std::move(key), std::move(kind), static_, /*computed=*/std::nullopt);
 }
 
 absl::StatusOr<std::unique_ptr<JsClassProperty>> JsirToAst::VisitClassProperty(
