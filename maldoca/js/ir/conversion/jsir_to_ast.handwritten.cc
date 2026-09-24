@@ -222,7 +222,9 @@ JsirToAst::VisitArrowFunctionExpression(JsirArrowFunctionExpressionOp op) {
     ABSL_ASSIGN_OR_RETURN(auto id, VisitIdentifierRef(mlir_id));
   }
   std::vector<std::unique_ptr<JsPattern>> params;
-  for (mlir::Value mlir_param_value : op.getParams()) {
+  ABSL_ASSIGN_OR_RETURN(mlir::ValueRange mlir_params,
+                        GetExprsRegionValues(op.getParams()));
+  for (mlir::Value mlir_param_value : mlir_params) {
     ABSL_ASSIGN_OR_RETURN(auto mlir_param,
                           Cast<JsirPatternRefOpInterface>(mlir_param_value));
     ABSL_ASSIGN_OR_RETURN(auto param, VisitPatternRef(mlir_param));
@@ -325,7 +327,9 @@ absl::StatusOr<std::unique_ptr<JsObjectMethod>> JsirToAst::VisitObjectMethod(
   }
 
   std::vector<std::unique_ptr<JsPattern>> params;
-  for (mlir::Value mlir_param_value : op.getParams()) {
+  ABSL_ASSIGN_OR_RETURN(mlir::ValueRange mlir_params,
+                        GetExprsRegionValues(op.getParams()));
+  for (mlir::Value mlir_param_value : mlir_params) {
     ABSL_ASSIGN_OR_RETURN(auto mlir_param,
                           Cast<JsirPatternRefOpInterface>(mlir_param_value));
     ABSL_ASSIGN_OR_RETURN(auto param, VisitPatternRef(mlir_param));
@@ -510,7 +514,9 @@ absl::StatusOr<std::unique_ptr<JsClassMethod>> JsirToAst::VisitClassMethod(
   }
 
   std::vector<std::unique_ptr<JsPattern>> params;
-  for (mlir::Value mlir_param_value : op.getParams()) {
+  ABSL_ASSIGN_OR_RETURN(mlir::ValueRange mlir_params,
+                        GetExprsRegionValues(op.getParams()));
+  for (mlir::Value mlir_param_value : mlir_params) {
     ABSL_ASSIGN_OR_RETURN(auto mlir_param,
                           Cast<JsirPatternRefOpInterface>(mlir_param_value));
     ABSL_ASSIGN_OR_RETURN(auto param, VisitPatternRef(mlir_param));
@@ -545,7 +551,9 @@ JsirToAst::VisitClassPrivateMethod(JsirClassPrivateMethodOp op) {
   }
 
   std::vector<std::unique_ptr<JsPattern>> params;
-  for (mlir::Value mlir_param_value : op.getParams()) {
+  ABSL_ASSIGN_OR_RETURN(mlir::ValueRange mlir_params,
+                        GetExprsRegionValues(op.getParams()));
+  for (mlir::Value mlir_param_value : mlir_params) {
     ABSL_ASSIGN_OR_RETURN(auto mlir_param,
                           Cast<JsirPatternRefOpInterface>(mlir_param_value));
     ABSL_ASSIGN_OR_RETURN(auto param, VisitPatternRef(mlir_param));
