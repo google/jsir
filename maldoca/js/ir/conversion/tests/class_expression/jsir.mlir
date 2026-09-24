@@ -23,7 +23,9 @@
 // JSIR-NEXT:           %4 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, value = 5.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:           "jsir.expr_region_end"(%4) : (!jsir.any) -> ()
 // JSIR-NEXT:         }) : (!jsir.any) -> ()
-// JSIR-NEXT:         "jsir.class_method"() <{async = false, generator = false, kind = "method", literal_key = #jsir<identifier <L 7 C 2>, <L 7 C 19>, "method_identifier", 141, 158, 1, "method_identifier">, operandSegmentSizes = array<i32: 0, 0>, static_ = false}> ({
+// JSIR-NEXT:         "jsir.class_method"() <{async = false, generator = false, kind = "method", literal_key = #jsir<identifier <L 7 C 2>, <L 7 C 19>, "method_identifier", 141, 158, 1, "method_identifier">, static_ = false}> ({
+// JSIR-NEXT:           "jsir.exprs_region_end"() : () -> ()
+// JSIR-NEXT:         }, {
 // JSIR-NEXT:           "jshir.block_statement"() ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }, {
@@ -31,20 +33,26 @@
 // JSIR-NEXT:           }) : () -> ()
 // JSIR-NEXT:         }) : () -> ()
 // JSIR-NEXT:         "jsir.class_private_method"() <{async = false, generator = false, key = #jsir<private_name <L 8 C 2>, <L 8 C 22>, 166, 186, 1, <L 8 C 3>, <L 8 C 22>, "method_private_name", 167, 186, 1, "method_private_name">, kind = "method", static_ = false}> ({
+// JSIR-NEXT:           "jsir.exprs_region_end"() : () -> ()
+// JSIR-NEXT:         }, {
 // JSIR-NEXT:           "jshir.block_statement"() ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }, {
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }) : () -> ()
 // JSIR-NEXT:         }) : () -> ()
-// JSIR-NEXT:         "jsir.class_method"() <{async = false, generator = false, kind = "method", literal_key = #jsir<string_literal <L 9 C 2>, <L 9 C 25>, 194, 217, 1, "method_literal_string", "\22method_literal_string\22", "method_literal_string">, operandSegmentSizes = array<i32: 0, 0>, static_ = false}> ({
+// JSIR-NEXT:         "jsir.class_method"() <{async = false, generator = false, kind = "method", literal_key = #jsir<string_literal <L 9 C 2>, <L 9 C 25>, 194, 217, 1, "method_literal_string", "\22method_literal_string\22", "method_literal_string">, static_ = false}> ({
+// JSIR-NEXT:           "jsir.exprs_region_end"() : () -> ()
+// JSIR-NEXT:         }, {
 // JSIR-NEXT:           "jshir.block_statement"() ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }, {
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }) : () -> ()
 // JSIR-NEXT:         }) : () -> ()
-// JSIR-NEXT:         "jsir.class_method"() <{async = false, generator = false, kind = "method", literal_key = #jsir<numeric_literal <L 10 C 2>, <L 10 C 5>, 225, 228, 1, 1.000000e+00 : f64, "1.0", 1.000000e+00 : f64>, operandSegmentSizes = array<i32: 0, 0>, static_ = false}> ({
+// JSIR-NEXT:         "jsir.class_method"() <{async = false, generator = false, kind = "method", literal_key = #jsir<numeric_literal <L 10 C 2>, <L 10 C 5>, 225, 228, 1, 1.000000e+00 : f64, "1.0", 1.000000e+00 : f64>, static_ = false}> ({
+// JSIR-NEXT:           "jsir.exprs_region_end"() : () -> ()
+// JSIR-NEXT:         }, {
 // JSIR-NEXT:           "jshir.block_statement"() ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }, {
@@ -52,7 +60,9 @@
 // JSIR-NEXT:           }) : () -> ()
 // JSIR-NEXT:         }) : () -> ()
 // JSIR-NEXT:         %3 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "\22method_computed\22", "method_computed">, value = "method_computed"}> : () -> !jsir.any
-// JSIR-NEXT:         "jsir.class_method"(%3) <{async = false, generator = false, kind = "method", operandSegmentSizes = array<i32: 0, 1>, static_ = false}> ({
+// JSIR-NEXT:         "jsir.class_method"(%3) <{async = false, generator = false, kind = "method", static_ = false}> ({
+// JSIR-NEXT:           "jsir.exprs_region_end"() : () -> ()
+// JSIR-NEXT:         }, {
 // JSIR-NEXT:           "jshir.block_statement"() ({
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:           }, {
