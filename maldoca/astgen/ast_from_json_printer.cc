@@ -68,6 +68,9 @@ static void GetCheckedClasses(const Type& type, bool is_part_of_variant,
 static absl::flat_hash_set<std::string> GetCheckedClasses(const AstDef& ast) {
   absl::flat_hash_set<std::string> checked_classes;
   for (const NodeDef* node : ast.topological_sorted_nodes()) {
+    if (!node->in_ast()) {
+      continue;
+    }
     for (const FieldDef& field : node->fields()) {
       if (!field.in_ast()) {
         continue;
@@ -130,6 +133,9 @@ void AstFromJsonPrinter::PrintAst(const AstDef& ast,
   absl::flat_hash_set<std::string> checked_classes = GetCheckedClasses(ast);
 
   for (const NodeDef* node : ast.topological_sorted_nodes()) {
+    if (!node->in_ast()) {
+      continue;
+    }
     PrintTitle((Symbol(ast.lang_name()) + node->name()).ToPascalCase());
     Println();
 
