@@ -193,15 +193,15 @@ absl::StatusOr<JsPassRunner::Result> UnsandboxedJsPassRunner::Run(
   ABSL_ASSIGN_OR_RETURN(std::unique_ptr<JsRepr> input_repr,
                         JsRepr::FromProto(input_repr_pb));
 
+  mlir::MLIRContext mlir_context;
+  LoadNecessaryDialects(mlir_context);
+
   JsPassContext context{
       .original_source = std::string(original_source),
       .original_source_u16 = Utf8ToUtf16(original_source),
       .repr = std::move(input_repr),
       .outputs = {},
   };
-
-  mlir::MLIRContext mlir_context;
-  LoadNecessaryDialects(mlir_context);
 
   ABSL_RETURN_IF_ERROR(RunPasses(passes, context, babel_, &mlir_context));
 
