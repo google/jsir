@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -40,8 +40,8 @@ enum class LaExpressionType {
   kFunctionCall,
 };
 
-absl::string_view LaExpressionTypeToString(LaExpressionType expression_type);
-absl::StatusOr<LaExpressionType> StringToLaExpressionType(absl::string_view s);
+std::string_view LaExpressionTypeToString(LaExpressionType expression_type);
+absl::StatusOr<LaExpressionType> StringToLaExpressionType(std::string_view s);
 
 class LaExpression {
  public:
@@ -73,7 +73,7 @@ class LaVariable : public virtual LaExpression {
 
   static absl::StatusOr<std::unique_ptr<LaVariable>> FromJson(const nlohmann::json& json);
 
-  absl::string_view identifier() const;
+  std::string_view identifier() const;
   void set_identifier(std::string identifier);
 
  protected:

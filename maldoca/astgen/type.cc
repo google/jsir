@@ -368,7 +368,7 @@ std::string BuiltinType::CcGetterType(CcGetterKind getter_kind) const {
     case BuiltinTypeKind::kDouble:
       return "double";
     case BuiltinTypeKind::kString:
-      return "absl::string_view";
+      return "std::string_view";
   }
 }
 

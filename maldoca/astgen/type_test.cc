@@ -154,8 +154,8 @@ TEST(TypeTest, ConvertBuiltinType) {
       .type_pb = "string {}",
       .js_type = "string",
       .cc_type = "std::string",
-      .cc_getter_type = "absl::string_view",
-      .cc_const_getter_type = "absl::string_view",
+      .cc_getter_type = "std::string_view",
+      .cc_const_getter_type = "std::string_view",
       .td_types =
           {
               {FIELD_KIND_ATTR, "StrAttr"},
@@ -227,8 +227,8 @@ TEST(TypeTest, ConvertVariantType) {
       )pb",
       .js_type = "boolean | string",
       .cc_type = "std::variant<bool, std::string>",
-      .cc_getter_type = "std::variant<bool, absl::string_view>",
-      .cc_const_getter_type = "std::variant<bool, absl::string_view>",
+      .cc_getter_type = "std::variant<bool, std::string_view>",
+      .cc_const_getter_type = "std::variant<bool, std::string_view>",
       .td_types =
           {
               {FIELD_KIND_ATTR, "AnyAttrOf<[BoolAttr, StrAttr]>"},

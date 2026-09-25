@@ -26,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -36,7 +37,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -45,7 +45,7 @@ namespace maldoca {
 // EUnionType
 // =============================================================================
 
-absl::string_view EUnionTypeTypeToString(EUnionTypeType union_type_type) {
+std::string_view EUnionTypeTypeToString(EUnionTypeType union_type_type) {
   switch (union_type_type) {
     case EUnionTypeType::kSubNodeA:
       return "SubNodeA";
@@ -54,8 +54,8 @@ absl::string_view EUnionTypeTypeToString(EUnionTypeType union_type_type) {
   }
 }
 
-absl::StatusOr<EUnionTypeType> StringToEUnionTypeType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, EUnionTypeType> {
+absl::StatusOr<EUnionTypeType> StringToEUnionTypeType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, EUnionTypeType> {
       {"SubNodeA", EUnionTypeType::kSubNodeA},
       {"SubNodeB", EUnionTypeType::kSubNodeB},
   };
@@ -77,7 +77,7 @@ ENode::ENode(
     : name_(std::move(name)),
       content_(std::move(content)) {}
 
-absl::string_view ENode::name() const {
+std::string_view ENode::name() const {
   return name_;
 }
 
@@ -106,7 +106,7 @@ ESubNodeA::ESubNodeA(
     : EUnionType(),
       value_a_(std::move(value_a)) {}
 
-absl::string_view ESubNodeA::value_a() const {
+std::string_view ESubNodeA::value_a() const {
   return value_a_;
 }
 
@@ -123,7 +123,7 @@ ESubNodeB::ESubNodeB(
     : EUnionType(),
       value_b_(std::move(value_b)) {}
 
-absl::string_view ESubNodeB::value_b() const {
+std::string_view ESubNodeB::value_b() const {
   return value_b_;
 }
 

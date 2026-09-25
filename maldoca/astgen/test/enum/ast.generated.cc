@@ -26,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -36,12 +37,11 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
 
-absl::string_view EUnaryOperatorToString(EUnaryOperator unary_operator) {
+std::string_view EUnaryOperatorToString(EUnaryOperator unary_operator) {
   switch (unary_operator) {
     case EUnaryOperator::kMinus:
       return "-";
@@ -62,8 +62,8 @@ absl::string_view EUnaryOperatorToString(EUnaryOperator unary_operator) {
   }
 }
 
-absl::StatusOr<EUnaryOperator> StringToEUnaryOperator(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, EUnaryOperator> {
+absl::StatusOr<EUnaryOperator> StringToEUnaryOperator(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, EUnaryOperator> {
       {"-", EUnaryOperator::kMinus},
       {"+", EUnaryOperator::kPlus},
       {"!", EUnaryOperator::kNot},
@@ -81,7 +81,7 @@ absl::StatusOr<EUnaryOperator> StringToEUnaryOperator(absl::string_view s) {
   return it->second;
 }
 
-absl::string_view EEscapedCharToString(EEscapedChar escaped_char) {
+std::string_view EEscapedCharToString(EEscapedChar escaped_char) {
   switch (escaped_char) {
     case EEscapedChar::kTab:
       return "\t";
@@ -90,8 +90,8 @@ absl::string_view EEscapedCharToString(EEscapedChar escaped_char) {
   }
 }
 
-absl::StatusOr<EEscapedChar> StringToEEscapedChar(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, EEscapedChar> {
+absl::StatusOr<EEscapedChar> StringToEEscapedChar(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, EEscapedChar> {
       {"\t", EEscapedChar::kTab},
       {"\\", EEscapedChar::kBackslash},
   };

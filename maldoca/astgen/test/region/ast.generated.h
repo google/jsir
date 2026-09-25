@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {

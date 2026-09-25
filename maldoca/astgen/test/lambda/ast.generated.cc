@@ -26,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -36,7 +37,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -45,7 +45,7 @@ namespace maldoca {
 // LaExpression
 // =============================================================================
 
-absl::string_view LaExpressionTypeToString(LaExpressionType expression_type) {
+std::string_view LaExpressionTypeToString(LaExpressionType expression_type) {
   switch (expression_type) {
     case LaExpressionType::kVariable:
       return "Variable";
@@ -56,8 +56,8 @@ absl::string_view LaExpressionTypeToString(LaExpressionType expression_type) {
   }
 }
 
-absl::StatusOr<LaExpressionType> StringToLaExpressionType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, LaExpressionType> {
+absl::StatusOr<LaExpressionType> StringToLaExpressionType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, LaExpressionType> {
       {"Variable", LaExpressionType::kVariable},
       {"FunctionDefinition", LaExpressionType::kFunctionDefinition},
       {"FunctionCall", LaExpressionType::kFunctionCall},
@@ -79,7 +79,7 @@ LaVariable::LaVariable(
     : LaExpression(),
       identifier_(std::move(identifier)) {}
 
-absl::string_view LaVariable::identifier() const {
+std::string_view LaVariable::identifier() const {
   return identifier_;
 }
 

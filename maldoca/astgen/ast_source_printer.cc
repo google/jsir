@@ -53,6 +53,7 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
   Println("#include <memory>");
   Println("#include <optional>");
   Println("#include <string>");
+  Println("#include <string_view>");
   Println("#include <utility>");
   Println("#include <variant>");
   Println("#include <vector>");
@@ -64,7 +65,6 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
   PrintIncludeHeader("absl/status/status.h");
   PrintIncludeHeader("absl/status/statusor.h");
   PrintIncludeHeader("absl/strings/str_cat.h");
-  PrintIncludeHeader("absl/strings/string_view.h");
   PrintIncludeHeader("nlohmann/json.hpp");
   Println();
 
@@ -95,7 +95,7 @@ void AstSourcePrinter::PrintEnum(const EnumDef& enum_def,
       {"enum_name", enum_def.name().ToSnakeCase()},
   });
 
-  Println("absl::string_view $EnumName$ToString($EnumName$ $enum_name$) {");
+  Println("std::string_view $EnumName$ToString($EnumName$ $enum_name$) {");
   {
     auto indent = WithIndent();
     Println("switch ($enum_name$) {");
@@ -117,13 +117,13 @@ void AstSourcePrinter::PrintEnum(const EnumDef& enum_def,
   Println();
 
   Println(
-      "absl::StatusOr<$EnumName$> StringTo$EnumName$(absl::string_view s) {");
+      "absl::StatusOr<$EnumName$> StringTo$EnumName$(std::string_view s) {");
   {
     auto indent = WithIndent();
 
     Println(
         "static const auto *kMap = "
-        "new absl::flat_hash_map<absl::string_view, $EnumName$> {");
+        "new absl::flat_hash_map<std::string_view, $EnumName$> {");
     {
       auto indent = WithIndent(4);
       for (const EnumMemberDef& member : enum_def.members()) {

@@ -26,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -36,7 +37,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -71,15 +71,15 @@ void MSourceLocation::set_end(double end) {
 // MNode
 // =============================================================================
 
-absl::string_view MNodeTypeToString(MNodeType node_type) {
+std::string_view MNodeTypeToString(MNodeType node_type) {
   switch (node_type) {
     case MNodeType::kObjectMethod:
       return "ObjectMethod";
   }
 }
 
-absl::StatusOr<MNodeType> StringToMNodeType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, MNodeType> {
+absl::StatusOr<MNodeType> StringToMNodeType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, MNodeType> {
       {"ObjectMethod", MNodeType::kObjectMethod},
   };
 
@@ -116,7 +116,7 @@ MFunction::MFunction(
     : MNode(std::move(loc)) /* NOLINT */,
       id_(std::move(id)) {}
 
-absl::string_view MFunction::id() const {
+std::string_view MFunction::id() const {
   return id_;
 }
 

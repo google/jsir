@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -43,8 +43,8 @@ enum class TlNodeType {
   kFunctionType,
 };
 
-absl::string_view TlNodeTypeToString(TlNodeType node_type);
-absl::StatusOr<TlNodeType> StringToTlNodeType(absl::string_view s);
+std::string_view TlNodeTypeToString(TlNodeType node_type);
+absl::StatusOr<TlNodeType> StringToTlNodeType(std::string_view s);
 
 class TlNode {
  public:
@@ -98,7 +98,7 @@ class TlLiteral : public virtual TlExpression {
 
   static absl::StatusOr<std::unique_ptr<TlLiteral>> FromJson(const nlohmann::json& json);
 
-  std::variant<bool, int64_t, double, absl::string_view> value() const;
+  std::variant<bool, int64_t, double, std::string_view> value() const;
   void set_value(std::variant<bool, int64_t, double, std::string> value);
 
  protected:
@@ -128,7 +128,7 @@ class TlVariable : public virtual TlExpression {
 
   static absl::StatusOr<std::unique_ptr<TlVariable>> FromJson(const nlohmann::json& json);
 
-  absl::string_view identifier() const;
+  std::string_view identifier() const;
   void set_identifier(std::string identifier);
 
  protected:

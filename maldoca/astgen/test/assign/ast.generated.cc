@@ -26,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -36,7 +37,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -45,7 +45,7 @@ namespace maldoca {
 // AExpression
 // =============================================================================
 
-absl::string_view AExpressionTypeToString(AExpressionType expression_type) {
+std::string_view AExpressionTypeToString(AExpressionType expression_type) {
   switch (expression_type) {
     case AExpressionType::kIdentifier:
       return "Identifier";
@@ -54,8 +54,8 @@ absl::string_view AExpressionTypeToString(AExpressionType expression_type) {
   }
 }
 
-absl::StatusOr<AExpressionType> StringToAExpressionType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, AExpressionType> {
+absl::StatusOr<AExpressionType> StringToAExpressionType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, AExpressionType> {
       {"Identifier", AExpressionType::kIdentifier},
       {"Assignment", AExpressionType::kAssignment},
   };
@@ -76,7 +76,7 @@ AIdentifier::AIdentifier(
     : AExpression(),
       name_(std::move(name)) {}
 
-absl::string_view AIdentifier::name() const {
+std::string_view AIdentifier::name() const {
   return name_;
 }
 

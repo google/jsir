@@ -26,6 +26,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -36,7 +37,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -45,7 +45,7 @@ namespace maldoca {
 // TlNode
 // =============================================================================
 
-absl::string_view TlNodeTypeToString(TlNodeType node_type) {
+std::string_view TlNodeTypeToString(TlNodeType node_type) {
   switch (node_type) {
     case TlNodeType::kLiteral:
       return "Literal";
@@ -62,8 +62,8 @@ absl::string_view TlNodeTypeToString(TlNodeType node_type) {
   }
 }
 
-absl::StatusOr<TlNodeType> StringToTlNodeType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, TlNodeType> {
+absl::StatusOr<TlNodeType> StringToTlNodeType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, TlNodeType> {
       {"Literal", TlNodeType::kLiteral},
       {"Variable", TlNodeType::kVariable},
       {"FunctionDefinition", TlNodeType::kFunctionDefinition},
@@ -97,7 +97,7 @@ TlLiteral::TlLiteral(
       TlExpression(),
       value_(std::move(value)) {}
 
-std::variant<bool, int64_t, double, absl::string_view> TlLiteral::value() const {
+std::variant<bool, int64_t, double, std::string_view> TlLiteral::value() const {
   switch (value_.index()) {
     case 0: {
       return std::get<0>(value_);
@@ -130,7 +130,7 @@ TlVariable::TlVariable(
       TlExpression(),
       identifier_(std::move(identifier)) {}
 
-absl::string_view TlVariable::identifier() const {
+std::string_view TlVariable::identifier() const {
   return identifier_;
 }
 

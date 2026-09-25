@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -39,8 +39,8 @@ enum class EUnionTypeType {
   kSubNodeB,
 };
 
-absl::string_view EUnionTypeTypeToString(EUnionTypeType union_type_type);
-absl::StatusOr<EUnionTypeType> StringToEUnionTypeType(absl::string_view s);
+std::string_view EUnionTypeTypeToString(EUnionTypeType union_type_type);
+absl::StatusOr<EUnionTypeType> StringToEUnionTypeType(std::string_view s);
 
 class EUnionType {
  public:
@@ -69,7 +69,7 @@ class ENode {
 
   static absl::StatusOr<std::unique_ptr<ENode>> FromJson(const nlohmann::json& json);
 
-  absl::string_view name() const;
+  std::string_view name() const;
   void set_name(std::string name);
 
   EUnionType* content();
@@ -105,7 +105,7 @@ class ESubNodeA : public virtual EUnionType {
 
   static absl::StatusOr<std::unique_ptr<ESubNodeA>> FromJson(const nlohmann::json& json);
 
-  absl::string_view value_a() const;
+  std::string_view value_a() const;
   void set_value_a(std::string value_a);
 
  protected:
@@ -135,7 +135,7 @@ class ESubNodeB : public virtual EUnionType {
 
   static absl::StatusOr<std::unique_ptr<ESubNodeB>> FromJson(const nlohmann::json& json);
 
-  absl::string_view value_b() const;
+  std::string_view value_b() const;
   void set_value_b(std::string value_b);
 
  protected:

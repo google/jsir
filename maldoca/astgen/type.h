@@ -179,7 +179,7 @@ class Type {
   //   => double
   //
   // string
-  //   => absl::string_view
+  //   => std::string_view
   //
   // ClassType
   //   => const ClassType*

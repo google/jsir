@@ -46,12 +46,12 @@ void AstHeaderPrinter::PrintAst(const AstDef& ast,
 
   Println("#include <optional>");
   Println("#include <string>");
+  Println("#include <string_view>");
   Println("#include <variant>");
   Println("#include <vector>");
   Println();
 
   PrintIncludeHeader("absl/status/statusor.h");
-  PrintIncludeHeader("absl/strings/string_view.h");
   PrintIncludeHeader("nlohmann/json.hpp");
   Println();
 
@@ -100,9 +100,9 @@ void AstHeaderPrinter::PrintEnum(const EnumDef& enum_def,
   Println("};");
   Println();
 
-  Println("absl::string_view $EnumName$ToString($EnumName$ $enum_name$);");
+  Println("std::string_view $EnumName$ToString($EnumName$ $enum_name$);");
   Println(
-      "absl::StatusOr<$EnumName$> StringTo$EnumName$(absl::string_view s);");
+      "absl::StatusOr<$EnumName$> StringTo$EnumName$(std::string_view s);");
 }
 
 void AstHeaderPrinter::PrintNode(const NodeDef& node,
