@@ -107,6 +107,7 @@ def JshirForInStatementOp : Jshir_Op<
   let arguments = (ins
     OptionalAttr<JsirForInOfDeclarationAttr>: $left_declaration,
     AnyType: $left_lval,  // JsLVal
+    Optional<AnyType>: $left_init,  // JsExpression
     AnyType: $right  // JsExpression
   );
 

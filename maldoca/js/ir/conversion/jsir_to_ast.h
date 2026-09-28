@@ -123,7 +123,8 @@ class JsirToAst {
 
   static absl::StatusOr<JsForInOfStatementFields> VisitForInOfStatement(
       std::optional<JsirForInOfDeclarationAttr> left_declaration,
-      mlir::Value left_lval, mlir::Value right, mlir::Region& body_region);
+      mlir::Value left_lval, mlir::Value left_init, mlir::Value right,
+      mlir::Region& body_region);
 
   static absl::StatusOr<std::unique_ptr<JsModuleSpecifier>>
   VisitModuleSpecifierAttr(JsirModuleSpecifierAttrInterface attr);
