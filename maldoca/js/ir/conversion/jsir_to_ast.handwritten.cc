@@ -158,8 +158,8 @@ absl::StatusOr<std::unique_ptr<JsForStatement>> JsirToAst::VisitForStatement(
 absl::StatusOr<JsirToAst::JsForInOfStatementFields>
 JsirToAst::VisitForInOfStatement(
     std::optional<JsirForInOfDeclarationAttr> left_declaration,
-    mlir::Value left_lval_value, mlir::Value right_value,
-    mlir::Region &body_region) {
+    mlir::Value left_lval_value, mlir::Value left_init_value,
+    mlir::Value right_value, mlir::Region& body_region) {
   ABSL_ASSIGN_OR_RETURN(auto left_lval_op,
                         Cast<JsirLValRefOpInterface>(left_lval_value));
   ABSL_ASSIGN_OR_RETURN(auto left_lval, VisitLValRef(left_lval_op));
@@ -169,9 +169,15 @@ JsirToAst::VisitForInOfStatement(
   if (!left_declaration.has_value()) {
     left = std::move(left_lval);
   } else {
+    std::optional<std::unique_ptr<JsExpression>> init;
+    if (left_init_value != nullptr) {
+      ABSL_ASSIGN_OR_RETURN(auto left_init_op,
+                            Cast<JsirExpressionOpInterface>(left_init_value));
+      ABSL_ASSIGN_OR_RETURN(init, VisitExpression(left_init_op));
+    }
     auto declarator = CreateJsNodeWithTrivia<JsVariableDeclarator>(
         left_declaration->getDeclaratorLoc(), std::move(left_lval),
-        /*init=*/std::nullopt);
+        std::move(init));
 
     std::vector<std::unique_ptr<JsVariableDeclarator>> declarations;
     declarations.push_back(std::move(declarator));
@@ -198,7 +204,7 @@ JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto fields,
       VisitForInOfStatement(op.getLeftDeclaration(), op.getLeftLval(),
-                            op.getRight(), op.getBody()));
+                            op.getLeftInit(), op.getRight(), op.getBody()));
   return Create<JsForInStatement>(op, std::move(fields.left),
                                   std::move(fields.right),
                                   std::move(fields.body));
@@ -207,9 +213,9 @@ JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
 absl::StatusOr<std::unique_ptr<JsForOfStatement>>
 JsirToAst::VisitForOfStatement(JshirForOfStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
-      auto fields,
-      VisitForInOfStatement(op.getLeftDeclaration(), op.getLeftLval(),
-                            op.getRight(), op.getBody()));
+      auto fields, VisitForInOfStatement(
+                       op.getLeftDeclaration(), op.getLeftLval(),
+                       /*left_init=*/nullptr, op.getRight(), op.getBody()));
   return Create<JsForOfStatement>(op, std::move(fields.left),
                                   std::move(fields.right),
                                   std::move(fields.body), op.getAwait());

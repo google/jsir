@@ -216,6 +216,7 @@ JshirForStatementOp AstToJsir::VisitForStatement(mlir::OpBuilder& builder,
 struct ForInOfLeft {
   std::optional<JsirForInOfDeclarationAttr> declaration_attr;
   const JsLVal* lval;
+  std::optional<const JsExpression*> init;
 };
 
 static absl::StatusOr<ForInOfLeft> GetForInOfLeft(
@@ -227,6 +228,7 @@ static absl::StatusOr<ForInOfLeft> GetForInOfLeft(
     return ForInOfLeft{
         .declaration_attr = std::nullopt,
         .lval = left_lval,
+        .init = std::nullopt,
     };
   }
 
@@ -248,6 +250,7 @@ static absl::StatusOr<ForInOfLeft> GetForInOfLeft(
           /*declarator_loc=*/GetJsirTriviaAttr(context, *declarator),
           /*kind=*/mlir::StringAttr::get(context, left_declaration->kind())),
       .lval = declarator->id(),
+      .init = declarator->init(),
   };
 }
 
@@ -262,11 +265,16 @@ JshirForInStatementOp AstToJsir::VisitForInStatement(
 
   mlir::Value mlir_left = VisitLValRef(builder, left->lval);
 
+  mlir::Value mlir_left_init;
+  if (left->init.has_value()) {
+    mlir_left_init = VisitExpression(builder, *left->init);
+  }
+
   mlir::Value mlir_right = VisitExpression(builder, node->right());
 
   auto op = CreateStmt<JshirForInStatementOp>(
       builder, node, left->declaration_attr.value_or(nullptr), mlir_left,
-      mlir_right);
+      mlir_left_init, mlir_right);
 
   mlir::Region& body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, body_region,
