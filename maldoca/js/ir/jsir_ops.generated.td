@@ -488,7 +488,8 @@ def JsirVariableDeclarationOp : Jsir_Op<
 def JsirFunctionDeclarationOp : Jsir_Op<
     "function_declaration", [
         JsirDeclarationOpInterfaceTraits,
-        NoTerminator
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
     ]> {
   let arguments = (ins
     OptionalAttr<JsirIdentifierAttr>: $id,
@@ -584,7 +585,8 @@ def JsirArrayExpressionOp : Jsir_Op<
 def JsirFunctionExpressionOp : Jsir_Op<
     "function_expression", [
         JsirExpressionOpInterfaceTraits,
-        NoTerminator
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
     ]> {
   let arguments = (ins
     OptionalAttr<JsirIdentifierAttr>: $id,

@@ -135,17 +135,17 @@ def JshirForOfStatementOp : Jshir_Op<
 def JsirArrowFunctionExpressionOp : Jsir_Op<
     "arrow_function_expression", [
         JsirExpressionOpInterfaceTraits,
-        AttrSizedOperandSegments,
-        NoTerminator
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
     ]> {
   let arguments = (ins
     Optional<AnyType>: $id,
-    Variadic<AnyType>: $params,
     BoolAttr: $generator,
     BoolAttr: $async
   );
 
   let regions = (region
+    ExprsRegion: $params,
     UnknownRegion: $body
   );
 
@@ -189,20 +189,20 @@ def JsirObjectPropertyRefOp : Jsir_Op<"object_property_ref", []> {
 
 def JsirObjectMethodOp : Jsir_Op<
     "object_method", [
-        AttrSizedOperandSegments,
-        NoTerminator
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
     ]> {
   let arguments = (ins
     JsirObjectLiteralKeyType: $literal_key,
     Optional<AnyType>: $computed_key,
     OptionalAttr<JsirIdentifierAttr>: $id,
-    Variadic<AnyType>: $params,
     BoolAttr: $generator,
     BoolAttr: $async,
     StrAttr: $kind
   );
 
   let regions = (region
+    ExprsRegion: $params,
     StmtRegion: $body
   );
 
@@ -317,12 +317,11 @@ def JsirParenthesizedExpressionRefOp : Jsir_Op<
 
 def JsirClassMethodOp : Jsir_Op<
     "class_method", [
-        AttrSizedOperandSegments,
-        NoTerminator
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
     ]> {
   let arguments = (ins
     OptionalAttr<JsirIdentifierAttr>: $id,
-    Variadic<AnyType>: $params,
     BoolAttr: $generator,
     BoolAttr: $async,
     JsirObjectLiteralKeyType: $literal_key,
@@ -332,17 +331,18 @@ def JsirClassMethodOp : Jsir_Op<
   );
 
   let regions = (region
+    ExprsRegion: $params,
     StmtRegion: $body
   );
 }
 
 def JsirClassPrivateMethodOp : Jsir_Op<
     "class_private_method", [
-        NoTerminator
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
     ]> {
   let arguments = (ins
     OptionalAttr<JsirIdentifierAttr>: $id,
-    Variadic<AnyType>: $params,
     BoolAttr: $generator,
     BoolAttr: $async,
     JsirPrivateNameAttr: $key,
@@ -351,6 +351,7 @@ def JsirClassPrivateMethodOp : Jsir_Op<
   );
 
   let regions = (region
+    ExprsRegion: $params,
     StmtRegion: $body
   );
 }

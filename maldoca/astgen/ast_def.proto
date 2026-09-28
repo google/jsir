@@ -265,6 +265,7 @@ enum MlirTrait {
   MLIR_TRAIT_INVALID = 0;
   MLIR_TRAIT_PURE = 1;                 // Pure
   MLIR_TRAIT_ISOLATED_FROM_ABOVE = 2;  // IsolatedFromAbove
+  MLIR_TRAIT_JSIR_FUNCTION_OP_INTERFACE = 3;  // JsirFunctionOpInterfaceTraits
 }
 
 // Definition of an AST node type.

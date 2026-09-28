@@ -283,6 +283,9 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
       case MLIR_TRAIT_ISOLATED_FROM_ABOVE:
         traits.push_back(Symbol("IsolatedFromAbove"));
         break;
+      case MLIR_TRAIT_JSIR_FUNCTION_OP_INTERFACE:
+        traits.push_back(Symbol("JsirFunctionOpInterfaceTraits"));
+        break;
     }
   }
 

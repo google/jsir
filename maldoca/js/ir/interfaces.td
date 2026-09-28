@@ -141,6 +141,45 @@ def JsirModuleDeclarationOpInterfaceTraits : TraitList<[
   DeclareOpInterfaceMethods<JsirModuleDeclarationOpInterface>
 ]>;
 
+def JsirFunctionOpInterface : OpInterface<"JsirFunctionOpInterface"> {
+  let cppNamespace = "::maldoca";
+
+  let methods = [
+    InterfaceMethod<
+      /*desc=*/"Returns the function parameter patterns region.",
+      /*retTy=*/"::mlir::Region &",
+      /*methodName=*/"getParams",
+      /*args=*/(ins),
+      /*methodBody=*/[{ return $_op.getParams(); }]
+    >,
+    InterfaceMethod<
+      /*desc=*/"Returns the function body region.",
+      /*retTy=*/"::mlir::Region &",
+      /*methodName=*/"getBody",
+      /*args=*/(ins),
+      /*methodBody=*/[{ return $_op.getBody(); }]
+    >,
+    InterfaceMethod<
+      /*desc=*/"Returns whether the function is a generator (`function*`).",
+      /*retTy=*/"bool",
+      /*methodName=*/"getGenerator",
+      /*args=*/(ins),
+      /*methodBody=*/[{ return $_op.getGenerator(); }]
+    >,
+    InterfaceMethod<
+      /*desc=*/"Returns whether the function is `async`.",
+      /*retTy=*/"bool",
+      /*methodName=*/"getAsync",
+      /*args=*/(ins),
+      /*methodBody=*/[{ return $_op.getAsync(); }]
+    >
+  ];
+}
+
+def JsirFunctionOpInterfaceTraits : TraitList<[
+  DeclareOpInterfaceMethods<JsirFunctionOpInterface>
+]>;
+
 def JsirModuleSpecifierAttrInterface : AttrInterface<"JsirModuleSpecifierAttrInterface"> {
   let cppNamespace = "::maldoca";
 }

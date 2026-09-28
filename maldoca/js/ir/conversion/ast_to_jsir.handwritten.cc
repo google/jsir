@@ -305,15 +305,19 @@ JsirArrowFunctionExpressionOp AstToJsir::VisitArrowFunctionExpression(
   if (node->id().has_value()) {
     mlir_id = VisitIdentifierRef(builder, node->id().value());
   }
-  std::vector<mlir::Value> mlir_params;
-  for (const auto& param : *node->params()) {
-    mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-    mlir_params.push_back(mlir_param);
-  }
   mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
   mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
   auto op = CreateExpr<JsirArrowFunctionExpressionOp>(
-      builder, node, mlir_id, mlir_params, mlir_generator, mlir_async);
+      builder, node, mlir_id, mlir_generator, mlir_async);
+  mlir::Region& mlir_params_region = op.getParams();
+  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
+    std::vector<mlir::Value> mlir_params;
+    for (const auto& param : *node->params()) {
+      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
+      mlir_params.push_back(mlir_param);
+    }
+    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
+  });
   mlir::Region& body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, body_region, [&] {
     if (std::holds_alternative<const JsBlockStatement*>(node->body())) {
@@ -361,22 +365,31 @@ JsirObjectPropertyRefOp AstToJsir::VisitObjectPropertyRef(
 
 JsirObjectMethodOp AstToJsir::VisitObjectMethod(mlir::OpBuilder& builder,
                                                 const JsObjectMethod* node) {
+  // The computed key is deliberately evaluated here, in the enclosing region,
+  // and *not* inside the params region populated below. A computed key such as
+  // `{ [f() + 1](a) {} }` is evaluated exactly once, when the object literal is
+  // constructed - not once per call to the method. Parameter defaults have the
+  // opposite semantics, which is why only the params moved into a region.
   auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
   JsirIdentifierAttr mlir_id;
   if (node->id().has_value()) {
     mlir_id = VisitIdentifierAttr(builder, node->id().value());
   }
-  std::vector<mlir::Value> mlir_params;
-  for (const auto& param : *node->params()) {
-    mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-    mlir_params.push_back(mlir_param);
-  }
   mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
   mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
   mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
   auto op = CreateExpr<JsirObjectMethodOp>(
-      builder, node, mlir_key.literal, mlir_key.computed, mlir_id, mlir_params,
+      builder, node, mlir_key.literal, mlir_key.computed, mlir_id,
       mlir_generator, mlir_async, mlir_kind);
+  mlir::Region& mlir_params_region = op.getParams();
+  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
+    std::vector<mlir::Value> mlir_params;
+    for (const auto& param : *node->params()) {
+      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
+      mlir_params.push_back(mlir_param);
+    }
+    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
+  });
   mlir::Region& mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitBlockStatement(builder, node->body());
@@ -530,19 +543,29 @@ JsirClassMethodOp AstToJsir::VisitClassMethod(mlir::OpBuilder& builder,
   if (node->id().has_value()) {
     mlir_id = VisitIdentifierAttr(builder, node->id().value());
   }
-  std::vector<mlir::Value> mlir_params;
-  for (const auto& param : *node->params()) {
-    mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-    mlir_params.push_back(mlir_param);
-  }
   mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
   mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
+  // The computed key is deliberately evaluated here, in the enclosing region
+  // (`jsir.class_body`), and *not* inside the params region populated below. A
+  // computed key such as `class C { [f() + 1](a) {} }` is evaluated exactly
+  // once, when the class body is constructed - not once per call to the method.
+  // Parameter defaults have the opposite semantics, which is why only the
+  // params moved into a region.
   auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
   mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
   mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
   auto op = CreateStmt<JsirClassMethodOp>(
-      builder, node, mlir_id, mlir_params, mlir_generator, mlir_async,
-      mlir_key.literal, mlir_key.computed, mlir_kind, mlir_static);
+      builder, node, mlir_id, mlir_generator, mlir_async, mlir_key.literal,
+      mlir_key.computed, mlir_kind, mlir_static);
+  mlir::Region& mlir_params_region = op.getParams();
+  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
+    std::vector<mlir::Value> mlir_params;
+    for (const auto& param : *node->params()) {
+      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
+      mlir_params.push_back(mlir_param);
+    }
+    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
+  });
   mlir::Region& mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitBlockStatement(builder, node->body());
@@ -556,19 +579,23 @@ JsirClassPrivateMethodOp AstToJsir::VisitClassPrivateMethod(
   if (node->id().has_value()) {
     mlir_id = VisitIdentifierAttr(builder, node->id().value());
   }
-  std::vector<mlir::Value> mlir_params;
-  for (const auto& param : *node->params()) {
-    mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-    mlir_params.push_back(mlir_param);
-  }
   mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
   mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
   JsirPrivateNameAttr mlir_key = VisitPrivateNameAttr(builder, node->key());
   mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
   mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
   auto op = CreateStmt<JsirClassPrivateMethodOp>(
-      builder, node, mlir_id, mlir_params, mlir_generator, mlir_async, mlir_key,
-      mlir_kind, mlir_static);
+      builder, node, mlir_id, mlir_generator, mlir_async, mlir_key, mlir_kind,
+      mlir_static);
+  mlir::Region& mlir_params_region = op.getParams();
+  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
+    std::vector<mlir::Value> mlir_params;
+    for (const auto& param : *node->params()) {
+      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
+      mlir_params.push_back(mlir_param);
+    }
+    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
+  });
   mlir::Region& mlir_body_region = op.getBody();
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitBlockStatement(builder, node->body());

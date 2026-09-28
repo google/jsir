@@ -851,12 +851,7 @@ bool JsirDataFlowAnalysis<ValueT, StateT, direction>::IsEntryBlock(
   mlir::Operation* parent_op = block->getParentOp();
 
   if (llvm::isa<JsirProgramOp>(parent_op) || llvm::isa<JsirFileOp>(parent_op) ||
-      llvm::isa<JsirFunctionDeclarationOp>(parent_op) ||
-      llvm::isa<JsirFunctionExpressionOp>(parent_op) ||
-      llvm::isa<JsirObjectMethodOp>(parent_op) ||
-      llvm::isa<JsirClassMethodOp>(parent_op) ||
-      llvm::isa<JsirClassPrivateMethodOp>(parent_op) ||
-      llvm::isa<JsirArrowFunctionExpressionOp>(parent_op)) {
+      llvm::isa<JsirFunctionOpInterface>(parent_op)) {
     return block->isEntryBlock();
   }
 
