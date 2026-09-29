@@ -233,6 +233,65 @@ cc_library(
 )
 
 cc_library(
+    name = "ir_attr_table_gen_printer",
+    srcs = ["ir_attr_table_gen_printer.cc"],
+    hdrs = ["ir_attr_table_gen_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ir_attr_python_bindings_printer",
+    srcs = ["ir_attr_python_bindings_printer.cc"],
+    hdrs = ["ir_attr_python_bindings_printer.h"],
+    deps = [
+        ":ast_def",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ir_attr_python_stubs_printer",
+    srcs = ["ir_attr_python_stubs_printer.cc"],
+    hdrs = ["ir_attr_python_stubs_printer.h"],
+    deps = [
+        ":ast_def",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
+    name = "ir_op_python_printer",
+    srcs = ["ir_op_python_printer.cc"],
+    hdrs = ["ir_op_python_printer.h"],
+    deps = [
+        ":ast_def",
+        ":ast_def_cc_proto",
+        ":ast_gen_utils",
+        ":cc_printer_base",
+        ":symbol",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/strings",
+        "@com_google_protobuf//src/google/protobuf/io",
+    ],
+)
+
+cc_library(
     name = "ast_to_ir_source_printer",
     srcs = ["ast_to_ir_source_printer.cc"],
     hdrs = ["ast_to_ir_source_printer.h"],
@@ -312,11 +371,16 @@ cc_binary(
         ":ast_to_ir_source_printer",
         ":ast_visitor_header_printer",
         ":ast_walker_header_printer",
+        ":ir_attr_python_bindings_printer",
+        ":ir_attr_python_stubs_printer",
+        ":ir_attr_table_gen_printer",
+        ":ir_op_python_printer",
         ":ir_table_gen_printer",
         ":ir_to_ast_source_printer",
         "//maldoca/base:filesystem",
         "//maldoca/base:path",
         "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/strings",
     ],

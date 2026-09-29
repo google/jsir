@@ -31,6 +31,10 @@
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
 #include "maldoca/astgen/ast_visitor_header_printer.h"
 #include "maldoca/astgen/ast_walker_header_printer.h"
+#include "maldoca/astgen/ir_attr_python_bindings_printer.h"
+#include "maldoca/astgen/ir_attr_python_stubs_printer.h"
+#include "maldoca/astgen/ir_attr_table_gen_printer.h"
+#include "maldoca/astgen/ir_op_python_printer.h"
 #include "maldoca/astgen/ir_table_gen_printer.h"
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/astgen/ts_interface_printer.h"
@@ -201,6 +205,91 @@ TEST_P(AstGenTest, IrTableGenTest) {
                    << expected_ir_tablegen_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ir_tablegen),
               absl::StripAsciiWhitespace(expected_ir_tablegen));
+  }
+}
+
+TEST_P(AstGenTest, IrAttrTableGenTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ir_attrs_tablegen =
+      PrintIrAttrTableGen(ast_def, GetParam().ir_path);
+
+  // So that we can copy from the output.
+  std::cout << "Output:" << std::endl;
+  std::cout << ir_attrs_tablegen << std::endl;
+
+  if (GetParam().expected_ir_attr_tablegen_path.has_value()) {
+    auto expected_ir_attr_tablegen_path =
+        GetDataDependencyFilepath(*GetParam().expected_ir_attr_tablegen_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(
+        std::string expected_ir_attrs_tablegen,
+        GetFileContents(expected_ir_attr_tablegen_path));
+
+    ABSL_LOG(INFO) << " expected_ir_attr_tablegen_path: "
+                   << expected_ir_attr_tablegen_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ir_attrs_tablegen),
+              absl::StripAsciiWhitespace(expected_ir_attrs_tablegen));
+  }
+}
+
+TEST_P(AstGenTest, IrAttrPythonBindingsTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ir_attrs_py = PrintIrAttrPythonBindings(
+      ast_def, GetParam().cc_namespace, GetParam().ir_path);
+
+  // So that we can copy from the output.
+  std::cout << "Output:" << std::endl;
+  std::cout << ir_attrs_py << std::endl;
+
+  if (GetParam().expected_ir_attr_python_bindings_path.has_value()) {
+    auto expected_ir_attrs_py_path = GetDataDependencyFilepath(
+        *GetParam().expected_ir_attr_python_bindings_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ir_attrs_py,
+                                 GetFileContents(expected_ir_attrs_py_path));
+
+    ABSL_LOG(INFO) << " expected_ir_attr_python_bindings_path: "
+                   << expected_ir_attrs_py_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ir_attrs_py),
+              absl::StripAsciiWhitespace(expected_ir_attrs_py));
+  }
+}
+
+TEST_P(AstGenTest, IrAttrPythonStubsTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ir_attrs_pyi = PrintIrAttrPythonStubs(ast_def);
+
+  std::cout << "Output:" << std::endl;
+  std::cout << ir_attrs_pyi << std::endl;
+
+  if (GetParam().expected_ir_attr_python_stubs_path.has_value()) {
+    auto expected_ir_attrs_pyi_path = GetDataDependencyFilepath(
+        *GetParam().expected_ir_attr_python_stubs_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ir_attrs_pyi,
+                                 GetFileContents(expected_ir_attrs_pyi_path));
+
+    ABSL_LOG(INFO) << " expected_ir_attr_python_stubs_path: "
+                   << expected_ir_attrs_pyi_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ir_attrs_pyi),
+              absl::StripAsciiWhitespace(expected_ir_attrs_pyi));
+  }
+}
+
+TEST_P(AstGenTest, IrOpPythonTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ir_ops_py = PrintIrOpPython(ast_def);
+
+  std::cout << "Output:" << std::endl;
+  std::cout << ir_ops_py << std::endl;
+
+  if (GetParam().expected_ir_op_python_path.has_value()) {
+    auto expected_ir_ops_py_path =
+        GetDataDependencyFilepath(*GetParam().expected_ir_op_python_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ir_ops_py,
+                                 GetFileContents(expected_ir_ops_py_path));
+
+    ABSL_LOG(INFO) << " expected_ir_op_python_path: "
+                   << expected_ir_ops_py_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ir_ops_py),
+              absl::StripAsciiWhitespace(expected_ir_ops_py));
   }
 }
 

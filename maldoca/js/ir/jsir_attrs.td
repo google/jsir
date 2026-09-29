@@ -12,11 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef MALDOCA_JS_IR_JSIR_ATTRS_TD_
+#define MALDOCA_JS_IR_JSIR_ATTRS_TD_
+
 include "mlir/IR/AttrTypeBase.td"
 include "mlir/IR/EnumAttr.td"
 include "mlir/IR/OpBase.td"
 include "maldoca/js/ir/interfaces.td"
 include "maldoca/js/ir/jsir_dialect.td"
+
+def JsirPositionAttr : AttrDef<Jsir_Dialect, "JsirPosition", []> {
+  let mnemonic = "position";
+  let parameters = (
+    ins
+      "int64_t": $line,
+      "int64_t": $column
+  );
+  let assemblyFormat = "`<` `L` $line `C` $column `>`";
+}
+
+// Import the generated attributes.
+include "maldoca/js/ir/jsir_attrs.generated.td"
 
 // Generates the C++ enum JsirForInOfKind.
 def JsirForInOfKind : I32EnumAttr<
@@ -39,195 +55,6 @@ def JsirForInOfKind : I32EnumAttr<
 def JsirForInOfKindAttr
     : EnumAttr<Jsir_Dialect, JsirForInOfKind, "for_in_of_kind">;
 
-def JsirPositionAttr : AttrDef<Jsir_Dialect, "JsirPosition", []> {
-  let mnemonic = "position";
-  let parameters = (
-    ins
-      "int64_t": $line,
-      "int64_t": $column
-  );
-  let assemblyFormat = "`<` `L` $line `C` $column `>`";
-}
-
-def JsirLocationAttr : AttrDef<Jsir_Dialect, "JsirLocation", []> {
-  let mnemonic = "location";
-  let parameters = (
-    ins
-      OptionalParameter<"JsirPositionAttr">: $start,
-      OptionalParameter<"JsirPositionAttr">: $end,
-      OptionalParameter<"::mlir::StringAttr">: $identifier_name,
-      OptionalParameter<"std::optional<int64_t>">: $start_index,
-      OptionalParameter<"std::optional<int64_t>">: $end_index,
-      OptionalParameter<"std::optional<int64_t>">: $scope_uid
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirCommentBlockAttr : AttrDef<
-    Jsir_Dialect, "JsirCommentBlock", [
-        DeclareAttrInterfaceMethods<JsirCommentAttrInterface>
-    ]> {
-  let mnemonic = "comment_block";
-  let parameters = (ins
-    "JsirLocationAttr": $loc,
-    "::mlir::StringAttr": $value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirCommentLineAttr : AttrDef<
-    Jsir_Dialect, "JsirCommentLine", [
-        DeclareAttrInterfaceMethods<JsirCommentAttrInterface>
-    ]> {
-  let mnemonic = "comment_line";
-  let parameters = (ins
-    "JsirLocationAttr": $loc,
-    "::mlir::StringAttr": $value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirSymbolIdAttr : AttrDef<Jsir_Dialect, "JsirSymbolId", []> {
-  let mnemonic = "symbol_id";
-  let parameters = (ins
-    "::mlir::StringAttr": $name,
-    "std::optional<int64_t>": $binding_uid
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirTriviaAttr : LocationAttrDef<Jsir_Dialect, "JsirTrivia", []> {
-  let mnemonic = "trivia";
-  let parameters = (
-    ins
-      OptionalParameter<"JsirLocationAttr">: $loc,
-      OptionalArrayRefParameter<"int64_t">: $leading_comment_uids,
-      OptionalArrayRefParameter<"int64_t">: $trailing_comment_uids,
-      OptionalArrayRefParameter<"int64_t">: $inner_comment_uids,
-      OptionalParameter<"JsirSymbolIdAttr">: $referenced_symbol,
-      OptionalArrayRefParameter<"JsirSymbolIdAttr">: $defined_symbols
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirInterpreterDirectiveAttr : AttrDef<Jsir_Dialect, "JsirInterpreterDirective", []> {
-  let mnemonic = "interpreter_directive";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::StringAttr": $value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirDirectiveLiteralExtraAttr : AttrDef<Jsir_Dialect,
-                                            "JsirDirectiveLiteralExtra", []> {
-  let mnemonic = "directive_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::StringAttr": $raw_value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirIdentifierAttr : AttrDef<Jsir_Dialect, "JsirIdentifier", []> {
-  let mnemonic = "identifier";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::StringAttr": $name
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirPrivateNameAttr : AttrDef<Jsir_Dialect, "JsirPrivateName", []> {
-  let mnemonic = "private_name";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    JsirIdentifierAttr: $id
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirRegExpLiteralAttr : AttrDef<Jsir_Dialect, "JsirRegExpLiteral", []> {
-  let mnemonic = "reg_exp_literal";
-  let parameters = (ins
-    "::mlir::StringAttr": $pattern,
-    "::mlir::StringAttr": $flags
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirRegExpLiteralExtraAttr : AttrDef<Jsir_Dialect,
-                                         "JsirRegExpLiteralExtra", []> {
-  let mnemonic = "reg_exp_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirNullLiteralAttr : AttrDef<Jsir_Dialect, "JsirNullLiteral", []> {
-  let mnemonic = "null_literal";
-}
-
-def JsirStringLiteralExtraAttr : AttrDef<Jsir_Dialect,
-                                         "JsirStringLiteralExtra", []> {
-  let mnemonic = "string_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::StringAttr": $raw_value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirStringLiteralAttr : AttrDef<Jsir_Dialect, "JsirStringLiteral", []> {
-  let mnemonic = "string_literal";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::StringAttr": $value,
-    JsirStringLiteralExtraAttr: $extra
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirNumericLiteralExtraAttr : AttrDef<Jsir_Dialect,
-                                         "JsirNumericLiteralExtra", []> {
-  let mnemonic = "numeric_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::FloatAttr": $raw_value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirNumericLiteralAttr : AttrDef<Jsir_Dialect, "JsirNumericLiteral", []> {
-  let mnemonic = "numeric_literal";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::FloatAttr": $value,
-    JsirNumericLiteralExtraAttr: $extra
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirBigIntLiteralExtraAttr : AttrDef<Jsir_Dialect,
-                                         "JsirBigIntLiteralExtra", []> {
-  let mnemonic = "big_int_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::StringAttr": $raw_value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirBigIntLiteralAttr : AttrDef<Jsir_Dialect, "JsirBigIntLiteral", []> {
-  let mnemonic = "big_int_literal";
-  let parameters = (ins
-    "::mlir::StringAttr": $value,
-    JsirBigIntLiteralExtraAttr: $extra
-  );
-  let assemblyFormat = "params";
-}
-
 // ```
 // for (let a in b) ...
 //      ~~~~~
@@ -249,61 +76,4 @@ def JsirForInOfDeclarationAttr : AttrDef<Jsir_Dialect,
   let assemblyFormat = "params";
 }
 
-def JsirImportSpecifierAttr : AttrDef<
-    Jsir_Dialect, "JsirImportSpecifier", [
-        DeclareAttrInterfaceMethods<JsirModuleSpecifierAttrInterface>
-    ]> {
-  let mnemonic = "import_specifier";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::Attribute": $imported,
-    JsirIdentifierAttr: $local
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirImportDefaultSpecifierAttr : AttrDef<
-    Jsir_Dialect, "JsirImportDefaultSpecifier", [
-        DeclareAttrInterfaceMethods<JsirModuleSpecifierAttrInterface>
-    ]> {
-  let mnemonic = "import_default_specifier";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    JsirIdentifierAttr: $local
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirImportNamespaceSpecifierAttr : AttrDef<
-    Jsir_Dialect, "JsirImportNamespaceSpecifier", [
-        DeclareAttrInterfaceMethods<JsirModuleSpecifierAttrInterface>
-    ]> {
-  let mnemonic = "import_namespace_specifier";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    JsirIdentifierAttr: $local
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirImportAttributeAttr : AttrDef<Jsir_Dialect, "JsirImportAttribute", []> {
-  let mnemonic = "import_attribute";
-  let parameters = (ins
-    JsirIdentifierAttr: $key,
-    JsirStringLiteralAttr: $value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirExportSpecifierAttr : AttrDef<
-    Jsir_Dialect, "JsirExportSpecifier", [
-        DeclareAttrInterfaceMethods<JsirModuleSpecifierAttrInterface>
-    ]> {
-  let mnemonic = "export_specifier";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::Attribute": $exported,
-    "::mlir::Attribute": $local
-  );
-  let assemblyFormat = "params";
-}
+#endif  // MALDOCA_JS_IR_JSIR_ATTRS_TD_
