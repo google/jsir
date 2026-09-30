@@ -379,4 +379,23 @@ def JsirExportDefaultDeclarationOp : Jsir_Op<
   );
 }
 
+// A specifier in `export {local as exported}`.
+//
+// `exported` is the name visible to importers, so it is an attribute.
+//
+// `local` is an SSA operand:
+// - Identifier: `jsir.identifier_ref`, a reference to the exported binding.
+// - StringLiteral: `jsir.string_literal`. Only valid in re-exports such as
+//   `export {"a-b" as c} from "m"`.
+// In a re-export (`source` set on the parent), `local` names a binding in the
+// source module, so it has no binding in this file.
+//
+// Handwritten because astgen applies one FieldKind to every variant member.
+def JsirExportSpecifierOp : Jsir_Op<"export_specifier", []> {
+  let arguments = (ins
+    AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr]>: $exported,
+    Optional<AnyType>: $local
+  );
+}
+
 #endif  // MALDOCA_JS_IR_JSIR_HANDWRITTEN_TD_

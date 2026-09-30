@@ -163,7 +163,7 @@
   ATTRIB(ImportNamespaceSpecifier)                                  \
   ATTRIB(ImportAttribute)                                           \
   CIR_OP(ExportNamedDeclaration)                                    \
-  ATTRIB(ExportSpecifier)                                           \
+  CIR_OP(ExportSpecifier)                                           \
   CIR_OP(ExportDefaultDeclaration)                                  \
   CIR_OP(ExportAllDeclaration)
 

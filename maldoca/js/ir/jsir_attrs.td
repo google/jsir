@@ -294,16 +294,3 @@ def JsirImportAttributeAttr : AttrDef<Jsir_Dialect, "JsirImportAttribute", []> {
   );
   let assemblyFormat = "params";
 }
-
-def JsirExportSpecifierAttr : AttrDef<
-    Jsir_Dialect, "JsirExportSpecifier", [
-        DeclareAttrInterfaceMethods<JsirModuleSpecifierAttrInterface>
-    ]> {
-  let mnemonic = "export_specifier";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::Attribute": $exported,
-    "::mlir::Attribute": $local
-  );
-  let assemblyFormat = "params";
-}

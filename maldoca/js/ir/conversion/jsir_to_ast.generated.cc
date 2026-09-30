@@ -1955,27 +1955,6 @@ JsirToAst::VisitModuleDeclaration(JsirModuleDeclarationOpInterface op) {
     });
 }
 
-absl::StatusOr<std::unique_ptr<JsModuleSpecifier>>
-JsirToAst::VisitModuleSpecifierAttr(JsirModuleSpecifierAttrInterface attr) {
-  using Ret = absl::StatusOr<std::unique_ptr<JsModuleSpecifier>>;
-  return llvm::TypeSwitch<mlir::Attribute, Ret>(attr)
-    .Case([&](JsirImportSpecifierAttr attr) {
-      return VisitImportSpecifierAttr(attr);
-    })
-    .Case([&](JsirImportDefaultSpecifierAttr attr) {
-      return VisitImportDefaultSpecifierAttr(attr);
-    })
-    .Case([&](JsirImportNamespaceSpecifierAttr attr) {
-      return VisitImportNamespaceSpecifierAttr(attr);
-    })
-    .Case([&](JsirExportSpecifierAttr attr) {
-      return VisitExportSpecifierAttr(attr);
-    })
-    .Default([&](mlir::Attribute op) {
-      return absl::InvalidArgumentError("Unrecognized op");
-    });
-}
-
 absl::StatusOr<std::unique_ptr<JsImportDeclaration>>
 JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -2030,9 +2009,11 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto specifiers,
       Convert(
-          op.getSpecifiersAttr(),
-          List(
-              ToAttrConverter(VisitExportSpecifierAttr)
+          op.getSpecifiers(),
+          StmtsRegion(
+              List(
+                  ToOpConverter(VisitExportSpecifier)
+              )
           )
       )
   );

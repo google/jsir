@@ -1167,22 +1167,6 @@ JsirModuleDeclarationOpInterface AstToJsir::VisitModuleDeclaration(mlir::OpBuild
   LOG(FATAL) << "Unreachable code.";
 }
 
-JsirModuleSpecifierAttrInterface AstToJsir::VisitModuleSpecifierAttr(mlir::OpBuilder &builder, const JsModuleSpecifier *node) {
-  if (auto *import_specifier = dynamic_cast<const JsImportSpecifier *>(node)) {
-    return VisitImportSpecifierAttr(builder, import_specifier);
-  }
-  if (auto *import_default_specifier = dynamic_cast<const JsImportDefaultSpecifier *>(node)) {
-    return VisitImportDefaultSpecifierAttr(builder, import_default_specifier);
-  }
-  if (auto *import_namespace_specifier = dynamic_cast<const JsImportNamespaceSpecifier *>(node)) {
-    return VisitImportNamespaceSpecifierAttr(builder, import_namespace_specifier);
-  }
-  if (auto *export_specifier = dynamic_cast<const JsExportSpecifier *>(node)) {
-    return VisitExportSpecifierAttr(builder, export_specifier);
-  }
-  LOG(FATAL) << "Unreachable code.";
-}
-
 JsirImportDeclarationOp AstToJsir::VisitImportDeclaration(mlir::OpBuilder &builder, const JsImportDeclaration *node) {
   std::vector<mlir::Attribute> mlir_specifiers_data;
   for (const auto &element : *node->specifiers()) {
@@ -1215,12 +1199,6 @@ JsirImportDeclarationOp AstToJsir::VisitImportDeclaration(mlir::OpBuilder &build
 }
 
 JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuilder &builder, const JsExportNamedDeclaration *node) {
-  std::vector<mlir::Attribute> mlir_specifiers_data;
-  for (const auto &element : *node->specifiers()) {
-    JsirExportSpecifierAttr mlir_element = VisitExportSpecifierAttr(builder, element.get());
-    mlir_specifiers_data.push_back(std::move(mlir_element));
-  }
-  auto mlir_specifiers = builder.getArrayAttr(mlir_specifiers_data);
   JsirStringLiteralAttr mlir_source;
   if (node->source().has_value()) {
     mlir_source = VisitStringLiteralAttr(builder, node->source().value());
@@ -1234,13 +1212,19 @@ JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuil
     }
     mlir_assertions = builder.getArrayAttr(mlir_assertions_data);
   }
-  auto op = CreateStmt<JsirExportNamedDeclarationOp>(builder, node, mlir_specifiers, mlir_source, mlir_assertions);
+  auto op = CreateStmt<JsirExportNamedDeclarationOp>(builder, node, mlir_source, mlir_assertions);
   if (node->declaration().has_value()) {
     mlir::Region &mlir_declaration_region = op.getDeclaration();
     AppendNewBlockAndPopulate(builder, mlir_declaration_region, [&] {
       VisitDeclaration(builder, node->declaration().value());
     });
   }
+  mlir::Region &mlir_specifiers_region = op.getSpecifiers();
+  AppendNewBlockAndPopulate(builder, mlir_specifiers_region, [&] {
+    for (const auto &element : *node->specifiers()) {
+      VisitExportSpecifier(builder, element.get());
+    }
+  });
   return op;
 }
 

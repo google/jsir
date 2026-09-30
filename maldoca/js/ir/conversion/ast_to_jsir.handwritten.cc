@@ -670,34 +670,38 @@ JsirImportAttributeAttr AstToJsir::VisitImportAttributeAttr(
                                       mlir_value);
 }
 
-JsirExportSpecifierAttr AstToJsir::VisitExportSpecifierAttr(
+JsirExportSpecifierOp AstToJsir::VisitExportSpecifier(
     mlir::OpBuilder& builder, const JsExportSpecifier* node) {
-  auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
   mlir::Attribute mlir_exported;
   if (std::holds_alternative<const JsIdentifier*>(node->exported())) {
     auto* exported = std::get<const JsIdentifier*>(node->exported());
     mlir_exported = VisitIdentifierAttr(builder, exported);
-  } else if (std::holds_alternative<const JsStringLiteral*>(node->exported())) {
+  } else if (std::holds_alternative<const JsStringLiteral*>(
+                 node->exported())) {
     auto* exported = std::get<const JsStringLiteral*>(node->exported());
     mlir_exported = VisitStringLiteralAttr(builder, exported);
   } else {
     LOG(FATAL) << "Unreachable code.";
   }
-  mlir::Attribute mlir_local;
+
+  // An identifier `local` refers to the exported binding, so it lowers to an
+  // lvalue (`jsir.identifier_ref`). A string literal `local` (only valid in
+  // re-exports) has no lvalue form, so it stays `jsir.string_literal`.
+  mlir::Value mlir_local;
   if (node->local().has_value()) {
-    auto local_variant = node->local().value();
-    if (std::holds_alternative<const JsIdentifier*>(local_variant)) {
-      auto* local = std::get<const JsIdentifier*>(local_variant);
-      mlir_local = VisitIdentifierAttr(builder, local);
-    } else if (std::holds_alternative<const JsStringLiteral*>(local_variant)) {
-      auto* local = std::get<const JsStringLiteral*>(local_variant);
-      mlir_local = VisitStringLiteralAttr(builder, local);
+    auto local = node->local().value();
+    if (std::holds_alternative<const JsIdentifier*>(local)) {
+      mlir_local =
+          VisitIdentifierRef(builder, std::get<const JsIdentifier*>(local));
+    } else if (std::holds_alternative<const JsStringLiteral*>(local)) {
+      mlir_local =
+          VisitStringLiteral(builder, std::get<const JsStringLiteral*>(local));
     } else {
       LOG(FATAL) << "Unreachable code.";
     }
   }
-  return JsirExportSpecifierAttr::get(builder.getContext(), loc, mlir_exported,
-                                      mlir_local);
+  return CreateStmt<JsirExportSpecifierOp>(builder, node, mlir_exported,
+                                           mlir_local);
 }
 
 JsirExportDefaultDeclarationOp AstToJsir::VisitExportDefaultDeclaration(

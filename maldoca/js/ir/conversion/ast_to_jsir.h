@@ -95,9 +95,6 @@ class AstToJsir {
   static JsirPatternRefOpInterface VisitPatternRef(mlir::OpBuilder& builder,
                                                    const JsPattern* node);
 
-  static JsirModuleSpecifierAttrInterface VisitModuleSpecifierAttr(
-      mlir::OpBuilder& builder, const JsModuleSpecifier* node);
-
   static JsirModuleDeclarationOpInterface VisitModuleDeclaration(
       mlir::OpBuilder& builder, const JsModuleDeclaration* node);
 

@@ -933,8 +933,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       llvm::isa<JsirClassPrivatePropertyOp>(op) ||
       llvm::isa<JsirClassBodyOp>(op) ||
       llvm::isa<JsirClassDeclarationOp>(op) /* TODO Should this be here? */
-      || llvm::isa<JsirClassExpressionOp>(op) ||
-      llvm::isa<JsirExportNamedDeclarationOp>(op)) {
+      || llvm::isa<JsirClassExpressionOp>(op)) {
     if (llvm::isa<JshirWithStatementOp>(op)) {
       maybe_jump_targets = {
           .labeled_break_target = getProgramPointAfter(op),
@@ -1039,6 +1038,43 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
         .from = After(block_stmt.getBody()),
         .to = After(block_stmt),
         .owner = &*block_stmt,
+    });
+  }
+
+  // ┌─────◄
+  // │     jsir.export_named_declaration (
+  // ├─────► ┌───────────────┐
+  // │       │ declaration   │ (optional)
+  // │  ┌──◄ └───────────────┘
+  // └──┴──► ┌───────────────┐
+  //         │ specifiers    │
+  // ┌─────◄ └───────────────┘
+  // │     );
+  // └─────►
+  if (auto export_decl = llvm::dyn_cast<JsirExportNamedDeclarationOp>(op);
+      export_decl != nullptr) {
+    if (!export_decl.getDeclaration().empty()) {
+      MaybeEmplaceCfgEdges({
+          .from = Before(export_decl),
+          .to = Before(export_decl.getDeclaration()),
+          .owner = &*export_decl,
+      });
+      MaybeEmplaceCfgEdges({
+          .from = After(export_decl.getDeclaration()),
+          .to = Before(export_decl.getSpecifiers()),
+          .owner = &*export_decl,
+      });
+    } else {
+      MaybeEmplaceCfgEdges({
+          .from = Before(export_decl),
+          .to = Before(export_decl.getSpecifiers()),
+          .owner = &*export_decl,
+      });
+    }
+    MaybeEmplaceCfgEdges({
+        .from = After(export_decl.getSpecifiers()),
+        .to = After(export_decl),
+        .owner = &*export_decl,
     });
   }
 

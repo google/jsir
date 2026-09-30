@@ -647,12 +647,29 @@ JsirToAst::VisitImportAttributeAttr(JsirImportAttributeAttr attr) {
 }
 
 absl::StatusOr<std::unique_ptr<JsExportSpecifier>>
-JsirToAst::VisitExportSpecifierAttr(JsirExportSpecifierAttr attr) {
+JsirToAst::VisitExportSpecifier(JsirExportSpecifierOp op) {
   ABSL_ASSIGN_OR_RETURN(auto exported,
-                        GetIdentifierOrStringLiteral(attr.getExported()));
-  ABSL_ASSIGN_OR_RETURN(auto local,
-                        GetIdentifierOrStringLiteral(attr.getLocal()));
-  return Create<JsExportSpecifier>(attr, std::move(exported), std::move(local));
+                        GetIdentifierOrStringLiteral(op.getExportedAttr()));
+
+  std::optional<std::variant<std::unique_ptr<JsIdentifier>,
+                             std::unique_ptr<JsStringLiteral>>>
+      local;
+  if (mlir::Value mlir_local = op.getLocal(); mlir_local != nullptr) {
+    mlir::Operation* mlir_local_op = mlir_local.getDefiningOp();
+    if (auto identifier_ref =
+            llvm::dyn_cast_or_null<JsirIdentifierRefOp>(mlir_local_op)) {
+      ABSL_ASSIGN_OR_RETURN(local, VisitIdentifierRef(identifier_ref));
+    } else if (auto string_literal =
+                   llvm::dyn_cast_or_null<JsirStringLiteralOp>(
+                       mlir_local_op)) {
+      ABSL_ASSIGN_OR_RETURN(local, VisitStringLiteral(string_literal));
+    } else if (!llvm::isa_and_nonnull<JsirNoneOp>(mlir_local_op)) {
+      return absl::InvalidArgumentError(
+          "JsirExportSpecifierOp::local must be defined by "
+          "JsirIdentifierRefOp or JsirStringLiteralOp.");
+    }
+  }
+  return Create<JsExportSpecifier>(op, std::move(exported), std::move(local));
 }
 
 absl::StatusOr<std::unique_ptr<JsExportDefaultDeclaration>>

@@ -60,7 +60,6 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::Attribute attr) {
       .Case([&](JsirImportDefaultSpecifierAttr attr) { return attr.getLoc(); })
       .Case(
           [&](JsirImportNamespaceSpecifierAttr attr) { return attr.getLoc(); })
-      .Case([&](JsirExportSpecifierAttr attr) { return attr.getLoc(); })
       .Case([&](JsirInterpreterDirectiveAttr attr) { return attr.getLoc(); })
       .Default([&](mlir::Attribute attr) {
         LOG(INFO) << "Unexpected mlir::Attribute to get source location from. "

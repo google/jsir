@@ -126,9 +126,6 @@ class JsirToAst {
       mlir::Value left_lval, mlir::Value left_init, mlir::Value right,
       mlir::Region& body_region);
 
-  static absl::StatusOr<std::unique_ptr<JsModuleSpecifier>>
-  VisitModuleSpecifierAttr(JsirModuleSpecifierAttrInterface attr);
-
   static absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
       JsirCommentAttrInterface attr);
 

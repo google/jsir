@@ -980,13 +980,13 @@ def JsirExportNamedDeclarationOp : Jsir_Op<
         NoTerminator
     ]> {
   let arguments = (ins
-    TypedArrayAttrBase<JsirExportSpecifierAttr, "">: $specifiers,
     OptionalAttr<JsirStringLiteralAttr>: $source,
     OptionalAttr<TypedArrayAttrBase<JsirImportAttributeAttr, "">>: $assertions
   );
 
   let regions = (region
-    OptionalRegion<StmtRegion>: $declaration
+    OptionalRegion<StmtRegion>: $declaration,
+    StmtsRegion: $specifiers
   );
 }
 

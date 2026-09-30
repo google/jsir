@@ -4,14 +4,21 @@
 // JSIR-NEXT:       %0 = "jsir.identifier"() <{name = "arbitrary_expression"}> : () -> !jsir.any
 // JSIR-NEXT:       "jsir.expr_region_end"(%0) : (!jsir.any) -> ()
 // JSIR-NEXT:     }) : () -> ()
-// JSIR-NEXT:     "jsir.export_named_declaration"() <{source = #jsir<string_literal <L 3 C 45>, <L 3 C 50>, 83, 88, 0, "foo", "\22foo\22", "foo">, specifiers = [#jsir<export_specifier <L 3 C 8>, <L 3 C 20>, 46, 58, 0, #jsir<identifier <L 3 C 8>, <L 3 C 20>, "identifier_1", 46, 58, 0, "identifier_1">, #jsir<identifier <L 3 C 8>, <L 3 C 20>, "identifier_1", 46, 58, 0, "identifier_1">>, #jsir<export_specifier <L 3 C 22>, <L 3 C 38>, 60, 76, 0, #jsir<string_literal <L 3 C 22>, <L 3 C 38>, 60, 76, 0, "string_literal", "\22string_literal\22", "string_literal">, #jsir<string_literal <L 3 C 22>, <L 3 C 38>, 60, 76, 0, "string_literal", "\22string_literal\22", "string_literal">>]}> ({
+// JSIR-NEXT:     "jsir.export_named_declaration"() <{source = #jsir<string_literal <L 3 C 45>, <L 3 C 50>, 83, 88, 0, "foo", "\22foo\22", "foo">}> ({
+// JSIR-NEXT:     }, {
+// JSIR-NEXT:       %0 = "jsir.identifier_ref"() <{name = "identifier_1"}> : () -> !jsir.any
+// JSIR-NEXT:       "jsir.export_specifier"(%0) <{exported = #jsir<identifier <L 3 C 8>, <L 3 C 20>, "identifier_1", 46, 58, 0, "identifier_1">}> : (!jsir.any) -> ()
+// JSIR-NEXT:       %1 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "\22string_literal\22", "string_literal">, value = "string_literal"}> : () -> !jsir.any
+// JSIR-NEXT:       "jsir.export_specifier"(%1) <{exported = #jsir<string_literal <L 3 C 22>, <L 3 C 38>, 60, 76, 0, "string_literal", "\22string_literal\22", "string_literal">}> : (!jsir.any) -> ()
 // JSIR-NEXT:     }) : () -> ()
-// JSIR-NEXT:     "jsir.export_named_declaration"() <{specifiers = []}> ({
+// JSIR-NEXT:     "jsir.export_named_declaration"() ({
 // JSIR-NEXT:       "jsir.variable_declaration"() <{kind = "let"}> ({
 // JSIR-NEXT:         %0 = "jsir.identifier_ref"() <{name = "identifier_2"}> : () -> !jsir.any
 // JSIR-NEXT:         %1 = "jsir.variable_declarator"(%0) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:         "jsir.exprs_region_end"(%1) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : () -> ()
+// JSIR-NEXT:     }, {
+// JSIR-NEXT:     ^bb0:
 // JSIR-NEXT:     }) : () -> ()
 // JSIR-NEXT:     "jsir.export_all_declaration"() <{source = #jsir<string_literal <L 7 C 14>, <L 7 C 19>, 131, 136, 0, "foo", "\22foo\22", "foo">}> : () -> ()
 // JSIR-NEXT:   }, {
