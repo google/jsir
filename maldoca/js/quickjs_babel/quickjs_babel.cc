@@ -171,8 +171,7 @@ absl::StatusOr<BabelParseResult> QuickJsBabel::Parse(
   };
 }
 
-// Not implemented. The version of @babel/standalone in //third_party doesn't
-// provide @babel/generator APIs.
+// Generates JavaScript source from a stringified AST using @babel/generator.
 absl::StatusOr<BabelGenerateResult> QuickJsBabel::Generate(
     const BabelAstString& ast_string, const BabelGenerateOptions& opts,
     absl::Duration timeout) {
