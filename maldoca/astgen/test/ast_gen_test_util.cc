@@ -95,7 +95,7 @@ TEST_P(AstGenTest, AstVisitorHdrTest) {
     auto expected_ast_visitor_h_path =
         GetDataDependencyFilepath(*GetParam().expected_ast_visitor_header_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_visitor_hdr,
-                         GetFileContents(expected_ast_visitor_h_path));
+                                 GetFileContents(expected_ast_visitor_h_path));
 
     ABSL_LOG(INFO) << " expected_ast_visitor_h_path: "
                    << expected_ast_visitor_h_path;
@@ -115,7 +115,7 @@ TEST_P(AstGenTest, AstWalkerHdrTest) {
     auto expected_ast_walker_h_path =
         GetDataDependencyFilepath(*GetParam().expected_ast_walker_header_path);
     MALDOCA_ASSERT_OK_AND_ASSIGN(std::string expected_ast_walker_hdr,
-                         GetFileContents(expected_ast_walker_h_path));
+                                 GetFileContents(expected_ast_walker_h_path));
 
     ABSL_LOG(INFO) << " expected_ast_walker_h_path: "
                    << expected_ast_walker_h_path;
