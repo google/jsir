@@ -15,19 +15,46 @@
 #ifndef MALDOCA_JS_IR_TRANSFORMS_CONSTANT_PROPAGATION_PASS_H_
 #define MALDOCA_JS_IR_TRANSFORMS_CONSTANT_PROPAGATION_PASS_H_
 
+#include <utility>
+
+#include "mlir/IR/DialectRegistry.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Support/LogicalResult.h"
-#include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
+#include "absl/base/nullability.h"
+#include "maldoca/js/babel/babel.h"
+#include "maldoca/js/driver/driver.pb.h"
+#include "maldoca/js/ir/analyses/constant_propagation/dynamic_analysis.h"
 
 namespace maldoca {
 
+class DynamicPrelude;
+
+// Always runs JsirDynamicConstantPropagationAnalysis. With no prelude, the
+// analysis falls back to ordinary constant propagation.
 mlir::LogicalResult PerformConstantPropagation(mlir::Operation *op,
                                                const BabelScopes &scopes);
 
 mlir::LogicalResult PerformConstantPropagation(
     mlir::Operation *op, JsirConstantPropagationAnalysis &analysis);
 
+mlir::LogicalResult PerformDynamicConstantPropagation(
+    mlir::Operation* op, const BabelScopes& scopes,
+    const JsirAnalysisConfig::DynamicConstantPropagation& config, Babel& babel,
+    JsirAnalysisResult::DynamicConstantPropagation* absl_nullable
+        analysis_result);
+
+mlir::LogicalResult PerformDynamicConstantPropagation(
+    mlir::Operation* op, const BabelScopes& scopes,
+    DynamicPrelude* absl_nullable dynamic_prelude,
+    JsirAnalysisResult::DynamicConstantPropagation* absl_nullable
+        analysis_result);
+
+mlir::LogicalResult PerformDynamicConstantPropagation(
+    mlir::Operation* op, JsirDynamicConstantPropagationAnalysis& analysis);
+
+// Ordinary (constprop) and dynamic (dynconstprop) share this pass. When babel
+// is set, prelude matching runs first; otherwise the analysis falls back.
 struct JsirConstantPropagationPass
     : public mlir::PassWrapper<JsirConstantPropagationPass,
                                mlir::OperationPass<>> {
@@ -37,15 +64,25 @@ struct JsirConstantPropagationPass
   explicit JsirConstantPropagationPass(const BabelScopes *scopes)
       : Base(), scopes_(*scopes) {}
 
-  void runOnOperation() override {
-    if (mlir::failed(PerformConstantPropagation(getOperation(), scopes_))) {
-      // Failure means that some invariants in the IR have been broken, and the
-      // IR might be in an invalid state.
-      signalPassFailure();
-    }
-  }
+  JsirConstantPropagationPass(
+      const BabelScopes* absl_nonnull scopes,
+      JsirAnalysisConfig::DynamicConstantPropagation config,
+      Babel* absl_nonnull babel,
+      JsAnalysisOutputs* absl_nullable js_analysis_outputs)
+      : Base(),
+        scopes_(*scopes),
+        dynamic_config_(std::move(config)),
+        babel_(babel),
+        js_analysis_outputs_(js_analysis_outputs) {}
+
+  void getDependentDialects(mlir::DialectRegistry& registry) const override;
+
+  void runOnOperation() override;
 
   const BabelScopes &scopes_;
+  JsirAnalysisConfig::DynamicConstantPropagation dynamic_config_;
+  Babel* absl_nullable babel_ = nullptr;
+  JsAnalysisOutputs* absl_nullable js_analysis_outputs_ = nullptr;
 };
 
 }  // namespace maldoca
