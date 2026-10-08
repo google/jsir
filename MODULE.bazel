@@ -54,6 +54,29 @@ bazel_dep(
 # https://registry.bazel.build/modules/re2
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
 
+# https://registry.bazel.build/modules/aspect_rules_esbuild
+# Compiles and bundles the TypeScript Babel glue (//maldoca/js/babel_ts) into a
+# single script for QuickJS.
+bazel_dep(name = "aspect_rules_esbuild", version = "0.27.1")
+
+esbuild = use_extension("@aspect_rules_esbuild//esbuild:extensions.bzl", "esbuild")
+
+# Keep close to //third_party/golang/esbuild/version.txt in google3.
+esbuild.toolchain(esbuild_version = "0.28.0")
+
+# https://registry.bazel.build/modules/aspect_rules_js
+# Fetches npm packages (see package.json): babel-standalone, which esbuild
+# bundles into //maldoca/js/babel_ts:babel_bundle, and jasmine, which runs the
+# TypeScript tests of //maldoca/js/babel_ts.
+bazel_dep(name = "aspect_rules_js", version = "3.4.0")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
+npm.npm_translate_lock(
+    name = "npm",
+    pnpm_lock = "//:pnpm-lock.yaml",
+)
+use_repo(npm, "npm")
+
 # LLVM and QuickJS are not in BCR; fetch them via a module extension.
 llvm_extensions = use_extension("//bazel:extensions.bzl", "llvm_deps")
 use_repo(

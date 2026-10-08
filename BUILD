@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_license//rules:license.bzl", "license")
 
 package(default_applicable_licenses = [":license"])
@@ -25,3 +26,6 @@ license(
 licenses(["notice"])
 
 exports_files(["LICENSE"])
+
+# npm packages from package.json, as //:node_modules/<package>.
+npm_link_all_packages(name = "node_modules")
