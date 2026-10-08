@@ -30,6 +30,7 @@
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_def.h"
+#include "maldoca/astgen/type.h"
 #include "maldoca/base/path.h"
 #include "google/protobuf/io/printer.h"
 
@@ -188,10 +189,14 @@ inline std::string UnIndentedSource(absl::string_view source) {
 
 // FieldIs{Argument,Region}:
 //
-// If a field has ignore_in_ir(), then we don't define anything in the op.
+// A field only defines something in the op if it exists on both sides of the
+// AST/IR correspondence, since the op and the AST<->IR conversions are how that
+// correspondence is materialized.
 //
-// Example: Node::start does not lead to any argument/region in JSIR because we
-// want to store the information in mlir::Location.
+// Example: Node::start is AST_ONLY, so it does not lead to any argument/region
+// in JSIR because we want to store the information in mlir::Location.
+// Conversely, an IR_ONLY field (such as the trivia carried by an attribute) has
+// no AST counterpart to convert from or to.
 //
 // If a field has enclose_in_region(), then it's an MLIR "region"; otherwise
 // it's an MLIR "argument".
@@ -202,11 +207,53 @@ inline std::string UnIndentedSource(absl::string_view source) {
 // See FieldDefPb::enclose_in_region for why we need to enclose certain fields
 // in a region.
 inline bool FieldIsArgument(const FieldDef* field) {
-  return field->in_ir() && !field->enclose_in_region();
+  return field->in_ast() && field->in_ir() && !field->enclose_in_region();
 }
 
 inline bool FieldIsRegion(const FieldDef* field) {
-  return field->in_ir() && field->enclose_in_region();
+  return field->in_ast() && field->in_ir() && field->enclose_in_region();
+}
+
+// Whether a class type refers to an AST node, i.e. is not marked
+// `is_plain_object` in the AST definition. See NodeDefPb::is_plain_object.
+inline bool IsAstNodeClass(const AstDef& ast, const ClassType& type) {
+  auto it = ast.nodes().find(type.name().ToPascalCase());
+  return it == ast.nodes().end() || !it->second->is_plain_object();
+}
+
+// Whether a variant holds at least one AST node type.
+inline bool VariantHasAstNode(const AstDef& ast, const VariantType& variant) {
+  for (const auto& scalar : variant.types()) {
+    if (scalar->IsA<ClassType>() &&
+        IsAstNodeClass(ast, static_cast<const ClassType&>(*scalar))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Whether a field of this type holds a child AST node, i.e. whether traversal
+// descends into it. Lists and variants of AST nodes count; plain-object
+// classes do not.
+inline bool IsAstNodeType(const AstDef& ast, const Type& type) {
+  if (type.IsA<ClassType>()) {
+    return IsAstNodeClass(ast, static_cast<const ClassType&>(type));
+  }
+  if (type.IsA<VariantType>()) {
+    return VariantHasAstNode(ast, static_cast<const VariantType&>(type));
+  }
+  if (type.IsA<ListType>()) {
+    const NonListType& element =
+        static_cast<const ListType&>(type).element_type();
+    if (element.IsA<ClassType>()) {
+      return IsAstNodeClass(ast, static_cast<const ClassType&>(element));
+    }
+    if (element.IsA<VariantType>()) {
+      return VariantHasAstNode(ast, static_cast<const VariantType&>(element));
+    }
+    return false;
+  }
+  return false;
 }
 
 }  // namespace maldoca

@@ -38,6 +38,12 @@ class FieldDef;
 class NodeDef;
 class AstDef;
 
+// Name of the well-known node that holds a node's source location, comments,
+// and symbol references, and that lowers to the IR's `mlir::Location`
+// attribute. Nodes with `ir_attr_has_loc` get an IR-only `loc` field of this
+// type.
+inline constexpr absl::string_view kTriviaNodeName = "Trivia";
+
 class EnumMemberDef {
  public:
   explicit EnumMemberDef(Symbol name, std::string string_value)
@@ -91,6 +97,16 @@ class FieldDef {
   }
   bool enclose_in_region() const { return enclose_in_region_; }
 
+  // Whether the generated MLIR attribute parameter is wrapped in
+  // `OptionalParameter<>`, which lets callers omit it.
+  //
+  // This is opt-in rather than derived from optionalness(): existing optional
+  // class-typed fields are spelled unwrapped, and wrapping them would change
+  // the builder APIs of the attributes that already ship.
+  bool ir_attr_optional_parameter() const {
+    return ir_attr_optional_parameter_;
+  }
+
  private:
   // Only allows creation from proto.
   FieldDef() = default;
@@ -101,6 +117,7 @@ class FieldDef {
   FieldKind kind_;
   GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
   bool enclose_in_region_;
+  bool ir_attr_optional_parameter_ = false;
 };
 
 // Definition of an AST node type.
@@ -324,6 +341,52 @@ class NodeDef {
 
   bool has_fold() const { return has_fold_; }
 
+  // Whether an IR attribute should be automatically generated.
+  bool should_generate_ir_attr() const { return should_generate_ir_attr_; }
+
+  // Whether this attribute has a "$loc: JsirTriviaAttr" parameter.
+  //
+  // This is sugar for an IR-only `loc` field of type `Trivia`, which is
+  // synthesized in AstDef::FromProto. Prefer in_ir()/aggregated_fields() over
+  // this accessor when generating code.
+  bool ir_attr_has_loc() const { return ir_attr_has_loc_; }
+
+  // Target representation for code generation of this node.
+  GenerationTarget generation_target() const { return generation_target_; }
+
+  // Whether this node is generated in the AST.
+  bool in_ast() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_AST_ONLY;
+  }
+
+  // Whether this node is generated in the IR.
+  bool in_ir() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_IR_ONLY;
+  }
+
+  // Whether the generated attribute is a `LocationAttrDef` rather than a plain
+  // `AttrDef`, i.e. a custom `::mlir::LocationAttr` subclass.
+  bool ir_attr_is_location() const { return ir_attr_is_location_; }
+
+  // Whether this class is plain data attached to the AST (e.g. source
+  // locations, comments) rather than a node carrying information necessary to
+  // represent the program's structure. See NodeDefPb::is_plain_object.
+  bool is_plain_object() const { return is_plain_object_; }
+
+  // Additional traits/interfaces to add to the AttrDef definition.
+  absl::Span<const std::string> additional_attr_traits() const {
+    return additional_attr_traits_;
+  }
+
+  // The MLIR attribute name (C++ class name): "<LangName>ir<ClassName>Attr"
+  Symbol ir_attr_name(absl::string_view lang_name) const;
+
+  // The stringified MLIR attribute mnemonic (without dialect name):
+  // "<class_name>"
+  Symbol ir_attr_mnemonic() const;
+
   // Additional MLIR traits to add to the op definition in ODS.
   absl::Span<const MlirTrait> additional_mlir_traits() const {
     return additional_mlir_traits_;
@@ -350,6 +413,12 @@ class NodeDef {
   std::vector<NodeDef*> leaves_;
   std::optional<EnumDef> node_type_enum_;
   bool should_generate_ir_op_;
+  bool should_generate_ir_attr_ = false;
+  bool ir_attr_has_loc_ = false;
+  GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
+  bool ir_attr_is_location_ = false;
+  bool is_plain_object_ = false;
+  std::vector<std::string> additional_attr_traits_;
   std::vector<FieldKind> kinds_;
   std::vector<FieldKind> aggregated_kinds_;
   bool has_control_flow_;
