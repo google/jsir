@@ -210,9 +210,35 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   } else {
     field.generation_target_ = field_pb.generation_target();
   }
+  field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
+  if (field_pb.has_ir_mapping()) {
+    const FieldIrMappingPb& mapping = field_pb.ir_mapping();
+    if (mapping.has_operand() && mapping.has_region()) {
+      return absl::InvalidArgumentError(
+          absl::StrCat("Field '", field_pb.name(),
+                       "': ir_mapping must set at most one of operand and "
+                       "region."));
+    }
+    if (mapping.has_literal_attr() && !mapping.has_operand()) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "Field '", field_pb.name(), "': ir_mapping.literal_attr requires ",
+          "ir_mapping.operand."));
+    }
+    if (mapping.has_literal_attr() == mapping.literal_attr_types().empty()) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "Field '", field_pb.name(), "': ir_mapping.literal_attr_types must ",
+          "be set iff ir_mapping.literal_attr is set."));
+    }
+    field.ir_mapping_ = mapping;
+  }
+
   return field;
+}
+
+Symbol IrDialectName(absl::string_view lang_name, bool has_control_flow) {
+  return Symbol(absl::StrCat(lang_name, has_control_flow ? "hir" : "ir"));
 }
 
 std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
@@ -229,9 +255,7 @@ std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
     return std::nullopt;
   }
 
-  auto ir_name = absl::StrCat(lang_name, has_control_flow() ? "hir" : "ir");
-
-  Symbol result{ir_name};
+  Symbol result = ir_dialect_name(lang_name);
 
   result += name();
 
@@ -284,6 +308,12 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
   }
 }
 
+Symbol NodeDef::ir_attr_name(absl::string_view lang_name) const {
+  return IrDialectName(lang_name, /*has_control_flow=*/false) + name() + "Attr";
+}
+
+Symbol NodeDef::ir_attr_mnemonic() const { return Symbol(name()); }
+
 /*static*/
 absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
   std::vector<EnumDef> enum_defs;
@@ -323,6 +353,39 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     }
 
     node->should_generate_ir_op_ = node_pb.should_generate_ir_op();
+    node->should_generate_ir_attr_ = node_pb.should_generate_ir_attr();
+    node->ir_attr_has_loc_ = node_pb.ir_attr_has_loc();
+    if (node_pb.generation_target() == GENERATION_TARGET_UNSPECIFIED) {
+      node->generation_target_ = GENERATION_TARGET_BOTH;
+    } else {
+      node->generation_target_ = node_pb.generation_target();
+    }
+    node->ir_attr_is_location_ = node_pb.ir_attr_is_location();
+    node->is_plain_object_ = node_pb.is_plain_object();
+
+    // `ir_attr_has_loc` is sugar for an IR-only `loc` field holding the node's
+    // trivia. Desugaring it here rather than special-casing it in each IR
+    // printer keeps `loc` an ordinary field: it participates in the node
+    // dependency graph (so `Trivia` is emitted before its users) and flows
+    // through the shared argument-printing logic.
+    if (node_pb.ir_attr_has_loc()) {
+      FieldDefPb loc_pb;
+      loc_pb.set_name("loc");
+      loc_pb.set_optionalness(OPTIONALNESS_MAYBE_UNDEFINED);
+      loc_pb.mutable_type()->set_class_(kTriviaNodeName);
+      loc_pb.set_generation_target(GENERATION_TARGET_IR_ONLY);
+      loc_pb.set_ir_attr_optional_parameter(true);
+
+      ABSL_ASSIGN_OR_RETURN(FieldDef loc_field,
+                            FieldDef::FromFieldDefPb(loc_pb, pb.lang_name()));
+
+      // The trivia is conventionally the first attribute parameter.
+      node->fields_.insert(node->fields_.begin(), std::move(loc_field));
+    }
+
+    for (const auto& trait : node_pb.additional_attr_traits()) {
+      node->additional_attr_traits_.push_back(trait);
+    }
 
     node->has_fold_ = node_pb.has_fold();
 
@@ -416,6 +479,34 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
   // NOTE: In the code below, we traverse `node_names` instead of `nodes`.
   // `node_names` preserves the original order of definitions.
   // This makes sure that the algorithm is always deterministic.
+
+  // Check that each `ir_mapping.literal_attr_types` entry names a node with an
+  // IR attribute, and each `ir_mapping.lval_op_types` entry names a node.
+  for (const std::string& name : node_names) {
+    const NodeDef& node = *nodes.at(name);
+    for (const FieldDef& field : node.fields_) {
+      const FieldIrMappingPb* mapping = field.ir_mapping();
+      if (mapping == nullptr) {
+        continue;
+      }
+      for (const std::string& type : mapping->literal_attr_types()) {
+        auto it = nodes.find(type);
+        if (it == nodes.end() || !it->second->should_generate_ir_attr()) {
+          return absl::InvalidArgumentError(
+              absl::StrCat(name, ".", field.name().ToCamelCase(),
+                           ": ir_mapping.literal_attr_types entry ", type,
+                           " is not a node with should_generate_ir_attr!"));
+        }
+      }
+      for (const std::string& type : mapping->lval_op_types()) {
+        if (!nodes.contains(type)) {
+          return absl::InvalidArgumentError(absl::StrCat(
+              name, ".", field.name().ToCamelCase(),
+              ": ir_mapping.lval_op_types entry ", type, " doesn't exist!"));
+        }
+      }
+    }
+  }
 
   // Set ancestors vector.
   for (const std::string& name : node_names) {

@@ -170,6 +170,59 @@ enum GenerationTarget {
   GENERATION_TARGET_IR_ONLY = 3;
 }
 
+// How an AST field maps onto the IR op of a node with a handwritten op
+// (`should_generate_ir_op: false`), when the op does not hold the field the way
+// its AST definition implies.
+//
+// Operand, region and attribute names are the op's argument names in TableGen
+// (snake_case), e.g. `computed_key`.
+//
+// For example, an object property's `key` is held by a `computed_key` operand
+// if the key is computed (`{[a]: 1}`), and otherwise by a `literal_key`
+// attribute (`{a: 1}`):
+//
+// ```
+// ir_mapping {
+//   operand: "computed_key"
+//   literal_attr: "literal_key"
+//   literal_attr_types: "Identifier"
+//   literal_attr_types: "StringLiteral"
+// }
+// ```
+message FieldIrMappingPb {
+  // At most one of `operand` and `region` may be set. If neither is set, the
+  // field is held by an operand or region of the same name.
+
+  // The op's operand that holds the field.
+  optional string operand = 1;
+
+  // The op's region that holds the field.
+  optional string region = 2;
+
+  // [Optional] The kind of the op(s) that hold the field, if it is not the
+  // field's kind. E.g. a for-of statement's `left` is a
+  // `VariableDeclaration | LVal`, but its `left_lval` operand holds an LVAL.
+  optional FieldKind kind = 3;
+
+  // [Optional] The op's attribute that holds the field when `operand` is unset.
+  // Requires `operand`.
+  optional string literal_attr = 4;
+
+  // The AST node types whose IR attributes `literal_attr` can hold. Each must
+  // set `should_generate_ir_attr`. Required iff `literal_attr` is set.
+  repeated string literal_attr_types = 5;
+
+  // [Optional] The kind of the op(s) that hold the field in the node's LVAL op
+  // (`*RefOp`), if it is not the same as in the node's other ops. E.g. in
+  // `({a: b} = c)`, the object property's `value` holds an LVAL.
+  optional FieldKind lval_op_kind = 6;
+
+  // [Optional] The AST node types that the field can hold in the node's LVAL
+  // op, if not those of its AST type. E.g. a parenthesized expression's
+  // `expression` is an `Expression`, but in `(a) = 1` it holds an `LVal`.
+  repeated string lval_op_types = 7;
+}
+
 // Definition of a field in an AST node.
 message FieldDefPb {
   // Name of the field.
@@ -258,6 +311,18 @@ message FieldDefPb {
   // Therefore, we define `enclose_in_region` to specify that this AST field,
   // when converted to an IR op, should be further enclosed in a region.
   optional bool enclose_in_region = 6 [default = false];
+
+  // [Optional] Whether the generated MLIR attribute parameter is wrapped in
+  // `OptionalParameter<>`, which lets callers omit it.
+  //
+  // This is opt-in rather than derived from `optionalness` because existing
+  // optional class-typed fields are spelled unwrapped, and wrapping them would
+  // change the builder APIs of the attributes that already ship.
+  optional bool ir_attr_optional_parameter = 7 [default = false];
+
+  // [Optional] How the field maps onto its node's handwritten IR op, if the op
+  // does not hold it in an operand or region of the same name.
+  optional FieldIrMappingPb ir_mapping = 8;
 }
 
 // MLIR traits.
@@ -330,6 +395,48 @@ message NodeDefPb {
 
   // Additional MLIR traits to add to the op definition.
   repeated MlirTrait additional_mlir_traits = 10 [packed = true];
+
+  // If true, automatically generate the corresponding attribute.
+  // If false, the attribute is expected to be manually written.
+  optional bool should_generate_ir_attr = 11;
+
+  // Whether this attribute has an optional trivia/location parameter:
+  // "OptionalParameter<"JsirTriviaAttr">: $loc".
+  //
+  // This is sugar: it synthesizes an IR-only `loc` field whose type is the
+  // `Trivia` node, prepended to the node's own fields. Declaring that field
+  // explicitly is equivalent.
+  optional bool ir_attr_has_loc = 12 [default = false];
+
+  // Additional traits or interfaces to add to the AttrDef definition.
+  repeated string additional_attr_traits = 13;
+
+  // Target representation for code generation of this node.
+  //
+  // `GENERATION_TARGET_IR_ONLY` declares a node that exists purely in the IR:
+  // no AST class, JSON conversion, or TypeScript interface is generated for it.
+  // For example, `Location` is the IR counterpart of `SourceLocation` and
+  // carries extra bookkeeping that the AST stores elsewhere.
+  optional GenerationTarget generation_target = 14
+      [default = GENERATION_TARGET_BOTH];
+
+  // If true, the generated attribute is defined with `LocationAttrDef` instead
+  // of `AttrDef`. On top of a plain `AttrDef`, this adds the
+  // `NativeAttrTrait<"IsLocation">` trait and changes the C++ base class to
+  // `::mlir::LocationAttr`, so the attribute can be used as an
+  // `::mlir::Location` on an operation.
+  optional bool ir_attr_is_location = 15 [default = false];
+
+  // Whether this class is plain data attached to the AST rather than an AST
+  // node in its own right, i.e. whether it carries auxiliary information
+  // (source locations, comments, symbol references, ...) instead of
+  // information necessary to represent the program's structure. E.g. Babel's
+  // `SourceLocation` (`node.loc`) and comments hang off nodes, but traversal
+  // doesn't descend into them.
+  //
+  // Generated code that models nodes (e.g. Python AST node classes, visitor
+  // keys) treats such a class as plain data.
+  optional bool is_plain_object = 16 [default = false];
 }
 
 // Definition of a tagged union node type.
