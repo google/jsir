@@ -258,6 +258,14 @@ message FieldDefPb {
   // Therefore, we define `enclose_in_region` to specify that this AST field,
   // when converted to an IR op, should be further enclosed in a region.
   optional bool enclose_in_region = 6 [default = false];
+
+  // [Optional] Whether the generated MLIR attribute parameter is wrapped in
+  // `OptionalParameter<>`, which lets callers omit it.
+  //
+  // This is opt-in rather than derived from `optionalness` because existing
+  // optional class-typed fields are spelled unwrapped, and wrapping them would
+  // change the builder APIs of the attributes that already ship.
+  optional bool ir_attr_optional_parameter = 7 [default = false];
 }
 
 // MLIR traits.
@@ -330,6 +338,48 @@ message NodeDefPb {
 
   // Additional MLIR traits to add to the op definition.
   repeated MlirTrait additional_mlir_traits = 10 [packed = true];
+
+  // If true, automatically generate the corresponding attribute.
+  // If false, the attribute is expected to be manually written.
+  optional bool should_generate_ir_attr = 11;
+
+  // Whether this attribute has an optional trivia/location parameter:
+  // "OptionalParameter<"JsirTriviaAttr">: $loc".
+  //
+  // This is sugar: it synthesizes an IR-only `loc` field whose type is the
+  // `Trivia` node, prepended to the node's own fields. Declaring that field
+  // explicitly is equivalent.
+  optional bool ir_attr_has_loc = 12 [default = false];
+
+  // Additional traits or interfaces to add to the AttrDef definition.
+  repeated string additional_attr_traits = 13;
+
+  // Target representation for code generation of this node.
+  //
+  // `GENERATION_TARGET_IR_ONLY` declares a node that exists purely in the IR:
+  // no AST class, JSON conversion, or TypeScript interface is generated for it.
+  // For example, `Location` is the IR counterpart of `SourceLocation` and
+  // carries extra bookkeeping that the AST stores elsewhere.
+  optional GenerationTarget generation_target = 14
+      [default = GENERATION_TARGET_BOTH];
+
+  // If true, the generated attribute is defined with `LocationAttrDef` instead
+  // of `AttrDef`. On top of a plain `AttrDef`, this adds the
+  // `NativeAttrTrait<"IsLocation">` trait and changes the C++ base class to
+  // `::mlir::LocationAttr`, so the attribute can be used as an
+  // `::mlir::Location` on an operation.
+  optional bool ir_attr_is_location = 15 [default = false];
+
+  // Whether this class is plain data attached to the AST rather than an AST
+  // node in its own right, i.e. whether it carries auxiliary information
+  // (source locations, comments, symbol references, ...) instead of
+  // information necessary to represent the program's structure. E.g. Babel's
+  // `SourceLocation` (`node.loc`) and comments hang off nodes, but traversal
+  // doesn't descend into them.
+  //
+  // Generated code that models nodes (e.g. Python AST node classes, visitor
+  // keys) treats such a class as plain data.
+  optional bool is_plain_object = 16 [default = false];
 }
 
 // Definition of a tagged union node type.
