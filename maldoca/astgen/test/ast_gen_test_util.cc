@@ -31,6 +31,7 @@
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
 #include "maldoca/astgen/ast_visitor_header_printer.h"
 #include "maldoca/astgen/ast_walker_header_printer.h"
+#include "maldoca/astgen/ir_attr_table_gen_printer.h"
 #include "maldoca/astgen/ir_table_gen_printer.h"
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/astgen/ts_interface_printer.h"
@@ -201,6 +202,29 @@ TEST_P(AstGenTest, IrTableGenTest) {
                    << expected_ir_tablegen_path;
     EXPECT_EQ(absl::StripAsciiWhitespace(ir_tablegen),
               absl::StripAsciiWhitespace(expected_ir_tablegen));
+  }
+}
+
+TEST_P(AstGenTest, IrAttrTableGenTest) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast_def, LoadAstDef());
+  std::string ir_attrs_tablegen =
+      PrintIrAttrTableGen(ast_def, GetParam().ir_path);
+
+  // So that we can copy from the output.
+  std::cout << "Output:" << std::endl;
+  std::cout << ir_attrs_tablegen << std::endl;
+
+  if (GetParam().expected_ir_attr_tablegen_path.has_value()) {
+    auto expected_ir_attr_tablegen_path =
+        GetDataDependencyFilepath(*GetParam().expected_ir_attr_tablegen_path);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(
+        std::string expected_ir_attrs_tablegen,
+        GetFileContents(expected_ir_attr_tablegen_path));
+
+    ABSL_LOG(INFO) << " expected_ir_attr_tablegen_path: "
+                   << expected_ir_attr_tablegen_path;
+    EXPECT_EQ(absl::StripAsciiWhitespace(ir_attrs_tablegen),
+              absl::StripAsciiWhitespace(expected_ir_attrs_tablegen));
   }
 }
 
