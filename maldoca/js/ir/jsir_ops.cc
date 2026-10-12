@@ -326,7 +326,7 @@ mlir::OpFoldResult JsirNullLiteralOp::fold(FoldAdaptor adaptor) {
 
 mlir::OpFoldResult JsirRegExpLiteralOp::fold(FoldAdaptor adaptor) {
   return JsirRegExpLiteralAttr::get(getContext(), getPatternAttr(),
-                                    getFlagsAttr());
+                                    getFlagsAttr(), getExtraAttr());
 }
 
 mlir::OpFoldResult JsirStringLiteralOp::fold(FoldAdaptor adaptor) {

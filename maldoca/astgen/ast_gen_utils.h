@@ -188,10 +188,14 @@ inline std::string UnIndentedSource(absl::string_view source) {
 
 // FieldIs{Argument,Region}:
 //
-// If a field has ignore_in_ir(), then we don't define anything in the op.
+// A field only defines something in the op if it exists on both sides of the
+// AST/IR correspondence, since the op and the AST<->IR conversions are how that
+// correspondence is materialized.
 //
-// Example: Node::start does not lead to any argument/region in JSIR because we
-// want to store the information in mlir::Location.
+// Example: Node::start is AST_ONLY, so it does not lead to any argument/region
+// in JSIR because we want to store the information in mlir::Location.
+// Conversely, an IR_ONLY field (such as the trivia carried by an attribute) has
+// no AST counterpart to convert from or to.
 //
 // If a field has enclose_in_region(), then it's an MLIR "region"; otherwise
 // it's an MLIR "argument".
@@ -202,11 +206,11 @@ inline std::string UnIndentedSource(absl::string_view source) {
 // See FieldDefPb::enclose_in_region for why we need to enclose certain fields
 // in a region.
 inline bool FieldIsArgument(const FieldDef* field) {
-  return field->in_ir() && !field->enclose_in_region();
+  return field->in_ast() && field->in_ir() && !field->enclose_in_region();
 }
 
 inline bool FieldIsRegion(const FieldDef* field) {
-  return field->in_ir() && field->enclose_in_region();
+  return field->in_ast() && field->in_ir() && field->enclose_in_region();
 }
 
 }  // namespace maldoca

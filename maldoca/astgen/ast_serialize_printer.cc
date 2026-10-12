@@ -80,6 +80,9 @@ void AstSerializePrinter::PrintAst(const AstDef& ast,
 )");
 
   for (const auto& node : ast.topological_sorted_nodes()) {
+    if (!node->in_ast()) {
+      continue;
+    }
     PrintTitle((Symbol(ast.lang_name()) + node->name()).ToPascalCase());
     Println();
 

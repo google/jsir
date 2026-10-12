@@ -25,6 +25,7 @@
 #include <iostream>
 #include <string>
 #include "absl/flags/flag.h"
+#include "absl/status/status.h"
 #include "absl/status/status_macros.h"
 #include "absl/strings/str_cat.h"
 #include "maldoca/astgen/ast_def.h"
@@ -36,6 +37,7 @@
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
 #include "maldoca/astgen/ast_visitor_header_printer.h"
 #include "maldoca/astgen/ast_walker_header_printer.h"
+#include "maldoca/astgen/ir_attr_table_gen_printer.h"
 #include "maldoca/astgen/ir_table_gen_printer.h"
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/base/filesystem.h"
@@ -138,6 +140,14 @@ absl::Status AstGenMain() {
           ir_path, absl::StrCat(ast_def.lang_name(), "ir_ops.generated.td"));
       std::cout << "Writing ir_tablegen to " << ir_tablegen_path << "\n";
       ABSL_RETURN_IF_ERROR(SetFileContents(ir_tablegen_path, ir_tablegen));
+
+      std::string ir_attrs_tablegen = PrintIrAttrTableGen(ast_def, ir_path);
+      auto ir_attrs_tablegen_path = JoinPath(
+          ir_path, absl::StrCat(ast_def.lang_name(), "ir_attrs.generated.td"));
+      std::cout << "Writing ir_attrs_tablegen to " << ir_attrs_tablegen_path
+                << "\n";
+      ABSL_RETURN_IF_ERROR(
+          SetFileContents(ir_attrs_tablegen_path, ir_attrs_tablegen));
     }
 
     std::string ast_to_ir = PrintAstToIrSource(
