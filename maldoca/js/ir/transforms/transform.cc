@@ -35,7 +35,6 @@
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/transforms/constant_propagation/pass.h"
 #include "maldoca/js/ir/transforms/dead_code_elimination/pass.h"
-#include "maldoca/js/ir/transforms/dynamic_constant_propagation/pass.h"
 #include "maldoca/js/ir/transforms/move_named_functions/pass.h"
 #include "maldoca/js/ir/transforms/normalize_object_properties/pass.h"
 #include "maldoca/js/ir/transforms/peel_parentheses/pass.h"
@@ -104,7 +103,7 @@ absl::StatusOr<std::unique_ptr<mlir::Pass>> CreateJsirTransformPass(
         prelude = output.ast_analysis().extract_prelude();
       }
 
-      return std::make_unique<JsirDynamicConstantPropagationPass>(
+      return std::make_unique<JsirConstantPropagationPass>(
           scopes, prelude, babel, analysis_outputs);
     }
 
