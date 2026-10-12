@@ -54,10 +54,11 @@ bazel_dep(
 # https://registry.bazel.build/modules/re2
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
 
-# LLVM and QuickJS are not in BCR; fetch them via a module extension.
+# LLVM, QuickJS and esbuild are not in BCR; fetch them via a module extension.
 llvm_extensions = use_extension("//bazel:extensions.bzl", "llvm_deps")
 use_repo(
     llvm_extensions,
+    "esbuild",
     "llvm-raw",
     "quickjs",
 )
