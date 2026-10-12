@@ -119,3 +119,9 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+java_proto_library(
+    name = "babel_java_proto",
+    visibility = ["//visibility:public"],
+    deps = [":babel_proto"],
+)
