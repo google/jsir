@@ -9,6 +9,7 @@ lang_name: "la"
 nodes {
   name: "Expression"
   kinds: FIELD_KIND_RVAL
+  should_generate_ir_attr: true
 }
 
 # interface Variable <: Expression {
@@ -26,6 +27,7 @@ nodes {
   }
   kinds: FIELD_KIND_LVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface FunctionDefinition <: Expression {
@@ -50,6 +52,7 @@ nodes {
     enclose_in_region: true
   }
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface FunctionCall <: Expression {
@@ -72,4 +75,5 @@ nodes {
     kind: FIELD_KIND_RVAL
   }
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }

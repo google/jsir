@@ -68,4 +68,5 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }

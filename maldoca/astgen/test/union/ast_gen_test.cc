@@ -42,6 +42,8 @@ INSTANTIATE_TEST_SUITE_P(
         .expected_ast_from_json_path =
             "maldoca/astgen/test/"
             "union/ast_from_json.generated.cc",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/union/eir_attrs.generated.td",
     }));
 
 }  // namespace

@@ -210,6 +210,7 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   } else {
     field.generation_target_ = field_pb.generation_target();
   }
+  field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
   return field;
@@ -284,6 +285,12 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
   }
 }
 
+Symbol NodeDef::ir_attr_name(absl::string_view lang_name) const {
+  return Symbol(absl::StrCat(lang_name, "ir")) + name() + "Attr";
+}
+
+Symbol NodeDef::ir_attr_mnemonic() const { return Symbol(name()); }
+
 /*static*/
 absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
   std::vector<EnumDef> enum_defs;
@@ -323,6 +330,16 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     }
 
     node->should_generate_ir_op_ = node_pb.should_generate_ir_op();
+    node->should_generate_ir_attr_ = node_pb.should_generate_ir_attr();
+    node->ir_attr_has_loc_ = node_pb.ir_attr_has_loc();
+    if (node_pb.generation_target() == GENERATION_TARGET_UNSPECIFIED) {
+      node->generation_target_ = GENERATION_TARGET_BOTH;
+    } else {
+      node->generation_target_ = node_pb.generation_target();
+    }
+    for (const auto& trait : node_pb.additional_attr_traits()) {
+      node->additional_attr_traits_.push_back(trait);
+    }
 
     node->has_fold_ = node_pb.has_fold();
 

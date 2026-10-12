@@ -35,6 +35,7 @@ cc_test(
         "ast_from_json.generated.cc",
         "ast_to_json.generated.cc",
         "ast_ts_interface.generated",
+        "lair_attrs.generated.td",
         "lair_ops.generated.td",
         "//maldoca/astgen/test/lambda/conversion:ast_to_lair.generated.cc",
     ],

@@ -188,7 +188,7 @@ inline std::string UnIndentedSource(absl::string_view source) {
 
 // FieldIs{Argument,Region}:
 //
-// If a field has ignore_in_ir(), then we don't define anything in the op.
+// If a field has `!in_ir()`, then we don't define anything in the op.
 //
 // Example: Node::start does not lead to any argument/region in JSIR because we
 // want to store the information in mlir::Location.

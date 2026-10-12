@@ -27,6 +27,7 @@ INSTANTIATE_TEST_SUITE_P(
                                      "typed_lambda/ast_ts_interface.generated",
         .cc_namespace = "maldoca",
         .ast_path = "maldoca/astgen/test/typed_lambda",
+        .ir_path = "maldoca/astgen/test/typed_lambda",
         .expected_ast_header_path =
             "maldoca/astgen/test/"
             "typed_lambda/ast.generated.h",
@@ -45,6 +46,8 @@ INSTANTIATE_TEST_SUITE_P(
         .expected_ast_from_json_path =
             "maldoca/astgen/test/"
             "typed_lambda/ast_from_json.generated.cc",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/typed_lambda/tlir_attrs.generated.td",
     }));
 
 }  // namespace

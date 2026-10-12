@@ -44,6 +44,8 @@ INSTANTIATE_TEST_SUITE_P(
             "enum/ast_from_json.generated.cc",
         .expected_ir_tablegen_path =
             "maldoca/astgen/test/enum/eir_ops.generated.td",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/enum/eir_attrs.generated.td",
         .expected_ast_to_ir_source_path =
             "maldoca/astgen/test/enum/conversion/"
             "ast_to_eir.generated.cc",

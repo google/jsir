@@ -37,6 +37,7 @@ cc_test(
         "ast_ts_interface.generated",
         "ast_visitor.generated.h",
         "ast_walker.generated.h",
+        "vir_attrs.generated.td",
         "vir_ops.generated.td",
         "//maldoca/astgen/test/variant/conversion:ast_to_vir.generated.cc",
         "//maldoca/astgen/test/variant/conversion:vir_to_ast.generated.cc",

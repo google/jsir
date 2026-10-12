@@ -77,6 +77,9 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
   }
 
   for (const NodeDef* node : ast.topological_sorted_nodes()) {
+    if (!node->in_ast()) {
+      continue;
+    }
     PrintNode(*node, ast.lang_name());
   }
 

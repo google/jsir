@@ -37,6 +37,7 @@ cc_test(
         "ast_ts_interface.generated",
         "ast_visitor.generated.h",
         "ast_walker.generated.h",
+        "rir_attrs.generated.td",
         "rir_ops.generated.td",
         "//maldoca/astgen/test/region/conversion:ast_to_rir.generated.cc",
         "//maldoca/astgen/test/region/conversion:rir_to_ast.generated.cc",

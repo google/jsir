@@ -37,6 +37,7 @@ cc_test(
         "ast_ts_interface.generated",
         "ast_visitor.generated.h",
         "ast_walker.generated.h",
+        "eir_attrs.generated.td",
         "eir_ops.generated.td",
         "//maldoca/astgen/test/enum/conversion:ast_to_eir.generated.cc",
         "//maldoca/astgen/test/enum/conversion:eir_to_ast.generated.cc",

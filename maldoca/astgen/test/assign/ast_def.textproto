@@ -7,6 +7,7 @@ lang_name: "a"
 nodes {
   name: "Expression"
   kinds: FIELD_KIND_RVAL
+  should_generate_ir_attr: true
 }
 
 # interface Identifier <: Expression {
@@ -23,6 +24,7 @@ nodes {
   }
   kinds: FIELD_KIND_LVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface Assignment <: Expression {
@@ -44,4 +46,5 @@ nodes {
     kind: FIELD_KIND_RVAL
   }
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }

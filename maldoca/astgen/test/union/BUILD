@@ -31,6 +31,7 @@ cc_test(
         "ast_ts_interface.generated",
         "ast_visitor.generated.h",
         "ast_walker.generated.h",
+        "eir_attrs.generated.td",
     ],
     deps = [
         "//maldoca/astgen/test:ast_gen_test_util",

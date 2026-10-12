@@ -8,6 +8,7 @@ nodes {
   name: "Expr"
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface Stmt {
@@ -24,6 +25,7 @@ nodes {
   }
   kinds: FIELD_KIND_STMT
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface Node {
@@ -52,6 +54,7 @@ nodes {
     optionalness: OPTIONALNESS_MAYBE_NULL
     enclose_in_region: true
     kind: FIELD_KIND_RVAL
+    ir_attr_optional_parameter: true
   }
   fields {
     name: "exprs"
@@ -79,6 +82,7 @@ nodes {
     optionalness: OPTIONALNESS_MAYBE_NULL
     enclose_in_region: true
     kind: FIELD_KIND_STMT
+    ir_attr_optional_parameter: true
   }
   fields {
     name: "stmts"
@@ -92,4 +96,5 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }

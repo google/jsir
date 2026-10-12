@@ -45,6 +45,8 @@ INSTANTIATE_TEST_SUITE_P(
         .expected_ir_tablegen_path =
             "maldoca/astgen/test/"
             "variant/vir_ops.generated.td",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/variant/vir_attrs.generated.td",
         .expected_ast_to_ir_source_path =
             "maldoca/astgen/test/"
             "variant/conversion/ast_to_vir.generated.cc",

@@ -8,6 +8,7 @@ nodes {
   name: "Class1"
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface Class2 {}
@@ -15,6 +16,7 @@ nodes {
   name: "Class2"
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface SimpleList {
@@ -43,6 +45,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface OptionalList {
@@ -62,6 +65,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface ListOfOptional {
@@ -92,6 +96,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface ListOfVariant {
@@ -130,6 +135,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface OptionalListOfOptional {
@@ -150,6 +156,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface OptionalListOfVariant {
@@ -174,6 +181,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface ListOfOptionalVariant {
@@ -214,6 +222,7 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }
 
 # interface OptionalListOfOptionalVariant {
@@ -239,4 +248,5 @@ nodes {
   }
   kinds: FIELD_KIND_RVAL
   should_generate_ir_op: true
+  should_generate_ir_attr: true
 }

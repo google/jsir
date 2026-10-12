@@ -38,6 +38,7 @@ cc_library(
         "//maldoca/astgen:ast_to_ir_source_printer",
         "//maldoca/astgen:ast_visitor_header_printer",
         "//maldoca/astgen:ast_walker_header_printer",
+        "//maldoca/astgen:ir_attr_table_gen_printer",
         "//maldoca/astgen:ir_table_gen_printer",
         "//maldoca/astgen:ir_to_ast_source_printer",
         "//maldoca/astgen:ts_interface_printer",

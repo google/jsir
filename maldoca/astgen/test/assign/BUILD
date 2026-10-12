@@ -29,6 +29,7 @@ cc_test(
     name = "ast_gen_test",
     srcs = ["ast_gen_test.cc"],
     data = [
+        "air_attrs.generated.td",
         "air_ops.generated.td",
         "ast.generated.cc",
         "ast.generated.h",

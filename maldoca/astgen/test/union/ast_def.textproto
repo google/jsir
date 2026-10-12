@@ -25,6 +25,7 @@ nodes {
     type { string {} }
     kind: FIELD_KIND_ATTR
   }
+  should_generate_ir_attr: true
 }
 
 nodes {
@@ -35,6 +36,7 @@ nodes {
     type { string {} }
     kind: FIELD_KIND_ATTR
   }
+  should_generate_ir_attr: true
 }
 
 union_types {

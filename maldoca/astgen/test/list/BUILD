@@ -35,6 +35,7 @@ cc_test(
         "ast_from_json.generated.cc",
         "ast_to_json.generated.cc",
         "ast_ts_interface.generated",
+        "liir_attrs.generated.td",
         "liir_ops.generated.td",
         "//maldoca/astgen/test/list/conversion:ast_to_liir.generated.cc",
         "//maldoca/astgen/test/list/conversion:liir_to_ast.generated.cc",

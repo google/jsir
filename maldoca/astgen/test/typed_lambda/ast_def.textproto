@@ -8,6 +8,7 @@ lang_name: "tl"
 # }
 nodes {
   name: "Node"
+  should_generate_ir_attr: true
 }
 
 # e ::= x
@@ -19,6 +20,7 @@ nodes {
 nodes {
   name: "Expression"
   parents: "Node"
+  should_generate_ir_attr: true
 }
 
 # T ::= L
@@ -28,6 +30,7 @@ nodes {
 nodes {
   name: "Type"
   parents: "Node"
+  should_generate_ir_attr: true
 }
 
 # interface Literal <: Expression {
@@ -49,6 +52,7 @@ nodes {
       }
     }
   }
+  should_generate_ir_attr: true
 }
 
 # interface Variable <: Expression {
@@ -63,6 +67,7 @@ nodes {
     name: "identifier"
     type { string {} }
   }
+  should_generate_ir_attr: true
 }
 
 # interface FunctionDefinition <: Expression {
@@ -87,6 +92,7 @@ nodes {
     name: "body"
     type { class: "Expression" }
   }
+  should_generate_ir_attr: true
 }
 
 # interface FunctionCall <: Expression {
@@ -106,6 +112,7 @@ nodes {
     name: "callee"
     type { class: "Expression" }
   }
+  should_generate_ir_attr: true
 }
 
 # interface LiteralType <: Type {
@@ -115,6 +122,7 @@ nodes {
   name: "LiteralType"
   type: "LiteralType"
   parents: "Type"
+  should_generate_ir_attr: true
 }
 
 # interface FunctionType <: Type {
@@ -134,4 +142,5 @@ nodes {
     name: "bodyType"
     type { class: "Type" }
   }
+  should_generate_ir_attr: true
 }
