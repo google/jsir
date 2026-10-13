@@ -370,6 +370,11 @@ class NodeDef {
   // `AttrDef`, i.e. a custom `::mlir::LocationAttr` subclass.
   bool ir_attr_is_location() const { return ir_attr_is_location_; }
 
+  // Whether this class is plain data attached to the AST (e.g. source
+  // locations, comments) rather than a node carrying information necessary to
+  // represent the program's structure. See NodeDefPb::is_plain_object.
+  bool is_plain_object() const { return is_plain_object_; }
+
   // Additional traits/interfaces to add to the AttrDef definition.
   absl::Span<const std::string> additional_attr_traits() const {
     return additional_attr_traits_;
@@ -412,6 +417,7 @@ class NodeDef {
   bool ir_attr_has_loc_ = false;
   GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
   bool ir_attr_is_location_ = false;
+  bool is_plain_object_ = false;
   std::vector<std::string> additional_attr_traits_;
   std::vector<FieldKind> kinds_;
   std::vector<FieldKind> aggregated_kinds_;

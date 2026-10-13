@@ -369,6 +369,17 @@ message NodeDefPb {
   // `::mlir::LocationAttr`, so the attribute can be used as an
   // `::mlir::Location` on an operation.
   optional bool ir_attr_is_location = 15 [default = false];
+
+  // Whether this class is plain data attached to the AST rather than an AST
+  // node in its own right, i.e. whether it carries auxiliary information
+  // (source locations, comments, symbol references, ...) instead of
+  // information necessary to represent the program's structure. E.g. Babel's
+  // `SourceLocation` (`node.loc`) and comments hang off nodes, but traversal
+  // doesn't descend into them.
+  //
+  // Generated code that models nodes (e.g. Python AST node classes, visitor
+  // keys) treats such a class as plain data.
+  optional bool is_plain_object = 16 [default = false];
 }
 
 // Definition of a tagged union node type.

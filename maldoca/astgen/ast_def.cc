@@ -338,6 +338,7 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
       node->generation_target_ = node_pb.generation_target();
     }
     node->ir_attr_is_location_ = node_pb.ir_attr_is_location();
+    node->is_plain_object_ = node_pb.is_plain_object();
 
     // `ir_attr_has_loc` is sugar for an IR-only `loc` field holding the node's
     // trivia. Desugaring it here rather than special-casing it in each IR

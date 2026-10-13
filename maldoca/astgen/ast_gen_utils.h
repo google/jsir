@@ -30,6 +30,7 @@
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_def.h"
+#include "maldoca/astgen/type.h"
 #include "maldoca/base/path.h"
 #include "google/protobuf/io/printer.h"
 
@@ -211,6 +212,48 @@ inline bool FieldIsArgument(const FieldDef* field) {
 
 inline bool FieldIsRegion(const FieldDef* field) {
   return field->in_ast() && field->in_ir() && field->enclose_in_region();
+}
+
+// Whether a class type refers to an AST node, i.e. is not marked
+// `is_plain_object` in the AST definition. See NodeDefPb::is_plain_object.
+inline bool IsAstNodeClass(const AstDef& ast, const ClassType& type) {
+  auto it = ast.nodes().find(type.name().ToPascalCase());
+  return it == ast.nodes().end() || !it->second->is_plain_object();
+}
+
+// Whether a variant holds at least one AST node type.
+inline bool VariantHasAstNode(const AstDef& ast, const VariantType& variant) {
+  for (const auto& scalar : variant.types()) {
+    if (scalar->IsA<ClassType>() &&
+        IsAstNodeClass(ast, static_cast<const ClassType&>(*scalar))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Whether a field of this type holds a child AST node, i.e. whether traversal
+// descends into it. Lists and variants of AST nodes count; plain-object
+// classes do not.
+inline bool IsAstNodeType(const AstDef& ast, const Type& type) {
+  if (type.IsA<ClassType>()) {
+    return IsAstNodeClass(ast, static_cast<const ClassType&>(type));
+  }
+  if (type.IsA<VariantType>()) {
+    return VariantHasAstNode(ast, static_cast<const VariantType&>(type));
+  }
+  if (type.IsA<ListType>()) {
+    const NonListType& element =
+        static_cast<const ListType&>(type).element_type();
+    if (element.IsA<ClassType>()) {
+      return IsAstNodeClass(ast, static_cast<const ClassType&>(element));
+    }
+    if (element.IsA<VariantType>()) {
+      return VariantHasAstNode(ast, static_cast<const VariantType&>(element));
+    }
+    return false;
+  }
+  return false;
 }
 
 }  // namespace maldoca
