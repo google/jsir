@@ -43,7 +43,9 @@ accurately model control flow structures.
 
 See
 [intermediate_representation_design.md](docs/intermediate_representation_design.md)
-for details.
+for details of the IR design, and
+[dataflow_analysis.md](docs/dataflow_analysis.md)
+for details of the dataflow analysis API.
 
 ## Getting started
 
@@ -127,7 +129,7 @@ bazelisk test //maldoca/js/ir/conversion/...
 
 ### Run the `jsir_gen` tool
 
-Convert a JavaScript source file to JSHIR:
+Convert a JavaScript source file to JSIR:
 
 ```shell
 bazelisk run //maldoca/js/ir:jsir_gen --\
