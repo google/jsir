@@ -213,7 +213,32 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
+  if (field_pb.has_ir_mapping()) {
+    const FieldIrMappingPb& mapping = field_pb.ir_mapping();
+    if (mapping.has_operand() && mapping.has_region()) {
+      return absl::InvalidArgumentError(
+          absl::StrCat("Field '", field_pb.name(),
+                       "': ir_mapping must set at most one of operand and "
+                       "region."));
+    }
+    if (mapping.has_literal_attr() && !mapping.has_operand()) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "Field '", field_pb.name(), "': ir_mapping.literal_attr requires ",
+          "ir_mapping.operand."));
+    }
+    if (mapping.has_literal_attr() == mapping.literal_attr_types().empty()) {
+      return absl::InvalidArgumentError(absl::StrCat(
+          "Field '", field_pb.name(), "': ir_mapping.literal_attr_types must ",
+          "be set iff ir_mapping.literal_attr is set."));
+    }
+    field.ir_mapping_ = mapping;
+  }
+
   return field;
+}
+
+Symbol IrDialectName(absl::string_view lang_name, bool has_control_flow) {
+  return Symbol(absl::StrCat(lang_name, has_control_flow ? "hir" : "ir"));
 }
 
 std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
@@ -230,9 +255,7 @@ std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
     return std::nullopt;
   }
 
-  auto ir_name = absl::StrCat(lang_name, has_control_flow() ? "hir" : "ir");
-
-  Symbol result{ir_name};
+  Symbol result = ir_dialect_name(lang_name);
 
   result += name();
 
@@ -286,7 +309,7 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
 }
 
 Symbol NodeDef::ir_attr_name(absl::string_view lang_name) const {
-  return Symbol(absl::StrCat(lang_name, "ir")) + name() + "Attr";
+  return IrDialectName(lang_name, /*has_control_flow=*/false) + name() + "Attr";
 }
 
 Symbol NodeDef::ir_attr_mnemonic() const { return Symbol(name()); }
@@ -456,6 +479,43 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
   // NOTE: In the code below, we traverse `node_names` instead of `nodes`.
   // `node_names` preserves the original order of definitions.
   // This makes sure that the algorithm is always deterministic.
+
+  // Check that each `ir_mapping.literal_attr_types` entry names a node with an
+  // IR attribute, and each `ir_mapping.lval_op_types` and
+  // `ir_mapping.lval_member_types` entry names a node.
+  for (const std::string& name : node_names) {
+    const NodeDef& node = *nodes.at(name);
+    for (const FieldDef& field : node.fields_) {
+      const FieldIrMappingPb* mapping = field.ir_mapping();
+      if (mapping == nullptr) {
+        continue;
+      }
+      for (const std::string& type : mapping->literal_attr_types()) {
+        auto it = nodes.find(type);
+        if (it == nodes.end() || !it->second->should_generate_ir_attr()) {
+          return absl::InvalidArgumentError(
+              absl::StrCat(name, ".", field.name().ToCamelCase(),
+                           ": ir_mapping.literal_attr_types entry ", type,
+                           " is not a node with should_generate_ir_attr!"));
+        }
+      }
+      for (const std::string& type : mapping->lval_op_types()) {
+        if (!nodes.contains(type)) {
+          return absl::InvalidArgumentError(absl::StrCat(
+              name, ".", field.name().ToCamelCase(),
+              ": ir_mapping.lval_op_types entry ", type, " doesn't exist!"));
+        }
+      }
+      for (const std::string& type : mapping->lval_member_types()) {
+        if (!nodes.contains(type)) {
+          return absl::InvalidArgumentError(
+              absl::StrCat(name, ".", field.name().ToCamelCase(),
+                           ": ir_mapping.lval_member_types entry ", type,
+                           " doesn't exist!"));
+        }
+      }
+    }
+  }
 
   // Set ancestors vector.
   for (const std::string& name : node_names) {
