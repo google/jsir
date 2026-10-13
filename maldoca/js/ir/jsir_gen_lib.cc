@@ -36,6 +36,7 @@
 #include "maldoca/js/driver/driver.h"
 #include "maldoca/js/driver/driver.pb.h"
 #include "maldoca/js/ir/conversion/utils.h"
+#include "maldoca/js/ir/utf16.h"
 #include "maldoca/js/quickjs_babel/quickjs_babel.h"
 
 namespace maldoca {
@@ -69,13 +70,19 @@ std::string DumpJsirAnalysisResult(absl::string_view original_source,
       using ComputedConstant =
           JsirAnalysisResult::DynamicConstantPropagation::ComputedConstant;
 
+      // `start_offset`/`end_offset` are UTF-16 code-unit offsets produced by
+      // Babel, but `original_source` is a UTF-8 byte string. Slicing the byte
+      // string with UTF-16 offsets misreports source segments whenever the
+      // source contains non-ASCII characters, so convert to UTF-16 first.
+      const std::u16string source_u16 = Utf8ToUtf16(original_source);
+
       auto formatter = [&](std::string* out, const ComputedConstant& constant) {
         absl::StrAppendFormat(
             out, "From [%d, %d): `%s` -> `", constant.start_offset(),
             constant.end_offset(),
-            original_source.substr(
+            Utf16ToUtf8(std::u16string_view(source_u16).substr(
                 constant.start_offset(),
-                constant.end_offset() - constant.start_offset()));
+                constant.end_offset() - constant.start_offset())));
         switch (constant.value_kind_case()) {
           case ComputedConstant::kStringValue:
             absl::StrAppend(out, constant.string_value());
