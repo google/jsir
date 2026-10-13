@@ -176,16 +176,16 @@ class JsAstToAstString final
 // +------+-----------------------------+-------------------------------+
 // |  To  | mlir::OwningOpRef<JsFileOp> | JavaScript high-level IR      |
 // +------+-----------------------------+-------------------------------+
-class JsAstToHir final : public JsConversionTmpl<JsAstRepr, JsHirRepr> {
+class JsAstToJsir final : public JsConversionTmpl<JsAstRepr, JsirRepr> {
  public:
-  explicit JsAstToHir(mlir::MLIRContext *absl_nonnull mlir_context)
+  explicit JsAstToJsir(mlir::MLIRContext* absl_nonnull mlir_context)
       : mlir_context_(*mlir_context) {}
 
-  std::string name() const override { return "JsAstToHir"; }
+  std::string name() const override { return "JsAstToJsir"; }
 
  private:
-  absl::StatusOr<std::unique_ptr<JsHirRepr>> Convert(
-      const JsAstRepr &from) override;
+  absl::StatusOr<std::unique_ptr<JsirRepr>> Convert(
+      const JsAstRepr& from) override;
 
   mlir::MLIRContext &mlir_context_;
 };
@@ -197,15 +197,15 @@ class JsAstToHir final : public JsConversionTmpl<JsAstRepr, JsHirRepr> {
 // +------+-------------------------------+-------------------------------+
 // |  To  | std::unique_ptr<JsFile>       | JavaScript AST                |
 // +------+-------------------------------+-------------------------------+
-class JsHirToAst final : public JsConversionTmpl<JsHirRepr, JsAstRepr> {
+class JsirToAst final : public JsConversionTmpl<JsirRepr, JsAstRepr> {
  public:
-  explicit JsHirToAst() = default;
+  explicit JsirToAst() = default;
 
-  std::string name() const override { return "JsHirToAst"; }
+  std::string name() const override { return "JsirToAst"; }
 
  private:
   absl::StatusOr<std::unique_ptr<JsAstRepr>> Convert(
-      const JsHirRepr &from) override;
+      const JsirRepr& from) override;
 };
 
 }  // namespace maldoca

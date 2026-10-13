@@ -59,7 +59,7 @@ enum class JsReprKind {
   kJsSource,
   kAstString,
   kAst,
-  kJshir,
+  kJsir,
 };
 
 std::ostream& operator<<(std::ostream& os, JsReprKind kind);
@@ -178,28 +178,17 @@ struct JsirRepr : JsRepr {
   mlir::OwningOpRef<JsirFileOp> op;
   BabelScopes scopes;
 
-  static bool classof(const JsRepr* repr) {
-    return repr->kind == JsReprKind::kJshir;
-  }
-
   std::string Dump() const override { return mlir::debugString(*op); }
 
- protected:
-  JsirRepr(JsReprKind kind, mlir::OwningOpRef<JsirFileOp> op,
-           BabelScopes scopes, std::optional<std::string> source_map)
-      : JsRepr(kind, std::move(source_map)),
+ public:
+  JsirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes,
+           std::optional<std::string> source_map)
+      : JsRepr(JsReprKind::kJsir, std::move(source_map)),
         op(std::move(op)),
         scopes(std::move(scopes)) {}
-};
-
-struct JsHirRepr : JsirRepr {
-  JsHirRepr(mlir::OwningOpRef<JsirFileOp> op, BabelScopes scopes,
-            std::optional<std::string> source_map)
-      : JsirRepr(JsReprKind::kJshir, std::move(op), std::move(scopes),
-                 std::move(source_map)) {}
 
   static bool classof(const JsRepr* repr) {
-    return repr->kind == JsReprKind::kJshir;
+    return repr->kind == JsReprKind::kJsir;
   }
 
   absl::StatusOr<JsReprPb> ToProto() const override;

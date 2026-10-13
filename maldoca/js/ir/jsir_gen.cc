@@ -18,7 +18,7 @@
 //
 // bazel run //maldoca/js/ir:jsir_gen -- \
 //   --input_file=test.js \
-//   --output_dialect=jshir
+//   --passes=source2ast,ast2jsir
 
 #include <algorithm>
 #include <iostream>
@@ -48,8 +48,10 @@
 static auto* kStringToPassKind =
     new absl::flat_hash_map<std::string, maldoca::JsirPassKind>{
         {"source2ast", maldoca::JsirPassKind::kSourceToAst},
-        {"ast2jsir", maldoca::JsirPassKind::kAstToJshir},
-        {"jsir2ast", maldoca::JsirPassKind::kJshirToAst},
+        {"ast2jsir", maldoca::JsirPassKind::kAstToJsir},
+        {"ast2hir", maldoca::JsirPassKind::kAstToJsir},
+        {"jsir2ast", maldoca::JsirPassKind::kJsirToAst},
+        {"hir2ast", maldoca::JsirPassKind::kJsirToAst},
         {"ast2source", maldoca::JsirPassKind::kAstToSource},
 
         {"erase_comments", maldoca::JsirPassKind::kEraseComments},

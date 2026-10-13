@@ -51,8 +51,8 @@ std::ostream &operator<<(std::ostream &os, JsReprKind kind) {
       return os << "AstString";
     case JsReprKind::kAst:
       return os << "Ast";
-    case JsReprKind::kJshir:
-      return os << "Jshir";
+    case JsReprKind::kJsir:
+      return os << "Jsir";
   }
 }
 
@@ -72,7 +72,7 @@ absl::StatusOr<std::unique_ptr<JsRepr>> JsRepr::FromProto(
     case JsReprPb::kBabelAstString:
       return std::make_unique<JsAstStringRepr>(proto.babel_ast_string(),
                                                std::move(source_map));
-    case JsReprPb::kJsHir:
+    case JsReprPb::kJsIr:
       return absl::UnimplementedError("JSIR parsing not supported");
   }
 }
@@ -95,9 +95,9 @@ absl::StatusOr<JsReprPb> JsAstStringRepr::ToProto() const {
   return proto;
 }
 
-absl::StatusOr<JsReprPb> JsHirRepr::ToProto() const {
+absl::StatusOr<JsReprPb> JsirRepr::ToProto() const {
   JsReprPb proto;
-  proto.set_js_hir(mlir::debugString(*op));
+  proto.set_js_ir(mlir::debugString(*op));
   if (source_map.has_value()) {
     proto.set_source_map(*source_map);
   }
