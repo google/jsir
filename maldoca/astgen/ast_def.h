@@ -38,6 +38,12 @@ class FieldDef;
 class NodeDef;
 class AstDef;
 
+// Name of the well-known node that holds a node's source location, comments,
+// and symbol references, and that lowers to the IR's `mlir::Location`
+// attribute. Nodes with `ir_attr_has_loc` get an IR-only `loc` field of this
+// type.
+inline constexpr absl::string_view kTriviaNodeName = "Trivia";
+
 class EnumMemberDef {
  public:
   explicit EnumMemberDef(Symbol name, std::string string_value)
@@ -339,6 +345,10 @@ class NodeDef {
   bool should_generate_ir_attr() const { return should_generate_ir_attr_; }
 
   // Whether this attribute has a "$loc: JsirTriviaAttr" parameter.
+  //
+  // This is sugar for an IR-only `loc` field of type `Trivia`, which is
+  // synthesized in AstDef::FromProto. Prefer in_ir()/aggregated_fields() over
+  // this accessor when generating code.
   bool ir_attr_has_loc() const { return ir_attr_has_loc_; }
 
   // Target representation for code generation of this node.
@@ -355,6 +365,10 @@ class NodeDef {
     return generation_target_ == GENERATION_TARGET_BOTH ||
            generation_target_ == GENERATION_TARGET_IR_ONLY;
   }
+
+  // Whether the generated attribute is a `LocationAttrDef` rather than a plain
+  // `AttrDef`, i.e. a custom `::mlir::LocationAttr` subclass.
+  bool ir_attr_is_location() const { return ir_attr_is_location_; }
 
   // Additional traits/interfaces to add to the AttrDef definition.
   absl::Span<const std::string> additional_attr_traits() const {
@@ -397,6 +411,7 @@ class NodeDef {
   bool should_generate_ir_attr_ = false;
   bool ir_attr_has_loc_ = false;
   GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
+  bool ir_attr_is_location_ = false;
   std::vector<std::string> additional_attr_traits_;
   std::vector<FieldKind> kinds_;
   std::vector<FieldKind> aggregated_kinds_;

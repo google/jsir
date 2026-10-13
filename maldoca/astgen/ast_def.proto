@@ -345,6 +345,10 @@ message NodeDefPb {
 
   // Whether this attribute has an optional trivia/location parameter:
   // "OptionalParameter<"JsirTriviaAttr">: $loc".
+  //
+  // This is sugar: it synthesizes an IR-only `loc` field whose type is the
+  // `Trivia` node, prepended to the node's own fields. Declaring that field
+  // explicitly is equivalent.
   optional bool ir_attr_has_loc = 12 [default = false];
 
   // Additional traits or interfaces to add to the AttrDef definition.
@@ -358,6 +362,13 @@ message NodeDefPb {
   // carries extra bookkeeping that the AST stores elsewhere.
   optional GenerationTarget generation_target = 14
       [default = GENERATION_TARGET_BOTH];
+
+  // If true, the generated attribute is defined with `LocationAttrDef` instead
+  // of `AttrDef`. On top of a plain `AttrDef`, this adds the
+  // `NativeAttrTrait<"IsLocation">` trait and changes the C++ base class to
+  // `::mlir::LocationAttr`, so the attribute can be used as an
+  // `::mlir::Location` on an operation.
+  optional bool ir_attr_is_location = 15 [default = false];
 }
 
 // Definition of a tagged union node type.

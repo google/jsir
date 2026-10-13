@@ -337,6 +337,28 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     } else {
       node->generation_target_ = node_pb.generation_target();
     }
+    node->ir_attr_is_location_ = node_pb.ir_attr_is_location();
+
+    // `ir_attr_has_loc` is sugar for an IR-only `loc` field holding the node's
+    // trivia. Desugaring it here rather than special-casing it in each IR
+    // printer keeps `loc` an ordinary field: it participates in the node
+    // dependency graph (so `Trivia` is emitted before its users) and flows
+    // through the shared argument-printing logic.
+    if (node_pb.ir_attr_has_loc()) {
+      FieldDefPb loc_pb;
+      loc_pb.set_name("loc");
+      loc_pb.set_optionalness(OPTIONALNESS_MAYBE_UNDEFINED);
+      loc_pb.mutable_type()->set_class_(kTriviaNodeName);
+      loc_pb.set_generation_target(GENERATION_TARGET_IR_ONLY);
+      loc_pb.set_ir_attr_optional_parameter(true);
+
+      ABSL_ASSIGN_OR_RETURN(FieldDef loc_field,
+                            FieldDef::FromFieldDefPb(loc_pb, pb.lang_name()));
+
+      // The trivia is conventionally the first attribute parameter.
+      node->fields_.insert(node->fields_.begin(), std::move(loc_field));
+    }
+
     for (const auto& trait : node_pb.additional_attr_traits()) {
       node->additional_attr_traits_.push_back(trait);
     }

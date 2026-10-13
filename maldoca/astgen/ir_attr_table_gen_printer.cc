@@ -132,14 +132,17 @@ void IrAttrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node) {
       {"AttrBaseName", AttrBaseName},
       {"attr_mnemonic", attr_mnemonic.ToCcVarName()},
       {"IrName", IrName},
+      {"AttrDefClass",
+       node.ir_attr_is_location() ? "LocationAttrDef" : "AttrDef"},
   });
 
   if (traits.empty()) {
     Println(
-        "def $AttrName$ : AttrDef<$IrName$_Dialect, \"$AttrBaseName$\", []> {");
+        "def $AttrName$ : $AttrDefClass$<$IrName$_Dialect, \"$AttrBaseName$\", "
+        "[]> {");
   } else {
     Print(
-        "def $AttrName$ : AttrDef<\n"
+        "def $AttrName$ : $AttrDefClass$<\n"
         "    $IrName$_Dialect, \"$AttrBaseName$\", [\n");
     {
       auto indent = WithIndent(8);
@@ -165,44 +168,20 @@ void IrAttrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node) {
       }
     }
 
-    bool has_loc = node.ir_attr_has_loc();
-    bool has_fields = !fields.empty();
-
-    if (has_loc || has_fields) {
-      if (has_loc && !has_fields) {
-        Println("let parameters = (ins");
-        Println("  OptionalParameter<\"$IrName$TriviaAttr\">: $$loc");
-        Println(");");
-      } else if (has_loc && has_fields) {
-        Println("let parameters = (ins");
-        {
-          auto indent2 = WithIndent();
-          Println("OptionalParameter<\"$IrName$TriviaAttr\">: $$loc,");
-          TabPrinter separator_printer{{
-              .print_separator = [&] { Print(",\n"); },
-          }};
-          for (const auto* field : fields) {
-            separator_printer.Print();
-            PrintArgument(ast, *field);
-          }
-          Println();
+    if (!fields.empty()) {
+      Println("let parameters = (ins");
+      {
+        auto indent2 = WithIndent();
+        TabPrinter separator_printer{{
+            .print_separator = [&] { Print(",\n"); },
+        }};
+        for (const auto* field : fields) {
+          separator_printer.Print();
+          PrintArgument(ast, *field);
         }
-        Println(");");
-      } else {
-        Println("let parameters = (ins");
-        {
-          auto indent2 = WithIndent();
-          TabPrinter separator_printer{{
-              .print_separator = [&] { Print(",\n"); },
-          }};
-          for (const auto* field : fields) {
-            separator_printer.Print();
-            PrintArgument(ast, *field);
-          }
-          Println();
-        }
-        Println(");");
+        Println();
       }
+      Println(");");
       Println("let assemblyFormat = \"params\";");
     }
   }

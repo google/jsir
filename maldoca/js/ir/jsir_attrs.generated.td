@@ -70,6 +70,19 @@ def JsirSymbolIdAttr : AttrDef<Jsir_Dialect, "JsirSymbolId", []> {
   let assemblyFormat = "params";
 }
 
+def JsirTriviaAttr : LocationAttrDef<Jsir_Dialect, "JsirTrivia", []> {
+  let mnemonic = "trivia";
+  let parameters = (ins
+    OptionalParameter<"JsirLocationAttr">: $loc,
+    OptionalArrayRefParameter<"int64_t">: $leading_comment_uids,
+    OptionalArrayRefParameter<"int64_t">: $trailing_comment_uids,
+    OptionalArrayRefParameter<"int64_t">: $inner_comment_uids,
+    OptionalParameter<"JsirSymbolIdAttr">: $referenced_symbol,
+    OptionalArrayRefParameter<"JsirSymbolIdAttr">: $defined_symbols
+  );
+  let assemblyFormat = "params";
+}
+
 def JsirInterpreterDirectiveAttr : AttrDef<Jsir_Dialect, "JsirInterpreterDirective", []> {
   let mnemonic = "interpreter_directive";
   let parameters = (ins

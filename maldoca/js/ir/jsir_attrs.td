@@ -31,20 +31,6 @@ def JsirPositionAttr : AttrDef<Jsir_Dialect, "JsirPosition", []> {
   let assemblyFormat = "`<` `L` $line `C` $column `>`";
 }
 
-def JsirTriviaAttr : LocationAttrDef<Jsir_Dialect, "JsirTrivia", []> {
-  let mnemonic = "trivia";
-  let parameters = (
-    ins
-      OptionalParameter<"JsirLocationAttr">: $loc,
-      OptionalArrayRefParameter<"int64_t">: $leading_comment_uids,
-      OptionalArrayRefParameter<"int64_t">: $trailing_comment_uids,
-      OptionalArrayRefParameter<"int64_t">: $inner_comment_uids,
-      OptionalParameter<"JsirSymbolIdAttr">: $referenced_symbol,
-      OptionalArrayRefParameter<"JsirSymbolIdAttr">: $defined_symbols
-  );
-  let assemblyFormat = "params";
-}
-
 // Import the generated attributes.
 include "maldoca/js/ir/jsir_attrs.generated.td"
 
