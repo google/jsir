@@ -170,6 +170,65 @@ enum GenerationTarget {
   GENERATION_TARGET_IR_ONLY = 3;
 }
 
+// How an AST field maps onto the IR op of a node with a handwritten op
+// (`should_generate_ir_op: false`), when the op does not hold the field the way
+// its AST definition implies.
+//
+// Operand, region and attribute names are the op's argument names in TableGen
+// (snake_case), e.g. `computed_key`.
+//
+// For example, an object property's `key` is held by a `computed_key` operand
+// if the key is computed (`{[a]: 1}`), and otherwise by a `literal_key`
+// attribute (`{a: 1}`):
+//
+// ```
+// ir_mapping {
+//   operand: "computed_key"
+//   literal_attr: "literal_key"
+//   literal_attr_types: "Identifier"
+//   literal_attr_types: "StringLiteral"
+// }
+// ```
+message FieldIrMappingPb {
+  // At most one of `operand` and `region` may be set. If neither is set, the
+  // field is held by an operand or region of the same name.
+
+  // The op's operand that holds the field.
+  optional string operand = 1;
+
+  // The op's region that holds the field.
+  optional string region = 2;
+
+  // [Optional] The kind of the op(s) that hold the field, if it is not the
+  // field's kind. E.g. a for-of statement's `left` is a
+  // `VariableDeclaration | LVal`, but its `left_lval` operand holds an LVAL.
+  optional FieldKind kind = 3;
+
+  // [Optional] The op's attribute that holds the field when `operand` is unset.
+  // Requires `operand`.
+  optional string literal_attr = 4;
+
+  // The AST node types whose IR attributes `literal_attr` can hold. Each must
+  // set `should_generate_ir_attr`. Required iff `literal_attr` is set.
+  repeated string literal_attr_types = 5;
+
+  // [Optional] The kind of the op(s) that hold the field in the node's LVAL op
+  // (`*RefOp`), if it is not the same as in the node's other ops. E.g. in
+  // `({a: b} = c)`, the object property's `value` holds an LVAL.
+  optional FieldKind lval_op_kind = 6;
+
+  // [Optional] The AST node types that the field can hold in the node's LVAL
+  // op, if not those of its AST type. E.g. a parenthesized expression's
+  // `expression` is an `Expression`, but in `(a) = 1` it holds an `LVal`.
+  repeated string lval_op_types = 7;
+
+  // [Optional] The members of the field's variant type that the op holds as
+  // LVAL ops, while it holds the other members as ops of the field's kind.
+  // E.g. an export specifier's `local` is an `Identifier | StringLiteral`, but
+  // an `Identifier` lowers to `jsir.identifier_ref`.
+  repeated string lval_member_types = 8;
+}
+
 // Definition of a field in an AST node.
 message FieldDefPb {
   // Name of the field.
@@ -266,6 +325,10 @@ message FieldDefPb {
   // optional class-typed fields are spelled unwrapped, and wrapping them would
   // change the builder APIs of the attributes that already ship.
   optional bool ir_attr_optional_parameter = 7 [default = false];
+
+  // [Optional] How the field maps onto its node's handwritten IR op, if the op
+  // does not hold it in an operand or region of the same name.
+  optional FieldIrMappingPb ir_mapping = 8;
 }
 
 // MLIR traits.
