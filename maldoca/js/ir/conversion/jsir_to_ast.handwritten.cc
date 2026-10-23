@@ -582,10 +582,11 @@ JsirToAst::VisitClassPrivateMethod(JsirClassPrivateMethodOp op) {
 
   std::string kind = op.getKind().str();
   bool static_ = op.getStatic_();
+  std::optional<bool> computed = op.getComputed();
 
   return Create<JsClassPrivateMethod>(
       op, std::move(id), std::move(params), generator, async, std::move(body),
-      std::move(key), std::move(kind), static_, /*computed=*/std::nullopt);
+      std::move(key), std::move(kind), static_, computed);
 }
 
 absl::StatusOr<std::unique_ptr<JsClassProperty>> JsirToAst::VisitClassProperty(
