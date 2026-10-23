@@ -344,6 +344,8 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
 
   virtual R VisitExportSpecifier(const JsExportSpecifier &export_specifier) = 0;
 
+  virtual R VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) = 0;
+
   virtual R VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) = 0;
 
   virtual R VisitExportDefaultDeclaration(const JsExportDefaultDeclaration &export_default_declaration) = 0;
@@ -360,6 +362,8 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitImportNamespaceSpecifier(*import_namespace_specifier);
     } else if (const JsExportSpecifier *export_specifier = dynamic_cast<const JsExportSpecifier *>(module_specifier_ptr)) {
       return VisitExportSpecifier(*export_specifier);
+    } else if (const JsExportNamespaceSpecifier *export_namespace_specifier = dynamic_cast<const JsExportNamespaceSpecifier *>(module_specifier_ptr)) {
+      return VisitExportNamespaceSpecifier(*export_namespace_specifier);
     }
 
     LOG(FATAL) << "Unreachable code.";
@@ -750,6 +754,8 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
 
   virtual R VisitExportSpecifier(JsExportSpecifier &export_specifier) = 0;
 
+  virtual R VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) = 0;
+
   virtual R VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) = 0;
 
   virtual R VisitExportDefaultDeclaration(JsExportDefaultDeclaration &export_default_declaration) = 0;
@@ -766,6 +772,8 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitImportNamespaceSpecifier(*import_namespace_specifier);
     } else if (JsExportSpecifier *export_specifier = dynamic_cast<JsExportSpecifier *>(module_specifier_ptr)) {
       return VisitExportSpecifier(*export_specifier);
+    } else if (JsExportNamespaceSpecifier *export_namespace_specifier = dynamic_cast<JsExportNamespaceSpecifier *>(module_specifier_ptr)) {
+      return VisitExportNamespaceSpecifier(*export_namespace_specifier);
     }
 
     LOG(FATAL) << "Unreachable code.";
@@ -1154,6 +1162,8 @@ class EmptyJsAstVisitor : public JsAstVisitor<void> {
 
   void VisitExportSpecifier(const JsExportSpecifier &export_specifier) override {}
 
+  void VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) override {}
+
   void VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) override {}
 
   void VisitExportDefaultDeclaration(const JsExportDefaultDeclaration &export_default_declaration) override {}
@@ -1330,6 +1340,8 @@ class EmptyMutableJsAstVisitor : public MutableJsAstVisitor<void> {
   void VisitImportDeclaration(JsImportDeclaration &import_declaration) override {}
 
   void VisitExportSpecifier(JsExportSpecifier &export_specifier) override {}
+
+  void VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) override {}
 
   void VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) override {}
 
@@ -1672,6 +1684,10 @@ class DefaultJsAstVisitor : public EmptyJsAstVisitor {
 
   void VisitExportSpecifier(const JsExportSpecifier &export_specifier) override {
     this->VisitNodeDefault(export_specifier);
+  }
+
+  void VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) override {
+    this->VisitNodeDefault(export_namespace_specifier);
   }
 
   void VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) override {
@@ -2024,6 +2040,10 @@ class DefaultMutableJsAstVisitor : public EmptyMutableJsAstVisitor {
 
   void VisitExportSpecifier(JsExportSpecifier &export_specifier) override {
     this->VisitNodeDefault(export_specifier);
+  }
+
+  void VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) override {
+    this->VisitNodeDefault(export_namespace_specifier);
   }
 
   void VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) override {

@@ -3158,6 +3158,41 @@ void JsExportSpecifier::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
+// JsExportNamespaceSpecifier
+// =============================================================================
+
+void JsExportNamespaceSpecifier::SerializeFields(std::ostream& os, bool &needs_comma) const {
+  MaybeAddComma(os, needs_comma);
+  switch (exported_.index()) {
+    case 0: {
+      os << "\"exported\":";
+      std::get<0>(exported_)->Serialize(os);
+      break;
+    }
+    case 1: {
+      os << "\"exported\":";
+      std::get<1>(exported_)->Serialize(os);
+      break;
+    }
+    default:
+      LOG(FATAL) << "Unreachable code.";
+  }
+}
+
+void JsExportNamespaceSpecifier::Serialize(std::ostream& os) const {
+  os << "{";
+  {
+    bool needs_comma = false;
+    MaybeAddComma(os, needs_comma);
+    os << "\"type\":\"ExportNamespaceSpecifier\"";
+    JsNode::SerializeFields(os, needs_comma);
+    JsModuleSpecifier::SerializeFields(os, needs_comma);
+    JsExportNamespaceSpecifier::SerializeFields(os, needs_comma);
+  }
+  os << "}";
+}
+
+// =============================================================================
 // JsExportNamedDeclaration
 // =============================================================================
 
@@ -3175,7 +3210,18 @@ void JsExportNamedDeclaration::SerializeFields(std::ostream& os, bool &needs_com
     bool needs_comma = false;
     for (const auto& element : specifiers_) {
       MaybeAddComma(os, needs_comma);
-      element->Serialize(os);
+      switch (element.index()) {
+        case 0: {
+          std::get<0>(element)->Serialize(os);
+          break;
+        }
+        case 1: {
+          std::get<1>(element)->Serialize(os);
+          break;
+        }
+        default:
+          LOG(FATAL) << "Unreachable code.";
+      }
     }
   }
   os << "]";

@@ -73,9 +73,11 @@ absl::StatusOr<std::optional<T>> GetNullableField(const nlohmann::json& json,
                                                   absl::string_view field_name,
                                                   Converter<T> converter) {
   auto field_it = json.find(field_name);
+  // Babel leaves nullable children it never assigns undefined instead of null
+  // (e.g. `ExportNamedDeclaration.declaration` for `export * as ns from "m"`),
+  // and JSON.stringify drops them. Treat a missing field like null.
   if (field_it == json.end()) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("`", field_name, "` is undefined."));
+    return std::nullopt;
   }
   const nlohmann::json& json_field = field_it.value();
   if (json_field.is_null()) {

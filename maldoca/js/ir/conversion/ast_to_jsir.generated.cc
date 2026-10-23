@@ -1198,6 +1198,23 @@ JsirImportDeclarationOp AstToJsir::VisitImportDeclaration(mlir::OpBuilder &build
   return CreateStmt<JsirImportDeclarationOp>(builder, node, mlir_specifiers, mlir_source, mlir_assertions);
 }
 
+JsirExportNamespaceSpecifierOp AstToJsir::VisitExportNamespaceSpecifier(mlir::OpBuilder &builder, const JsExportNamespaceSpecifier *node) {
+  mlir::Attribute mlir_exported;
+  switch (node->exported().index()) {
+    case 0: {
+      mlir_exported = VisitIdentifierAttr(builder, std::get<0>(node->exported()));
+      break;
+    }
+    case 1: {
+      mlir_exported = VisitStringLiteralAttr(builder, std::get<1>(node->exported()));
+      break;
+    }
+    default:
+      LOG(FATAL) << "Unreachable code.";
+  }
+  return CreateStmt<JsirExportNamespaceSpecifierOp>(builder, node, mlir_exported);
+}
+
 JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuilder &builder, const JsExportNamedDeclaration *node) {
   JsirStringLiteralAttr mlir_source;
   if (node->source().has_value()) {
@@ -1222,7 +1239,18 @@ JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuil
   mlir::Region &mlir_specifiers_region = op.getSpecifiers();
   AppendNewBlockAndPopulate(builder, mlir_specifiers_region, [&] {
     for (const auto &element : *node->specifiers()) {
-      VisitExportSpecifier(builder, element.get());
+      switch (element.index()) {
+        case 0: {
+          VisitExportSpecifier(builder, std::get<0>(element).get());
+          break;
+        }
+        case 1: {
+          VisitExportNamespaceSpecifier(builder, std::get<1>(element).get());
+          break;
+        }
+        default:
+          LOG(FATAL) << "Unreachable code.";
+      }
     }
   });
   return op;

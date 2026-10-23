@@ -1993,6 +1993,23 @@ JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
       std::move(assertions));
 }
 
+absl::StatusOr<std::unique_ptr<JsExportNamespaceSpecifier>>
+JsirToAst::VisitExportNamespaceSpecifier(JsirExportNamespaceSpecifierOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto exported,
+      Convert(
+          op.getExportedAttr(),
+          AttrVariant(
+              ToAttrConverter(VisitIdentifierAttr),
+              ToAttrConverter(VisitStringLiteralAttr)
+          )
+      )
+  );
+  return Create<JsExportNamespaceSpecifier>(
+      op,
+      std::move(exported));
+}
+
 absl::StatusOr<std::unique_ptr<JsExportNamedDeclaration>>
 JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -2012,7 +2029,10 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
           op.getSpecifiers(),
           StmtsRegion(
               List(
-                  ToOpConverter(VisitExportSpecifier)
+                  OpVariant(
+                      ToOpConverter(VisitExportSpecifier),
+                      ToOpConverter(VisitExportNamespaceSpecifier)
+                  )
               )
           )
       )

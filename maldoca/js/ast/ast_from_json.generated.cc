@@ -553,6 +553,8 @@ JsNode::FromJson(const nlohmann::json& json) {
     return JsImportNamespaceSpecifier::FromJson(json);
   } else if (type == "ExportSpecifier") {
     return JsExportSpecifier::FromJson(json);
+  } else if (type == "ExportNamespaceSpecifier") {
+    return JsExportNamespaceSpecifier::FromJson(json);
   } else if (type == "ModuleSpecifier") {
     return JsModuleSpecifier::FromJson(json);
   } else if (type == "ImportAttribute") {
@@ -5993,6 +5995,8 @@ JsModuleSpecifier::FromJson(const nlohmann::json& json) {
     return JsImportNamespaceSpecifier::FromJson(json);
   } else if (type == "ExportSpecifier") {
     return JsExportSpecifier::FromJson(json);
+  } else if (type == "ExportNamespaceSpecifier") {
+    return JsExportNamespaceSpecifier::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -6330,6 +6334,22 @@ JsImportDeclaration::FromJson(const nlohmann::json& json) {
 // JsExportSpecifier
 // =============================================================================
 
+static bool IsExportSpecifier(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return false;
+  }
+  auto type_it = json.find("type");
+  if (type_it == json.end()) {
+    return false;
+  }
+  const nlohmann::json &type_json = type_it.value();
+  if (!type_json.is_string()) {
+    return false;
+  }
+  const std::string &type = type_json.get<std::string>();
+  return type == "ExportSpecifier";
+}
+
 absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>
 JsExportSpecifier::GetExported(const nlohmann::json& json) {
   return GetRequiredField<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>(
@@ -6397,6 +6417,73 @@ JsExportSpecifier::FromJson(const nlohmann::json& json) {
 }
 
 // =============================================================================
+// JsExportNamespaceSpecifier
+// =============================================================================
+
+static bool IsExportNamespaceSpecifier(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return false;
+  }
+  auto type_it = json.find("type");
+  if (type_it == json.end()) {
+    return false;
+  }
+  const nlohmann::json &type_json = type_it.value();
+  if (!type_json.is_string()) {
+    return false;
+  }
+  const std::string &type = type_json.get<std::string>();
+  return type == "ExportNamespaceSpecifier";
+}
+
+absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>
+JsExportNamespaceSpecifier::GetExported(const nlohmann::json& json) {
+  return GetRequiredField<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>>(
+      json,
+      "exported",
+      Variant(
+          VariantOption<std::unique_ptr<JsIdentifier>>{
+              .predicate = IsIdentifier,
+              .converter = JsIdentifier::FromJson,
+          },
+          VariantOption<std::unique_ptr<JsStringLiteral>>{
+              .predicate = IsStringLiteral,
+              .converter = JsStringLiteral::FromJson,
+          })
+  );
+}
+
+absl::StatusOr<std::unique_ptr<JsExportNamespaceSpecifier>>
+JsExportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  ABSL_ASSIGN_OR_RETURN(auto loc, JsNode::GetLoc(json));
+  ABSL_ASSIGN_OR_RETURN(auto start, JsNode::GetStart(json));
+  ABSL_ASSIGN_OR_RETURN(auto end, JsNode::GetEnd(json));
+  ABSL_ASSIGN_OR_RETURN(auto leading_comment_uids, JsNode::GetLeadingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto trailing_comment_uids, JsNode::GetTrailingCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto inner_comment_uids, JsNode::GetInnerCommentUids(json));
+  ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
+  ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
+  ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto exported, JsExportNamespaceSpecifier::GetExported(json));
+
+  return absl::make_unique<JsExportNamespaceSpecifier>(
+      std::move(loc),
+      std::move(start),
+      std::move(end),
+      std::move(leading_comment_uids),
+      std::move(trailing_comment_uids),
+      std::move(inner_comment_uids),
+      std::move(scope_uid),
+      std::move(referenced_symbol),
+      std::move(defined_symbols),
+      std::move(exported));
+}
+
+// =============================================================================
 // JsExportNamedDeclaration
 // =============================================================================
 
@@ -6409,13 +6496,21 @@ JsExportNamedDeclaration::GetDeclaration(const nlohmann::json& json) {
   );
 }
 
-absl::StatusOr<std::vector<std::unique_ptr<JsExportSpecifier>>>
+absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>>
 JsExportNamedDeclaration::GetSpecifiers(const nlohmann::json& json) {
-  return GetRequiredField<std::vector<std::unique_ptr<JsExportSpecifier>>>(
+  return GetRequiredField<std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>>(
       json,
       "specifiers",
-      List<std::unique_ptr<JsExportSpecifier>>(
-          JsExportSpecifier::FromJson
+      List<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>(
+          Variant(
+              VariantOption<std::unique_ptr<JsExportSpecifier>>{
+                  .predicate = IsExportSpecifier,
+                  .converter = JsExportSpecifier::FromJson,
+              },
+              VariantOption<std::unique_ptr<JsExportNamespaceSpecifier>>{
+                  .predicate = IsExportNamespaceSpecifier,
+                  .converter = JsExportNamespaceSpecifier::FromJson,
+              })
       )
   );
 }

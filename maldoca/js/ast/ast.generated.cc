@@ -667,6 +667,8 @@ std::string_view JsNodeTypeToString(JsNodeType node_type) {
       return "ImportNamespaceSpecifier";
     case JsNodeType::kExportSpecifier:
       return "ExportSpecifier";
+    case JsNodeType::kExportNamespaceSpecifier:
+      return "ExportNamespaceSpecifier";
     case JsNodeType::kImportAttribute:
       return "ImportAttribute";
   }
@@ -759,6 +761,7 @@ absl::StatusOr<JsNodeType> StringToJsNodeType(std::string_view s) {
       {"ImportDefaultSpecifier", JsNodeType::kImportDefaultSpecifier},
       {"ImportNamespaceSpecifier", JsNodeType::kImportNamespaceSpecifier},
       {"ExportSpecifier", JsNodeType::kExportSpecifier},
+      {"ExportNamespaceSpecifier", JsNodeType::kExportNamespaceSpecifier},
       {"ImportAttribute", JsNodeType::kImportAttribute},
   };
 
@@ -5380,6 +5383,55 @@ void JsExportSpecifier::set_local(std::optional<std::variant<std::unique_ptr<JsI
 }
 
 // =============================================================================
+// JsExportNamespaceSpecifier
+// =============================================================================
+
+JsExportNamespaceSpecifier::JsExportNamespaceSpecifier(
+    std::optional<std::unique_ptr<JsSourceLocation>> loc,
+    std::optional<int64_t> start,
+    std::optional<int64_t> end,
+    std::optional<std::vector<int64_t>> leading_comment_uids,
+    std::optional<std::vector<int64_t>> trailing_comment_uids,
+    std::optional<std::vector<int64_t>> inner_comment_uids,
+    std::optional<int64_t> scope_uid,
+    std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+      exported_(std::move(exported)) {}
+
+std::variant<JsIdentifier*, JsStringLiteral*> JsExportNamespaceSpecifier::exported() {
+  switch (exported_.index()) {
+    case 0: {
+      return std::get<0>(exported_).get();
+    }
+    case 1: {
+      return std::get<1>(exported_).get();
+    }
+    default:
+      LOG(FATAL) << "Unreachable code.";
+  }
+}
+
+std::variant<const JsIdentifier*, const JsStringLiteral*> JsExportNamespaceSpecifier::exported() const {
+  switch (exported_.index()) {
+    case 0: {
+      return std::get<0>(exported_).get();
+    }
+    case 1: {
+      return std::get<1>(exported_).get();
+    }
+    default:
+      LOG(FATAL) << "Unreachable code.";
+  }
+}
+
+void JsExportNamespaceSpecifier::set_exported(std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported) {
+  exported_ = std::move(exported);
+}
+
+// =============================================================================
 // JsExportNamedDeclaration
 // =============================================================================
 
@@ -5394,7 +5446,7 @@ JsExportNamedDeclaration::JsExportNamedDeclaration(
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
     std::optional<std::unique_ptr<JsDeclaration>> declaration,
-    std::vector<std::unique_ptr<JsExportSpecifier>> specifiers,
+    std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>> specifiers,
     std::optional<std::unique_ptr<JsStringLiteral>> source,
     std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions)
     : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
@@ -5425,15 +5477,15 @@ void JsExportNamedDeclaration::set_declaration(std::optional<std::unique_ptr<JsD
   declaration_ = std::move(declaration);
 }
 
-std::vector<std::unique_ptr<JsExportSpecifier>>* JsExportNamedDeclaration::specifiers() {
+std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>* JsExportNamedDeclaration::specifiers() {
   return &specifiers_;
 }
 
-const std::vector<std::unique_ptr<JsExportSpecifier>>* JsExportNamedDeclaration::specifiers() const {
+const std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>* JsExportNamedDeclaration::specifiers() const {
   return &specifiers_;
 }
 
-void JsExportNamedDeclaration::set_specifiers(std::vector<std::unique_ptr<JsExportSpecifier>> specifiers) {
+void JsExportNamedDeclaration::set_specifiers(std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>> specifiers) {
   specifiers_ = std::move(specifiers);
 }
 
