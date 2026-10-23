@@ -8,6 +8,7 @@
 // JSIR-NEXT:         "jsir.exprs_region_end"(%2) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : () -> ()
 // JSIR-NEXT:     }, {
+// JSIR-NEXT:     }, {
 // JSIR-NEXT:       %0 = "jsir.identifier"() <{name = "i"}> : () -> !jsir.any
 // JSIR-NEXT:       %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "10", 1.000000e+01 : f64>, value = 1.000000e+01 : f64}> : () -> !jsir.any
 // JSIR-NEXT:       %2 = "jsir.binary_expression"(%0, %1) <{operator_ = "<"}> : (!jsir.any, !jsir.any) -> !jsir.any
@@ -56,6 +57,7 @@
 // JSIR-NEXT:                   // State [default = <unknown>] { <i#0 : 0.000000e+00 : f64> }
 // JSIR-NEXT:             })
 // JSIR-NEXT:               // State [default = <unknown>] { <i#0 : 0.000000e+00 : f64> }
+// JSIR-NEXT:         }, {
 // JSIR-NEXT:         }, {
 // JSIR-NEXT:           ^bb0:
 // JSIR-NEXT:               // <executable>

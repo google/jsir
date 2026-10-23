@@ -32,6 +32,7 @@
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -194,7 +195,54 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
         absl::StrCat("Field '", field_pb.name(), "' is not in camelCase."));
   }
 
-  ABSL_ASSIGN_OR_RETURN(field.type_, FromTypePb(field_pb.type(), lang_name));
+  auto field_error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Field '", field_pb.name(), "': ", message));
+  };
+
+  // A field with `alternatives` has the variant of their types. Their IR
+  // settings are checked against the nodes in AstDef::ValidateIrMapping().
+  TypePb type_pb = field_pb.type();
+  if (!field_pb.alternatives().empty()) {
+    if (field_pb.has_type()) {
+      return field_error("Exactly one of type and alternatives can be set.");
+    }
+    if (field_pb.alternatives_size() < 2) {
+      return field_error("alternatives requires at least two alternatives.");
+    }
+    if (field_pb.kind() != FIELD_KIND_UNSPECIFIED) {
+      return field_error(
+          "kind can't be set with alternatives: each alternative has its own "
+          "kind.");
+    }
+    size_t num_ir_names = 0;
+    for (const FieldAlternativePb& alternative_pb : field_pb.alternatives()) {
+      if (!alternative_pb.type().has_class_()) {
+        return field_error("Each alternative's type must be a class.");
+      }
+      *type_pb.mutable_variant()->add_types() = alternative_pb.type();
+      Alternative alternative{.member_name = alternative_pb.type().class_()};
+      if (alternative_pb.has_ir_name()) {
+        if (alternative_pb.ir_name().empty()) {
+          return field_error(absl::StrCat("Alternative \"",
+                                          alternative.member_name,
+                                          "\" has an empty ir_name."));
+        }
+        alternative.ir_name = alternative_pb.ir_name();
+        ++num_ir_names;
+      }
+      if (alternative_pb.has_kind()) {
+        alternative.kind = alternative_pb.kind();
+      }
+      field.alternatives_.push_back(std::move(alternative));
+    }
+    if (num_ir_names != 0 && num_ir_names != field.alternatives_.size()) {
+      return field_error(
+          "Either all alternatives must have an ir_name or none.");
+    }
+  }
+
+  ABSL_ASSIGN_OR_RETURN(field.type_, FromTypePb(type_pb, lang_name));
 
   if (field_pb.optionalness() == OPTIONALNESS_UNSPECIFIED) {
     return absl::InvalidArgumentError(
@@ -212,6 +260,15 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   }
   field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
   field.enclose_in_region_ = field_pb.enclose_in_region();
+  if (field_pb.has_ir_mapping()) {
+    field.ir_mapping_ = field_pb.ir_mapping();
+  }
+
+  if (!field.alternatives_.empty() && !field.in_ir()) {
+    return field_error(
+        "alternatives can't be set on a field that isn't in the IR "
+        "(GENERATION_TARGET_AST_ONLY): use type.");
+  }
 
   return field;
 }
@@ -373,6 +430,18 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     for (auto mlir_trait : node_pb.additional_mlir_traits()) {
       node->additional_mlir_traits_.push_back(
           static_cast<MlirTrait>(mlir_trait));
+    }
+
+    for (auto mlir_trait : node_pb.excluded_mlir_traits()) {
+      node->excluded_mlir_traits_.push_back(static_cast<MlirTrait>(mlir_trait));
+    }
+
+    if (!node_pb.fold_kinds().empty() && !node_pb.has_fold()) {
+      return absl::InvalidArgumentError(
+          absl::StrCat(node_pb.name(), ": fold_kinds requires has_fold."));
+    }
+    for (auto kind : node_pb.fold_kinds()) {
+      node->fold_kinds_.push_back(static_cast<FieldKind>(kind));
     }
 
     node_names.push_back(node_pb.name());
@@ -540,6 +609,9 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     for (MlirTrait trait : node.additional_mlir_traits()) {
       aggregated_additional_mlir_traits.insert(trait);
     }
+    for (MlirTrait trait : node.excluded_mlir_traits_) {
+      aggregated_additional_mlir_traits.erase(trait);
+    }
 
     node.aggregated_additional_mlir_traits_ = {
         aggregated_additional_mlir_traits.begin(),
@@ -605,8 +677,245 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     }
   }
 
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
+    for (FieldDef& field : node.fields_) {
+      ABSL_RETURN_IF_ERROR(ValidateIrMapping(nodes, node, field));
+    }
+  }
+
   return AstDef{pb.lang_name(), std::move(enum_defs), std::move(node_names),
                 std::move(nodes), std::move(topological_sorted_nodes)};
+}
+
+absl::Status AstDef::ValidateIrMapping(
+    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+    NodeDef& node, FieldDef& field) {
+  ABSL_RETURN_IF_ERROR(ResolveAlternatives(nodes, node, field));
+
+  const FieldIrMappingPb* mapping = field.ir_mapping();
+  if (mapping == nullptr) {
+    return absl::OkStatus();
+  }
+
+  auto error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(
+        absl::StrCat(node.name(), "::", field.name().ToCcVarName(),
+                     ": ir_mapping: ", message));
+  };
+
+  auto check_node_names = [&](absl::string_view what,
+                              const auto& names) -> absl::Status {
+    for (const std::string& type_name : names) {
+      if (!nodes.contains(type_name)) {
+        return error(
+            absl::StrCat(what, " \"", type_name, "\" doesn't name a node."));
+      }
+    }
+    return absl::OkStatus();
+  };
+
+  if (mapping->has_operand() && mapping->has_region()) {
+    return error("At most one of operand and region can be set.");
+  }
+  if (mapping->has_literal_attr() && !mapping->has_operand()) {
+    return error("literal_attr requires operand.");
+  }
+  if (mapping->has_literal_attr() != !mapping->literal_attr_types().empty()) {
+    return error("literal_attr_types must be set iff literal_attr is set.");
+  }
+  ABSL_RETURN_IF_ERROR(
+      check_node_names("literal_attr_types", mapping->literal_attr_types()));
+  for (const std::string& type_name : mapping->literal_attr_types()) {
+    if (!nodes.at(type_name)->should_generate_ir_attr()) {
+      return error(absl::StrCat("literal_attr_types \"", type_name,
+                                "\" must have should_generate_ir_attr."));
+    }
+  }
+  ABSL_RETURN_IF_ERROR(
+      check_node_names("lval_op_types", mapping->lval_op_types()));
+
+  if (!field.ir_splits().empty() &&
+      (mapping->has_operand() || mapping->has_region() ||
+       mapping->has_literal_attr() || mapping->has_kind() ||
+       mapping->has_lval_op_kind() || !mapping->lval_op_types().empty())) {
+    return error(
+        "A field split by the ir_names of its alternatives cannot have "
+        "operand, region, literal_attr, kind, lval_op_kind or lval_op_types.");
+  }
+  if (field.has_member_ir_kinds() &&
+      (mapping->has_kind() || mapping->has_lval_op_kind() ||
+       !mapping->lval_op_types().empty() || mapping->has_literal_attr())) {
+    return error(
+        "Alternatives of different kinds cannot be combined with kind, "
+        "lval_op_kind, lval_op_types or literal_attr.");
+  }
+
+  if (mapping->has_literal_unless()) {
+    if (!mapping->has_literal_attr() || !mapping->has_operand()) {
+      return error("literal_unless requires literal_attr and operand.");
+    }
+    if (field.optionalness() != OPTIONALNESS_REQUIRED) {
+      return error("literal_unless requires a required field.");
+    }
+    FieldDef* sibling = nullptr;
+    for (FieldDef& other : node.fields_) {
+      if (other.name().ToCamelCase() == mapping->literal_unless()) {
+        sibling = &other;
+        break;
+      }
+    }
+    if (sibling == nullptr) {
+      return error(absl::StrCat("literal_unless \"", mapping->literal_unless(),
+                                "\" doesn't name a sibling field."));
+    }
+    if (!sibling->type().IsA<BuiltinType>() ||
+        static_cast<const BuiltinType&>(sibling->type()).builtin_kind() !=
+            BuiltinTypeKind::kBool ||
+        sibling->optionalness() != OPTIONALNESS_REQUIRED) {
+      return error(absl::StrCat("literal_unless \"", mapping->literal_unless(),
+                                "\" must name a required bool field."));
+    }
+    sibling->derived_in_ir_ = true;
+  }
+
+  return absl::OkStatus();
+}
+
+absl::Status AstDef::ResolveAlternatives(
+    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+    const NodeDef& node, FieldDef& field) {
+  if (field.alternatives_.empty()) {
+    return absl::OkStatus();
+  }
+
+  auto error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        node.name(), "::", field.name().ToCcVarName(), ": ", message));
+  };
+  auto supports_kind = [&](const NodeDef& member, FieldKind kind) {
+    return absl::c_linear_search(member.aggregated_kinds(), kind);
+  };
+
+  // The kind of each alternative: its `kind` if set, otherwise the one of
+  // FIELD_KIND_STMT, FIELD_KIND_RVAL and FIELD_KIND_LVAL its node supports.
+  std::vector<FieldKind> kinds;
+  for (const FieldDef::Alternative& alternative : field.alternatives_) {
+    auto it = nodes.find(alternative.member_name);
+    if (it == nodes.end()) {
+      return error(absl::StrCat("Alternative \"", alternative.member_name,
+                                "\" doesn't name a node."));
+    }
+    const NodeDef& member = *it->second;
+    if (alternative.kind.has_value()) {
+      FieldKind kind = *alternative.kind;
+      if (kind != FIELD_KIND_STMT && kind != FIELD_KIND_RVAL &&
+          kind != FIELD_KIND_LVAL) {
+        return error(absl::StrCat(
+            "Alternative \"", alternative.member_name, "\" has kind ",
+            FieldKind_Name(kind),
+            ", but must be FIELD_KIND_STMT, FIELD_KIND_RVAL or "
+            "FIELD_KIND_LVAL."));
+      }
+      if (!supports_kind(member, kind)) {
+        return error(absl::StrCat("Alternative \"", alternative.member_name,
+                                  "\" doesn't support kind ",
+                                  FieldKind_Name(kind), "."));
+      }
+      kinds.push_back(kind);
+      continue;
+    }
+    std::vector<FieldKind> supported;
+    for (FieldKind kind :
+         {FIELD_KIND_STMT, FIELD_KIND_RVAL, FIELD_KIND_LVAL}) {
+      if (supports_kind(member, kind)) {
+        supported.push_back(kind);
+      }
+    }
+    if (supported.size() != 1) {
+      std::vector<std::string> names;
+      for (FieldKind kind : supported) {
+        names.push_back(FieldKind_Name(kind));
+      }
+      return error(absl::StrCat(
+          "Alternative \"", alternative.member_name, "\" supports ",
+          names.empty() ? "none" : absl::StrJoin(names, ", "),
+          " of FIELD_KIND_STMT, FIELD_KIND_RVAL and FIELD_KIND_LVAL: set its "
+          "kind."));
+    }
+    kinds.push_back(supported.front());
+  }
+
+  // FieldDef::FromFieldDefPb() checked that either all alternatives have an
+  // ir_name or none does.
+  if (!field.alternatives_.front().ir_name.has_value()) {
+    // Without ir_name, the alternatives are held in the field's operand, as
+    // rvalues or lvalues. This doesn't require the node to have
+    // should_generate_ir_op: it also describes handwritten ops.
+    for (size_t i = 0; i != kinds.size(); ++i) {
+      if (kinds[i] == FIELD_KIND_STMT) {
+        return error(absl::StrCat(
+            "Alternative \"", field.alternatives_[i].member_name,
+            "\" is FIELD_KIND_STMT, which requires ir_names (a statement is "
+            "held in its own region)."));
+      }
+    }
+    if (static_cast<size_t>(absl::c_count(kinds, kinds.front())) ==
+        kinds.size()) {
+      return error(absl::StrCat(
+          "All alternatives are ", FieldKind_Name(kinds.front()),
+          " and have no ir_name: use type and kind instead of alternatives."));
+    }
+    // The field is held as an rvalue, except for its lvalue alternatives.
+    field.kind_ = FIELD_KIND_RVAL;
+    for (size_t i = 0; i != kinds.size(); ++i) {
+      if (kinds[i] == FIELD_KIND_LVAL) {
+        field.member_ir_kinds_[field.alternatives_[i].member_name] =
+            FIELD_KIND_LVAL;
+      }
+    }
+    return absl::OkStatus();
+  }
+
+  if (!node.should_generate_ir_op()) {
+    return error(
+        "Alternatives with ir_names require the node to have "
+        "should_generate_ir_op.");
+  }
+  for (size_t i = 0; i != kinds.size(); ++i) {
+    const FieldDef::Alternative& alternative = field.alternatives_[i];
+    FieldKind kind = kinds[i];
+    // A statement is always held in a region.
+    bool is_region = kind == FIELD_KIND_STMT || field.enclose_in_region();
+
+    auto it = absl::c_find_if(field.ir_splits_, [&](const FieldIrSplitPb& s) {
+      return s.operand() == *alternative.ir_name ||
+             s.region() == *alternative.ir_name;
+    });
+    if (it == field.ir_splits_.end()) {
+      FieldIrSplitPb& split = field.ir_splits_.emplace_back();
+      split.add_types(alternative.member_name);
+      if (is_region) {
+        split.set_region(*alternative.ir_name);
+      } else {
+        split.set_operand(*alternative.ir_name);
+      }
+      split.set_kind(kind);
+      continue;
+    }
+    if (it->kind() != kind || it->has_region() != is_region) {
+      return error(absl::StrCat(
+          "The alternatives with ir_name \"", *alternative.ir_name,
+          "\" must have the same kind and all be held in a region or all in "
+          "an operand, but \"",
+          it->types(0), "\" is ", FieldKind_Name(it->kind()),
+          it->has_region() ? " (region)" : " (operand)", " and \"",
+          alternative.member_name, "\" is ", FieldKind_Name(kind),
+          is_region ? " (region)." : " (operand)."));
+    }
+    it->add_types(alternative.member_name);
+  }
+  return absl::OkStatus();
 }
 
 void AstDef::ResolveClassType(

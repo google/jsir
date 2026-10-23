@@ -170,6 +170,106 @@ enum GenerationTarget {
   GENERATION_TARGET_IR_ONLY = 3;
 }
 
+// Describes how a field maps onto the IR op of its node, when that differs from
+// the default (one argument or region named after the field, holding the
+// field's type with the field's kind).
+message FieldIrMappingPb {
+  // [Optional] Name of the op operand that holds the field, if it differs from
+  // the field name.
+  //
+  // At most one of `operand` and `region` can be set.
+  optional string operand = 1;
+
+  // [Optional] Name of the op region that holds the field, if it differs from
+  // the field name.
+  optional string region = 2;
+
+  // [Optional] Kind of the op(s) holding the field, if it differs from the
+  // field's kind.
+  optional FieldKind kind = 3;
+
+  // [Optional] Name of the op attribute that holds the field when `operand` is
+  // unset. Requires `operand`.
+  //
+  // Example: a static member expression `a.b` holds its property in the
+  // `literal_property` attribute, whereas a computed one `a[b]` holds it in the
+  // `computed_property` operand.
+  optional string literal_attr = 4;
+
+  // The node types that `literal_attr` can hold. Each must name a node with
+  // `should_generate_ir_attr`. Required iff `literal_attr` is set.
+  repeated string literal_attr_types = 5;
+
+  // [Optional] Kind of the field in the node's LVAL (`*RefOp`) op, if it
+  // differs from the field's kind.
+  optional FieldKind lval_op_kind = 6;
+
+  // The types held in the node's LVAL op, if they differ from the field's AST
+  // types.
+  repeated string lval_op_types = 7;
+
+  // Formerly `lval_member_types` and `split`, replaced by
+  // `FieldDefPb.alternatives`: the IR mapping of a variant member is declared
+  // with the member.
+  reserved 8, 9;
+  reserved "lval_member_types", "split";
+
+  // [Optional] Name of a bool sibling field. When that sibling is false, the
+  // field is held as an attribute in `literal_attr` (dispatching on the
+  // member's runtime type over `literal_attr_types`); when it is true, the
+  // field is held as an expression in `operand`.
+  //
+  // The sibling itself is not stored in the IR: converting the IR back to the
+  // AST recomputes it from which of `literal_attr` and `operand` is set.
+  //
+  // Example: `MemberExpression.property` with `literal_unless: "computed"`.
+  // Requires `literal_attr` and `operand`.
+  optional string literal_unless = 10;
+}
+
+// One member of a field's variant type, and how the IR op of the field's node
+// holds it. See FieldDefPb.alternatives.
+message FieldAlternativePb {
+  // The member's type: a scalar type, normally a class.
+  optional ScalarTypePb type = 1;
+
+  // [Optional] Name of the IR operand/region that holds this member. Either
+  // all alternatives of a field set it or none does. Alternatives sharing an
+  // `ir_name` are held in the same operand/region, and must have the same kind.
+  //
+  // Without `ir_name`, all alternatives are held in the field's single
+  // operand/region, as ops of their own kinds.
+  optional string ir_name = 2;
+
+  // [Optional] Kind of the IR op that holds this member. Required if the
+  // member's node supports several of FIELD_KIND_STMT, FIELD_KIND_RVAL and
+  // FIELD_KIND_LVAL (or none); otherwise inferred as the one it supports.
+  optional FieldKind kind = 3;
+}
+
+// A group of variant members of a field split across several IR
+// operands/regions: the alternatives sharing an `ir_name`.
+//
+// This isn't written in textprotos: `FieldDef::ir_splits()` resolves it from
+// the field's `alternatives`.
+message FieldIrSplitPb {
+  // The variant members (node names) routed to this group.
+  repeated string types = 1;
+
+  // Name of the optional op operand that holds these members.
+  //
+  // Exactly one of `operand` and `region` must be set.
+  optional string operand = 2;
+
+  // Name of the optional op region that holds these members: a `StmtRegion`
+  // for FIELD_KIND_STMT, an `ExprRegion` for FIELD_KIND_RVAL/FIELD_KIND_LVAL.
+  optional string region = 3;
+
+  // Kind of these members (FIELD_KIND_STMT, FIELD_KIND_RVAL or
+  // FIELD_KIND_LVAL).
+  optional FieldKind kind = 4;
+}
+
 // Definition of a field in an AST node.
 message FieldDefPb {
   // Name of the field.
@@ -180,10 +280,10 @@ message FieldDefPb {
   // The optionalness of a field - whether it might be null or undefined.
   optional Optionalness optionalness = 2 [default = OPTIONALNESS_REQUIRED];
 
-  // The type of the field.
+  // The type of the field. Exactly one of `type` and `alternatives` is set.
   optional TypePb type = 3;
 
-  // The field kind. E.g. LVAL.
+  // The field kind. E.g. LVAL. Must not be set with `alternatives`.
   optional FieldKind kind = 4 [default = FIELD_KIND_UNSPECIFIED];
 
   // Target representation for code generation of this field.
@@ -266,6 +366,53 @@ message FieldDefPb {
   // optional class-typed fields are spelled unwrapped, and wrapping them would
   // change the builder APIs of the attributes that already ship.
   optional bool ir_attr_optional_parameter = 7 [default = false];
+
+  // [Optional] How the field maps onto its node's IR op, if not the default.
+  optional FieldIrMappingPb ir_mapping = 8;
+
+  // The members of a variant field whose members are held in the IR by
+  // different operands/regions or as ops of different kinds, with how each is
+  // held. Set instead of `type` (and `kind`) only for such fields: the field's
+  // AST type is the variant of the alternatives' types. At least two.
+  //
+  // Each alternative's kind is its `kind` if set, otherwise the one of
+  // FIELD_KIND_STMT, FIELD_KIND_RVAL and FIELD_KIND_LVAL that its node
+  // supports. A FIELD_KIND_STMT alternative is held in a region; another
+  // alternative is held in a region if the field has `enclose_in_region`,
+  // otherwise in an operand.
+  //
+  // - With `ir_name`s, the field is split across one optional operand/region
+  //   per distinct `ir_name`, of which exactly one is set (at most one if the
+  //   field is optional). Example: `ForStatement.init: VariableDeclaration |
+  //   Expression`, where the declaration is a statement and the expression is
+  //   an rvalue:
+  //
+  //   ```
+  //   alternatives {
+  //     type { class: "VariableDeclaration" }
+  //     ir_name: "init_declaration"
+  //   }
+  //   alternatives {
+  //     type { class: "Expression" }
+  //     ir_name: "init_expression"
+  //   }
+  //   enclose_in_region: true
+  //   ```
+  //
+  // - Without `ir_name`s, the field is held in a single operand named after it,
+  //   whose op is an rvalue for some alternatives and an lvalue for the others.
+  //   Example: an Identifier `ExportSpecifier.local` is held by a
+  //   `jsir.identifier_ref` op, but a StringLiteral one by a
+  //   `jsir.string_literal` op:
+  //
+  //   ```
+  //   alternatives {
+  //     type { class: "Identifier" }
+  //     kind: FIELD_KIND_LVAL
+  //   }
+  //   alternatives { type { class: "StringLiteral" } }
+  //   ```
+  repeated FieldAlternativePb alternatives = 9;
 }
 
 // MLIR traits.
@@ -380,6 +527,20 @@ message NodeDefPb {
   // Generated code that models nodes (e.g. Python AST node classes, visitor
   // keys) treats such a class as plain data.
   optional bool is_plain_object = 16 [default = false];
+
+  // MLIR traits that this node's ops must not have, even though an ancestor
+  // adds them via `additional_mlir_traits`.
+  //
+  // Example: `MemberExpression` derives from `Pattern` and `LVal`, which are
+  // `Pure`, but evaluating a member expression may run a getter.
+  repeated MlirTrait excluded_mlir_traits = 17 [packed = true];
+
+  // If non-empty, only the ops of these kinds have a folder. Requires
+  // `has_fold`. If empty, all the node's ops have a folder.
+  //
+  // Example: `MemberExpression` folds its rvalue op, but not its lvalue
+  // (`*RefOp`) op.
+  repeated FieldKind fold_kinds = 18 [packed = true];
 }
 
 // Definition of a tagged union node type.

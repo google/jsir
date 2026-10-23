@@ -15,6 +15,8 @@
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
 
 #include <cstddef>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -24,6 +26,7 @@
 #include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -60,19 +63,18 @@ static Symbol GetVisitor(const NodeDef& node, FieldKind kind) {
 // Gets the name of the *RegionEndOp.
 // - For an lval or rval (expression): <Ir>ExprRegionEndOp.
 // - For a list of lvals or rvals (expressions): <Ir>ExprsRegionEndOp.
-Symbol GetRegionEndOp(const AstDef& ast, const FieldDef& field,
-                      absl::string_view ir_lang) {
+Symbol GetRegionEndOp(FieldKind kind, bool is_list, absl::string_view ir_lang) {
   auto ir_name = Symbol(absl::StrCat(ir_lang, "ir"));
 
   Symbol region_end_op;
-  switch (field.kind()) {
+  switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
     case FIELD_KIND_ATTR:
-      LOG(FATAL) << "Unsupported FieldKind: " << field.kind();
+      LOG(FATAL) << "Unsupported FieldKind: " << kind;
     case FIELD_KIND_RVAL:
     case FIELD_KIND_LVAL: {
-      if (field.type().IsA<ListType>()) {
+      if (is_list) {
         return ir_name + "ExprsRegionEndOp";
       } else {
         return ir_name + "ExprRegionEndOp";
@@ -82,6 +84,27 @@ Symbol GetRegionEndOp(const AstDef& ast, const FieldDef& field,
       return Symbol{};
     }
   }
+}
+
+// The names of the C++ variables holding the arguments of a field, in the
+// order of the op builder's parameters.
+std::vector<Symbol> GetArgumentVariables(const FieldDef& field) {
+  if (FieldIsSplit(&field)) {
+    std::vector<Symbol> variables;
+    for (const FieldIrSplitPb& split : field.ir_splits()) {
+      if (split.has_operand()) {
+        variables.push_back(Symbol("mlir") + Symbol(split.operand()));
+      }
+    }
+    return variables;
+  }
+  if (FieldHasLiteralAttr(&field)) {
+    return {
+        Symbol("mlir") + Symbol(field.ir_mapping()->literal_attr()),
+        Symbol("mlir") + Symbol(field.ir_mapping()->operand()),
+    };
+  }
+  return {Symbol("mlir") + field.name()};
 }
 
 }  // namespace
@@ -289,7 +312,7 @@ void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
 
     for (const auto* field : node.aggregated_fields()) {
       if (FieldIsArgument(field)) {
-        PrintField(ast, node, *field);
+        PrintField(ast, node, *field, kind);
       }
     }
 
@@ -310,12 +333,13 @@ void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
           continue;
         }
 
-        const auto mlir_field_name = (Symbol("mlir") + field->name());
-        auto vars = WithVars({
-            {"mlir_field_name", mlir_field_name.ToCcVarName()},
-        });
+        for (const Symbol& mlir_field_name : GetArgumentVariables(*field)) {
+          auto vars = WithVars({
+              {"mlir_field_name", mlir_field_name.ToCcVarName()},
+          });
 
-        Print(", $mlir_field_name$");
+          Print(", $mlir_field_name$");
+        }
       }
     }
     Println(");");
@@ -323,7 +347,7 @@ void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
     if (has_regions) {
       for (const auto* field : node.aggregated_fields()) {
         if (FieldIsRegion(field)) {
-          PrintRegion(ast, node, *field);
+          PrintRegion(ast, node, *field, kind);
         }
       }
 
@@ -336,18 +360,280 @@ void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
 }
 
 void AstToIrSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
-                                      const FieldDef& field) {
+                                      const FieldDef& field,
+                                      FieldKind op_kind) {
+  if (FieldIsSplit(&field)) {
+    return PrintSplitField(ast, field, /*regions=*/false);
+  }
+  if (FieldHasLiteralAttr(&field)) {
+    return PrintLiteralAttrField(ast, node, field, op_kind);
+  }
+
   MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
+  FieldKind kind = FieldIrKind(field, op_kind);
 
   auto lhs = Symbol("mlir") + field.name();
   auto rhs = absl::StrCat("node->", field.name().ToCcVarName(), "()");
+
+  if (std::unique_ptr<Type> narrowed = NarrowedIrType(ast, field, op_kind)) {
+    // The op holds a narrower type than the AST field, e.g. only the
+    // `Pattern` members of `Expression | Pattern` in an LVAL op. Downcast the
+    // field value to it.
+    CHECK(maybe_null == MaybeNull::kNo)
+        << field.name().ToCcVarName()
+        << ": Narrowed IR types are only supported for required fields.";
+    const auto& narrowed_class = static_cast<const ClassType&>(*narrowed);
+    auto narrowed_rhs = (field.name() + "ir").ToCcVarName();
+    auto vars = WithVars({
+        {"NarrowedType", narrowed_class.CcClassName()},
+        {"narrowed_rhs", narrowed_rhs},
+        {"rhs", rhs},
+        {"field", field.name().ToCcVarName()},
+    });
+    if (field.type().IsA<VariantType>()) {
+      Println(
+          "const $NarrowedType$ *$narrowed_rhs$ = std::visit([](const auto "
+          "*value) { return dynamic_cast<const $NarrowedType$ *>(value); }, "
+          "$rhs$);");
+    } else {
+      Println(
+          "const $NarrowedType$ *$narrowed_rhs$ = dynamic_cast<const "
+          "$NarrowedType$ *>($rhs$);");
+    }
+    Println(
+        "CHECK($narrowed_rhs$ != nullptr) << \"$field$ must be a "
+        "$NarrowedType$.\";");
+    PrintToIr(ast, Action::kDef, *narrowed, RefOrVal::kRef, kind, lhs,
+              narrowed_rhs);
+    return;
+  }
+
   PrintNullableToIr(ast, Action::kDef, field.type(), maybe_null, RefOrVal::kRef,
-                    field.kind(), lhs, rhs);
+                    kind, lhs, rhs);
+}
+
+void AstToIrSourcePrinter::PrintLiteralAttrField(const AstDef& ast,
+                                                 const NodeDef& node,
+                                                 const FieldDef& field,
+                                                 FieldKind op_kind) {
+  const FieldIrMappingPb& mapping = *field.ir_mapping();
+
+  auto literal_lhs = Symbol("mlir") + Symbol(mapping.literal_attr());
+  auto operand_lhs = Symbol("mlir") + Symbol(mapping.operand());
+  auto rhs = absl::StrCat("node->", field.name().ToCcVarName(), "()");
+
+  auto vars = WithVars({
+      {"literal_lhs", literal_lhs.ToCcVarName()},
+      {"operand_lhs", operand_lhs.ToCcVarName()},
+      {"rhs", rhs},
+      {"field", field.name().ToCcVarName()},
+  });
+
+  Println("mlir::Attribute $literal_lhs$;");
+  Println("mlir::Value $operand_lhs$;");
+
+  if (mapping.has_literal_unless()) {
+    auto vars = WithVars({
+        {"literal_unless", Symbol(mapping.literal_unless()).ToCcVarName()},
+    });
+    Println("if (!node->$literal_unless$()) {");
+  } else {
+    LOG(FATAL) << field.name().ToCcVarName()
+               << ": literal_attr without literal_unless is not supported.";
+  }
+  {
+    auto indent = WithIndent();
+    IfStmtPrinter if_printer(this);
+    for (const std::string& type_name : mapping.literal_attr_types()) {
+      bool exact = false;
+      std::optional<size_t> member =
+          FindMemberHolding(ast, field.type(), type_name, &exact);
+      CHECK(member.has_value())
+          << field.name().ToCcVarName() << ": literal_attr_types \""
+          << type_name << "\" isn't held by any member of the field.";
+
+      std::string member_rhs = rhs;
+      if (field.type().IsA<VariantType>()) {
+        member_rhs = absl::StrFormat("std::get<%zu>(%s)", *member, rhs);
+      }
+      std::string literal_rhs;
+      std::string condition;
+      std::string type_class =
+          (Symbol(ast.lang_name()) + type_name).ToPascalCase();
+      auto literal_var = (field.name() + Symbol(type_name)).ToCcVarName();
+      if (field.type().IsA<VariantType>()) {
+        condition = absl::StrFormat(
+            "const auto *%s = %s.index() == %zu ? %s : nullptr", literal_var,
+            rhs, *member,
+            exact ? member_rhs
+                  : absl::StrFormat("dynamic_cast<const %s *>(%s)", type_class,
+                                    member_rhs));
+      } else {
+        condition = absl::StrFormat(
+            "const auto *%s = %s", literal_var,
+            exact ? member_rhs
+                  : absl::StrFormat("dynamic_cast<const %s *>(%s)", type_class,
+                                    member_rhs));
+      }
+
+      ClassType literal_type{Symbol(type_name), ast.lang_name()};
+      if_printer.PrintCase({
+          [&] { Print(condition); },
+          [&] {
+            PrintClassToIr(ast, Action::kAssign, literal_type, FIELD_KIND_ATTR,
+                           literal_lhs, literal_var);
+          },
+      });
+    }
+    Println(" else {");
+    {
+      auto indent = WithIndent();
+      std::vector<std::string> type_names{mapping.literal_attr_types().begin(),
+                                          mapping.literal_attr_types().end()};
+      auto vars = WithVars({
+          {"literal_unless", Symbol(mapping.literal_unless()).ToCcVarName()},
+          {"literal_types", absl::StrJoin(type_names, " or ")},
+      });
+      Println(
+          "LOG(FATAL) << \"If $literal_unless$ is false, $field$ must be "
+          "$literal_types$.\";");
+    }
+    Println("}");
+  }
+  Println("} else {");
+  {
+    auto indent = WithIndent();
+    PrintToIr(ast, Action::kAssign, field.type(), RefOrVal::kRef,
+              FieldIrKind(field, op_kind), operand_lhs, rhs);
+  }
+  Println("}");
+}
+
+void AstToIrSourcePrinter::PrintSplitField(const AstDef& ast,
+                                           const FieldDef& field,
+                                           bool regions) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  absl::Span<const FieldIrSplitPb> splits = field.ir_splits();
+  const auto& variant = static_cast<const VariantType&>(field.type());
+  MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
+
+  // Finds the split holding a variant member.
+  auto find_split = [&](const ScalarType& member) -> const FieldIrSplitPb& {
+    std::string member_name =
+        static_cast<const ClassType&>(member).name().ToPascalCase();
+    for (const FieldIrSplitPb& split : splits) {
+      if (absl::c_linear_search(split.types(), member_name)) {
+        return split;
+      }
+    }
+    LOG(FATAL) << field.name().ToCcVarName() << ": variant member "
+               << member_name << " isn't covered by any split.";
+  };
+
+  if (!regions) {
+    // The operands are defined before the op is created.
+    for (const FieldIrSplitPb& split : splits) {
+      if (split.has_operand()) {
+        auto vars = WithVars({
+            {"lhs", (Symbol("mlir") + Symbol(split.operand())).ToCcVarName()},
+        });
+        Println("mlir::Value $lhs$;");
+      }
+    }
+  }
+
+  bool has_any = absl::c_any_of(splits, [&](const auto& split) {
+    return regions ? split.has_region() : split.has_operand();
+  });
+  if (!has_any) {
+    return;
+  }
+
+  auto rhs = absl::StrCat("node->", field.name().ToCcVarName(), "()");
+  auto print_switch = [&](const std::string& rhs) {
+    auto vars = WithVars({{"rhs", rhs}});
+    Println("switch ($rhs$.index()) {");
+    {
+      auto indent = WithIndent();
+      for (size_t i = 0; i != variant.types().size(); ++i) {
+        const ScalarType& member = *variant.types()[i];
+        const FieldIrSplitPb& split = find_split(member);
+        if (regions ? !split.has_region() : !split.has_operand()) {
+          continue;
+        }
+
+        auto member_rhs = absl::StrFormat("std::get<%zu>(%s)", i, rhs);
+        auto vars = WithVars({{"i", std::to_string(i)}});
+        Println("case $i$: {");
+        {
+          auto indent = WithIndent();
+          if (!regions) {
+            PrintToIr(ast, Action::kAssign, member, RefOrVal::kRef,
+                      split.kind(), Symbol("mlir") + Symbol(split.operand()),
+                      member_rhs);
+          } else {
+            auto lhs = Symbol("mlir") + Symbol(split.region());
+            auto vars = WithVars({
+                {"lhs", lhs.ToCcVarName()},
+                {"lhs_region", (lhs + "region").ToCcVarName()},
+                {"mlirGetter", Symbol(split.region()).ToMlirGetter()},
+                {"RegionEndOp",
+                 GetRegionEndOp(split.kind(), /*is_list=*/false, ir_lang)
+                     .ToPascalCase()},
+            });
+            Println("mlir::Region &$lhs_region$ = op.$mlirGetter$();");
+            Println("AppendNewBlockAndPopulate(builder, $lhs_region$, [&] {");
+            {
+              auto indent = WithIndent();
+              if (split.kind() == FIELD_KIND_STMT) {
+                PrintToIr(ast, Action::kCreate, member, RefOrVal::kRef,
+                          split.kind(), lhs, member_rhs);
+              } else {
+                PrintToIr(ast, Action::kDef, member, RefOrVal::kRef,
+                          split.kind(), lhs, member_rhs);
+                Println("CreateStmt<$RegionEndOp$>(builder, nullptr, $lhs$);");
+              }
+            }
+            Println("});");
+          }
+          Println("break;");
+        }
+        Println("}");
+      }
+      Println("default:");
+      Println("  break;");
+    }
+    Println("}");
+  };
+
+  switch (maybe_null) {
+    case MaybeNull::kYes: {
+      auto vars = WithVars({{"rhs", rhs}});
+      Println("if ($rhs$.has_value()) {");
+      {
+        auto indent = WithIndent();
+        print_switch(absl::StrCat(rhs, ".value()"));
+      }
+      Println("}");
+      break;
+    }
+    case MaybeNull::kNo:
+      print_switch(rhs);
+      break;
+  }
 }
 
 void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
-                                       const FieldDef& field) {
+                                       const FieldDef& field,
+                                       FieldKind op_kind) {
+  if (FieldIsSplit(&field)) {
+    return PrintSplitField(ast, field, /*regions=*/true);
+  }
+
   MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
+  FieldKind kind = FieldIrKind(field, op_kind);
 
   auto lhs = Symbol("mlir") + field.name();
   auto lhs_region = lhs + "region";
@@ -360,7 +646,7 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
   auto vars = WithVars({
       {"lhs", lhs.ToCcVarName()},
       {"lhs_region", lhs_region.ToCcVarName()},
-      {"mlirGetter", field.name().ToMlirGetter()},
+      {"mlirGetter", FieldIrName(field).ToMlirGetter()},
       {"rhs", rhs},
   });
 
@@ -371,11 +657,11 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
       auto indent = WithIndent();
 
       Action action = [&] {
-        switch (field.kind()) {
+        switch (kind) {
           case FIELD_KIND_UNSPECIFIED:
             LOG(FATAL) << "Unspecified FieldKind.";
           case FIELD_KIND_ATTR:
-            LOG(FATAL) << "Unsupported FieldKind: " << field.kind();
+            LOG(FATAL) << "Unsupported FieldKind: " << kind;
           case FIELD_KIND_RVAL:
           case FIELD_KIND_LVAL: {
             return Action::kDef;
@@ -386,9 +672,9 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
         }
       }();
 
-      Symbol region_end_op = GetRegionEndOp(ast, field, ir_lang);
-      PrintToIr(ast, action, field.type(), RefOrVal::kRef, field.kind(), lhs,
-                rhs);
+      Symbol region_end_op =
+          GetRegionEndOp(kind, field.type().IsA<ListType>(), ir_lang);
+      PrintToIr(ast, action, field.type(), RefOrVal::kRef, kind, lhs, rhs);
 
       auto vars = WithVars({
           {"RegionEndOp", region_end_op.ToPascalCase()},

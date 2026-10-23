@@ -1,0 +1,197 @@
+# proto-file: maldoca/astgen/ast_def.proto
+# proto-message: AstDefPb
+
+# Tests fields whose IR representation is not a single argument/region:
+#
+# - `alternatives` with `ir_name`s: a variant field whose members have
+#   different kinds is split into one operand/region per `ir_name`.
+#
+# - `literal_unless`: a field is held in a literal attribute or in an operand,
+#   depending on a bool sibling field that is not stored in the IR.
+#
+# - Narrowed variant fields: a variant field held as an rvalue/lvalue only holds
+#   the members that support that kind.
+
+lang_name: "s"
+
+# interface Expression {}
+nodes {
+  name: "Expression"
+  kinds: FIELD_KIND_RVAL
+}
+
+# interface Pattern {}
+nodes {
+  name: "Pattern"
+  kinds: FIELD_KIND_LVAL
+}
+
+# interface Statement {}
+nodes {
+  name: "Statement"
+  kinds: FIELD_KIND_STMT
+}
+
+# interface Identifier <: Expression, Pattern {
+#   name: string
+# }
+nodes {
+  name: "Identifier"
+  type: "Identifier"
+  parents: "Expression"
+  parents: "Pattern"
+  fields {
+    name: "name"
+    type { string {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+  should_generate_ir_attr: true
+}
+
+# interface Call <: Expression {
+#   callee: Expression
+# }
+nodes {
+  name: "Call"
+  type: "Call"
+  parents: "Expression"
+  fields {
+    name: "callee"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface Declaration <: Statement {
+#   id: Identifier
+# }
+nodes {
+  name: "Declaration"
+  type: "Declaration"
+  parents: "Statement"
+  fields {
+    name: "id"
+    type { class: "Identifier" }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface ExpressionStatement <: Statement {
+#   expression: Expression
+# }
+nodes {
+  name: "ExpressionStatement"
+  type: "ExpressionStatement"
+  parents: "Statement"
+  fields {
+    name: "expression"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  should_generate_ir_op: true
+}
+
+# interface Member <: Expression {
+#   object: Expression
+#   property: Expression
+#   computed: boolean
+# }
+#
+# - `a.b`:  `computed` is false, and `property` is held in `literal_property`.
+# - `a[b]`: `computed` is true, and `property` is held in `computed_property`.
+nodes {
+  name: "Member"
+  type: "Member"
+  parents: "Expression"
+  fields {
+    name: "object"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+  }
+  fields {
+    name: "property"
+    type { class: "Expression" }
+    kind: FIELD_KIND_RVAL
+    ir_mapping {
+      operand: "computed_property"
+      literal_attr: "literal_property"
+      literal_attr_types: "Identifier"
+      literal_unless: "computed"
+    }
+  }
+  fields {
+    name: "computed"
+    type { bool {} }
+    kind: FIELD_KIND_ATTR
+  }
+  should_generate_ir_op: true
+}
+
+# interface Property {
+#   value: Expression | Pattern
+# }
+#
+# The rvalue op holds an `Expression`; the lvalue op holds a `Pattern`.
+nodes {
+  name: "Property"
+  type: "Property"
+  fields {
+    name: "value"
+    type {
+      variant {
+        types { class: "Expression" }
+        types { class: "Pattern" }
+      }
+    }
+    kind: FIELD_KIND_RVAL
+    ir_mapping { lval_op_kind: FIELD_KIND_LVAL }
+  }
+  kinds: FIELD_KIND_RVAL
+  kinds: FIELD_KIND_LVAL
+  should_generate_ir_op: true
+}
+
+# interface Loop <: Statement {
+#   init: Declaration | Expression | null
+#   left: Declaration | Pattern
+#   body: Statement
+# }
+nodes {
+  name: "Loop"
+  type: "Loop"
+  parents: "Statement"
+  fields {
+    name: "init"
+    optionalness: OPTIONALNESS_MAYBE_NULL
+    alternatives {
+      type { class: "Declaration" }
+      ir_name: "init_declaration"
+    }
+    alternatives {
+      type { class: "Expression" }
+      ir_name: "init_expression"
+    }
+    enclose_in_region: true
+  }
+  fields {
+    name: "left"
+    alternatives {
+      type { class: "Declaration" }
+      ir_name: "left_declaration"
+    }
+    alternatives {
+      type { class: "Pattern" }
+      ir_name: "left_pattern"
+    }
+  }
+  fields {
+    name: "body"
+    type { class: "Statement" }
+    kind: FIELD_KIND_STMT
+    enclose_in_region: true
+  }
+  should_generate_ir_op: true
+}

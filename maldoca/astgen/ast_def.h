@@ -21,9 +21,11 @@
 #include <utility>
 #include <vector>
 
+#include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/log/log.h"
+#include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
@@ -107,7 +109,53 @@ class FieldDef {
     return ir_attr_optional_parameter_;
   }
 
+  // How the field maps onto its node's IR op, or nullptr if it uses the
+  // default mapping. See FieldIrMappingPb.
+  const FieldIrMappingPb* ir_mapping() const {
+    return ir_mapping_.has_value() ? &*ir_mapping_ : nullptr;
+  }
+
+  // Whether the field is left out of the IR because it is recomputed from how
+  // another field is represented, i.e. whether a sibling field's
+  // `ir_mapping.literal_unless` names it.
+  //
+  // Example: `MemberExpression.computed` is true iff the IR holds `property`
+  // in the `computed_property` operand rather than the `literal_property`
+  // attribute.
+  bool derived_in_ir() const { return derived_in_ir_; }
+
+  // If the field's `alternatives` have `ir_name`s, the field is split across
+  // several IR operands/regions: one group of alternatives per distinct
+  // `ir_name`, in the order the names first appear (see
+  // FieldDefPb.alternatives). Empty otherwise.
+  //
+  // Resolved by AstDef::FromProto(), which infers the kind of each group.
+  absl::Span<const FieldIrSplitPb> ir_splits() const { return ir_splits_; }
+
+  // For a field with `alternatives` without `ir_name`s, the kind of the IR op
+  // holding the variant member `member_name` if it differs from the field's
+  // kind (FIELD_KIND_LVAL for an lvalue alternative of the FIELD_KIND_RVAL
+  // field), or nullopt.
+  std::optional<FieldKind> member_ir_kind(absl::string_view member_name) const {
+    auto it = member_ir_kinds_.find(member_name);
+    if (it == member_ir_kinds_.end()) {
+      return std::nullopt;
+    }
+    return it->second;
+  }
+
+  // Whether member_ir_kind() is set for some variant member.
+  bool has_member_ir_kinds() const { return !member_ir_kinds_.empty(); }
+
  private:
+  // An alternative of the field (see FieldAlternativePb).
+  struct Alternative {
+    // The member's class name.
+    std::string member_name;
+    std::optional<std::string> ir_name;
+    std::optional<FieldKind> kind;
+  };
+
   // Only allows creation from proto.
   FieldDef() = default;
 
@@ -118,6 +166,17 @@ class FieldDef {
   GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
   bool enclose_in_region_;
   bool ir_attr_optional_parameter_ = false;
+  std::optional<FieldIrMappingPb> ir_mapping_;
+  bool derived_in_ir_ = false;
+
+  // As declared in the proto (empty if the field has a `type`).
+  std::vector<Alternative> alternatives_;
+
+  // Resolved from `alternatives_` by AstDef::ValidateIrMapping().
+  std::vector<FieldIrSplitPb> ir_splits_;
+  absl::flat_hash_map<std::string, FieldKind> member_ir_kinds_;
+
+  friend class AstDef;
 };
 
 // Definition of an AST node type.
@@ -341,6 +400,12 @@ class NodeDef {
 
   bool has_fold() const { return has_fold_; }
 
+  // Whether the op of `kind` has a folder. See NodeDefPb::fold_kinds.
+  bool has_fold(FieldKind kind) const {
+    return has_fold_ &&
+           (fold_kinds_.empty() || absl::c_linear_search(fold_kinds_, kind));
+  }
+
   // Whether an IR attribute should be automatically generated.
   bool should_generate_ir_attr() const { return should_generate_ir_attr_; }
 
@@ -393,7 +458,8 @@ class NodeDef {
   }
 
   // Additional MLIR traits to add to the op definition in ODS, including those
-  // from ancestors.
+  // from ancestors, minus the node's excluded ones (see
+  // NodeDefPb::excluded_mlir_traits).
   absl::Span<const MlirTrait> aggregated_additional_mlir_traits() const {
     return aggregated_additional_mlir_traits_;
   }
@@ -427,7 +493,9 @@ class NodeDef {
   absl::flat_hash_map<std::string, DispatchOverride> dispatch_overrides_;
   absl::flat_hash_set<std::string> dispatch_skip_;
   bool has_fold_;
+  std::vector<FieldKind> fold_kinds_;
   std::vector<MlirTrait> additional_mlir_traits_;
+  std::vector<MlirTrait> excluded_mlir_traits_;
   std::vector<MlirTrait> aggregated_additional_mlir_traits_;
 
   friend class AstDef;
@@ -485,6 +553,19 @@ class AstDef {
 
   static void ResolveClassType(
       Type& type, absl::Span<const NodeDef* const> topological_sorted_nodes);
+
+  // Validates `field.ir_mapping()` and the field's `alternatives` against the
+  // rest of `node`. Resolves the field's ir_splits() and member_ir_kind()s,
+  // and marks the field named by `literal_unless` (if any) as derived_in_ir().
+  static absl::Status ValidateIrMapping(
+      const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+      NodeDef& node, FieldDef& field);
+
+  // Infers the kinds of the field's `alternatives`, validates them, and
+  // resolves the field's ir_splits() and member_ir_kind()s.
+  static absl::Status ResolveAlternatives(
+      const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+      const NodeDef& node, FieldDef& field);
 };
 
 }  // namespace maldoca

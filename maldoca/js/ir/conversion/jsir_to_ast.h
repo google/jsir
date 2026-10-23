@@ -113,19 +113,6 @@ class JsirToAst {
   static absl::StatusOr<std::unique_ptr<JsDeclaration>> VisitDeclaration(
       JsirDeclarationOpInterface op);
 
-  struct JsForInOfStatementFields {
-    std::variant<std::unique_ptr<JsVariableDeclaration>,
-                 std::unique_ptr<JsLVal>>
-        left;
-    std::unique_ptr<JsExpression> right;
-    std::unique_ptr<JsStatement> body;
-  };
-
-  static absl::StatusOr<JsForInOfStatementFields> VisitForInOfStatement(
-      std::optional<JsirForInOfDeclarationAttr> left_declaration,
-      mlir::Value left_lval, mlir::Value left_init, mlir::Value right,
-      mlir::Region& body_region);
-
   static absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
       JsirCommentAttrInterface attr);
 
@@ -169,28 +156,6 @@ class JsirToAst {
 
     return statements;
   }
-
-  struct ObjectPropertyKey {
-    std::unique_ptr<JsExpression> key;
-    bool computed;
-  };
-
-  static absl::StatusOr<ObjectPropertyKey> GetObjectPropertyKey(
-      mlir::Value computed_key, std::optional<mlir::Attribute> literal_key);
-
-  struct MemberExpressionProperty {
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>
-        property;
-    bool computed;
-  };
-
-  static absl::StatusOr<MemberExpressionProperty> GetMemberExpressionProperty(
-      mlir::Value computed_property,
-      std::optional<mlir::Attribute> literal_property);
-
-  static absl::StatusOr<
-      std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>>>
-      GetMemberExpressionObject(mlir::Value);
 
   static absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>,
                                      std::unique_ptr<JsStringLiteral>>>
@@ -280,26 +245,6 @@ class JsirToAst {
     }
     mlir::Block& block = region.front();
     return &block;
-  }
-
-  template <typename Stmt, typename StmtOp, typename Expr, typename ExprOp>
-  static absl::StatusOr<
-      std::variant<std::unique_ptr<Stmt>, std::unique_ptr<Expr>>>
-  VisitStmtOrExprRegion(mlir::Region& region,
-                        VisitFunc<Stmt, StmtOp> visit_stmt,
-                        VisitFunc<Expr, ExprOp> visit_expr) {
-    ABSL_ASSIGN_OR_RETURN(auto mlir_end, GetStmtRegionOperation(region));
-    if (auto mlir_stmt_op = llvm::dyn_cast<StmtOp>(mlir_end)) {
-      return visit_stmt(mlir_stmt_op);
-    } else if (auto mlir_end_op =
-                   llvm::dyn_cast<JsirExprRegionEndOp>(mlir_end)) {
-      auto mlir_expr_value = mlir_end_op.getArgument();
-      auto mlir_expr_op =
-          llvm::dyn_cast<ExprOp>(mlir_expr_value.getDefiningOp());
-      return visit_expr(mlir_expr_op);
-    } else {
-      return absl::InvalidArgumentError("Invalid op type.");
-    }
   }
 };
 
