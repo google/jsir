@@ -592,9 +592,13 @@ JsirClassPrivateMethodOp AstToJsir::VisitClassPrivateMethod(
   JsirPrivateNameAttr mlir_key = VisitPrivateNameAttr(builder, node->key());
   mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
   mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
+  mlir::BoolAttr mlir_computed;
+  if (node->computed().has_value()) {
+    mlir_computed = builder.getBoolAttr(node->computed().value());
+  }
   auto op = CreateStmt<JsirClassPrivateMethodOp>(
       builder, node, mlir_id, mlir_generator, mlir_async, mlir_key, mlir_kind,
-      mlir_static);
+      mlir_static, mlir_computed);
   mlir::Region& mlir_params_region = op.getParams();
   AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
     std::vector<mlir::Value> mlir_params;
