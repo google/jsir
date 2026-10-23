@@ -154,8 +154,8 @@ std::optional<mlir::Attribute> QuickJsValueToMlirAttribute(
     absl::Cleanup cleanup_cstr = [&] { JS_FreeCString(qjs_context, cstr); };
 
     std::string s{cstr, len};
-    return builder.getAttr<JsirBigIntLiteralAttr>(builder.getStringAttr(s),
-                                                  /*extra=*/nullptr);
+    return builder.getAttr<JsirBigIntLiteralAttr>(
+        /*loc=*/nullptr, builder.getStringAttr(s), /*extra=*/nullptr);
   }
 
   return std::nullopt;
@@ -343,7 +343,8 @@ mlir::OpFoldResult JsirNumericLiteralOp::fold(FoldAdaptor adaptor) {
 
 mlir::OpFoldResult JsirBigIntLiteralOp::fold(FoldAdaptor adaptor) {
   mlir::Builder builder(getContext());
-  return builder.getAttr<JsirBigIntLiteralAttr>(getValueAttr(), getExtraAttr());
+  return builder.getAttr<JsirBigIntLiteralAttr>(/*loc=*/nullptr, getValueAttr(),
+                                                getExtraAttr());
 }
 
 mlir::OpFoldResult JsirParenthesizedExpressionOp::fold(FoldAdaptor adaptor) {

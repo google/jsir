@@ -54,6 +54,7 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::Attribute attr) {
   return llvm::TypeSwitch<mlir::Attribute, JsirTriviaAttr>(attr)
       .Case([&](JsirStringLiteralAttr attr) { return attr.getLoc(); })
       .Case([&](JsirNumericLiteralAttr attr) { return attr.getLoc(); })
+      .Case([&](JsirBigIntLiteralAttr attr) { return attr.getLoc(); })
       .Case([&](JsirIdentifierAttr attr) { return attr.getLoc(); })
       .Case([&](JsirPrivateNameAttr attr) { return attr.getLoc(); })
       .Case([&](JsirImportSpecifierAttr attr) { return attr.getLoc(); })

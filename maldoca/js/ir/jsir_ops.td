@@ -348,7 +348,10 @@ def JsirClassPrivateMethodOp : Jsir_Op<
     BoolAttr: $async,
     JsirPrivateNameAttr: $key,
     StrAttr: $kind,
-    BoolAttr: $static_
+    BoolAttr: $static_,
+    // Babel always emits `false` here; it is kept so the lifted AST matches
+    // the parsed one field for field.
+    OptionalAttr<BoolAttr>: $computed
   );
 
   let regions = (region
