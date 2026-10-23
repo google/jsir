@@ -1256,6 +1256,25 @@ class JsAstWalker : public JsAstVisitor<void> {
     }
   }
 
+  void VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) override {
+    if (preorder_callback_) {
+      preorder_callback_->VisitExportNamespaceSpecifier(export_namespace_specifier);
+    }
+    switch (export_namespace_specifier.exported().index()) {
+      case 0:
+        VisitIdentifier(*std::get<0>(export_namespace_specifier.exported()));
+        break;
+      case 1:
+        VisitStringLiteral(*std::get<1>(export_namespace_specifier.exported()));
+        break;
+      default:
+        LOG(FATAL) << "Unreachable code.";
+    }
+    if (postorder_callback_) {
+      postorder_callback_->VisitExportNamespaceSpecifier(export_namespace_specifier);
+    }
+  }
+
   void VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) override {
     if (preorder_callback_) {
       preorder_callback_->VisitExportNamedDeclaration(export_named_declaration);
@@ -1264,7 +1283,16 @@ class JsAstWalker : public JsAstVisitor<void> {
       VisitDeclaration(*export_named_declaration.declaration().value());
     }
     for (const auto &elem : *export_named_declaration.specifiers()) {
-      VisitExportSpecifier(*elem);
+      switch (elem.index()) {
+        case 0:
+          VisitExportSpecifier(*std::get<0>(elem));
+          break;
+        case 1:
+          VisitExportNamespaceSpecifier(*std::get<1>(elem));
+          break;
+        default:
+          LOG(FATAL) << "Unreachable code.";
+      }
     }
     if (export_named_declaration.source().has_value()) {
       VisitStringLiteral(*export_named_declaration.source().value());
@@ -2542,6 +2570,25 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
     }
   }
 
+  void VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) override {
+    if (preorder_callback_) {
+      preorder_callback_->VisitExportNamespaceSpecifier(export_namespace_specifier);
+    }
+    switch (export_namespace_specifier.exported().index()) {
+      case 0:
+        VisitIdentifier(*std::get<0>(export_namespace_specifier.exported()));
+        break;
+      case 1:
+        VisitStringLiteral(*std::get<1>(export_namespace_specifier.exported()));
+        break;
+      default:
+        LOG(FATAL) << "Unreachable code.";
+    }
+    if (postorder_callback_) {
+      postorder_callback_->VisitExportNamespaceSpecifier(export_namespace_specifier);
+    }
+  }
+
   void VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) override {
     if (preorder_callback_) {
       preorder_callback_->VisitExportNamedDeclaration(export_named_declaration);
@@ -2550,7 +2597,16 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
       VisitDeclaration(*export_named_declaration.declaration().value());
     }
     for (const auto &elem : *export_named_declaration.specifiers()) {
-      VisitExportSpecifier(*elem);
+      switch (elem.index()) {
+        case 0:
+          VisitExportSpecifier(*std::get<0>(elem));
+          break;
+        case 1:
+          VisitExportNamespaceSpecifier(*std::get<1>(elem));
+          break;
+        default:
+          LOG(FATAL) << "Unreachable code.";
+      }
     }
     if (export_named_declaration.source().has_value()) {
       VisitStringLiteral(*export_named_declaration.source().value());
