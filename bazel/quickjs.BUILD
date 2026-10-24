@@ -52,5 +52,10 @@ cc_library(
         "-ldl",
         "-lm",
     ],
-    local_defines = ["CONFIG_BIGNUM"],
+    local_defines = ["CONFIG_BIGNUM"] + select({
+        # QuickJS checks for EMSCRIPTEN, which newer versions of Emscripten no
+        # longer define (only __EMSCRIPTEN__).
+        "@platforms//os:emscripten": ["EMSCRIPTEN"],
+        "//conditions:default": [],
+    }),
 )
