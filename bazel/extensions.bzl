@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def _llvm_deps_impl(_):
     """Implementation of the llvm_deps module extension."""
-    LLVM_COMMIT = "030e74c2808a9af58c6b4ef461fd0c2c7039d647"
+    LLVM_COMMIT = "d5efcd0ec41d0f425076e3dd738a68d333ad610f"
 
     # LLVM is pinned to the same commit used in the Google monorepo.
     # The build files from the LLVM monorepo are overlaid via llvm_configure
@@ -25,6 +25,14 @@ def _llvm_deps_impl(_):
         urls = ["https://bellard.org/quickjs/quickjs-2024-01-13.tar.xz"],
         strip_prefix = "quickjs-2024-01-13",
         add_prefix = "quickjs",
+    )
+
+    # The editor of the in-browser demo (//maldoca/js/ir/wasm), from npm.
+    http_archive(
+        name = "monaco_editor",
+        build_file = "@jsir//:bazel/monaco_editor.BUILD",
+        sha256 = "5dbda58750b13452de39affcea703af096022d8e3546c67ed5d3bd072763f939",
+        urls = ["https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.52.0.tgz"],
     )
 
 llvm_deps = module_extension(
