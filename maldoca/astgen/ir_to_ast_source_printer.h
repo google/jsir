@@ -44,11 +44,24 @@ class IrToAstSourcePrinter : public CcPrinterBase {
 
   void PrintLeafNode(const AstDef& ast, const NodeDef& node, FieldKind kind);
 
-  void PrintField(const AstDef& ast, const NodeDef& node,
-                  const FieldDef& field);
+  // - op_kind: The kind of the op being converted (e.g. FIELD_KIND_LVAL for a
+  //   *RefOp), which might change the field's kind (see FieldIrKind()).
+  void PrintField(const AstDef& ast, const NodeDef& node, const FieldDef& field,
+                  FieldKind op_kind);
 
   void PrintRegion(const AstDef& ast, const NodeDef& node,
-                   const FieldDef& field);
+                   const FieldDef& field, FieldKind op_kind);
+
+  // Prints the code that converts a field held either in a literal attribute
+  // or in an operand (see FieldDef::literal_attr()), and recomputes the
+  // bool sibling named by its discriminator.
+  void PrintLiteralAttrField(const AstDef& ast, const NodeDef& node,
+                             const FieldDef& field, FieldKind op_kind);
+
+  // Prints the code that converts a split field (see FieldDef::ir_splits())
+  // from whichever of its operands/regions is set.
+  void PrintSplitField(const AstDef& ast, const NodeDef& node,
+                       const FieldDef& field);
 
   void PrintConverter(const AstDef& ast, const Type& type,
                       absl::string_view lang_name, FieldKind kind,
@@ -64,6 +77,11 @@ class IrToAstSourcePrinter : public CcPrinterBase {
 
   void PrintVariantConverter(const AstDef& ast, const VariantType& variant_type,
                              absl::string_view lang_name, FieldKind kind);
+
+  // Prints the converter of a variant field whose members are held by ops of
+  // different kinds (see FieldMemberIrKind() in ast_gen_utils.h).
+  void PrintPerMemberKindsConverter(const AstDef& ast, const FieldDef& field,
+                                    FieldKind op_kind, MaybeNull maybe_null);
 
   void PrintListConverter(const AstDef& ast, const ListType& list_type,
                           absl::string_view lang_name, FieldKind kind);
