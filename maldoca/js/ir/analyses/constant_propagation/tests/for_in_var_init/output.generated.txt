@@ -1,0 +1,75 @@
+// JSIR:      "jsir.file"() <{comments = []}> ({
+// JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
+// JSIR-NEXT:     %0 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
+// JSIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %2 = "jsir.identifier"() <{name = "object"}> : () -> !jsir.any
+// JSIR-NEXT:     "jshir.for_in_statement"(%0, %1, %2) <{left_declaration = #jsir<for_in_of_declaration <L 1 C 5>, <L 1 C 14>, 5, 14, 1, <L 1 C 9>, <L 1 C 14>, 9, 14, 1, "a", 0, "var">}> ({
+// JSIR-NEXT:       "jshir.block_statement"() ({
+// JSIR-NEXT:         %3 = "jsir.identifier"() <{name = "console"}> : () -> !jsir.any
+// JSIR-NEXT:         %4 = "jsir.member_expression"(%3) <{literal_property = #jsir<identifier <L 2 C 10>, <L 2 C 13>, "log", 38, 41, 2, "log">}> : (!jsir.any) -> !jsir.any
+// JSIR-NEXT:         %5 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
+// JSIR-NEXT:         %6 = "jsir.call_expression"(%4, %5) : (!jsir.any, !jsir.any) -> !jsir.any
+// JSIR-NEXT:         "jsir.expression_statement"(%6) : (!jsir.any) -> ()
+// JSIR-NEXT:       }, {
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:       }) : () -> ()
+// JSIR-NEXT:     }) : (!jsir.any, !jsir.any, !jsir.any) -> ()
+// JSIR-NEXT:   }, {
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:   }) : () -> ()
+// JSIR-NEXT: }) : () -> ()
+// JSIR-NEXT: jsir.file {[]} ({
+// JSIR-NEXT:   ^bb0:
+// JSIR-NEXT:       // <executable>
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT:     jsir.program {"script"} ({
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %0 = jsir.identifier_ref {"a"}
+// JSIR-NEXT:           // %0 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:           // %1 = 1.000000e+00 : f64
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         %2 = jsir.identifier {"object"}
+// JSIR-NEXT:           // %2 = <unknown>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:         jshir.for_in_statement (%0, %1, %2) {#jsir<for_in_of_declaration <L 1 C 5>, <L 1 C 14>, 5, 14, 1, <L 1 C 9>, <L 1 C 14>, 9, 14, 1, "a", 0, "var">} ({
+// JSIR-NEXT:           ^bb0:
+// JSIR-NEXT:               // <executable>
+// JSIR-NEXT:               // State [default = <unknown>] { }
+// JSIR-NEXT:             jshir.block_statement ({
+// JSIR-NEXT:               ^bb0:
+// JSIR-NEXT:                   // <executable>
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:                 %3 = jsir.identifier {"console"}
+// JSIR-NEXT:                   // %3 = <unknown>
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:                 %4 = jsir.member_expression (%3) {#jsir<identifier <L 2 C 10>, <L 2 C 13>, "log", 38, 41, 2, "log">}
+// JSIR-NEXT:                   // %4 = <unknown>
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:                 %5 = jsir.identifier {"a"}
+// JSIR-NEXT:                   // %5 = <unknown>
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:                 %6 = jsir.call_expression (%4, %5)
+// JSIR-NEXT:                   // %6 = <unknown>
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:                 jsir.expression_statement (%6)
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:             }, {
+// JSIR-NEXT:               ^bb0:
+// JSIR-NEXT:                   // <executable>
+// JSIR-NEXT:                   // State [default = <unknown>] { }
+// JSIR-NEXT:             })
+// JSIR-NEXT:               // State [default = <unknown>] { }
+// JSIR-NEXT:         })
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     }, {
+// JSIR-NEXT:       ^bb0:
+// JSIR-NEXT:           // <executable>
+// JSIR-NEXT:           // State [default = <unknown>] { }
+// JSIR-NEXT:     })
+// JSIR-NEXT:       // State [default = <unknown>] { }
+// JSIR-NEXT: })
+// JSIR-NEXT:   // State [default = <uninitialized>] { }
