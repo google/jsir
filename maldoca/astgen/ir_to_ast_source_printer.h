@@ -44,11 +44,24 @@ class IrToAstSourcePrinter : public CcPrinterBase {
 
   void PrintLeafNode(const AstDef& ast, const NodeDef& node, FieldKind kind);
 
-  void PrintField(const AstDef& ast, const NodeDef& node,
-                  const FieldDef& field);
+  // - op_kind: The kind of the op being converted (e.g. FIELD_KIND_LVAL for a
+  //   *RefOp), which might change the field's kind (see FieldIrKind()).
+  void PrintField(const AstDef& ast, const NodeDef& node, const FieldDef& field,
+                  FieldKind op_kind);
 
   void PrintRegion(const AstDef& ast, const NodeDef& node,
-                   const FieldDef& field);
+                   const FieldDef& field, FieldKind op_kind);
+
+  // Prints the code that converts a field held either in a literal attribute
+  // or in an operand (see FieldIrMappingPb::literal_attr), and recomputes the
+  // bool sibling named by `literal_unless`.
+  void PrintLiteralAttrField(const AstDef& ast, const NodeDef& node,
+                             const FieldDef& field, FieldKind op_kind);
+
+  // Prints the code that converts a split field (see FieldIrMappingPb::split)
+  // from whichever of its operands/regions is set.
+  void PrintSplitField(const AstDef& ast, const NodeDef& node,
+                       const FieldDef& field);
 
   void PrintConverter(const AstDef& ast, const Type& type,
                       absl::string_view lang_name, FieldKind kind,

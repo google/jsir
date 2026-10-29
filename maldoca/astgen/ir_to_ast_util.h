@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -552,6 +553,72 @@ template <typename AttrT, typename T>
 absl::StatusOr<T> Convert(mlir::Attribute attr,
                           ToAttrConverter<AttrT, T> converter) {
   return converter(attr);
+}
+
+// Moves the value held by `from` into a variant `To` whose alternatives include
+// all of `from`'s alternatives.
+//
+// Used for split fields (see FieldIrMappingPb::split), where a group of variant
+// members is converted on its own and then stored in the full field variant.
+template <typename To, typename... From>
+To WidenVariant(std::variant<From...> from) {
+  return std::visit([](auto&& value) -> To { return To(std::move(value)); },
+                    std::move(from));
+}
+
+namespace internal {
+
+template <typename To>
+struct DynCastAstNodeImpl;
+
+template <typename T>
+struct DynCastAstNodeImpl<std::unique_ptr<T>> {
+  template <typename From>
+  static absl::StatusOr<std::unique_ptr<T>> Cast(std::unique_ptr<From> from) {
+    if (auto* to = dynamic_cast<T*>(from.get())) {
+      from.release();
+      return std::unique_ptr<T>(to);
+    }
+    return absl::InvalidArgumentError("Unexpected AST node type.");
+  }
+};
+
+template <typename... Ts>
+struct DynCastAstNodeImpl<std::variant<std::unique_ptr<Ts>...>> {
+  template <typename From>
+  static absl::StatusOr<std::variant<std::unique_ptr<Ts>...>> Cast(
+      std::unique_ptr<From> from) {
+    std::optional<std::variant<std::unique_ptr<Ts>...>> result;
+    (
+        [&] {
+          if (result.has_value()) {
+            return;
+          }
+          if (auto* to = dynamic_cast<Ts*>(from.get())) {
+            from.release();
+            result.emplace(std::in_place_type<std::unique_ptr<Ts>>, to);
+          }
+        }(),
+        ...);
+    if (!result.has_value()) {
+      return absl::InvalidArgumentError("Unexpected AST node type.");
+    }
+    return *std::move(result);
+  }
+};
+
+}  // namespace internal
+
+// Downcasts an AST node to `To`, which is either `std::unique_ptr<T>` or a
+// variant of them. For a variant, the node is stored in the first alternative
+// it is an instance of.
+//
+// Used for fields whose op holds a narrower type than the AST field (see
+// NarrowedIrType() in ast_gen_utils.h), e.g. `ObjectProperty.value: Expression
+// | Pattern`, of which the `object_property_ref` op holds only a `Pattern`.
+template <typename To, typename From>
+absl::StatusOr<To> DynCastAstNode(std::unique_ptr<From> from) {
+  return internal::DynCastAstNodeImpl<To>::Cast(std::move(from));
 }
 
 // Attr converters

@@ -485,6 +485,56 @@ def JsirVariableDeclarationOp : Jsir_Op<
   );
 }
 
+def JshirForStatementOp : Jshir_Op<
+    "for_statement", [
+        JsirStatementOpInterfaceTraits,
+        NoTerminator,
+        PredOpTrait<"at most one of init_declaration, init_expression is set", CPred<"(int(!::llvm::cast<JshirForStatementOp>(&$_op).getInitDeclaration().empty()) + int(!::llvm::cast<JshirForStatementOp>(&$_op).getInitExpression().empty())) <= 1">>
+    ]> {
+  let regions = (region
+    OptionalRegion<StmtRegion>: $init_declaration,
+    OptionalRegion<ExprRegion>: $init_expression,
+    OptionalRegion<ExprRegion>: $test,
+    OptionalRegion<ExprRegion>: $update,
+    StmtRegion: $body
+  );
+}
+
+def JshirForInStatementOp : Jshir_Op<
+    "for_in_statement", [
+        JsirStatementOpInterfaceTraits,
+        NoTerminator,
+        PredOpTrait<"exactly one of left_declaration, left_lval is set", CPred<"(int(!::llvm::cast<JshirForInStatementOp>(&$_op).getLeftDeclaration().empty()) + int(::llvm::cast<JshirForInStatementOp>(&$_op).getLeftLval() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    Optional<AnyType>: $left_lval,
+    AnyType: $right
+  );
+
+  let regions = (region
+    OptionalRegion<StmtRegion>: $left_declaration,
+    StmtRegion: $body
+  );
+}
+
+def JshirForOfStatementOp : Jshir_Op<
+    "for_of_statement", [
+        JsirStatementOpInterfaceTraits,
+        NoTerminator,
+        PredOpTrait<"exactly one of left_declaration, left_lval is set", CPred<"(int(!::llvm::cast<JshirForOfStatementOp>(&$_op).getLeftDeclaration().empty()) + int(::llvm::cast<JshirForOfStatementOp>(&$_op).getLeftLval() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    Optional<AnyType>: $left_lval,
+    AnyType: $right,
+    BoolAttr: $await
+  );
+
+  let regions = (region
+    OptionalRegion<StmtRegion>: $left_declaration,
+    StmtRegion: $body
+  );
+}
+
 def JsirFunctionDeclarationOp : Jsir_Op<
     "function_declaration", [
         JsirDeclarationOpInterfaceTraits,
@@ -523,6 +573,30 @@ def JsirThisExpressionOp : Jsir_Op<
         JsirExpressionOpInterfaceTraits,
         Pure
     ]> {
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirArrowFunctionExpressionOp : Jsir_Op<
+    "arrow_function_expression", [
+        JsirExpressionOpInterfaceTraits,
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits,
+        PredOpTrait<"exactly one of body_block, body_expression is set", CPred<"(int(!::llvm::cast<JsirArrowFunctionExpressionOp>(&$_op).getBodyBlock().empty()) + int(!::llvm::cast<JsirArrowFunctionExpressionOp>(&$_op).getBodyExpression().empty())) == 1">>
+    ]> {
+  let arguments = (ins
+    OptionalAttr<JsirIdentifierAttr>: $id,
+    BoolAttr: $generator,
+    BoolAttr: $async
+  );
+
+  let regions = (region
+    ExprsRegion: $params,
+    OptionalRegion<StmtRegion>: $body_block,
+    OptionalRegion<ExprRegion>: $body_expression
+  );
+
   let results = (outs
     JsirAnyType
   );
@@ -575,6 +649,63 @@ def JsirArrayExpressionOp : Jsir_Op<
     ]> {
   let arguments = (ins
     Variadic<AnyType>: $elements
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirObjectPropertyOp : Jsir_Op<
+    "object_property", [
+        PredOpTrait<"exactly one of literal_key, computed_key is set", CPred<"(int(::llvm::cast<JsirObjectPropertyOp>(&$_op).getLiteralKeyAttr() != nullptr) + int(::llvm::cast<JsirObjectPropertyOp>(&$_op).getComputedKey() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr, JsirNumericLiteralAttr, JsirBigIntLiteralAttr]>>: $literal_key,
+    Optional<AnyType>: $computed_key,
+    BoolAttr: $shorthand,
+    AnyType: $value
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirObjectPropertyRefOp : Jsir_Op<
+    "object_property_ref", [
+        PredOpTrait<"exactly one of literal_key, computed_key is set", CPred<"(int(::llvm::cast<JsirObjectPropertyRefOp>(&$_op).getLiteralKeyAttr() != nullptr) + int(::llvm::cast<JsirObjectPropertyRefOp>(&$_op).getComputedKey() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr, JsirNumericLiteralAttr, JsirBigIntLiteralAttr]>>: $literal_key,
+    Optional<AnyType>: $computed_key,
+    BoolAttr: $shorthand,
+    AnyType: $value
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirObjectMethodOp : Jsir_Op<
+    "object_method", [
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits,
+        PredOpTrait<"exactly one of literal_key, computed_key is set", CPred<"(int(::llvm::cast<JsirObjectMethodOp>(&$_op).getLiteralKeyAttr() != nullptr) + int(::llvm::cast<JsirObjectMethodOp>(&$_op).getComputedKey() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr, JsirNumericLiteralAttr, JsirBigIntLiteralAttr]>>: $literal_key,
+    Optional<AnyType>: $computed_key,
+    OptionalAttr<JsirIdentifierAttr>: $id,
+    BoolAttr: $generator,
+    BoolAttr: $async,
+    StrAttr: $kind
+  );
+
+  let regions = (region
+    ExprsRegion: $params,
+    StmtRegion: $body
   );
 
   let results = (outs
@@ -682,6 +813,58 @@ def JshirLogicalExpressionOp : Jshir_Op<
 
   let regions = (region
     ExprRegion: $right
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirMemberExpressionOp : Jsir_Op<
+    "member_expression", [
+        JsirExpressionOpInterfaceTraits,
+        PredOpTrait<"exactly one of literal_property, computed_property is set", CPred<"(int(::llvm::cast<JsirMemberExpressionOp>(&$_op).getLiteralPropertyAttr() != nullptr) + int(::llvm::cast<JsirMemberExpressionOp>(&$_op).getComputedProperty() != nullptr)) == 1">>
+    ]> {
+  let hasFolder = 1;
+
+  let arguments = (ins
+    AnyType: $object,
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirPrivateNameAttr]>>: $literal_property,
+    Optional<AnyType>: $computed_property
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirMemberExpressionRefOp : Jsir_Op<
+    "member_expression_ref", [
+        JsirPatternRefOpInterfaceTraits,
+        JsirLValRefOpInterfaceTraits,
+        PredOpTrait<"exactly one of literal_property, computed_property is set", CPred<"(int(::llvm::cast<JsirMemberExpressionRefOp>(&$_op).getLiteralPropertyAttr() != nullptr) + int(::llvm::cast<JsirMemberExpressionRefOp>(&$_op).getComputedProperty() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    AnyType: $object,
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirPrivateNameAttr]>>: $literal_property,
+    Optional<AnyType>: $computed_property
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirOptionalMemberExpressionOp : Jsir_Op<
+    "optional_member_expression", [
+        JsirExpressionOpInterfaceTraits,
+        PredOpTrait<"exactly one of literal_property, computed_property is set", CPred<"(int(::llvm::cast<JsirOptionalMemberExpressionOp>(&$_op).getLiteralPropertyAttr() != nullptr) + int(::llvm::cast<JsirOptionalMemberExpressionOp>(&$_op).getComputedProperty() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    AnyType: $object,
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirPrivateNameAttr]>>: $literal_property,
+    Optional<AnyType>: $computed_property,
+    BoolAttr: $optional
   );
 
   let results = (outs
@@ -883,6 +1066,44 @@ def JsirAssignmentPatternRefOp : Jsir_Op<
   );
 }
 
+def JsirClassMethodOp : Jsir_Op<
+    "class_method", [
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits,
+        PredOpTrait<"exactly one of literal_key, computed_key is set", CPred<"(int(::llvm::cast<JsirClassMethodOp>(&$_op).getLiteralKeyAttr() != nullptr) + int(::llvm::cast<JsirClassMethodOp>(&$_op).getComputedKey() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    OptionalAttr<JsirIdentifierAttr>: $id,
+    BoolAttr: $generator,
+    BoolAttr: $async,
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr, JsirNumericLiteralAttr, JsirBigIntLiteralAttr]>>: $literal_key,
+    Optional<AnyType>: $computed_key,
+    StrAttr: $kind,
+    BoolAttr: $static_
+  );
+
+  let regions = (region
+    ExprsRegion: $params,
+    StmtRegion: $body
+  );
+}
+
+def JsirClassPropertyOp : Jsir_Op<
+    "class_property", [
+        NoTerminator,
+        PredOpTrait<"exactly one of literal_key, computed_key is set", CPred<"(int(::llvm::cast<JsirClassPropertyOp>(&$_op).getLiteralKeyAttr() != nullptr) + int(::llvm::cast<JsirClassPropertyOp>(&$_op).getComputedKey() != nullptr)) == 1">>
+    ]> {
+  let arguments = (ins
+    OptionalAttr<AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr, JsirNumericLiteralAttr, JsirBigIntLiteralAttr]>>: $literal_key,
+    Optional<AnyType>: $computed_key,
+    BoolAttr: $static_
+  );
+
+  let regions = (region
+    OptionalRegion<ExprRegion>: $value
+  );
+}
+
 def JsirClassPrivatePropertyOp : Jsir_Op<
     "class_private_property", [
         NoTerminator
@@ -987,6 +1208,18 @@ def JsirExportNamedDeclarationOp : Jsir_Op<
   let regions = (region
     OptionalRegion<StmtRegion>: $declaration,
     StmtsRegion: $specifiers
+  );
+}
+
+def JsirExportDefaultDeclarationOp : Jsir_Op<
+    "export_default_declaration", [
+        JsirModuleDeclarationOpInterfaceTraits,
+        NoTerminator,
+        PredOpTrait<"exactly one of declaration, expression is set", CPred<"(int(!::llvm::cast<JsirExportDefaultDeclarationOp>(&$_op).getDeclaration().empty()) + int(!::llvm::cast<JsirExportDefaultDeclarationOp>(&$_op).getExpression().empty())) == 1">>
+    ]> {
+  let regions = (region
+    OptionalRegion<StmtRegion>: $declaration,
+    OptionalRegion<ExprRegion>: $expression
   );
 }
 

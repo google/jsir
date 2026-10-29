@@ -1092,6 +1092,182 @@ JsirToAst::VisitVariableDeclaration(JsirVariableDeclarationOp op) {
       std::move(kind));
 }
 
+absl::StatusOr<std::unique_ptr<JsForStatement>>
+JsirToAst::VisitForStatement(JshirForStatementOp op) {
+  std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>> init;
+  if (!op.getInitDeclaration().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto init_declaration_ast,
+        Convert(
+            op.getInitDeclaration(),
+            StmtRegion(
+                ToOpConverter(VisitVariableDeclaration)
+            )
+        )
+    );
+    init.emplace(std::in_place_index<0>, std::move(init_declaration_ast));
+  }
+  if (!op.getInitExpression().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto init_expression_ast,
+        Convert(
+            op.getInitExpression(),
+            ExprRegion<JsirExprRegionEndOp>(
+                ToOpConverter(VisitExpression)
+            )
+        )
+    );
+    init.emplace(std::in_place_index<1>, std::move(init_expression_ast));
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto test,
+      Convert(
+          op.getTest(),
+          Nullable(
+              ExprRegion<JsirExprRegionEndOp>(
+                  ToOpConverter(VisitExpression)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto update,
+      Convert(
+          op.getUpdate(),
+          Nullable(
+              ExprRegion<JsirExprRegionEndOp>(
+                  ToOpConverter(VisitExpression)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
+  return Create<JsForStatement>(
+      op,
+      std::move(init),
+      std::move(test),
+      std::move(update),
+      std::move(body));
+}
+
+absl::StatusOr<std::unique_ptr<JsForInStatement>>
+JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
+  std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>> left;
+  if (!op.getLeftDeclaration().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto left_declaration_ast,
+        Convert(
+            op.getLeftDeclaration(),
+            StmtRegion(
+                ToOpConverter(VisitVariableDeclaration)
+            )
+        )
+    );
+    left.emplace(std::in_place_index<0>, std::move(left_declaration_ast));
+  }
+  if (op.getLeftLval() != nullptr) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto left_lval_ast,
+        Convert(
+            op.getLeftLval(),
+            ToOpConverter(VisitLValRef)
+        )
+    );
+    left.emplace(std::in_place_index<1>, std::move(left_lval_ast));
+  }
+  if (!left.has_value()) {
+    return absl::InvalidArgumentError("Exactly one of left_declaration, left_lval must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto right,
+      Convert(
+          op.getRight(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
+  return Create<JsForInStatement>(
+      op,
+      *std::move(left),
+      std::move(right),
+      std::move(body));
+}
+
+absl::StatusOr<std::unique_ptr<JsForOfStatement>>
+JsirToAst::VisitForOfStatement(JshirForOfStatementOp op) {
+  std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>> left;
+  if (!op.getLeftDeclaration().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto left_declaration_ast,
+        Convert(
+            op.getLeftDeclaration(),
+            StmtRegion(
+                ToOpConverter(VisitVariableDeclaration)
+            )
+        )
+    );
+    left.emplace(std::in_place_index<0>, std::move(left_declaration_ast));
+  }
+  if (op.getLeftLval() != nullptr) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto left_lval_ast,
+        Convert(
+            op.getLeftLval(),
+            ToOpConverter(VisitLValRef)
+        )
+    );
+    left.emplace(std::in_place_index<1>, std::move(left_lval_ast));
+  }
+  if (!left.has_value()) {
+    return absl::InvalidArgumentError("Exactly one of left_declaration, left_lval must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto right,
+      Convert(
+          op.getRight(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitStatement)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto await,
+      Convert(
+          op.getAwaitAttr(),
+          ToBool()
+      )
+  );
+  return Create<JsForOfStatement>(
+      op,
+      *std::move(left),
+      std::move(right),
+      std::move(body),
+      std::move(await));
+}
+
 absl::StatusOr<std::unique_ptr<JsFunctionDeclaration>>
 JsirToAst::VisitFunctionDeclaration(JsirFunctionDeclarationOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -1162,6 +1338,79 @@ absl::StatusOr<std::unique_ptr<JsThisExpression>>
 JsirToAst::VisitThisExpression(JsirThisExpressionOp op) {
   return Create<JsThisExpression>(
       op);
+}
+
+absl::StatusOr<std::unique_ptr<JsArrowFunctionExpression>>
+JsirToAst::VisitArrowFunctionExpression(JsirArrowFunctionExpressionOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto params,
+      Convert(
+          op.getParams(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto generator,
+      Convert(
+          op.getGeneratorAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto async,
+      Convert(
+          op.getAsyncAttr(),
+          ToBool()
+      )
+  );
+  std::optional<std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>> body;
+  if (!op.getBodyBlock().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto body_block_ast,
+        Convert(
+            op.getBodyBlock(),
+            StmtRegion(
+                ToOpConverter(VisitBlockStatement)
+            )
+        )
+    );
+    body.emplace(std::in_place_index<0>, std::move(body_block_ast));
+  }
+  if (!op.getBodyExpression().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto body_expression_ast,
+        Convert(
+            op.getBodyExpression(),
+            ExprRegion<JsirExprRegionEndOp>(
+                ToOpConverter(VisitExpression)
+            )
+        )
+    );
+    body.emplace(std::in_place_index<1>, std::move(body_expression_ast));
+  }
+  if (!body.has_value()) {
+    return absl::InvalidArgumentError("Exactly one of body_block, body_expression must be set.");
+  }
+  return Create<JsArrowFunctionExpression>(
+      op,
+      std::move(id),
+      std::move(params),
+      std::move(generator),
+      std::move(async),
+      *std::move(body));
 }
 
 absl::StatusOr<std::unique_ptr<JsYieldExpression>>
@@ -1237,6 +1486,213 @@ JsirToAst::VisitArrayExpression(JsirArrayExpressionOp op) {
   return Create<JsArrayExpression>(
       op,
       std::move(elements));
+}
+
+absl::StatusOr<std::unique_ptr<JsObjectProperty>>
+JsirToAst::VisitObjectProperty(JsirObjectPropertyOp op) {
+  std::unique_ptr<JsExpression> key;
+  bool computed;
+  if (mlir::Attribute literal_key = op.getLiteralKeyAttr()) {
+    computed = false;
+    if (auto literal_key_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_identifier_ast, VisitIdentifierAttr(literal_key_identifier));
+      key = std::move(literal_key_identifier_ast);
+    } else if (auto literal_key_string_literal = llvm::dyn_cast<JsirStringLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_string_literal_ast, VisitStringLiteralAttr(literal_key_string_literal));
+      key = std::move(literal_key_string_literal_ast);
+    } else if (auto literal_key_numeric_literal = llvm::dyn_cast<JsirNumericLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_numeric_literal_ast, VisitNumericLiteralAttr(literal_key_numeric_literal));
+      key = std::move(literal_key_numeric_literal_ast);
+    } else if (auto literal_key_big_int_literal = llvm::dyn_cast<JsirBigIntLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_big_int_literal_ast, VisitBigIntLiteralAttr(literal_key_big_int_literal));
+      key = std::move(literal_key_big_int_literal_ast);
+    } else {
+      return absl::InvalidArgumentError("literal_key must be Identifier or StringLiteral or NumericLiteral or BigIntLiteral.");
+    }
+  } else if (op.getComputedKey() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        key,
+        Convert(
+            op.getComputedKey(),
+            ToOpConverter(VisitExpression)
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_key and computed_key must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto shorthand,
+      Convert(
+          op.getShorthandAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto value_ir,
+      Convert(
+          op.getValue(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(auto value, (DynCastAstNode<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPattern>>>(std::move(value_ir))));
+  return Create<JsObjectProperty>(
+      op,
+      std::move(key),
+      std::move(computed),
+      std::move(shorthand),
+      std::move(value));
+}
+
+absl::StatusOr<std::unique_ptr<JsObjectProperty>>
+JsirToAst::VisitObjectPropertyRef(JsirObjectPropertyRefOp op) {
+  std::unique_ptr<JsExpression> key;
+  bool computed;
+  if (mlir::Attribute literal_key = op.getLiteralKeyAttr()) {
+    computed = false;
+    if (auto literal_key_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_identifier_ast, VisitIdentifierAttr(literal_key_identifier));
+      key = std::move(literal_key_identifier_ast);
+    } else if (auto literal_key_string_literal = llvm::dyn_cast<JsirStringLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_string_literal_ast, VisitStringLiteralAttr(literal_key_string_literal));
+      key = std::move(literal_key_string_literal_ast);
+    } else if (auto literal_key_numeric_literal = llvm::dyn_cast<JsirNumericLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_numeric_literal_ast, VisitNumericLiteralAttr(literal_key_numeric_literal));
+      key = std::move(literal_key_numeric_literal_ast);
+    } else if (auto literal_key_big_int_literal = llvm::dyn_cast<JsirBigIntLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_big_int_literal_ast, VisitBigIntLiteralAttr(literal_key_big_int_literal));
+      key = std::move(literal_key_big_int_literal_ast);
+    } else {
+      return absl::InvalidArgumentError("literal_key must be Identifier or StringLiteral or NumericLiteral or BigIntLiteral.");
+    }
+  } else if (op.getComputedKey() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        key,
+        Convert(
+            op.getComputedKey(),
+            ToOpConverter(VisitExpression)
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_key and computed_key must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto shorthand,
+      Convert(
+          op.getShorthandAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto value_ir,
+      Convert(
+          op.getValue(),
+          ToOpConverter(VisitPatternRef)
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(auto value, (DynCastAstNode<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPattern>>>(std::move(value_ir))));
+  return Create<JsObjectProperty>(
+      op,
+      std::move(key),
+      std::move(computed),
+      std::move(shorthand),
+      std::move(value));
+}
+
+absl::StatusOr<std::unique_ptr<JsObjectMethod>>
+JsirToAst::VisitObjectMethod(JsirObjectMethodOp op) {
+  std::unique_ptr<JsExpression> key;
+  bool computed;
+  if (mlir::Attribute literal_key = op.getLiteralKeyAttr()) {
+    computed = false;
+    if (auto literal_key_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_identifier_ast, VisitIdentifierAttr(literal_key_identifier));
+      key = std::move(literal_key_identifier_ast);
+    } else if (auto literal_key_string_literal = llvm::dyn_cast<JsirStringLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_string_literal_ast, VisitStringLiteralAttr(literal_key_string_literal));
+      key = std::move(literal_key_string_literal_ast);
+    } else if (auto literal_key_numeric_literal = llvm::dyn_cast<JsirNumericLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_numeric_literal_ast, VisitNumericLiteralAttr(literal_key_numeric_literal));
+      key = std::move(literal_key_numeric_literal_ast);
+    } else if (auto literal_key_big_int_literal = llvm::dyn_cast<JsirBigIntLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_big_int_literal_ast, VisitBigIntLiteralAttr(literal_key_big_int_literal));
+      key = std::move(literal_key_big_int_literal_ast);
+    } else {
+      return absl::InvalidArgumentError("literal_key must be Identifier or StringLiteral or NumericLiteral or BigIntLiteral.");
+    }
+  } else if (op.getComputedKey() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        key,
+        Convert(
+            op.getComputedKey(),
+            ToOpConverter(VisitExpression)
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_key and computed_key must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto params,
+      Convert(
+          op.getParams(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto generator,
+      Convert(
+          op.getGeneratorAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto async,
+      Convert(
+          op.getAsyncAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto kind,
+      Convert(
+          op.getKindAttr(),
+          ToString()
+      )
+  );
+  return Create<JsObjectMethod>(
+      op,
+      std::move(key),
+      std::move(computed),
+      std::move(id),
+      std::move(params),
+      std::move(generator),
+      std::move(async),
+      std::move(body),
+      std::move(kind));
 }
 
 absl::StatusOr<std::unique_ptr<JsFunctionExpression>>
@@ -1446,6 +1902,152 @@ JsirToAst::VisitLogicalExpression(JshirLogicalExpressionOp op) {
       std::move(operator_),
       std::move(left),
       std::move(right));
+}
+
+absl::StatusOr<std::unique_ptr<JsMemberExpression>>
+JsirToAst::VisitMemberExpression(JsirMemberExpressionOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto object,
+      Convert(
+          op.getObject(),
+          OpVariant(
+              ToOpConverter(VisitExpression),
+              ToOpConverter(VisitSuper)
+          )
+      )
+  );
+  std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property;
+  bool computed;
+  if (mlir::Attribute literal_property = op.getLiteralPropertyAttr()) {
+    computed = false;
+    if (auto literal_property_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_property)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_property_identifier_ast, VisitIdentifierAttr(literal_property_identifier));
+      property.emplace<0>(std::move(literal_property_identifier_ast));
+    } else if (auto literal_property_private_name = llvm::dyn_cast<JsirPrivateNameAttr>(literal_property)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_property_private_name_ast, VisitPrivateNameAttr(literal_property_private_name));
+      property.emplace<1>(std::move(literal_property_private_name_ast));
+    } else {
+      return absl::InvalidArgumentError("literal_property must be Identifier or PrivateName.");
+    }
+  } else if (op.getComputedProperty() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        property,
+        Convert(
+            op.getComputedProperty(),
+            OpVariant(
+                ToOpConverter(VisitExpression),
+                ToOpConverter(VisitPrivateName)
+            )
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_property and computed_property must be set.");
+  }
+  return Create<JsMemberExpression>(
+      op,
+      std::move(object),
+      std::move(property),
+      std::move(computed));
+}
+
+absl::StatusOr<std::unique_ptr<JsMemberExpression>>
+JsirToAst::VisitMemberExpressionRef(JsirMemberExpressionRefOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto object,
+      Convert(
+          op.getObject(),
+          OpVariant(
+              ToOpConverter(VisitExpression),
+              ToOpConverter(VisitSuper)
+          )
+      )
+  );
+  std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property;
+  bool computed;
+  if (mlir::Attribute literal_property = op.getLiteralPropertyAttr()) {
+    computed = false;
+    if (auto literal_property_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_property)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_property_identifier_ast, VisitIdentifierAttr(literal_property_identifier));
+      property.emplace<0>(std::move(literal_property_identifier_ast));
+    } else if (auto literal_property_private_name = llvm::dyn_cast<JsirPrivateNameAttr>(literal_property)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_property_private_name_ast, VisitPrivateNameAttr(literal_property_private_name));
+      property.emplace<1>(std::move(literal_property_private_name_ast));
+    } else {
+      return absl::InvalidArgumentError("literal_property must be Identifier or PrivateName.");
+    }
+  } else if (op.getComputedProperty() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        property,
+        Convert(
+            op.getComputedProperty(),
+            OpVariant(
+                ToOpConverter(VisitExpression),
+                ToOpConverter(VisitPrivateName)
+            )
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_property and computed_property must be set.");
+  }
+  return Create<JsMemberExpression>(
+      op,
+      std::move(object),
+      std::move(property),
+      std::move(computed));
+}
+
+absl::StatusOr<std::unique_ptr<JsOptionalMemberExpression>>
+JsirToAst::VisitOptionalMemberExpression(JsirOptionalMemberExpressionOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto object,
+      Convert(
+          op.getObject(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property;
+  bool computed;
+  if (mlir::Attribute literal_property = op.getLiteralPropertyAttr()) {
+    computed = false;
+    if (auto literal_property_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_property)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_property_identifier_ast, VisitIdentifierAttr(literal_property_identifier));
+      property.emplace<0>(std::move(literal_property_identifier_ast));
+    } else if (auto literal_property_private_name = llvm::dyn_cast<JsirPrivateNameAttr>(literal_property)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_property_private_name_ast, VisitPrivateNameAttr(literal_property_private_name));
+      property.emplace<1>(std::move(literal_property_private_name_ast));
+    } else {
+      return absl::InvalidArgumentError("literal_property must be Identifier or PrivateName.");
+    }
+  } else if (op.getComputedProperty() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        property,
+        Convert(
+            op.getComputedProperty(),
+            OpVariant(
+                ToOpConverter(VisitExpression),
+                ToOpConverter(VisitPrivateName)
+            )
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_property and computed_property must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto optional,
+      Convert(
+          op.getOptionalAttr(),
+          ToBool()
+      )
+  );
+  return Create<JsOptionalMemberExpression>(
+      op,
+      std::move(object),
+      std::move(property),
+      std::move(computed),
+      std::move(optional));
 }
 
 absl::StatusOr<std::unique_ptr<JsConditionalExpression>>
@@ -1764,6 +2366,168 @@ JsirToAst::VisitAssignmentPatternRef(JsirAssignmentPatternRefOp op) {
       std::move(right));
 }
 
+absl::StatusOr<std::unique_ptr<JsClassMethod>>
+JsirToAst::VisitClassMethod(JsirClassMethodOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto params,
+      Convert(
+          op.getParams(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto generator,
+      Convert(
+          op.getGeneratorAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto async,
+      Convert(
+          op.getAsyncAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
+  std::unique_ptr<JsExpression> key;
+  bool computed;
+  if (mlir::Attribute literal_key = op.getLiteralKeyAttr()) {
+    computed = false;
+    if (auto literal_key_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_identifier_ast, VisitIdentifierAttr(literal_key_identifier));
+      key = std::move(literal_key_identifier_ast);
+    } else if (auto literal_key_string_literal = llvm::dyn_cast<JsirStringLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_string_literal_ast, VisitStringLiteralAttr(literal_key_string_literal));
+      key = std::move(literal_key_string_literal_ast);
+    } else if (auto literal_key_numeric_literal = llvm::dyn_cast<JsirNumericLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_numeric_literal_ast, VisitNumericLiteralAttr(literal_key_numeric_literal));
+      key = std::move(literal_key_numeric_literal_ast);
+    } else if (auto literal_key_big_int_literal = llvm::dyn_cast<JsirBigIntLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_big_int_literal_ast, VisitBigIntLiteralAttr(literal_key_big_int_literal));
+      key = std::move(literal_key_big_int_literal_ast);
+    } else {
+      return absl::InvalidArgumentError("literal_key must be Identifier or StringLiteral or NumericLiteral or BigIntLiteral.");
+    }
+  } else if (op.getComputedKey() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        key,
+        Convert(
+            op.getComputedKey(),
+            ToOpConverter(VisitExpression)
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_key and computed_key must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto kind,
+      Convert(
+          op.getKindAttr(),
+          ToString()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto static_,
+      Convert(
+          op.getStatic_Attr(),
+          ToBool()
+      )
+  );
+  return Create<JsClassMethod>(
+      op,
+      std::move(id),
+      std::move(params),
+      std::move(generator),
+      std::move(async),
+      std::move(body),
+      std::move(key),
+      std::move(kind),
+      std::move(computed),
+      std::move(static_));
+}
+
+absl::StatusOr<std::unique_ptr<JsClassProperty>>
+JsirToAst::VisitClassProperty(JsirClassPropertyOp op) {
+  std::unique_ptr<JsExpression> key;
+  bool computed;
+  if (mlir::Attribute literal_key = op.getLiteralKeyAttr()) {
+    computed = false;
+    if (auto literal_key_identifier = llvm::dyn_cast<JsirIdentifierAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_identifier_ast, VisitIdentifierAttr(literal_key_identifier));
+      key = std::move(literal_key_identifier_ast);
+    } else if (auto literal_key_string_literal = llvm::dyn_cast<JsirStringLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_string_literal_ast, VisitStringLiteralAttr(literal_key_string_literal));
+      key = std::move(literal_key_string_literal_ast);
+    } else if (auto literal_key_numeric_literal = llvm::dyn_cast<JsirNumericLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_numeric_literal_ast, VisitNumericLiteralAttr(literal_key_numeric_literal));
+      key = std::move(literal_key_numeric_literal_ast);
+    } else if (auto literal_key_big_int_literal = llvm::dyn_cast<JsirBigIntLiteralAttr>(literal_key)) {
+      ABSL_ASSIGN_OR_RETURN(auto literal_key_big_int_literal_ast, VisitBigIntLiteralAttr(literal_key_big_int_literal));
+      key = std::move(literal_key_big_int_literal_ast);
+    } else {
+      return absl::InvalidArgumentError("literal_key must be Identifier or StringLiteral or NumericLiteral or BigIntLiteral.");
+    }
+  } else if (op.getComputedKey() != nullptr) {
+    computed = true;
+    ABSL_ASSIGN_OR_RETURN(
+        key,
+        Convert(
+            op.getComputedKey(),
+            ToOpConverter(VisitExpression)
+        )
+    );
+  } else {
+    return absl::InvalidArgumentError("Exactly one of literal_key and computed_key must be set.");
+  }
+  ABSL_ASSIGN_OR_RETURN(
+      auto value,
+      Convert(
+          op.getValue(),
+          Nullable(
+              ExprRegion<JsirExprRegionEndOp>(
+                  ToOpConverter(VisitExpression)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto static_,
+      Convert(
+          op.getStatic_Attr(),
+          ToBool()
+      )
+  );
+  return Create<JsClassProperty>(
+      op,
+      std::move(key),
+      std::move(value),
+      std::move(static_),
+      std::move(computed));
+}
+
 absl::StatusOr<std::unique_ptr<JsClassPrivateProperty>>
 JsirToAst::VisitClassPrivateProperty(JsirClassPrivatePropertyOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -2043,6 +2807,44 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
       std::move(specifiers),
       std::move(source),
       std::move(assertions));
+}
+
+absl::StatusOr<std::unique_ptr<JsExportDefaultDeclaration>>
+JsirToAst::VisitExportDefaultDeclaration(JsirExportDefaultDeclarationOp op) {
+  std::optional<std::variant<std::unique_ptr<JsFunctionDeclaration>, std::unique_ptr<JsClassDeclaration>, std::unique_ptr<JsExpression>>> declaration;
+  if (!op.getDeclaration().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto declaration_ast,
+        Convert(
+            op.getDeclaration(),
+            StmtRegion(
+                OpVariant(
+                    ToOpConverter(VisitFunctionDeclaration),
+                    ToOpConverter(VisitClassDeclaration)
+                )
+            )
+        )
+    );
+    declaration = WidenVariant<std::variant<std::unique_ptr<JsFunctionDeclaration>, std::unique_ptr<JsClassDeclaration>, std::unique_ptr<JsExpression>>>(std::move(declaration_ast));
+  }
+  if (!op.getExpression().empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        auto expression_ast,
+        Convert(
+            op.getExpression(),
+            ExprRegion<JsirExprRegionEndOp>(
+                ToOpConverter(VisitExpression)
+            )
+        )
+    );
+    declaration.emplace(std::in_place_index<2>, std::move(expression_ast));
+  }
+  if (!declaration.has_value()) {
+    return absl::InvalidArgumentError("Exactly one of declaration, expression must be set.");
+  }
+  return Create<JsExportDefaultDeclaration>(
+      op,
+      *std::move(declaration));
 }
 
 absl::StatusOr<std::unique_ptr<JsExportAllDeclaration>>

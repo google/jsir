@@ -153,11 +153,16 @@ def JsirFunctionOpInterface : OpInterface<"JsirFunctionOpInterface"> {
       /*methodBody=*/[{ return $_op.getParams(); }]
     >,
     InterfaceMethod<
-      /*desc=*/"Returns the function body region.",
+      /*desc=*/[{
+        Returns the function body region.
+
+        For an arrow function, this is whichever of `body_block` and
+        `body_expression` is set.
+      }],
       /*retTy=*/"::mlir::Region &",
       /*methodName=*/"getBody",
       /*args=*/(ins),
-      /*methodBody=*/[{ return $_op.getBody(); }]
+      /*methodBody=*/[{ return ::maldoca::GetJsirFunctionBody($_op); }]
     >,
     InterfaceMethod<
       /*desc=*/"Returns whether the function is a generator (`function*`).",

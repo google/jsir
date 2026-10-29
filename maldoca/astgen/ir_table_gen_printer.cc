@@ -15,14 +15,18 @@
 #include "maldoca/astgen/ir_table_gen_printer.h"
 
 #include <cstddef>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
 #include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_def.h"
+#include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/ast_gen_utils.h"
 #include "maldoca/astgen/symbol.h"
 #include "maldoca/astgen/type.h"
@@ -66,6 +70,15 @@ void IrTableGenPrinter::PrintAst(const AstDef& ast, absl::string_view ir_path) {
   bool has_exprs_region = false;
   for (const auto* node : ast.topological_sorted_nodes()) {
     for (const auto* field : node->aggregated_fields()) {
+      if (FieldIsSplit(field)) {
+        for (const FieldIrSplitPb& split : field->ir_splits()) {
+          if (split.has_region() && (split.kind() == FIELD_KIND_LVAL ||
+                                     split.kind() == FIELD_KIND_RVAL)) {
+            has_expr_region = true;
+          }
+        }
+        continue;
+      }
       if (!field->enclose_in_region()) {
         continue;
       }
@@ -216,7 +229,7 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
       {"HirName", Symbol(hir_name).ToPascalCase()},
   });
 
-  std::vector<Symbol> traits;
+  std::vector<std::string> traits;
   for (const NodeDef* parent : node.parents()) {
     if (!absl::c_linear_search(parent->aggregated_kinds(), kind)) {
       continue;
@@ -225,7 +238,7 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
     if (!parent_ir_op_name.has_value()) {
       continue;
     }
-    traits.push_back(*parent_ir_op_name + "Traits");
+    traits.push_back((*parent_ir_op_name + "Traits").ToPascalCase());
   }
 
   // When there is more than one variadic operand, we must append the
@@ -243,7 +256,21 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
       continue;
     }
 
-    switch (field.kind()) {
+    // Operands of a split or a literal attribute are always optional.
+    if (FieldIsSplit(&field)) {
+      for (const FieldIrSplitPb& split : field.ir_splits()) {
+        if (split.has_operand()) {
+          num_variadic_operands++;
+        }
+      }
+      continue;
+    }
+    if (FieldHasLiteralAttr(&field)) {
+      num_variadic_operands++;
+      continue;
+    }
+
+    switch (FieldIrKind(field, kind)) {
       case FIELD_KIND_UNSPECIFIED: {
         LOG(QFATAL) << node.name() << "::" << field.name().ToCcVarName()
                     << ": FieldKind unspecified.";
@@ -263,11 +290,11 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
     }
   }
   if (num_variadic_operands > 1) {
-    traits.push_back(Symbol("AttrSizedOperandSegments"));
+    traits.push_back("AttrSizedOperandSegments");
   }
 
   if (absl::c_any_of(node.aggregated_fields(), FieldIsRegion)) {
-    traits.push_back(Symbol("NoTerminator"));
+    traits.push_back("NoTerminator");
   }
 
   for (auto mlir_trait : node.aggregated_additional_mlir_traits()) {
@@ -275,14 +302,24 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
       case MLIR_TRAIT_INVALID:
         LOG(FATAL) << "Invalid MlirTrait.";
       case MLIR_TRAIT_PURE:
-        traits.push_back(Symbol("Pure"));
+        traits.push_back("Pure");
         break;
       case MLIR_TRAIT_ISOLATED_FROM_ABOVE:
-        traits.push_back(Symbol("IsolatedFromAbove"));
+        traits.push_back("IsolatedFromAbove");
         break;
       case MLIR_TRAIT_JSIR_FUNCTION_OP_INTERFACE:
-        traits.push_back(Symbol("JsirFunctionOpInterfaceTraits"));
+        traits.push_back("JsirFunctionOpInterfaceTraits");
         break;
+    }
+  }
+
+  // Fields held in several arguments/regions require that exactly one (or at
+  // most one, if the field is optional) of them is set.
+  for (const FieldDef* field : node.aggregated_fields()) {
+    std::optional<std::string> trait =
+        GetExclusiveSlotsTrait(ast, node, *field, kind);
+    if (trait.has_value()) {
+      traits.push_back(*std::move(trait));
     }
   }
 
@@ -307,9 +344,9 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
           .print_separator = [&] { Print(",\n"); },
       }};
 
-      for (const Symbol& trait : traits) {
+      for (const std::string& trait : traits) {
         auto vars = WithVars({
-            {"Trait", trait.ToPascalCase()},
+            {"Trait", trait},
         });
 
         tab_printer.Print();
@@ -324,7 +361,7 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
     TabPrinter line_separator_printer{{
         .print_separator = [&] { Print("\n"); },
     }};
-    if (node.has_fold()) {
+    if (node.has_fold(kind)) {
       line_separator_printer.Print();
       Println("let hasFolder = 1;");
     }
@@ -343,8 +380,12 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
             continue;
           }
 
-          separator_printer.Print();
-          PrintArgument(ast, node, *field);
+          for (const std::string& argument :
+               GetArguments(ast, node, *field, kind)) {
+            separator_printer.Print();
+            auto vars = WithVars({{"argument", argument}});
+            Print("$argument$");
+          }
         }
       }
       Println();
@@ -365,8 +406,12 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
             continue;
           }
 
-          separator_printer.Print();
-          PrintRegion(ast, node, *field);
+          for (const std::string& region :
+               GetRegions(ast, node, *field, kind)) {
+            separator_printer.Print();
+            auto vars = WithVars({{"region", region}});
+            Print("$region$");
+          }
         }
       }
       Println();
@@ -387,38 +432,87 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
   Println();
 }
 
-void IrTableGenPrinter::PrintArgument(const AstDef& ast, const NodeDef& node,
-                                      const FieldDef& field) {
-  auto vars = WithVars({
-      {"type", field.type().TdType(field.optionalness(), field.kind())},
-      {"name", field.name().ToCcVarName()},
-  });
-  Print("$type$: $$$name$");
+namespace {
+
+std::string RegionTdType(FieldKind kind, bool is_list) {
+  switch (kind) {
+    case FIELD_KIND_UNSPECIFIED:
+      LOG(FATAL) << "FieldKind is unspecified.";
+    case FIELD_KIND_ATTR:
+      LOG(FATAL) << "Region of attributes not supported.";
+    case FIELD_KIND_LVAL:
+    case FIELD_KIND_RVAL:
+      return is_list ? "ExprsRegion" : "ExprRegion";
+    case FIELD_KIND_STMT:
+      return is_list ? "StmtsRegion" : "StmtRegion";
+  }
 }
 
-void IrTableGenPrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
-                                    const FieldDef& field) {
-  std::string region_type = [&] {
-    switch (field.kind()) {
-      case FIELD_KIND_UNSPECIFIED:
-        LOG(FATAL) << "FieldKind is unspecified.";
-      case FIELD_KIND_ATTR:
-        LOG(FATAL) << "Region of attributes not supported.";
-      case FIELD_KIND_LVAL:
-      case FIELD_KIND_RVAL:
-        if (field.type().IsA<ListType>()) {
-          return "ExprsRegion";
-        } else {
-          return "ExprRegion";
-        }
-      case FIELD_KIND_STMT:
-        if (field.type().IsA<ListType>()) {
-          return "StmtsRegion";
-        } else {
-          return "StmtRegion";
-        }
+}  // namespace
+
+std::vector<std::string> IrTableGenPrinter::GetArguments(const AstDef& ast,
+                                                         const NodeDef& node,
+                                                         const FieldDef& field,
+                                                         FieldKind op_kind) {
+  std::vector<std::string> arguments;
+  if (FieldIsSplit(&field)) {
+    for (const FieldIrSplitPb& split : field.ir_splits()) {
+      if (!split.has_operand()) {
+        continue;
+      }
+      arguments.push_back(absl::StrCat("Optional<AnyType>: $",
+                                       Symbol(split.operand()).ToCcVarName()));
     }
-  }();
+    return arguments;
+  }
+
+  if (FieldHasLiteralAttr(&field)) {
+    const FieldIrMappingPb& mapping = *field.ir_mapping();
+    std::vector<std::string> attr_types;
+    for (const std::string& type_name : mapping.literal_attr_types()) {
+      attr_types.push_back(ast.nodes()
+                               .at(type_name)
+                               ->ir_op_name(ast.lang_name(), FIELD_KIND_ATTR)
+                               .value()
+                               .ToPascalCase());
+    }
+    // Always an AnyAttrOf<>, even for a single type, so that the attribute is
+    // built and read as an mlir::Attribute regardless of the number of types.
+    std::string attr_type =
+        absl::StrCat("AnyAttrOf<[", absl::StrJoin(attr_types, ", "), "]>");
+    arguments.push_back(
+        absl::StrCat("OptionalAttr<", attr_type, ">: $",
+                     Symbol(mapping.literal_attr()).ToCcVarName()));
+    arguments.push_back(absl::StrCat("Optional<AnyType>: $",
+                                     Symbol(mapping.operand()).ToCcVarName()));
+    return arguments;
+  }
+
+  arguments.push_back(absl::StrCat(
+      field.type().TdType(field.optionalness(), FieldIrKind(field, op_kind)),
+      ": $", FieldIrName(field).ToCcVarName()));
+  return arguments;
+}
+
+std::vector<std::string> IrTableGenPrinter::GetRegions(const AstDef& ast,
+                                                       const NodeDef& node,
+                                                       const FieldDef& field,
+                                                       FieldKind op_kind) {
+  std::vector<std::string> regions;
+  if (FieldIsSplit(&field)) {
+    for (const FieldIrSplitPb& split : field.ir_splits()) {
+      if (!split.has_region()) {
+        continue;
+      }
+      regions.push_back(absl::StrCat(
+          "OptionalRegion<", RegionTdType(split.kind(), /*is_list=*/false),
+          ">: $", Symbol(split.region()).ToCcVarName()));
+    }
+    return regions;
+  }
+
+  std::string region_type =
+      RegionTdType(FieldIrKind(field, op_kind), field.type().IsA<ListType>());
 
   switch (field.optionalness()) {
     case OPTIONALNESS_UNSPECIFIED:
@@ -430,12 +524,64 @@ void IrTableGenPrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
       region_type = absl::StrCat("OptionalRegion<", region_type, ">");
   }
 
-  auto vars = WithVars({
-      {"name", field.name().ToCcVarName()},
-      {"RegionType", region_type},
-  });
+  regions.push_back(
+      absl::StrCat(region_type, ": $", FieldIrName(field).ToCcVarName()));
+  return regions;
+}
 
-  Print("$RegionType$: $$$name$");
+std::optional<std::string> IrTableGenPrinter::GetExclusiveSlotsTrait(
+    const AstDef& ast, const NodeDef& node, const FieldDef& field,
+    FieldKind op_kind) {
+  if (!FieldIsInIrOp(&field) || field.derived_in_ir()) {
+    return std::nullopt;
+  }
+
+  std::string op_name =
+      node.ir_op_name(ast.lang_name(), op_kind).value().ToPascalCase();
+  auto getter = [&](absl::string_view name) {
+    return absl::StrCat("::llvm::cast<", op_name, ">(&$_op).",
+                        Symbol(name).ToMlirGetter());
+  };
+
+  // (slot name, C++ condition that the slot is set).
+  std::vector<std::pair<std::string, std::string>> slots;
+  bool exactly_one;
+  if (FieldIsSplit(&field)) {
+    for (const FieldIrSplitPb& split : field.ir_splits()) {
+      if (split.has_operand()) {
+        slots.push_back(
+            {Symbol(split.operand()).ToCcVarName(),
+             absl::StrCat(getter(split.operand()), "() != nullptr")});
+      } else {
+        slots.push_back(
+            {Symbol(split.region()).ToCcVarName(),
+             absl::StrCat("!", getter(split.region()), "().empty()")});
+      }
+    }
+    exactly_one = field.optionalness() == OPTIONALNESS_REQUIRED;
+  } else if (FieldHasLiteralAttr(&field)) {
+    const FieldIrMappingPb& mapping = *field.ir_mapping();
+    slots.push_back(
+        {Symbol(mapping.literal_attr()).ToCcVarName(),
+         absl::StrCat(getter(mapping.literal_attr()), "Attr() != nullptr")});
+    slots.push_back({Symbol(mapping.operand()).ToCcVarName(),
+                     absl::StrCat(getter(mapping.operand()), "() != nullptr")});
+    exactly_one = true;
+  } else {
+    return std::nullopt;
+  }
+
+  std::vector<std::string> names;
+  std::vector<std::string> conditions;
+  for (const auto& [name, condition] : slots) {
+    names.push_back(name);
+    conditions.push_back(absl::StrCat("int(", condition, ")"));
+  }
+
+  return absl::StrCat("PredOpTrait<\"", exactly_one ? "exactly" : "at most",
+                      " one of ", absl::StrJoin(names, ", "),
+                      " is set\", CPred<\"(", absl::StrJoin(conditions, " + "),
+                      ") ", exactly_one ? "==" : "<=", " 1\">>");
 }
 
 std::string PrintIrTableGen(const AstDef& ast, absl::string_view ir_path) {

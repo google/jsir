@@ -1,6 +1,7 @@
 // JSIR:      "jsir.file"() <{comments = [#jsir<comment_line <L 9 C 0>, <L 9 C 36>, 139, 175, " TODO(b/182441574): Fix AST error.">, #jsir<comment_line <L 10 C 0>, <L 10 C 39>, 176, 215, " export * as identifier_3 from \22foo\22;">]}> ({
 // JSIR-NEXT:   "jsir.program"() <{source_type = "module"}> ({
 // JSIR-NEXT:     "jsir.export_default_declaration"() ({
+// JSIR-NEXT:     }, {
 // JSIR-NEXT:       %0 = "jsir.identifier"() <{name = "arbitrary_expression"}> : () -> !jsir.any
 // JSIR-NEXT:       "jsir.expr_region_end"(%0) : (!jsir.any) -> ()
 // JSIR-NEXT:     }) : () -> ()
