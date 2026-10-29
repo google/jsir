@@ -120,6 +120,13 @@ class JsirConstantPropagationAnalysis
     return JsirConstantPropagationValue::Unknown();
   }
 
+  // We don't know the values that a CFG edge implicitly assigns, e.g. the
+  // keys/elements that a for-in/of statement iterates over.
+  std::optional<JsirConstantPropagationValue> ImplicitWriteValue()
+      const override {
+    return JsirConstantPropagationValue::Unknown();
+  }
+
   void VisitOpCommon(
       mlir::Operation *op,
       llvm::ArrayRef<const JsirConstantPropagationValue *> operands,

@@ -145,7 +145,8 @@ class JsirGeneralCfgEdge
           std::tuple<mlir::ProgramPoint*, mlir::ProgramPoint*,
                      mlir::SmallVector<mlir::Value>,
                      mlir::SmallVector<mlir::Value>,
-                     std::optional<LivenessInfo>>> {
+                     std::optional<LivenessInfo>,
+                     mlir::SmallVector<mlir::Value>>> {
  public:
   using Base::Base;
 
@@ -165,6 +166,15 @@ class JsirGeneralCfgEdge
     return std::get<4>(getValue());
   }
 
+  // The lvalues that are implicitly assigned when the edge is taken, i.e.
+  // assigned without an op that does so.
+  //
+  // Example: the edges entering the body of `for (x in o)` write `x` (the
+  // `left_lval` operand), as the loop assigns it the next key.
+  const mlir::SmallVector<mlir::Value>& getImplicitWrites() const {
+    return std::get<5>(getValue());
+  }
+
   void print(llvm::raw_ostream& os) const override {
     os << "JsirGeneralCfgEdge";
     os << "\n  pred: ";
@@ -175,6 +185,8 @@ class JsirGeneralCfgEdge
     os << getPredValues().size();
     os << "\n  succ values size: ";
     os << getSuccValues().size();
+    os << "\n  implicit writes size: ";
+    os << getImplicitWrites().size();
     if (getLivenessInfo().has_value()) {
       os << "\n  liveness kind: ";
       switch (getLivenessInfo().value().kind) {
@@ -451,6 +463,8 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
                  absl::FunctionRef<mlir::ValueRange(mlir::Block*)>>
         pred_values;
     mlir::ValueRange succ_values;
+    // See JsirGeneralCfgEdge::getImplicitWrites().
+    mlir::ValueRange implicit_writes;
   };
 
   void MaybeEmplaceCfgEdges(CfgEdgeOptions options) {
@@ -476,7 +490,8 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
         }
 
         JsirGeneralCfgEdge* edge = getLatticeAnchor<JsirGeneralCfgEdge>(
-            from, to, pred_values, options.succ_values, options.liveness_info);
+            from, to, pred_values, options.succ_values, options.liveness_info,
+            options.implicit_writes);
 
         mlir::ProgramPoint* dependent = nullptr;
         if (auto* owner_op = llvm::dyn_cast<mlir::Operation*>(options.owner)) {
@@ -1256,8 +1271,13 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ┌──┴──◄ └───────────────┘
   // │     );
   // └─────►
+  //
+  // The loop assigns its target (the `left_lval` operand) the next key before
+  // each iteration, so the edges into the body carry it as an implicit write.
+  // (A `continue` edge joins into the same body entry state.)
   if (auto for_in_stmt = llvm::dyn_cast<JshirForInStatementOp>(op);
       for_in_stmt != nullptr) {
+    mlir::Value left_lval = for_in_stmt.getLeftLval();
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(for_in_stmt),
         .unlabeled_break_target = getProgramPointAfter(for_in_stmt),
@@ -1268,11 +1288,13 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
         .from = Before(for_in_stmt),
         .to = Before(for_in_stmt.getBody()),
         .owner = &*for_in_stmt,
+        .implicit_writes = left_lval,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_in_stmt.getBody()),
         .to = Before(for_in_stmt.getBody()),
         .owner = &*for_in_stmt,
+        .implicit_writes = left_lval,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_in_stmt.getBody()),
@@ -1288,8 +1310,12 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   // ┌──┴──◄ └───────────────┘
   // │     );
   // └─────►
+  //
+  // As for jshir.for_in_statement, the edges into the body write the target
+  // (the next element).
   if (auto for_of_stmt = llvm::dyn_cast<JshirForOfStatementOp>(op);
       for_of_stmt != nullptr) {
+    mlir::Value left_lval = for_of_stmt.getLeftLval();
     maybe_jump_targets = {
         .labeled_break_target = getProgramPointAfter(for_of_stmt),
         .unlabeled_break_target = getProgramPointAfter(for_of_stmt),
@@ -1300,11 +1326,13 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
         .from = Before(for_of_stmt),
         .to = Before(for_of_stmt.getBody()),
         .owner = &*for_of_stmt,
+        .implicit_writes = left_lval,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_of_stmt.getBody()),
         .to = Before(for_of_stmt.getBody()),
         .owner = &*for_of_stmt,
+        .implicit_writes = left_lval,
     });
     MaybeEmplaceCfgEdges({
         .from = After(for_of_stmt.getBody()),

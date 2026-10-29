@@ -16,6 +16,7 @@
 #define MALDOCA_JS_IR_ANALYSES_CONDITIONAL_FORWARD_PER_VAR_DATAFLOW_ANALYSIS_H_
 
 #include <cassert>
+#include <optional>
 #include <string>
 
 #include "llvm/ADT/ArrayRef.h"
@@ -152,6 +153,39 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
     JsirStateRef<StateT> exit_state = GetStateAtEndOf(&declarations_exit);
     exit_state.AddDependent(Base::getProgramPointAfter(op));
     after.Join(exit_state.value());
+  }
+
+  // The value of a variable that a CFG edge implicitly assigns (see
+  // JsirGeneralCfgEdge::getImplicitWrites()), or nullopt to not model the
+  // assignment.
+  virtual std::optional<ValueT> ImplicitWriteValue() const {
+    return std::nullopt;
+  }
+
+  // Writes ImplicitWriteValue() to each identifier that the edge implicitly
+  // assigns, in the successor's state.
+  void VisitCfgEdge(JsirGeneralCfgEdge *edge) override {
+    // JsirConditionalForwardDataFlowAnalysis doesn't expose VisitCfgEdge.
+    JsirForwardDataFlowAnalysis<ValueT, StateT>::VisitCfgEdge(edge);
+
+    if (edge->getImplicitWrites().empty()) {
+      return;
+    }
+    std::optional<ValueT> value = ImplicitWriteValue();
+    if (!value.has_value()) {
+      return;
+    }
+    JsirStateRef<StateT> succ_state =
+        this->template GetStateImpl<StateT>(edge->getSucc());
+    for (mlir::Value lvalue : edge->getImplicitWrites()) {
+      auto id = lvalue.getDefiningOp<JsirIdentifierRefOp>();
+      if (id == nullptr) {
+        continue;
+      }
+      const JsSymbolId symbol = GetSymbolId(scopes_, id);
+      succ_state.Write(
+          [&](StateT *state) { return state->Set(symbol, *value); });
+    }
   }
 
   void VisitVariableDeclarator(
