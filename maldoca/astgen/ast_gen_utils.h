@@ -20,17 +20,24 @@
 #include <algorithm>
 #include <functional>
 #include <limits>
+#include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
+#include "absl/log/check.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 #include "maldoca/astgen/ast_def.h"
+#include "maldoca/astgen/ast_def.pb.h"
+#include "maldoca/astgen/symbol.h"
 #include "maldoca/astgen/type.h"
+#include "maldoca/astgen/type.pb.h"
 #include "maldoca/base/path.h"
 #include "google/protobuf/io/printer.h"
 
@@ -206,12 +213,239 @@ inline std::string UnIndentedSource(absl::string_view source) {
 //
 // See FieldDefPb::enclose_in_region for why we need to enclose certain fields
 // in a region.
+//
+// A field split by the `ir_name`s of its alternatives (see
+// FieldDef::ir_splits()) is held in several arguments/regions, so it can be
+// both an argument and a region. A field that
+// is derived_in_ir() is neither: it is not stored in the op, but recomputed
+// when converting the op back to the AST.
+
+// Whether the field takes part in the AST<->IR conversion: it is either stored
+// in the op, or recomputed from it (derived_in_ir()).
+inline bool FieldIsInIrOp(const FieldDef* field) {
+  return field->in_ast() && field->in_ir();
+}
+
+// Whether `field` is one of `node`'s own fields (not inherited from an
+// ancestor) and is only in the AST (GENERATION_TARGET_AST_ONLY).
+inline bool FieldIsOwnAstOnly(const NodeDef& node, const FieldDef* field) {
+  absl::Span<const FieldDef> own_fields = node.fields();
+  return field->generation_target() == GENERATION_TARGET_AST_ONLY &&
+         field >= own_fields.data() &&
+         field < own_fields.data() + own_fields.size();
+}
+
+// Whether the field is split across several operands/regions, one per
+// `ir_name` of its alternatives. See FieldDef::ir_splits().
+inline bool FieldIsSplit(const FieldDef* field) {
+  return !field->ir_splits().empty();
+}
+
+// Whether the field is held either in a literal attribute or in an operand. See
+// FieldDef::literal_attr().
+inline bool FieldHasLiteralAttr(const FieldDef* field) {
+  return field->literal_attr() != nullptr;
+}
+
 inline bool FieldIsArgument(const FieldDef* field) {
-  return field->in_ast() && field->in_ir() && !field->enclose_in_region();
+  if (!FieldIsInIrOp(field) || field->derived_in_ir()) {
+    return false;
+  }
+  if (FieldIsSplit(field)) {
+    return absl::c_any_of(field->ir_splits(),
+                          [](const auto& split) { return !split.is_region; });
+  }
+  if (FieldHasLiteralAttr(field)) {
+    return true;
+  }
+  return !field->enclose_in_region();
 }
 
 inline bool FieldIsRegion(const FieldDef* field) {
-  return field->in_ast() && field->in_ir() && field->enclose_in_region();
+  if (!FieldIsInIrOp(field) || field->derived_in_ir()) {
+    return false;
+  }
+  if (FieldIsSplit(field)) {
+    return absl::c_any_of(field->ir_splits(),
+                          [](const auto& split) { return split.is_region; });
+  }
+  if (FieldHasLiteralAttr(field)) {
+    return false;
+  }
+  return field->enclose_in_region();
+}
+
+// The name of the single argument/region that holds a field without a split
+// (for a field with a literal attribute, the name of its operand). See
+// FieldDef::ir_name().
+inline Symbol FieldIrName(const FieldDef& field) { return field.ir_name(); }
+
+// The kind a field has in the op of `op_kind`: the LVAL op override's kind in
+// an LVAL op (see FieldDef::lval_op_override()), otherwise the field's own
+// kind.
+inline FieldKind FieldIrKind(const FieldDef& field, FieldKind op_kind) {
+  if (const FieldDef::LvalOpOverride* lval_op = field.lval_op_override();
+      lval_op != nullptr && op_kind == FIELD_KIND_LVAL) {
+    return lval_op->kind;
+  }
+  return field.kind();
+}
+
+// The kind of the op that holds the variant member `member_name` of a field in
+// the op of `op_kind`: the kind of its alternative if the field has
+// alternatives of different kinds (see FieldDef::member_ir_kind()), otherwise
+// FieldIrKind().
+//
+// Example: an `ExportSpecifier`'s Identifier `local` is held by a
+// `jsir.identifier_ref` (LVAL) op, but its StringLiteral `local` by a
+// `jsir.string_literal` (RVAL) op.
+inline FieldKind FieldMemberIrKind(const FieldDef& field,
+                                   absl::string_view member_name,
+                                   FieldKind op_kind) {
+  if (std::optional<FieldKind> kind = field.member_ir_kind(member_name)) {
+    return *kind;
+  }
+  return FieldIrKind(field, op_kind);
+}
+
+// Whether the members of a variant field are held by ops of different kinds
+// (see FieldMemberIrKind()).
+inline bool FieldHasPerMemberKinds(const FieldDef& field) {
+  return field.has_member_ir_kinds();
+}
+
+// Builds the type `name` (a class) or `name1 | name2 | ...` (a variant).
+inline std::unique_ptr<Type> MakeClassOrVariantType(
+    absl::Span<const std::string> names, absl::string_view lang_name) {
+  TypePb pb;
+  if (names.size() == 1) {
+    pb.set_class_(names.front());
+  } else {
+    for (const std::string& name : names) {
+      pb.mutable_variant()->add_types()->set_class_(name);
+    }
+  }
+  auto type = FromTypePb(pb, lang_name);
+  CHECK_OK(type.status());
+  return *std::move(type);
+}
+
+// If the op of `op_kind` holds a narrower type than the field's AST type,
+// returns that type; otherwise returns nullptr.
+//
+// - In an LVAL op, the LVAL op override's type (if set) replaces the AST types
+//   (see FieldDef::lval_op_override()).
+// - For a variant field held as an rvalue/lvalue, members whose node doesn't
+//   support that kind can't be held in the op. For example,
+//   `ObjectProperty.value: Expression | Pattern` holds an `Expression` in the
+//   `object_property` op and a `Pattern` in the `object_property_ref` op.
+//
+// The narrowed type must be a single class. When converting the AST to the IR,
+// the field value is downcast to it; when converting back, the value is
+// downcast to the first variant member it is an instance of.
+inline std::unique_ptr<Type> NarrowedIrType(const AstDef& ast,
+                                            const FieldDef& field,
+                                            FieldKind op_kind) {
+  if (FieldIsSplit(&field) || FieldHasLiteralAttr(&field)) {
+    return nullptr;
+  }
+  if (const FieldDef::LvalOpOverride* lval_op = field.lval_op_override();
+      lval_op != nullptr && op_kind == FIELD_KIND_LVAL &&
+      lval_op->type.has_value()) {
+    return MakeClassOrVariantType({*lval_op->type}, ast.lang_name());
+  }
+
+  FieldKind kind = FieldIrKind(field, op_kind);
+  if (kind != FIELD_KIND_RVAL && kind != FIELD_KIND_LVAL) {
+    return nullptr;
+  }
+  if (!field.type().IsA<VariantType>()) {
+    return nullptr;
+  }
+  const auto& variant = static_cast<const VariantType&>(field.type());
+  std::vector<std::string> supported;
+  for (const auto& member : variant.types()) {
+    if (!member->IsA<ClassType>()) {
+      return nullptr;
+    }
+    std::string name =
+        static_cast<const ClassType&>(*member).name().ToPascalCase();
+    FieldKind member_kind = FieldMemberIrKind(field, name, op_kind);
+    auto it = ast.nodes().find(name);
+    if (it == ast.nodes().end() ||
+        absl::c_linear_search(it->second->aggregated_kinds(), member_kind)) {
+      supported.push_back(std::move(name));
+    }
+  }
+  if (supported.size() == variant.types().size()) {
+    return nullptr;
+  }
+  CHECK_EQ(supported.size(), 1u)
+      << field.name().ToCcVarName()
+      << ": Exactly one variant member must support the kind "
+      << FieldKind_Name(kind) << ".";
+  return MakeClassOrVariantType(supported, ast.lang_name());
+}
+
+// The index of the variant member (or 0 for a class type) that holds the AST
+// node type `type_name`: either that member is `type_name` itself, or
+// `type_name` descends from it. Returns nullopt if no member does.
+//
+// Sets `*exact` to whether the member is `type_name` itself.
+inline std::optional<size_t> FindMemberHolding(const AstDef& ast,
+                                               const Type& type,
+                                               absl::string_view type_name,
+                                               bool* exact) {
+  std::vector<std::string> member_names;
+  if (type.IsA<VariantType>()) {
+    for (const auto& member : static_cast<const VariantType&>(type).types()) {
+      if (member->IsA<ClassType>()) {
+        member_names.push_back(
+            static_cast<const ClassType&>(*member).name().ToPascalCase());
+      } else {
+        member_names.push_back("");
+      }
+    }
+  } else if (type.IsA<ClassType>()) {
+    member_names.push_back(
+        static_cast<const ClassType&>(type).name().ToPascalCase());
+  }
+
+  for (size_t i = 0; i != member_names.size(); ++i) {
+    if (member_names[i] == type_name) {
+      *exact = true;
+      return i;
+    }
+  }
+  auto it = ast.nodes().find(type_name);
+  if (it == ast.nodes().end()) {
+    return std::nullopt;
+  }
+  for (size_t i = 0; i != member_names.size(); ++i) {
+    if (absl::c_any_of(it->second->ancestors(), [&](const NodeDef* ancestor) {
+          return ancestor->name() == member_names[i];
+        })) {
+      *exact = false;
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+
+// The class names of the members of a variant type (or of a class type).
+inline std::vector<std::string> MemberNames(const Type& type) {
+  std::vector<std::string> names;
+  if (type.IsA<VariantType>()) {
+    for (const auto& member : static_cast<const VariantType&>(type).types()) {
+      if (member->IsA<ClassType>()) {
+        names.push_back(
+            static_cast<const ClassType&>(*member).name().ToPascalCase());
+      }
+    }
+  } else if (type.IsA<ClassType>()) {
+    names.push_back(static_cast<const ClassType&>(type).name().ToPascalCase());
+  }
+  return names;
 }
 
 // Whether a class type refers to an AST node, i.e. is not marked

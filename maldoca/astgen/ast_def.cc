@@ -32,6 +32,7 @@
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -194,7 +195,134 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
         absl::StrCat("Field '", field_pb.name(), "' is not in camelCase."));
   }
 
-  ABSL_ASSIGN_OR_RETURN(field.type_, FromTypePb(field_pb.type(), lang_name));
+  auto field_error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("Field '", field_pb.name(), "': ", message));
+  };
+
+  // A field with `alternatives` without `type` has the variant of their types.
+  // Their IR settings are checked against the nodes in
+  // AstDef::ResolveAlternatives().
+  TypePb type_pb = field_pb.type();
+  if (!field_pb.alternatives().empty()) {
+    if (field_pb.kind() != FIELD_KIND_UNSPECIFIED) {
+      return field_error(
+          "kind can't be set with alternatives: each alternative has its own "
+          "kind.");
+    }
+    if (field_pb.has_ir_name() &&
+        !absl::c_all_of(field_pb.alternatives(),
+                        [](const FieldAlternativePb& alternative_pb) {
+                          return alternative_pb.has_op_kind();
+                        })) {
+      return field_error(
+          "ir_name can't be combined with alternatives, except with op_kind "
+          "ones: set the ir_name of each alternative.");
+    }
+
+    size_t num_ir_names = 0;
+    size_t num_selectors = 0;
+    size_t num_op_kinds = 0;
+    size_t num_members = 0;
+    bool has_typeless = false;
+    for (const FieldAlternativePb& alternative_pb : field_pb.alternatives()) {
+      Alternative alternative;
+      if (alternative_pb.has_type()) {
+        const NonListTypePb& alt_type = alternative_pb.type();
+        if (alt_type.has_class_()) {
+          alternative.member_names.push_back(alt_type.class_());
+        } else if (alt_type.has_variant()) {
+          for (const ScalarTypePb& member : alt_type.variant().types()) {
+            if (!member.has_class_()) {
+              return field_error(
+                  "Each alternative's type must be a class or a variant of "
+                  "classes.");
+            }
+            alternative.member_names.push_back(member.class_());
+          }
+          if (alternative.member_names.empty()) {
+            return field_error("An alternative has an empty variant type.");
+          }
+        } else {
+          return field_error(
+              "Each alternative's type must be a class or a variant of "
+              "classes.");
+        }
+        for (const std::string& member_name : alternative.member_names) {
+          *type_pb.mutable_variant()->add_types()->mutable_class_() =
+              member_name;
+        }
+        num_members += alternative.member_names.size();
+      } else {
+        has_typeless = true;
+        ++num_members;
+      }
+      if (alternative_pb.has_ir_name()) {
+        if (alternative_pb.ir_name().empty()) {
+          return field_error(absl::StrCat("Alternative ",
+                                          alternative.DebugName(),
+                                          " has an empty ir_name."));
+        }
+        alternative.ir_name = alternative_pb.ir_name();
+        ++num_ir_names;
+      }
+      if (alternative_pb.has_kind()) {
+        alternative.kind = alternative_pb.kind();
+      }
+      if (alternative_pb.has_when() && alternative_pb.has_unless()) {
+        return field_error(absl::StrCat("Alternative ", alternative.DebugName(),
+                                        " can't have both when and unless."));
+      }
+      if (alternative_pb.has_when()) {
+        alternative.when = alternative_pb.when();
+      }
+      if (alternative_pb.has_unless()) {
+        alternative.unless = alternative_pb.unless();
+      }
+      if (alternative.when.has_value() || alternative.unless.has_value()) {
+        ++num_selectors;
+      }
+      if (alternative_pb.has_op_kind()) {
+        alternative.op_kind = alternative_pb.op_kind();
+        ++num_op_kinds;
+      }
+      field.alternatives_.push_back(std::move(alternative));
+    }
+
+    size_t num_alternatives = field.alternatives_.size();
+    if (num_members < 2) {
+      return field_error("alternatives requires at least two alternatives.");
+    }
+    if (num_ir_names != 0 && num_ir_names != num_alternatives) {
+      return field_error(
+          "Either all alternatives must have an ir_name or none.");
+    }
+    if (num_selectors != 0 && num_op_kinds != 0) {
+      return field_error(
+          "Alternatives can't mix when/unless with op_kind selectors.");
+    }
+    bool has_selectors = num_selectors != 0 || num_op_kinds != 0;
+    if (has_selectors && num_selectors + num_op_kinds != num_alternatives) {
+      return field_error(
+          "Either all alternatives must have a selector (when, unless or "
+          "op_kind) or none.");
+    }
+    if (!has_selectors && field_pb.has_type()) {
+      return field_error(
+          "Exactly one of type and alternatives can be set, unless the "
+          "alternatives have selectors (when, unless or op_kind).");
+    }
+    if (has_typeless && !field_pb.has_type()) {
+      return field_error(
+          "An alternative without a type holds the field's type, so the field "
+          "must have a type.");
+    }
+    if (field_pb.has_type()) {
+      type_pb = field_pb.type();
+    }
+  }
+
+  ABSL_ASSIGN_OR_RETURN(field.type_, FromTypePb(type_pb, lang_name));
 
   if (field_pb.optionalness() == OPTIONALNESS_UNSPECIFIED) {
     return absl::InvalidArgumentError(
@@ -213,7 +341,31 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
+  if (field_pb.has_ir_name()) {
+    if (field_pb.ir_name().empty()) {
+      return field_error("ir_name can't be empty.");
+    }
+    if (!field.in_ast() || !field.in_ir()) {
+      return field_error(
+          "ir_name requires a field that is both in the AST and in the IR.");
+    }
+    field.ir_name_ = field_pb.ir_name();
+  }
+
+  if (!field.alternatives_.empty() && !field.in_ir()) {
+    return field_error(
+        "alternatives can't be set on a field that isn't in the IR "
+        "(GENERATION_TARGET_AST_ONLY): use type.");
+  }
+
   return field;
+}
+
+std::string FieldDef::Alternative::DebugName() const {
+  if (member_names.empty()) {
+    return "<field type>";
+  }
+  return absl::StrCat("\"", absl::StrJoin(member_names, " | "), "\"");
 }
 
 std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
@@ -373,6 +525,18 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     for (auto mlir_trait : node_pb.additional_mlir_traits()) {
       node->additional_mlir_traits_.push_back(
           static_cast<MlirTrait>(mlir_trait));
+    }
+
+    for (auto mlir_trait : node_pb.excluded_mlir_traits()) {
+      node->excluded_mlir_traits_.push_back(static_cast<MlirTrait>(mlir_trait));
+    }
+
+    if (!node_pb.fold_kinds().empty() && !node_pb.has_fold()) {
+      return absl::InvalidArgumentError(
+          absl::StrCat(node_pb.name(), ": fold_kinds requires has_fold."));
+    }
+    for (auto kind : node_pb.fold_kinds()) {
+      node->fold_kinds_.push_back(static_cast<FieldKind>(kind));
     }
 
     node_names.push_back(node_pb.name());
@@ -540,6 +704,9 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     for (MlirTrait trait : node.additional_mlir_traits()) {
       aggregated_additional_mlir_traits.insert(trait);
     }
+    for (MlirTrait trait : node.excluded_mlir_traits_) {
+      aggregated_additional_mlir_traits.erase(trait);
+    }
 
     node.aggregated_additional_mlir_traits_ = {
         aggregated_additional_mlir_traits.begin(),
@@ -605,8 +772,531 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     }
   }
 
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
+    for (FieldDef& field : node.fields_) {
+      ABSL_RETURN_IF_ERROR(ResolveAlternatives(nodes, node, field));
+    }
+  }
+
   return AstDef{pb.lang_name(), std::move(enum_defs), std::move(node_names),
                 std::move(nodes), std::move(topological_sorted_nodes)};
+}
+
+namespace {
+
+// The class names of a class type, or of the members of a variant of classes.
+// nullopt for any other type.
+std::optional<std::vector<std::string>> ClassNames(const Type& type) {
+  if (type.IsA<ClassType>()) {
+    return std::vector<std::string>{
+        static_cast<const ClassType&>(type).name().ToPascalCase()};
+  }
+  if (!type.IsA<VariantType>()) {
+    return std::nullopt;
+  }
+  std::vector<std::string> names;
+  for (const auto& member : static_cast<const VariantType&>(type).types()) {
+    if (!member->IsA<ClassType>()) {
+      return std::nullopt;
+    }
+    names.push_back(
+        static_cast<const ClassType&>(*member).name().ToPascalCase());
+  }
+  return names;
+}
+
+bool SupportsKind(const NodeDef& node, FieldKind kind) {
+  return absl::c_linear_search(node.aggregated_kinds(), kind);
+}
+
+// The leaf nodes that are `node` or descend from it.
+absl::flat_hash_set<const NodeDef*> LeavesOf(const NodeDef& node) {
+  if (node.leaves().empty()) {
+    return {&node};
+  }
+  return {node.leaves().begin(), node.leaves().end()};
+}
+
+}  // namespace
+
+absl::Status AstDef::ResolveAlternatives(
+    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+    NodeDef& node, FieldDef& field) {
+  if (field.alternatives_.empty()) {
+    return absl::OkStatus();
+  }
+
+  auto error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        node.name(), "::", field.name().ToCcVarName(), ": ", message));
+  };
+
+  std::optional<std::vector<std::string>> field_members =
+      ClassNames(field.type());
+  if (!field_members.has_value()) {
+    return error(
+        "A field with alternatives must have a class type or a variant of "
+        "classes.");
+  }
+
+  // The class names an alternative holds: its own, or the field's.
+  auto names_of = [&](const FieldDef::Alternative& alternative)
+      -> absl::Span<const std::string> {
+    if (alternative.member_names.empty()) {
+      return *field_members;
+    }
+    return alternative.member_names;
+  };
+
+  // The kind of each alternative: its `kind` if set, otherwise the one of
+  // FIELD_KIND_STMT, FIELD_KIND_RVAL and FIELD_KIND_LVAL all its types
+  // support.
+  bool has_sibling_selectors = false;
+  bool has_op_kinds = false;
+  std::vector<FieldKind> kinds;
+  for (const FieldDef::Alternative& alternative : field.alternatives_) {
+    has_sibling_selectors |=
+        alternative.when.has_value() || alternative.unless.has_value();
+    has_op_kinds |= alternative.op_kind.has_value();
+
+    std::vector<const NodeDef*> members;
+    for (const std::string& member_name : names_of(alternative)) {
+      auto it = nodes.find(member_name);
+      if (it == nodes.end()) {
+        return error(absl::StrCat("Alternative \"", member_name,
+                                  "\" doesn't name a node."));
+      }
+      members.push_back(it->second.get());
+    }
+
+    if (alternative.kind.has_value()) {
+      FieldKind kind = *alternative.kind;
+      if (kind == FIELD_KIND_ATTR) {
+        // Validated by ResolveSiblingAlternatives().
+        if (!alternative.unless.has_value()) {
+          return error(absl::StrCat(
+              "Alternative ", alternative.DebugName(),
+              " has kind FIELD_KIND_ATTR, which is only supported for "
+              "unless alternatives."));
+        }
+        kinds.push_back(kind);
+        continue;
+      }
+      if (kind != FIELD_KIND_STMT && kind != FIELD_KIND_RVAL &&
+          kind != FIELD_KIND_LVAL) {
+        return error(absl::StrCat(
+            "Alternative ", alternative.DebugName(), " has kind ",
+            FieldKind_Name(kind),
+            ", but must be FIELD_KIND_ATTR, FIELD_KIND_STMT, FIELD_KIND_RVAL "
+            "or FIELD_KIND_LVAL."));
+      }
+      for (const NodeDef* member : members) {
+        if (!SupportsKind(*member, kind)) {
+          return error(absl::StrCat("Alternative \"", member->name(),
+                                    "\" doesn't support kind ",
+                                    FieldKind_Name(kind), "."));
+        }
+      }
+      kinds.push_back(kind);
+      continue;
+    }
+
+    std::optional<FieldKind> inferred;
+    for (const NodeDef* member : members) {
+      std::vector<FieldKind> supported;
+      for (FieldKind kind :
+           {FIELD_KIND_STMT, FIELD_KIND_RVAL, FIELD_KIND_LVAL}) {
+        if (SupportsKind(*member, kind)) {
+          supported.push_back(kind);
+        }
+      }
+      if (supported.size() != 1) {
+        std::vector<std::string> names;
+        for (FieldKind kind : supported) {
+          names.push_back(FieldKind_Name(kind));
+        }
+        return error(absl::StrCat(
+            "Alternative \"", member->name(), "\" supports ",
+            names.empty() ? "none" : absl::StrJoin(names, ", "),
+            " of FIELD_KIND_STMT, FIELD_KIND_RVAL and FIELD_KIND_LVAL: set "
+            "its kind."));
+      }
+      if (inferred.has_value() && *inferred != supported.front()) {
+        return error(absl::StrCat("The types of alternative ",
+                                  alternative.DebugName(),
+                                  " support different kinds: set its kind."));
+      }
+      inferred = supported.front();
+    }
+    kinds.push_back(*inferred);
+  }
+
+  if (has_sibling_selectors) {
+    return ResolveSiblingAlternatives(nodes, node, field, kinds);
+  }
+  if (has_op_kinds) {
+    return ResolveOpKindAlternatives(nodes, node, field, kinds);
+  }
+
+  // FieldDef::FromFieldDefPb() checked that either all alternatives have an
+  // ir_name or none does.
+  if (!field.alternatives_.front().ir_name.has_value()) {
+    // Without ir_name, the alternatives are held in the field's operand, as
+    // rvalues or lvalues. This doesn't require the node to have
+    // should_generate_ir_op: it also describes handwritten ops.
+    for (size_t i = 0; i != kinds.size(); ++i) {
+      if (kinds[i] == FIELD_KIND_STMT) {
+        return error(absl::StrCat(
+            "Alternative ", field.alternatives_[i].DebugName(),
+            " is FIELD_KIND_STMT, which requires ir_names (a statement is "
+            "held in its own region)."));
+      }
+    }
+    if (static_cast<size_t>(absl::c_count(kinds, kinds.front())) ==
+        kinds.size()) {
+      return error(absl::StrCat(
+          "All alternatives are ", FieldKind_Name(kinds.front()),
+          " and have no ir_name: use type and kind instead of alternatives."));
+    }
+    // The field is held as an rvalue, except for its lvalue alternatives.
+    field.kind_ = FIELD_KIND_RVAL;
+    for (size_t i = 0; i != kinds.size(); ++i) {
+      if (kinds[i] == FIELD_KIND_LVAL) {
+        for (const std::string& member_name :
+             field.alternatives_[i].member_names) {
+          field.member_ir_kinds_[member_name] = FIELD_KIND_LVAL;
+        }
+      }
+    }
+    return absl::OkStatus();
+  }
+
+  if (!node.should_generate_ir_op()) {
+    return error(
+        "Alternatives with ir_names require the node to have "
+        "should_generate_ir_op.");
+  }
+  for (size_t i = 0; i != kinds.size(); ++i) {
+    const FieldDef::Alternative& alternative = field.alternatives_[i];
+    FieldKind kind = kinds[i];
+    // A statement is always held in a region.
+    bool is_region = kind == FIELD_KIND_STMT || field.enclose_in_region();
+
+    auto it =
+        absl::c_find_if(field.ir_splits_, [&](const FieldDef::IrSplit& split) {
+          return split.name == *alternative.ir_name;
+        });
+    if (it == field.ir_splits_.end()) {
+      field.ir_splits_.push_back(FieldDef::IrSplit{
+          .name = *alternative.ir_name,
+          .is_region = is_region,
+          .kind = kind,
+          .types = alternative.member_names,
+      });
+      continue;
+    }
+    if (it->kind != kind || it->is_region != is_region) {
+      return error(absl::StrCat(
+          "The alternatives with ir_name \"", *alternative.ir_name,
+          "\" must have the same kind and all be held in a region or all in "
+          "an operand, but \"",
+          it->types.front(), "\" is ", FieldKind_Name(it->kind),
+          it->is_region ? " (region)" : " (operand)", " and ",
+          alternative.DebugName(), " is ", FieldKind_Name(kind),
+          is_region ? " (region)." : " (operand)."));
+    }
+    it->types.insert(it->types.end(), alternative.member_names.begin(),
+                     alternative.member_names.end());
+  }
+  return absl::OkStatus();
+}
+
+absl::Status AstDef::ResolveSiblingAlternatives(
+    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+    NodeDef& node, FieldDef& field, absl::Span<const FieldKind> kinds) {
+  auto error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        node.name(), "::", field.name().ToCcVarName(), ": ", message));
+  };
+
+  std::string sibling_name;
+  std::optional<size_t> when_index;
+  std::vector<size_t> unless_indices;
+  for (size_t i = 0; i != field.alternatives_.size(); ++i) {
+    const FieldDef::Alternative& alternative = field.alternatives_[i];
+    const std::string& name =
+        alternative.when.has_value() ? *alternative.when : *alternative.unless;
+    if (sibling_name.empty()) {
+      sibling_name = name;
+    } else if (name != sibling_name) {
+      return error(
+          absl::StrCat("All when/unless must name the same sibling, "
+                       "but got \"",
+                       sibling_name, "\" and \"", name, "\"."));
+    }
+    if (!alternative.ir_name.has_value()) {
+      return error("Alternatives with when/unless require ir_names.");
+    }
+    if (alternative.when.has_value()) {
+      if (when_index.has_value()) {
+        return error("Exactly one alternative must have when.");
+      }
+      when_index = i;
+    } else {
+      unless_indices.push_back(i);
+    }
+  }
+  if (!when_index.has_value()) {
+    return error("Exactly one alternative must have when.");
+  }
+  if (unless_indices.empty()) {
+    return error("At least one alternative must have unless.");
+  }
+
+  // The `when` alternative: the field's whole type, in an operand.
+  const FieldDef::Alternative& when_alternative =
+      field.alternatives_[*when_index];
+  if (!when_alternative.member_names.empty()) {
+    return error(
+        "The when alternative holds the field's whole type: it can't have a "
+        "type.");
+  }
+  FieldKind when_kind = kinds[*when_index];
+  if (when_kind != FIELD_KIND_RVAL && when_kind != FIELD_KIND_LVAL) {
+    return error(
+        absl::StrCat("The when alternative must be FIELD_KIND_RVAL or "
+                     "FIELD_KIND_LVAL, but is ",
+                     FieldKind_Name(when_kind), "."));
+  }
+
+  // The `unless` alternatives: attributes of some of the field's types.
+  const std::string& literal_attr =
+      *field.alternatives_[unless_indices.front()].ir_name;
+  if (literal_attr == *when_alternative.ir_name) {
+    return error(
+        absl::StrCat("The when and unless alternatives must have "
+                     "different ir_names, but both are \"",
+                     literal_attr, "\"."));
+  }
+  std::vector<std::string> field_members = *ClassNames(field.type());
+  std::vector<std::string> literal_attr_types;
+  for (size_t i : unless_indices) {
+    const FieldDef::Alternative& alternative = field.alternatives_[i];
+    if (kinds[i] != FIELD_KIND_ATTR) {
+      return error(absl::StrCat("The unless alternative ",
+                                alternative.DebugName(),
+                                " must have kind FIELD_KIND_ATTR."));
+    }
+    if (*alternative.ir_name != literal_attr) {
+      return error(absl::StrCat(
+          "The unless alternatives must share an ir_name, but got \"",
+          literal_attr, "\" and \"", *alternative.ir_name, "\"."));
+    }
+    if (alternative.member_names.empty()) {
+      return error("An unless alternative must have a type.");
+    }
+    for (const std::string& member_name : alternative.member_names) {
+      const NodeDef& member = *nodes.at(member_name);
+      if (!member.should_generate_ir_attr()) {
+        return error(absl::StrCat("The unless alternative \"", member_name,
+                                  "\" must have should_generate_ir_attr."));
+      }
+      // The type must be held by a member of the field's type.
+      bool held = absl::c_any_of(field_members, [&](const std::string& name) {
+        return name == member_name ||
+               absl::c_any_of(member.ancestors(), [&](const NodeDef* ancestor) {
+                 return ancestor->name() == name;
+               });
+      });
+      if (!held) {
+        return error(absl::StrCat("The unless alternative \"", member_name,
+                                  "\" isn't a type of the field."));
+      }
+      literal_attr_types.push_back(member_name);
+    }
+  }
+
+  if (field.optionalness() != OPTIONALNESS_REQUIRED) {
+    return error("Alternatives with when/unless require a required field.");
+  }
+  if (field.enclose_in_region()) {
+    return error(
+        "Alternatives with when/unless can't be combined with "
+        "enclose_in_region.");
+  }
+
+  FieldDef* sibling = nullptr;
+  for (FieldDef& other : node.fields_) {
+    if (other.name().ToCamelCase() == sibling_name) {
+      sibling = &other;
+      break;
+    }
+  }
+  if (sibling == nullptr) {
+    return error(absl::StrCat("when/unless \"", sibling_name,
+                              "\" doesn't name a sibling field."));
+  }
+  if (sibling == &field || !sibling->type().IsA<BuiltinType>() ||
+      static_cast<const BuiltinType&>(sibling->type()).builtin_kind() !=
+          BuiltinTypeKind::kBool ||
+      sibling->optionalness() != OPTIONALNESS_REQUIRED) {
+    return error(absl::StrCat("when/unless \"", sibling_name,
+                              "\" must name a required bool field."));
+  }
+  sibling->derived_in_ir_ = true;
+
+  field.kind_ = when_kind;
+  field.ir_name_ = *when_alternative.ir_name;
+  field.literal_attr_ = FieldDef::LiteralAttr{
+      .name = literal_attr,
+      .types = std::move(literal_attr_types),
+      .discriminator = sibling_name,
+  };
+  return absl::OkStatus();
+}
+
+absl::Status AstDef::ResolveOpKindAlternatives(
+    const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+    const NodeDef& node, FieldDef& field, absl::Span<const FieldKind> kinds) {
+  auto error = [&](absl::string_view message) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        node.name(), "::", field.name().ToCcVarName(), ": ", message));
+  };
+
+  std::optional<size_t> rval_index;
+  std::optional<size_t> lval_index;
+  for (size_t i = 0; i != field.alternatives_.size(); ++i) {
+    const FieldDef::Alternative& alternative = field.alternatives_[i];
+    FieldKind op_kind = *alternative.op_kind;
+    if (op_kind != FIELD_KIND_RVAL && op_kind != FIELD_KIND_LVAL) {
+      return error(
+          absl::StrCat("op_kind must be FIELD_KIND_RVAL or "
+                       "FIELD_KIND_LVAL, but is ",
+                       FieldKind_Name(op_kind), "."));
+    }
+    std::optional<size_t>& index =
+        op_kind == FIELD_KIND_RVAL ? rval_index : lval_index;
+    if (index.has_value()) {
+      return error(absl::StrCat("Exactly one alternative must have op_kind ",
+                                FieldKind_Name(op_kind), "."));
+    }
+    index = i;
+    if (!SupportsKind(node, op_kind)) {
+      return error(absl::StrCat("op_kind ", FieldKind_Name(op_kind),
+                                " requires the node to support that kind."));
+    }
+    if (alternative.ir_name.has_value()) {
+      return error(
+          "Alternatives with op_kind can't have an ir_name: set the field's "
+          "ir_name.");
+    }
+    if (kinds[i] != FIELD_KIND_RVAL && kinds[i] != FIELD_KIND_LVAL) {
+      return error(
+          absl::StrCat("Alternative ", alternative.DebugName(),
+                       " must be FIELD_KIND_RVAL or FIELD_KIND_LVAL, but is ",
+                       FieldKind_Name(kinds[i]), "."));
+    }
+  }
+  if (!rval_index.has_value() || !lval_index.has_value()) {
+    return error(
+        "Alternatives with op_kind require exactly one for each of "
+        "FIELD_KIND_RVAL and FIELD_KIND_LVAL.");
+  }
+
+  std::vector<std::string> field_members = *ClassNames(field.type());
+  bool is_variant = field.type().IsA<VariantType>();
+
+  // The members the op holds for a field held with `kind`: for a variant
+  // field, only the members that support the kind (see NarrowedIrType()).
+  auto implicit_members = [&](FieldKind kind) -> std::vector<std::string> {
+    if (!is_variant) {
+      return field_members;
+    }
+    std::vector<std::string> supported;
+    for (const std::string& name : field_members) {
+      if (SupportsKind(*nodes.at(name), kind)) {
+        supported.push_back(name);
+      }
+    }
+    return supported;
+  };
+
+  bool narrowed = false;
+  // Checks that the alternative of `op_kind` holds what the op of that kind
+  // holds by default. Returns its types.
+  auto check_implicit = [&](size_t index, FieldKind op_kind) -> absl::Status {
+    const FieldDef::Alternative& alternative = field.alternatives_[index];
+    std::vector<std::string> expected = implicit_members(kinds[index]);
+    if (expected.empty() ||
+        (expected.size() != 1 && expected.size() != field_members.size())) {
+      return error(absl::StrCat(
+          "In the ", FieldKind_Name(op_kind),
+          " op, either one or all members of the field must support ",
+          FieldKind_Name(kinds[index]), "."));
+    }
+    std::vector<std::string> actual = alternative.member_names.empty()
+                                          ? field_members
+                                          : alternative.member_names;
+    if (actual != expected) {
+      return error(absl::StrCat("The ", FieldKind_Name(op_kind),
+                                " alternative ", alternative.DebugName(),
+                                " must hold \"", absl::StrJoin(expected, " | "),
+                                "\": the members of the field that "
+                                "support ",
+                                FieldKind_Name(kinds[index]), "."));
+    }
+    narrowed |= expected.size() != field_members.size();
+    return absl::OkStatus();
+  };
+
+  ABSL_RETURN_IF_ERROR(check_implicit(*rval_index, FIELD_KIND_RVAL));
+  field.kind_ = kinds[*rval_index];
+
+  FieldKind lval_kind = kinds[*lval_index];
+  // The class the LVAL op holds, for a class field holding another class.
+  std::optional<std::string> lval_type;
+
+  const FieldDef::Alternative& lval_alternative =
+      field.alternatives_[*lval_index];
+  if (is_variant || lval_alternative.member_names.empty() ||
+      lval_alternative.member_names == field_members) {
+    ABSL_RETURN_IF_ERROR(check_implicit(*lval_index, FIELD_KIND_LVAL));
+  } else {
+    // A class field holding another class in the LVAL op.
+    if (lval_alternative.member_names.size() != 1) {
+      return error(absl::StrCat(
+          "The FIELD_KIND_LVAL alternative of a class field must have a "
+          "single class, but has ",
+          lval_alternative.DebugName(), "."));
+    }
+    const std::string& member = lval_alternative.member_names.front();
+    absl::flat_hash_set<const NodeDef*> lval_leaves =
+        LeavesOf(*nodes.at(member));
+    if (!absl::c_any_of(
+            LeavesOf(*nodes.at(field_members.front())),
+            [&](const NodeDef* leaf) { return lval_leaves.contains(leaf); })) {
+      return error(absl::StrCat("The FIELD_KIND_LVAL alternative \"", member,
+                                "\" has no node in common with the field's "
+                                "type \"",
+                                field_members.front(), "\"."));
+    }
+    lval_type = member;
+    narrowed = true;
+  }
+
+  if (narrowed && field.optionalness() != OPTIONALNESS_REQUIRED) {
+    return error(
+        "An op holding only some of the field's types requires a required "
+        "field.");
+  }
+  if (lval_kind != field.kind_ || lval_type.has_value()) {
+    field.lval_op_override_ = FieldDef::LvalOpOverride{
+        .kind = lval_kind,
+        .type = std::move(lval_type),
+    };
+  }
+  return absl::OkStatus();
 }
 
 void AstDef::ResolveClassType(

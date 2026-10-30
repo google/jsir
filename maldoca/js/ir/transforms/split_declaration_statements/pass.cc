@@ -47,19 +47,26 @@ std::vector<mlir::Operation *> GetDependencyOps(mlir::Operation *root) {
 }
 
 bool BlockIsForHeader(mlir::Block &block) {
-  auto for_op =
-      llvm::dyn_cast_if_present<JshirForStatementOp>(block.getParentOp());
-  if (for_op == nullptr) {
-    return false;
-  }
-
   auto *region = block.getParent();
   if (region == nullptr) {
     return false;
   }
 
-  return &for_op.getInit() == region || &for_op.getTest() == region ||
-         &for_op.getUpdate() == region;
+  mlir::Operation *parent_op = block.getParentOp();
+  if (auto for_op = llvm::dyn_cast_if_present<JshirForStatementOp>(parent_op)) {
+    return &for_op.getInitDeclaration() == region ||
+           &for_op.getInitExpression() == region ||
+           &for_op.getTest() == region || &for_op.getUpdate() == region;
+  }
+  if (auto for_in_op =
+          llvm::dyn_cast_if_present<JshirForInStatementOp>(parent_op)) {
+    return &for_in_op.getLeftDeclaration() == region;
+  }
+  if (auto for_of_op =
+          llvm::dyn_cast_if_present<JshirForOfStatementOp>(parent_op)) {
+    return &for_of_op.getLeftDeclaration() == region;
+  }
+  return false;
 }
 
 void SplitDeclarationStatements(mlir::Operation *root) {

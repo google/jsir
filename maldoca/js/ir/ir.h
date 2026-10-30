@@ -314,6 +314,19 @@ QjsValue EmulateBinOp(JSContext *qjs_context, std::string op, QjsValue left,
 QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
                        QjsValue operand);
 
+class JsirArrowFunctionExpressionOp;
+
+// Returns the body region of a function op. Implements
+// JsirFunctionOpInterface::getBody().
+template <typename FunctionOpT>
+mlir::Region &GetJsirFunctionBody(FunctionOpT op) {
+  return op.getBody();
+}
+
+// The body of an arrow function is either a block statement (`body_block`) or
+// an expression (`body_expression`). Returns whichever region is set.
+mlir::Region &GetJsirFunctionBody(JsirArrowFunctionExpressionOp op);
+
 }  // namespace maldoca
 
 // Include the auto-generated header file containing the declaration of the JSIR

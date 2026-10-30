@@ -14,14 +14,19 @@
 
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 
+#include <cstddef>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
+#include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/container/btree_map.h"
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -269,10 +274,14 @@ void IrToAstSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
   {
     auto indent = WithIndent();
     for (const auto* field : node.aggregated_fields()) {
-      if (FieldIsArgument(field)) {
-        PrintField(ast, node, *field);
+      if (FieldIsSplit(field) && FieldIsInIrOp(field)) {
+        PrintSplitField(ast, node, *field);
+      } else if (FieldHasLiteralAttr(field) && FieldIsInIrOp(field)) {
+        PrintLiteralAttrField(ast, node, *field, kind);
+      } else if (FieldIsArgument(field)) {
+        PrintField(ast, node, *field, kind);
       } else if (FieldIsRegion(field)) {
-        PrintRegion(ast, node, *field);
+        PrintRegion(ast, node, *field, kind);
       }
     }
 
@@ -283,14 +292,29 @@ void IrToAstSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
       Print("$name$");
 
       for (const FieldDef* field : node.aggregated_fields()) {
-        if (!FieldIsArgument(field) && !FieldIsRegion(field)) {
+        if (FieldIsOwnAstOnly(node, field)) {
+          // The IR doesn't hold the field. The fields inherited from the
+          // ancestors (e.g. the trivia of a `Node`) are filled in by
+          // `Create<>`; the node's own fields are passed as unset.
+          CHECK(field->optionalness() != OPTIONALNESS_REQUIRED)
+              << node.name() << "." << field->name().ToCcVarName()
+              << ": A field that is only in the AST must be optional.";
+          Print(",\nstd::nullopt");
+          continue;
+        }
+        if (!FieldIsInIrOp(field)) {
           continue;
         }
 
+        // A required split field is held in an std::optional until we've
+        // checked that it is set.
+        bool unwrap = FieldIsSplit(field) &&
+                      field->optionalness() == OPTIONALNESS_REQUIRED;
         auto vars = WithVars({
             {"field_name", field->name().ToCcVarName()},
+            {"deref", unwrap ? "*" : ""},
         });
-        Print(",\nstd::move($field_name$)");
+        Print(",\n$deref$std::move($field_name$)");
       }
     }
 
@@ -301,13 +325,15 @@ void IrToAstSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
 }
 
 void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
-                                      const FieldDef& field) {
+                                      const FieldDef& field,
+                                      FieldKind op_kind) {
   MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
+  FieldKind kind = FieldIrKind(field, op_kind);
 
-  auto mlir_getter = field.name().ToMlirGetter();
+  auto mlir_getter = FieldIrName(field).ToMlirGetter();
 
   std::string rhs;
-  switch (field.kind()) {
+  switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
       LOG(FATAL) << "Unspecified FieldKind.";
     case FIELD_KIND_ATTR: {
@@ -324,8 +350,18 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
     }
   }
 
+  std::unique_ptr<Type> narrowed = NarrowedIrType(ast, field, op_kind);
+  // A class-typed field narrowed in the LVAL op (see
+  // FieldDef::LvalOpOverride::type) also
+  // accepts an op of the field's own type, which the AST -> IR conversion
+  // falls back to when the AST holds a node without the narrowed form.
+  bool narrowed_with_fallback =
+      narrowed != nullptr && field.type().IsA<ClassType>();
+  auto lhs = narrowed != nullptr ? (field.name() + "ir").ToCcVarName()
+                                 : field.name().ToCcVarName();
+
   auto vars = WithVars({
-      {"lhs", field.name().ToCcVarName()},
+      {"lhs", lhs},
       {"rhs", rhs},
   });
 
@@ -337,28 +373,260 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
     {
       auto indent = WithIndent(4);
       Println("$rhs$,");
-      PrintConverter(ast, field.type(), ast.lang_name(), field.kind(),
-                     maybe_null);
+      if (FieldHasPerMemberKinds(field)) {
+        PrintPerMemberKindsConverter(ast, field, op_kind, maybe_null);
+      } else if (narrowed_with_fallback) {
+        CHECK(maybe_null == MaybeNull::kNo);
+        Println("OpVariant(");
+        {
+          auto indent = WithIndent(4);
+          PrintConverter(ast, *narrowed, ast.lang_name(), kind, MaybeNull::kNo);
+          Print(",\n");
+          PrintConverter(ast, field.type(), ast.lang_name(), field.kind(),
+                         MaybeNull::kNo);
+          Println();
+        }
+        Print(")");
+      } else {
+        PrintConverter(ast, narrowed != nullptr ? *narrowed : field.type(),
+                       ast.lang_name(), kind, maybe_null);
+      }
       Println();
     }
     Println(")");
   }
   Println(");");
+
+  if (narrowed != nullptr) {
+    // The op holds a narrower type than the AST field. Downcast the converted
+    // value to the field's type.
+    auto vars = WithVars({
+        {"field_name", field.name().ToCcVarName()},
+        {"CcType", field.type().CcType()},
+    });
+    // The extra parentheses protect the commas in $CcType$ from the macro.
+    Println(
+        "ABSL_ASSIGN_OR_RETURN(auto $field_name$, "
+        "(DynCastAstNode<$CcType$>(std::move($lhs$))));");
+  }
+}
+
+void IrToAstSourcePrinter::PrintLiteralAttrField(const AstDef& ast,
+                                                 const NodeDef& node,
+                                                 const FieldDef& field,
+                                                 FieldKind op_kind) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  const FieldDef::LiteralAttr& literal_attr_def = *field.literal_attr();
+
+  Symbol literal_attr{literal_attr_def.name};
+  Symbol operand = field.ir_name();
+  const std::vector<std::string>& type_names = literal_attr_def.types;
+
+  auto vars = WithVars({
+      {"CcType", field.type().CcType()},
+      {"field_name", field.name().ToCcVarName()},
+      {"literal_unless", Symbol(literal_attr_def.discriminator).ToCcVarName()},
+      {"literal_attr", literal_attr.ToCcVarName()},
+      {"literalAttrGetter", literal_attr.ToMlirGetter()},
+      {"operand", operand.ToCcVarName()},
+      {"operandGetter", operand.ToMlirGetter()},
+      {"literal_types", absl::StrJoin(type_names, " or ")},
+  });
+
+  Println("$CcType$ $field_name$;");
+  Println("bool $literal_unless$;");
+  Println(
+      "if (mlir::Attribute $literal_attr$ = op.$literalAttrGetter$Attr()) {");
+  {
+    auto indent = WithIndent();
+    Println("$literal_unless$ = false;");
+    IfStmtPrinter if_printer(this);
+    for (const std::string& type_name : type_names) {
+      bool exact = false;
+      std::optional<size_t> member =
+          FindMemberHolding(ast, field.type(), type_name, &exact);
+      CHECK(member.has_value())
+          << field.name().ToCcVarName() << ": literal_attr_types \""
+          << type_name << "\" isn't held by any member of the field.";
+
+      const NodeDef& type_node = *ast.nodes().at(type_name);
+      auto typed_attr = (literal_attr + Symbol(type_name)).ToCcVarName();
+      auto vars = WithVars({
+          {"AttrType",
+           type_node.ir_op_name(ir_lang, FIELD_KIND_ATTR)->ToPascalCase()},
+          {"typed_attr", typed_attr},
+          {"typed_ast", (Symbol(typed_attr) + "ast").ToCcVarName()},
+          {"Visitor", GetVisitor(type_node, FIELD_KIND_ATTR).ToPascalCase()},
+          {"index", std::to_string(*member)},
+      });
+      if_printer.PrintCase({
+          [&] {
+            Print(
+                "auto $typed_attr$ = "
+                "llvm::dyn_cast<$AttrType$>($literal_attr$)");
+          },
+          [&] {
+            Println(
+                "ABSL_ASSIGN_OR_RETURN(auto $typed_ast$, "
+                "$Visitor$($typed_attr$));");
+            if (field.type().IsA<VariantType>()) {
+              Println("$field_name$.emplace<$index$>(std::move($typed_ast$));");
+            } else {
+              Println("$field_name$ = std::move($typed_ast$);");
+            }
+          },
+      });
+    }
+    Println(" else {");
+    Println(
+        "  return absl::InvalidArgumentError(\"$literal_attr$ must be "
+        "$literal_types$.\");");
+    Println("}");
+  }
+  Println("} else if (op.$operandGetter$() != nullptr) {");
+  {
+    auto indent = WithIndent();
+    Println("$literal_unless$ = true;");
+    Println("ABSL_ASSIGN_OR_RETURN(");
+    {
+      auto indent = WithIndent(4);
+      Println("$field_name$,");
+      Print("Convert(\n");
+      {
+        auto indent = WithIndent(4);
+        Println("op.$operandGetter$(),");
+        PrintConverter(ast, field.type(), ast.lang_name(),
+                       FieldIrKind(field, op_kind), MaybeNull::kNo);
+        Println();
+      }
+      Println(")");
+    }
+    Println(");");
+  }
+  Println("} else {");
+  Println(
+      "  return absl::InvalidArgumentError(\"Exactly one of $literal_attr$ and "
+      "$operand$ must be set.\");");
+  Println("}");
+}
+
+void IrToAstSourcePrinter::PrintSplitField(const AstDef& ast,
+                                           const NodeDef& node,
+                                           const FieldDef& field) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  std::vector<std::string> member_names = MemberNames(field.type());
+
+  auto vars = WithVars({
+      {"CcType", field.type().CcType()},
+      {"field_name", field.name().ToCcVarName()},
+  });
+  Println("std::optional<$CcType$> $field_name$;");
+
+  std::vector<std::string> slot_names;
+  for (const FieldDef::IrSplit& split : field.ir_splits()) {
+    Symbol slot{split.name};
+    slot_names.push_back(slot.ToCcVarName());
+
+    std::vector<std::string> types{split.types.begin(), split.types.end()};
+    std::unique_ptr<Type> group_type =
+        MakeClassOrVariantType(types, ast.lang_name());
+
+    auto vars = WithVars({
+        {"mlirGetter", slot.ToMlirGetter()},
+        {"slot_ast", (slot + "ast").ToCcVarName()},
+    });
+    if (!split.is_region) {
+      Println("if (op.$mlirGetter$() != nullptr) {");
+    } else {
+      Println("if (!op.$mlirGetter$().empty()) {");
+    }
+    {
+      auto indent = WithIndent();
+      Println("ABSL_ASSIGN_OR_RETURN(");
+      {
+        auto indent = WithIndent(4);
+        Println("auto $slot_ast$,");
+        Print("Convert(\n");
+        {
+          auto indent = WithIndent(4);
+          Println("op.$mlirGetter$(),");
+          if (!split.is_region) {
+            PrintConverter(ast, *group_type, ast.lang_name(), split.kind,
+                           MaybeNull::kNo);
+            Println();
+          } else {
+            std::string converter_type;
+            if (split.kind == FIELD_KIND_STMT) {
+              converter_type = "StmtRegion";
+            } else {
+              converter_type = absl::StrCat(
+                  "ExprRegion<",
+                  Symbol(absl::StrCat(ir_lang, "ir")).ToPascalCase(),
+                  "ExprRegionEndOp>");
+            }
+            auto vars = WithVars({{"ConverterType", converter_type}});
+            Print("$ConverterType$(\n");
+            {
+              auto indent = WithIndent(4);
+              PrintConverter(ast, *group_type, ast.lang_name(), split.kind,
+                             MaybeNull::kNo);
+              Println();
+            }
+            Println(")");
+          }
+        }
+        Println(")");
+      }
+      Println(");");
+
+      if (types.size() == 1) {
+        auto index = absl::c_find(member_names, types.front());
+        CHECK(index != member_names.end());
+        auto vars = WithVars({
+            {"index", std::to_string(index - member_names.begin())},
+        });
+        Println(
+            "$field_name$.emplace(std::in_place_index<$index$>, "
+            "std::move($slot_ast$));");
+      } else {
+        Println(
+            "$field_name$ = WidenVariant<$CcType$>(std::move($slot_ast$));");
+      }
+    }
+    Println("}");
+  }
+
+  if (field.optionalness() == OPTIONALNESS_REQUIRED) {
+    auto vars = WithVars({
+        {"slot_names", absl::StrJoin(slot_names, ", ")},
+    });
+    Println("if (!$field_name$.has_value()) {");
+    Println(
+        "  return absl::InvalidArgumentError(\"Exactly one of $slot_names$ "
+        "must be set.\");");
+    Println("}");
+  }
 }
 
 void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
-                                       const FieldDef& field) {
+                                       const FieldDef& field,
+                                       FieldKind op_kind) {
   absl::string_view ir_lang = ir_lang_name_.empty()
                                   ? ast.lang_name()
                                   : absl::string_view(ir_lang_name_);
   MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
+  FieldKind kind = FieldIrKind(field, op_kind);
 
   std::string converter_type = [&]() -> std::string {
-    switch (field.kind()) {
+    switch (kind) {
       case FIELD_KIND_UNSPECIFIED:
         LOG(FATAL) << "Unspecified FieldKind.";
       case FIELD_KIND_ATTR:
-        LOG(FATAL) << "Unsupported FieldKind: " << field.kind();
+        LOG(FATAL) << "Unsupported FieldKind: " << kind;
       case FIELD_KIND_RVAL:
       case FIELD_KIND_LVAL: {
         if (field.type().IsA<ListType>()) {
@@ -386,7 +654,7 @@ void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
   auto vars = WithVars({
       {"ConverterType", converter_type},
       {"lhs", field.name().ToCcVarName()},
-      {"mlirGetter", field.name().ToMlirGetter()},
+      {"mlirGetter", FieldIrName(field).ToMlirGetter()},
   });
 
   Println("ABSL_ASSIGN_OR_RETURN(");
@@ -406,7 +674,7 @@ void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
             Print("$ConverterType$(\n");
             {
               auto indent = WithIndent(4);
-              PrintConverter(ast, field.type(), ast.lang_name(), field.kind(),
+              PrintConverter(ast, field.type(), ast.lang_name(), kind,
                              MaybeNull::kNo);
               Println();
             }
@@ -419,7 +687,7 @@ void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
           Print("$ConverterType$(\n");
           {
             auto indent = WithIndent(4);
-            PrintConverter(ast, field.type(), ast.lang_name(), field.kind(),
+            PrintConverter(ast, field.type(), ast.lang_name(), kind,
                            MaybeNull::kNo);
             Println();
           }
@@ -562,7 +830,54 @@ void IrToAstSourcePrinter::PrintVariantConverter(
   Print(")");
 }
 
+void IrToAstSourcePrinter::PrintPerMemberKindsConverter(const AstDef& ast,
+                                                        const FieldDef& field,
+                                                        FieldKind op_kind,
+                                                        MaybeNull maybe_null) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  CHECK(field.type().IsA<VariantType>())
+      << field.name().ToCcVarName()
+      << ": Alternatives of different kinds require a variant field.";
+  const auto& variant_type = static_cast<const VariantType&>(field.type());
+
+  if (maybe_null == MaybeNull::kYes) {
+    std::string none_op = absl::StrCat(
+        Symbol(absl::StrCat(ir_lang, "ir")).ToPascalCase(), "NoneOp");
+    Print(absl::StrCat("Nullable<", none_op, ">(\n"));
+  }
+  {
+    auto indent = WithIndent(maybe_null == MaybeNull::kYes ? 4 : 0);
+    Println("OpVariant(");
+    {
+      auto indent = WithIndent(4);
+      TabPrinter tab_printer{{
+          .print_separator = [this] { Print(",\n"); },
+      }};
+      for (const auto& member : variant_type.types()) {
+        CHECK(member->IsA<ClassType>())
+            << field.name().ToCcVarName()
+            << ": Alternatives of different kinds require class members.";
+        const auto& class_type = static_cast<const ClassType&>(*member);
+        tab_printer.Print();
+        PrintClassConverter(
+            class_type, ast.lang_name(),
+            FieldMemberIrKind(field, class_type.name().ToPascalCase(),
+                              op_kind));
+      }
+      Println();
+    }
+    Print(")");
+  }
+  if (maybe_null == MaybeNull::kYes) {
+    Println();
+    Print(")");
+  }
+}
+
 void IrToAstSourcePrinter::PrintListConverter(const AstDef& ast,
+
                                               const ListType& list_type,
                                               absl::string_view lang_name,
                                               FieldKind kind) {

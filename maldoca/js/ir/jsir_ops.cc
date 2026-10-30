@@ -390,4 +390,11 @@ mlir::OpFoldResult JsirMemberExpressionOp::fold(FoldAdaptor adaptor) {
       .value_or(nullptr);
 }
 
+mlir::Region &GetJsirFunctionBody(JsirArrowFunctionExpressionOp op) {
+  if (!op.getBodyBlock().empty()) {
+    return op.getBodyBlock();
+  }
+  return op.getBodyExpression();
+}
+
 }  // namespace maldoca

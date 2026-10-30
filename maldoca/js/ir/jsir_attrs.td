@@ -55,25 +55,4 @@ def JsirForInOfKind : I32EnumAttr<
 def JsirForInOfKindAttr
     : EnumAttr<Jsir_Dialect, JsirForInOfKind, "for_in_of_kind">;
 
-// ```
-// for (let a in b) ...
-//      ~~~~~
-// ```
-//
-// `let a` is a `JsVariableDeclaration { JsVariableDeclarator { JsLVal }}` in
-// the original AST, but we only store the `JsLVal` part in the IR, which means
-// we lose the JsTrivia (source location, comments, etc.) information.
-//
-// Therefore, we add `declaration_loc` and `declarator_loc` to store that.
-def JsirForInOfDeclarationAttr : AttrDef<Jsir_Dialect,
-                                         "JsirForInOfDeclaration", []> {
-  let mnemonic = "for_in_of_declaration";
-  let parameters = (ins
-    OptionalParameter<"JsirTriviaAttr">: $declaration_loc,
-    OptionalParameter<"JsirTriviaAttr">: $declarator_loc,
-    "::mlir::StringAttr": $kind
-  );
-  let assemblyFormat = "params";
-}
-
 #endif  // MALDOCA_JS_IR_JSIR_ATTRS_TD_

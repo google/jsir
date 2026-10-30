@@ -170,6 +170,56 @@ enum GenerationTarget {
   GENERATION_TARGET_IR_ONLY = 3;
 }
 
+// A way the IR op of a field's node holds the field, and when it applies. See
+// FieldDefPb.alternatives.
+message FieldAlternativePb {
+  // [Optional] The type this alternative holds: a class, or a variant of
+  // classes (equivalent to one alternative per class, with the same settings).
+  //
+  // If unset, the alternative holds the field's whole `type`. This requires
+  // the field to have a `type` and the alternative to have a `when` or an
+  // `op_kind`.
+  optional NonListTypePb type = 1;
+
+  // [Optional] Name of the IR operand/region that holds this alternative.
+  // Either all alternatives of a field set it or none does. Alternatives
+  // sharing an `ir_name` are held in the same operand/region, and must have the
+  // same kind.
+  //
+  // Without `ir_name`, all alternatives are held in the field's single
+  // operand/region (see FieldDefPb.ir_name), as ops of their own kinds.
+  optional string ir_name = 2;
+
+  // [Optional] Kind of the IR op (or attribute) that holds this alternative.
+  // If unset, it's inferred as the one of FIELD_KIND_STMT, FIELD_KIND_RVAL and
+  // FIELD_KIND_LVAL that all the alternative's types support; it must be set
+  // if there's no such kind, and for FIELD_KIND_ATTR.
+  optional FieldKind kind = 3;
+
+  // [Optional] Selectors. By default, an alternative applies when the field
+  // holds a node of its `type`. With a selector, it applies when:
+  //
+  // - `when`: the named required bool sibling field is true;
+  // - `unless`: the named required bool sibling field is false;
+  // - `op_kind`: the field is held in the node's op of this kind
+  //   (FIELD_KIND_RVAL for `FooOp`, FIELD_KIND_LVAL for `FooRefOp`).
+  //
+  // Either all alternatives of a field have a selector or none does, and a
+  // field can't mix `when`/`unless` with `op_kind`.
+  //
+  // `when`/`unless` select between an attribute and an operand: all `unless`
+  // alternatives have FIELD_KIND_ATTR and share an `ir_name` (the attribute,
+  // which holds their types); exactly one `when` alternative has no `type`
+  // (its `ir_name` is the operand, which holds the whole field). The sibling
+  // isn't stored in the IR: it's recomputed from which one is set.
+  //
+  // `op_kind` alternatives have no `ir_name`; there's exactly one for each of
+  // FIELD_KIND_RVAL and FIELD_KIND_LVAL, both of which the node must support.
+  optional string when = 4;
+  optional string unless = 5;
+  optional FieldKind op_kind = 6;
+}
+
 // Definition of a field in an AST node.
 message FieldDefPb {
   // Name of the field.
@@ -180,10 +230,16 @@ message FieldDefPb {
   // The optionalness of a field - whether it might be null or undefined.
   optional Optionalness optionalness = 2 [default = OPTIONALNESS_REQUIRED];
 
-  // The type of the field.
+  // The type of the field. Required unless the field has `alternatives`.
+  //
+  // With `alternatives` without selectors (see FieldAlternativePb.when), it
+  // must not be set: the field's type is the variant of the alternatives'
+  // types. With selectors, it's optional: if set, it's the field's AST type and
+  // the alternatives describe how the IR holds it; otherwise the field's type
+  // is the variant of the alternatives' types.
   optional TypePb type = 3;
 
-  // The field kind. E.g. LVAL.
+  // The field kind. E.g. LVAL. Must not be set with `alternatives`.
   optional FieldKind kind = 4 [default = FIELD_KIND_UNSPECIFIED];
 
   // Target representation for code generation of this field.
@@ -266,6 +322,94 @@ message FieldDefPb {
   // optional class-typed fields are spelled unwrapped, and wrapping them would
   // change the builder APIs of the attributes that already ship.
   optional bool ir_attr_optional_parameter = 7 [default = false];
+
+  // Formerly `ir_mapping`, replaced by `ir_name` and `alternatives`.
+  reserved 8;
+  reserved "ir_mapping";
+
+  // How the IR holds the field, for a field held in several ways: in different
+  // operands/regions (`ir_name`), as ops of different kinds (`kind`), or with
+  // different types (`type`), depending on the type of the node the field holds
+  // (by default), on a bool sibling field (`when`/`unless`), or on the kind of
+  // the op (`op_kind`). At least two (counting each class of a variant `type`).
+  // `kind` must not be set on the field: each alternative has its own kind.
+  //
+  // Each alternative's kind is its `kind` if set, otherwise the one of
+  // FIELD_KIND_STMT, FIELD_KIND_RVAL and FIELD_KIND_LVAL that its types
+  // support. A FIELD_KIND_STMT alternative is held in a region; another
+  // alternative is held in a region if the field has `enclose_in_region`,
+  // otherwise in an operand.
+  //
+  // - With `ir_name`s and no selectors, the field is split across one optional
+  //   operand/region per distinct `ir_name`, of which exactly one is set (at
+  //   most one if the field is optional). Example: `ForStatement.init:
+  //   VariableDeclaration | Expression`, where the declaration is a statement
+  //   and the expression is an rvalue:
+  //
+  //   ```
+  //   alternatives {
+  //     type { class: "VariableDeclaration" }
+  //     ir_name: "init_declaration"
+  //   }
+  //   alternatives {
+  //     type { class: "Expression" }
+  //     ir_name: "init_expression"
+  //   }
+  //   enclose_in_region: true
+  //   ```
+  //
+  // - Without `ir_name`s and selectors, the field is held in a single operand
+  //   named after it, whose op is an rvalue for some alternatives and an lvalue
+  //   for the others. Example: an Identifier `ExportSpecifier.local` is held by
+  //   a `jsir.identifier_ref` op, but a StringLiteral one by a
+  //   `jsir.string_literal` op:
+  //
+  //   ```
+  //   alternatives {
+  //     type { class: "Identifier" }
+  //     kind: FIELD_KIND_LVAL
+  //   }
+  //   alternatives { type { class: "StringLiteral" } }
+  //   ```
+  //
+  // - With `when`/`unless`, the field is held either in an attribute or in an
+  //   operand, depending on a bool sibling. Example: a static `a.b` holds its
+  //   property in the `literal_property` attribute, a computed `a[b]` in the
+  //   `computed_property` operand:
+  //
+  //   ```
+  //   type { variant { types { class: "Expression" }
+  //                    types { class: "PrivateName" } } }
+  //   alternatives {
+  //     type { variant { types { class: "Identifier" }
+  //                      types { class: "PrivateName" } } }
+  //     ir_name: "literal_property"
+  //     kind: FIELD_KIND_ATTR
+  //     unless: "computed"
+  //   }
+  //   alternatives { ir_name: "computed_property" when: "computed" }
+  //   ```
+  //
+  // - With `op_kind`, the field is held differently in the node's rvalue and
+  //   lvalue ops. Example: `ObjectProperty.value` is an `Expression` in the
+  //   `object_property` op, and a `Pattern` in the `object_property_ref` op:
+  //
+  //   ```
+  //   alternatives { type { class: "Expression" } op_kind: FIELD_KIND_RVAL }
+  //   alternatives { type { class: "Pattern" } op_kind: FIELD_KIND_LVAL }
+  //   ```
+  //
+  //   In an op, a variant field can only hold the members that support the
+  //   op's kind for the field, and a class field can hold another class only in
+  //   the LVAL op.
+  repeated FieldAlternativePb alternatives = 9;
+
+  // [Optional] Name of the IR operand/region that holds the field, if it
+  // differs from the field name. Can't be combined with `alternatives`, except
+  // with `op_kind` ones.
+  //
+  // Example: `ObjectExpression.properties` is held in the `region` region.
+  optional string ir_name = 10;
 }
 
 // MLIR traits.
@@ -380,6 +524,20 @@ message NodeDefPb {
   // Generated code that models nodes (e.g. Python AST node classes, visitor
   // keys) treats such a class as plain data.
   optional bool is_plain_object = 16 [default = false];
+
+  // MLIR traits that this node's ops must not have, even though an ancestor
+  // adds them via `additional_mlir_traits`.
+  //
+  // Example: `MemberExpression` derives from `Pattern` and `LVal`, which are
+  // `Pure`, but evaluating a member expression may run a getter.
+  repeated MlirTrait excluded_mlir_traits = 17 [packed = true];
+
+  // If non-empty, only the ops of these kinds have a folder. Requires
+  // `has_fold`. If empty, all the node's ops have a folder.
+  //
+  // Example: `MemberExpression` folds its rvalue op, but not its lvalue
+  // (`*RefOp`) op.
+  repeated FieldKind fold_kinds = 18 [packed = true];
 }
 
 // Definition of a tagged union node type.
