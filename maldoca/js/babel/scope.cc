@@ -21,14 +21,58 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/container/inlined_vector.h"
+#include "absl/log/absl_log.h"
+#include "absl/log/log.h"
 #include "absl/strings/string_view.h"
 #include "maldoca/js/ast/ast.generated.h"
+#include "maldoca/js/babel/babel.pb.h"
 
 namespace maldoca {
+namespace {
 
-std::optional<int64_t> FindSymbolBindingUid(const BabelScopes &scopes,
-                                  int64_t use_scope_uid,
-                                  absl::string_view name) {
+// Returns whether the binding with `binding_uid` is block-scoped, i.e. declared
+// with `let` or `const`. Babel also registers catch clause parameters and class
+// declarations as `let`.
+bool IsBlockScopedBinding(const BabelScopes &scopes, int64_t binding_uid) {
+  auto it = scopes.bindings().find(binding_uid);
+  if (it == scopes.bindings().end()) {
+    return false;
+  }
+  return it->second.kind() == BabelBinding::KIND_LET ||
+         it->second.kind() == BabelBinding::KIND_CONST;
+}
+
+// Returns whether the lookup for a declaration of `declaration_kind` skips the
+// binding with `binding_uid` and continues in the parent scope. See
+// `FindSymbolBindingUid`.
+bool ShouldSkipBinding(const BabelScopes &scopes, int64_t binding_uid,
+                       BabelBinding::Kind declaration_kind) {
+  switch (declaration_kind) {
+    case BabelBinding::KIND_VAR:
+      // Babel registers `var` bindings in the enclosing function or program
+      // scope, so skip block-scoped bindings (e.g. a catch clause parameter)
+      // between the scope where the `var` is written and that scope.
+      return IsBlockScopedBinding(scopes, binding_uid);
+    case BabelBinding::KIND_UNKNOWN:
+    case BabelBinding::KIND_LET:
+    case BabelBinding::KIND_CONST:
+    case BabelBinding::KIND_MODULE:
+    case BabelBinding::KIND_HOISTED:
+    case BabelBinding::KIND_PARAM:
+    case BabelBinding::KIND_LOCAL:
+      // Babel registers these bindings in the scope where they are written, so
+      // the nearest binding is the one.
+      return false;
+  }
+  ABSL_LOG(FATAL) << "Unknown BabelBinding::Kind: "
+             << static_cast<int>(declaration_kind);
+}
+
+}  // namespace
+
+std::optional<int64_t> FindSymbolBindingUid(
+    const BabelScopes &scopes, int64_t use_scope_uid, absl::string_view name,
+    std::optional<BabelBinding::Kind> declaration_kind) {
   auto scope_it = scopes.scopes().find(use_scope_uid);
   if (scope_it == scopes.scopes().end()) {
     return std::nullopt;
@@ -36,7 +80,15 @@ std::optional<int64_t> FindSymbolBindingUid(const BabelScopes &scopes,
   const auto &scope = scope_it->second;
   auto binding_it = scope.binding_uids().find(name);
   if (binding_it != scope.binding_uids().end()) {
-    return binding_it->second;
+    int64_t binding_uid = binding_it->second;
+    // References and assignments resolve to the nearest binding, whereas a
+    // declaration may skip it and keep searching up the scope tree, e.g. a
+    // `var` skips a catch clause parameter to reach the scope that the `var`
+    // is hoisted to.
+    if (!declaration_kind.has_value() ||
+        !ShouldSkipBinding(scopes, binding_uid, *declaration_kind)) {
+      return binding_uid;
+    }
   }
 
   // If this scope has no parent, then this is the root, stop searching.
@@ -51,13 +103,14 @@ std::optional<int64_t> FindSymbolBindingUid(const BabelScopes &scopes,
     return std::nullopt;
   }
 
-  return FindSymbolBindingUid(scopes, parent_scope_uid, name);
+  return FindSymbolBindingUid(scopes, parent_scope_uid, name, declaration_kind);
 }
 
 JsSymbolId GetSymbolId(const BabelScopes &scopes, int64_t use_scope_uid,
-                       absl::string_view name) {
+                       absl::string_view name,
+                       std::optional<BabelBinding::Kind> declaration_kind) {
   std::optional<int64_t> binding_uid =
-      FindSymbolBindingUid(scopes, use_scope_uid, name);
+      FindSymbolBindingUid(scopes, use_scope_uid, name, declaration_kind);
   return JsSymbolId{std::string(name), binding_uid};
 }
 

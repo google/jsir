@@ -36,15 +36,20 @@ inline llvm::raw_ostream& operator<<(llvm::raw_ostream& os,
 
 // Searches all scopes from the one `op` is in to the global scope for a symbol.
 // Returns the uid of the scope where the symbol is defined.
-std::optional<int64_t> FindSymbolBindingUid(const BabelScopes& scopes,
-                                            mlir::Operation* op,
-                                            absl::string_view name);
+// See `FindSymbolBindingUid` in `third_party/maldoca/js/babel/scope.h` for how
+// `declaration_kind` affects the search.
+std::optional<int64_t> FindSymbolBindingUid(
+    const BabelScopes& scopes, mlir::Operation* op, absl::string_view name,
+    std::optional<BabelBinding::Kind> declaration_kind = std::nullopt);
 
 // Turns a symbol name into a JsSymbolId, by searching all scopes from
 // the one `op` is in to the global scope. If the symbol is not found, assume it
 // has `scope_uid` 0.
-JsSymbolId GetSymbolId(const BabelScopes& scopes, mlir::Operation* op,
-                       absl::string_view name);
+// See `FindSymbolBindingUid` in `third_party/maldoca/js/babel/scope.h` for how
+// `declaration_kind` affects the search.
+JsSymbolId GetSymbolId(
+    const BabelScopes& scopes, mlir::Operation* op, absl::string_view name,
+    std::optional<BabelBinding::Kind> declaration_kind = std::nullopt);
 
 // Turns an op / attr into a JsSymbolId, by searching all scopes from
 // the one op / attr is in to the global scope. If the symbol is not found,
