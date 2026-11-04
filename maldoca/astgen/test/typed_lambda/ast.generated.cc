@@ -33,7 +33,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -112,7 +112,7 @@ std::variant<bool, int64_t, double, std::string_view> TlLiteral::value() const {
       return std::get<3>(value_);
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 

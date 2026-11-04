@@ -33,7 +33,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -2712,7 +2712,7 @@ std::optional<std::variant<JsVariableDeclaration*, JsExpression*>> JsForStatemen
         return std::get<1>(init_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -2729,7 +2729,7 @@ std::optional<std::variant<const JsVariableDeclaration*, const JsExpression*>> J
         return std::get<1>(init_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -2823,7 +2823,7 @@ std::variant<JsVariableDeclaration*, JsLVal*> JsForInStatement::left() {
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -2836,7 +2836,7 @@ std::variant<const JsVariableDeclaration*, const JsLVal*> JsForInStatement::left
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -2903,7 +2903,7 @@ std::variant<JsVariableDeclaration*, JsLVal*> JsForOfStatement::left() {
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -2916,7 +2916,7 @@ std::variant<const JsVariableDeclaration*, const JsLVal*> JsForOfStatement::left
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3064,7 +3064,7 @@ std::variant<JsBlockStatement*, JsExpression*> JsArrowFunctionExpression::body()
       return std::get<1>(body_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3077,7 +3077,7 @@ std::variant<const JsBlockStatement*, const JsExpression*> JsArrowFunctionExpres
       return std::get<1>(body_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3314,7 +3314,7 @@ std::variant<JsExpression*, JsPattern*> JsObjectProperty::value() {
       return std::get<1>(value_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3327,7 +3327,7 @@ std::variant<const JsExpression*, const JsPattern*> JsObjectProperty::value() co
       return std::get<1>(value_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3568,7 +3568,7 @@ std::variant<JsExpression*, JsPrivateName*> JsBinaryExpression::left() {
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3581,7 +3581,7 @@ std::variant<const JsExpression*, const JsPrivateName*> JsBinaryExpression::left
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3745,7 +3745,7 @@ std::variant<JsExpression*, JsSuper*> JsMemberExpression::object() {
       return std::get<1>(object_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3758,7 +3758,7 @@ std::variant<const JsExpression*, const JsSuper*> JsMemberExpression::object() c
       return std::get<1>(object_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3775,7 +3775,7 @@ std::variant<JsExpression*, JsPrivateName*> JsMemberExpression::property() {
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3788,7 +3788,7 @@ std::variant<const JsExpression*, const JsPrivateName*> JsMemberExpression::prop
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3850,7 +3850,7 @@ std::variant<JsExpression*, JsPrivateName*> JsOptionalMemberExpression::property
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3863,7 +3863,7 @@ std::variant<const JsExpression*, const JsPrivateName*> JsOptionalMemberExpressi
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3979,7 +3979,7 @@ std::variant<JsExpression*, JsSuper*, JsImport*> JsCallExpression::callee() {
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3995,7 +3995,7 @@ std::variant<const JsExpression*, const JsSuper*, const JsImport*> JsCallExpress
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -4103,7 +4103,7 @@ std::variant<JsExpression*, JsSuper*, JsImport*> JsNewExpression::callee() {
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -4119,7 +4119,7 @@ std::variant<const JsExpression*, const JsSuper*, const JsImport*> JsNewExpressi
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5083,7 +5083,7 @@ std::variant<JsIdentifier*, JsStringLiteral*> JsImportSpecifier::imported() {
       return std::get<1>(imported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5096,7 +5096,7 @@ std::variant<const JsIdentifier*, const JsStringLiteral*> JsImportSpecifier::imp
       return std::get<1>(imported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5320,7 +5320,7 @@ std::variant<JsIdentifier*, JsStringLiteral*> JsExportSpecifier::exported() {
       return std::get<1>(exported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5333,7 +5333,7 @@ std::variant<const JsIdentifier*, const JsStringLiteral*> JsExportSpecifier::exp
       return std::get<1>(exported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5353,7 +5353,7 @@ std::optional<std::variant<JsIdentifier*, JsStringLiteral*>> JsExportSpecifier::
         return std::get<1>(local_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -5370,7 +5370,7 @@ std::optional<std::variant<const JsIdentifier*, const JsStringLiteral*>> JsExpor
         return std::get<1>(local_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -5509,7 +5509,7 @@ std::variant<JsFunctionDeclaration*, JsClassDeclaration*, JsExpression*> JsExpor
       return std::get<2>(declaration_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5525,7 +5525,7 @@ std::variant<const JsFunctionDeclaration*, const JsClassDeclaration*, const JsEx
       return std::get<2>(declaration_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 

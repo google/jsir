@@ -27,7 +27,7 @@
 #include <utility>
 
 #include "maldoca/astgen/test/list/ast.generated.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -203,7 +203,7 @@ void LiListOfVariant::SerializeFields(std::ostream& os, bool &needs_comma) const
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -224,7 +224,7 @@ void LiListOfVariant::SerializeFields(std::ostream& os, bool &needs_comma) const
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -294,7 +294,7 @@ void LiOptionalListOfVariant::SerializeFields(std::ostream& os, bool &needs_comm
             break;
           }
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       }
     }
@@ -333,7 +333,7 @@ void LiListOfOptionalVariant::SerializeFields(std::ostream& os, bool &needs_comm
             break;
           }
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       } else {
         os << "null";
@@ -358,7 +358,7 @@ void LiListOfOptionalVariant::SerializeFields(std::ostream& os, bool &needs_comm
             break;
           }
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       } else {
         os << "null";
@@ -400,7 +400,7 @@ void LiOptionalListOfOptionalVariant::SerializeFields(std::ostream& os, bool &ne
               break;
             }
             default:
-              LOG(FATAL) << "Unreachable code.";
+              ABSL_LOG(FATAL) << "Unreachable code.";
           }
         } else {
           os << "null";

@@ -99,7 +99,7 @@ class AstVisitorHeaderPrinter : public CcPrinterBase {
   //            dynamic_cast<const <Lang><Child1> *>(<non_leaf>_ptr)) {
   //      return Visit<Child1>(*<child1>);
   //    }
-  //    LOG(FATAL) << "Unreachable code.";
+  //    ABSL_LOG(FATAL) << "Unreachable code.";
   //  }
   //
   // Example:
@@ -109,7 +109,7 @@ class AstVisitorHeaderPrinter : public CcPrinterBase {
   //            dynamic_cast<const JsRegExpLiteral *>(literal_ptr)) {
   //      return VisitRegExpLiteral(*reg_exp_literal);
   //    }
-  //    LOG(FATAL) << "Unreachable code.";
+  //    ABSL_LOG(FATAL) << "Unreachable code.";
   //  }
   void PrintNonLeafDispatch(const NodeDef& node, absl::string_view lang_name,
                             bool is_mutable);

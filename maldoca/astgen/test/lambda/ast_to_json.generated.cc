@@ -27,7 +27,7 @@
 #include <utility>
 
 #include "maldoca/astgen/test/lambda/ast.generated.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"

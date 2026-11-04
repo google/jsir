@@ -61,7 +61,7 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
 
   PrintIncludeHeader("absl/container/flat_hash_map.h");
   PrintIncludeHeader("absl/memory/memory.h");
-  PrintIncludeHeader("absl/log/log.h");
+  PrintIncludeHeader("absl/log/absl_log.h");
   PrintIncludeHeader("absl/status/status.h");
   PrintIncludeHeader("absl/status/statusor.h");
   PrintIncludeHeader("absl/strings/str_cat.h");
@@ -355,7 +355,7 @@ void AstSourcePrinter::PrintGetterBody(const std::string& cc_expr,
         }
 
         Println("default:");
-        Println("  LOG(FATAL) << \"Unreachable code.\";");
+        Println("  ABSL_LOG(FATAL) << \"Unreachable code.\";");
       }
       Println("}");
 

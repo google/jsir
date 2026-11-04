@@ -59,7 +59,7 @@ void AstSerializePrinter::PrintAst(const AstDef& ast,
 
   PrintIncludeHeaders({
       std::string(header_path),
-      "absl/log/log.h",
+      "absl/log/absl_log.h",
       "absl/memory/memory.h",
       "absl/status/status.h",
       "absl/strings/string_view.h",
@@ -183,7 +183,7 @@ void AstSerializePrinter::PrintVariantSerialize(const VariantType& variant_type,
     }
 
     Println("default:");
-    Println("  LOG(FATAL) << \"Unreachable code.\";");
+    Println("  ABSL_LOG(FATAL) << \"Unreachable code.\";");
   }
   Println("}");
 }

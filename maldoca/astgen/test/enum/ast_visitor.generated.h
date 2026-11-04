@@ -27,7 +27,7 @@
 #include <functional>
 #include <utility>
 
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "maldoca/astgen/test/enum/ast.generated.h"
 
 namespace maldoca {

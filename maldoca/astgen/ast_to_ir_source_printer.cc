@@ -130,8 +130,8 @@ void AstToIrSourcePrinter::PrintAst(const AstDef& ast,
       "mlir/IR/Region.h",
       "mlir/IR/Value.h",
       "absl/cleanup/cleanup.h",
-      "absl/log/check.h",
-      "absl/log/log.h",
+      "absl/log/absl_check.h",
+      "absl/log/absl_log.h",
       "absl/types/optional.h",
       "absl/types/variant.h",
       std::string(ast_header_path),
@@ -236,7 +236,7 @@ void AstToIrSourcePrinter::PrintNonLeafNode(const AstDef& ast,
       Println("}");
     }
 
-    Println("LOG(FATAL) << \"Unreachable code.\";");
+    Println("ABSL_LOG(FATAL) << \"Unreachable code.\";");
   }
   Println("}");
   Println();
@@ -597,7 +597,7 @@ void AstToIrSourcePrinter::PrintVariantToIr(const AstDef& ast, Action action,
     }
 
     Println("default:");
-    Println("  LOG(FATAL) << \"Unreachable code.\";");
+    Println("  ABSL_LOG(FATAL) << \"Unreachable code.\";");
   }
   Println("}");
 }

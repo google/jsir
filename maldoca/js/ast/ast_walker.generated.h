@@ -29,7 +29,7 @@
 #include <variant>
 #include <vector>
 
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ast/ast_visitor.generated.h"
 
@@ -414,7 +414,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitExpression(*std::get<1>(init));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (for_statement.test().has_value()) {
@@ -441,7 +441,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitLVal(*std::get<1>(for_in_statement.left()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitExpression(*for_in_statement.right());
     VisitStatement(*for_in_statement.body());
@@ -462,7 +462,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitLVal(*std::get<1>(for_of_statement.left()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitExpression(*for_of_statement.right());
     VisitStatement(*for_of_statement.body());
@@ -532,7 +532,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitExpression(*std::get<1>(arrow_function_expression.body()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitArrowFunctionExpression(arrow_function_expression);
@@ -588,7 +588,7 @@ class JsAstWalker : public JsAstVisitor<void> {
             VisitSpreadElement(*std::get<1>(elem_val));
             break;
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       }
     }
@@ -610,7 +610,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitPattern(*std::get<1>(object_property.value()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitObjectProperty(object_property);
@@ -650,7 +650,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitSpreadElement(*std::get<2>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -706,7 +706,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitPrivateName(*std::get<1>(binary_expression.left()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitExpression(*binary_expression.right());
     if (postorder_callback_) {
@@ -748,7 +748,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitSuper(*std::get<1>(member_expression.object()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     switch (member_expression.property().index()) {
       case 0:
@@ -758,7 +758,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitPrivateName(*std::get<1>(member_expression.property()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitMemberExpression(member_expression);
@@ -778,7 +778,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitPrivateName(*std::get<1>(optional_member_expression.property()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitOptionalMemberExpression(optional_member_expression);
@@ -812,7 +812,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitImport(*std::get<2>(call_expression.callee()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     for (const auto &elem : *call_expression.arguments()) {
       switch (elem.index()) {
@@ -823,7 +823,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitSpreadElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -845,7 +845,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitSpreadElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -868,7 +868,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitImport(*std::get<2>(new_expression.callee()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     for (const auto &elem : *new_expression.arguments()) {
       switch (elem.index()) {
@@ -879,7 +879,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitSpreadElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -967,7 +967,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitRestElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -1094,7 +1094,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitStaticBlock(*std::get<4>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -1157,7 +1157,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitStringLiteral(*std::get<1>(import_specifier.imported()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitIdentifier(*import_specifier.local());
     if (postorder_callback_) {
@@ -1212,7 +1212,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitImportNamespaceSpecifier(*std::get<2>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     VisitStringLiteral(*import_declaration.source());
@@ -1236,7 +1236,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitStringLiteral(*std::get<1>(export_specifier.exported()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (export_specifier.local().has_value()) {
       auto local = export_specifier.local().value();
@@ -1248,7 +1248,7 @@ class JsAstWalker : public JsAstVisitor<void> {
           VisitStringLiteral(*std::get<1>(local));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -1294,7 +1294,7 @@ class JsAstWalker : public JsAstVisitor<void> {
         VisitExpression(*std::get<2>(export_default_declaration.declaration()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitExportDefaultDeclaration(export_default_declaration);
@@ -1700,7 +1700,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitExpression(*std::get<1>(init));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (for_statement.test().has_value()) {
@@ -1727,7 +1727,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitLVal(*std::get<1>(for_in_statement.left()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitExpression(*for_in_statement.right());
     VisitStatement(*for_in_statement.body());
@@ -1748,7 +1748,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitLVal(*std::get<1>(for_of_statement.left()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitExpression(*for_of_statement.right());
     VisitStatement(*for_of_statement.body());
@@ -1818,7 +1818,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitExpression(*std::get<1>(arrow_function_expression.body()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitArrowFunctionExpression(arrow_function_expression);
@@ -1874,7 +1874,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
             VisitSpreadElement(*std::get<1>(elem_val));
             break;
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       }
     }
@@ -1896,7 +1896,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitPattern(*std::get<1>(object_property.value()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitObjectProperty(object_property);
@@ -1936,7 +1936,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitSpreadElement(*std::get<2>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -1992,7 +1992,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitPrivateName(*std::get<1>(binary_expression.left()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitExpression(*binary_expression.right());
     if (postorder_callback_) {
@@ -2034,7 +2034,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitSuper(*std::get<1>(member_expression.object()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     switch (member_expression.property().index()) {
       case 0:
@@ -2044,7 +2044,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitPrivateName(*std::get<1>(member_expression.property()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitMemberExpression(member_expression);
@@ -2064,7 +2064,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitPrivateName(*std::get<1>(optional_member_expression.property()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitOptionalMemberExpression(optional_member_expression);
@@ -2098,7 +2098,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitImport(*std::get<2>(call_expression.callee()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     for (const auto &elem : *call_expression.arguments()) {
       switch (elem.index()) {
@@ -2109,7 +2109,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitSpreadElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -2131,7 +2131,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitSpreadElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -2154,7 +2154,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitImport(*std::get<2>(new_expression.callee()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     for (const auto &elem : *new_expression.arguments()) {
       switch (elem.index()) {
@@ -2165,7 +2165,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitSpreadElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -2253,7 +2253,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitRestElement(*std::get<1>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -2380,7 +2380,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitStaticBlock(*std::get<4>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -2443,7 +2443,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitStringLiteral(*std::get<1>(import_specifier.imported()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     VisitIdentifier(*import_specifier.local());
     if (postorder_callback_) {
@@ -2498,7 +2498,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitImportNamespaceSpecifier(*std::get<2>(elem));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     VisitStringLiteral(*import_declaration.source());
@@ -2522,7 +2522,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitStringLiteral(*std::get<1>(export_specifier.exported()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (export_specifier.local().has_value()) {
       auto local = export_specifier.local().value();
@@ -2534,7 +2534,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           VisitStringLiteral(*std::get<1>(local));
           break;
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     if (postorder_callback_) {
@@ -2580,7 +2580,7 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
         VisitExpression(*std::get<2>(export_default_declaration.declaration()));
         break;
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     if (postorder_callback_) {
       postorder_callback_->VisitExportDefaultDeclaration(export_default_declaration);

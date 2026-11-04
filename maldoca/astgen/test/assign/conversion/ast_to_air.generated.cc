@@ -36,8 +36,8 @@
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
 #include "absl/cleanup/cleanup.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_check.h"
+#include "absl/log/absl_log.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/test/assign/ast.generated.h"
@@ -52,7 +52,7 @@ AirExpressionOpInterface AstToAir::VisitExpression(mlir::OpBuilder &builder, con
   if (auto *assignment = dynamic_cast<const AAssignment *>(node)) {
     return VisitAssignment(builder, assignment);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 AirIdentifierOp AstToAir::VisitIdentifier(mlir::OpBuilder &builder, const AIdentifier *node) {

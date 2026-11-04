@@ -78,7 +78,7 @@ void AstVisitorHeaderPrinter::PrintAstVisitor(const AstDef& ast,
   Println("#include <utility>");
   Println();
 
-  PrintIncludeHeader("absl/log/log.h");
+  PrintIncludeHeader("absl/log/absl_log.h");
   PrintIncludeHeader(GetAstHeaderPath(ast_path));
   Println();
 
@@ -193,7 +193,7 @@ void AstVisitorHeaderPrinter::PrintBaseVisitor(const NodeDef& node,
         Println("}");
         Println();
       }
-      Println("LOG(FATAL) << \"Unreachable code.\";");
+      Println("ABSL_LOG(FATAL) << \"Unreachable code.\";");
     }
     Println("}");
 
@@ -358,7 +358,7 @@ void AstVisitorHeaderPrinter::PrintNonLeafDispatch(const NodeDef& node,
       Println("}");
       Println();
     }
-    Println("LOG(FATAL) << \"Unreachable code.\";");
+    Println("ABSL_LOG(FATAL) << \"Unreachable code.\";");
   }
   Println("}");
 }

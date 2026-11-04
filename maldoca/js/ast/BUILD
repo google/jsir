@@ -36,7 +36,7 @@ cc_library(
         "//maldoca/astgen:ast_from_json_utils",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
@@ -51,7 +51,7 @@ cc_library(
     hdrs = ["ast_visitor.generated.h"],
     deps = [
         ":ast",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/memory",
     ],
 )
@@ -62,7 +62,7 @@ cc_library(
     deps = [
         ":ast",
         ":ast_visitor",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
     ],
 )
 

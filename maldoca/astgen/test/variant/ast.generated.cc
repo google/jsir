@@ -33,7 +33,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -102,7 +102,7 @@ std::variant<double, std::string_view> VNode::simple_variant_builtin() const {
       return std::get<1>(simple_variant_builtin_);
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -122,7 +122,7 @@ std::optional<std::variant<double, std::string_view>> VNode::nullable_variant_bu
         return std::get<1>(nullable_variant_builtin_.value());
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -143,7 +143,7 @@ std::optional<std::variant<double, std::string_view>> VNode::optional_variant_bu
         return std::get<1>(optional_variant_builtin_.value());
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -161,7 +161,7 @@ std::variant<VDerivedClass1*, VDerivedClass2*> VNode::simple_variant_class() {
       return std::get<1>(simple_variant_class_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -174,7 +174,7 @@ std::variant<const VDerivedClass1*, const VDerivedClass2*> VNode::simple_variant
       return std::get<1>(simple_variant_class_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -194,7 +194,7 @@ std::optional<std::variant<VDerivedClass1*, VDerivedClass2*>> VNode::nullable_va
         return std::get<1>(nullable_variant_class_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -211,7 +211,7 @@ std::optional<std::variant<const VDerivedClass1*, const VDerivedClass2*>> VNode:
         return std::get<1>(nullable_variant_class_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -232,7 +232,7 @@ std::optional<std::variant<VDerivedClass1*, VDerivedClass2*>> VNode::optional_va
         return std::get<1>(optional_variant_class_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -249,7 +249,7 @@ std::optional<std::variant<const VDerivedClass1*, const VDerivedClass2*>> VNode:
         return std::get<1>(optional_variant_class_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }

@@ -27,7 +27,7 @@
 #include <functional>
 #include <utility>
 
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "maldoca/astgen/test/multiple_inheritance/ast.generated.h"
 
 namespace maldoca {
@@ -45,7 +45,7 @@ class MAstVisitor {
       return VisitObjectMethod(*object_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitFunction(const MFunction &function) {
@@ -54,7 +54,7 @@ class MAstVisitor {
       return VisitObjectMethod(*object_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 };
 
@@ -71,7 +71,7 @@ class MutableMAstVisitor {
       return VisitObjectMethod(*object_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitFunction(MFunction &function) {
@@ -80,7 +80,7 @@ class MutableMAstVisitor {
       return VisitObjectMethod(*object_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 };
 

@@ -112,7 +112,7 @@ void AstWalkerHeaderPrinter::PrintAstWalker(const AstDef& ast,
   Println("#include <vector>");
   Println();
 
-  PrintIncludeHeader("absl/log/log.h");
+  PrintIncludeHeader("absl/log/absl_log.h");
   PrintIncludeHeader(GetAstHeaderPath(ast_path));
   PrintIncludeHeader(GetAstVisitorHeaderPath(ast_path));
   Println();
@@ -327,7 +327,7 @@ void AstWalkerHeaderPrinter::PrintFieldTraversal(const FieldDef& field,
           }
         }
         Println("      default:");
-        Println("        LOG(FATAL) << \"Unreachable code.\";");
+        Println("        ABSL_LOG(FATAL) << \"Unreachable code.\";");
         Println("    }");
         Println("  }");
         Println("}");
@@ -346,7 +346,7 @@ void AstWalkerHeaderPrinter::PrintFieldTraversal(const FieldDef& field,
           }
         }
         Println("    default:");
-        Println("      LOG(FATAL) << \"Unreachable code.\";");
+        Println("      ABSL_LOG(FATAL) << \"Unreachable code.\";");
         Println("  }");
         Println("}");
       }
@@ -388,7 +388,7 @@ void AstWalkerHeaderPrinter::PrintFieldTraversal(const FieldDef& field,
         }
       }
       Println("    default:");
-      Println("      LOG(FATAL) << \"Unreachable code.\";");
+      Println("      ABSL_LOG(FATAL) << \"Unreachable code.\";");
       Println("  }");
       Println("}");
     } else {
@@ -409,7 +409,7 @@ void AstWalkerHeaderPrinter::PrintFieldTraversal(const FieldDef& field,
         }
       }
       Println("  default:");
-      Println("    LOG(FATAL) << \"Unreachable code.\";");
+      Println("    ABSL_LOG(FATAL) << \"Unreachable code.\";");
       Println("}");
     }
     return;

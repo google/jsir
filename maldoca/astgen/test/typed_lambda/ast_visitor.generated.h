@@ -27,7 +27,7 @@
 #include <functional>
 #include <utility>
 
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "maldoca/astgen/test/typed_lambda/ast.generated.h"
 
 namespace maldoca {
@@ -57,7 +57,7 @@ class TlAstVisitor {
       return VisitFunctionType(*function_type);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitExpression(const TlExpression &expression) {
@@ -72,7 +72,7 @@ class TlAstVisitor {
       return VisitFunctionCall(*function_call);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 };
 
@@ -101,7 +101,7 @@ class MutableTlAstVisitor {
       return VisitFunctionType(*function_type);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitExpression(TlExpression &expression) {
@@ -116,7 +116,7 @@ class MutableTlAstVisitor {
       return VisitFunctionCall(*function_call);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 };
 

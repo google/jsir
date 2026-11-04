@@ -27,7 +27,7 @@
 #include <functional>
 #include <utility>
 
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "maldoca/js/ast/ast.generated.h"
 
 namespace maldoca {
@@ -55,7 +55,7 @@ class JsPatternVisitor {
       return VisitAssignmentPattern(*assignment_pattern);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitIdentifier(const JsIdentifier &identifier) = 0;
@@ -90,7 +90,7 @@ class MutableJsPatternVisitor {
       return VisitAssignmentPattern(*assignment_pattern);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitIdentifier(JsIdentifier &identifier) = 0;
@@ -125,7 +125,7 @@ class JsLValVisitor {
       return VisitAssignmentPattern(*assignment_pattern);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitIdentifier(const JsIdentifier &identifier) = 0;
@@ -160,7 +160,7 @@ class MutableJsLValVisitor {
       return VisitAssignmentPattern(*assignment_pattern);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitIdentifier(JsIdentifier &identifier) = 0;
@@ -362,7 +362,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitExportSpecifier(*export_specifier);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitModuleDeclaration(const JsModuleDeclaration &module_declaration) {
@@ -377,7 +377,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitExportAllDeclaration(*export_all_declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitClass(const JsClass &class_) {
@@ -388,7 +388,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitClassExpression(*class_expression);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitObjectMember(const JsObjectMember &object_member) {
@@ -399,7 +399,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitObjectMethod(*object_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitDeclaration(const JsDeclaration &declaration) {
@@ -412,7 +412,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitClassDeclaration(*class_declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitBlockStatementFunction(const JsBlockStatementFunction &block_statement_function) {
@@ -429,7 +429,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitClassPrivateMethod(*class_private_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitStatement(const JsStatement &statement) {
@@ -474,7 +474,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitDeclaration(*declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitFunction(const JsFunction &function) {
@@ -485,7 +485,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitArrowFunctionExpression(*arrow_function_expression);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitLiteral(const JsLiteral &literal) {
@@ -504,7 +504,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitBigIntLiteral(*big_int_literal);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitExpression(const JsExpression &expression) {
@@ -563,7 +563,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitMetaProperty(*meta_property);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitProgramBodyElement(const JsProgramBodyElement &program_body_element) {
@@ -574,7 +574,7 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitModuleDeclaration(*module_declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 };
 
@@ -768,7 +768,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitExportSpecifier(*export_specifier);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitModuleDeclaration(JsModuleDeclaration &module_declaration) {
@@ -783,7 +783,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitExportAllDeclaration(*export_all_declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitClass(JsClass &class_) {
@@ -794,7 +794,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitClassExpression(*class_expression);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitObjectMember(JsObjectMember &object_member) {
@@ -805,7 +805,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitObjectMethod(*object_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitDeclaration(JsDeclaration &declaration) {
@@ -818,7 +818,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitClassDeclaration(*class_declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitBlockStatementFunction(JsBlockStatementFunction &block_statement_function) {
@@ -835,7 +835,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitClassPrivateMethod(*class_private_method);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitStatement(JsStatement &statement) {
@@ -880,7 +880,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitDeclaration(*declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitFunction(JsFunction &function) {
@@ -891,7 +891,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitArrowFunctionExpression(*arrow_function_expression);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitLiteral(JsLiteral &literal) {
@@ -910,7 +910,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitBigIntLiteral(*big_int_literal);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitExpression(JsExpression &expression) {
@@ -969,7 +969,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitMetaProperty(*meta_property);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   R VisitProgramBodyElement(JsProgramBodyElement &program_body_element) {
@@ -980,7 +980,7 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitModuleDeclaration(*module_declaration);
     }
 
-    LOG(FATAL) << "Unreachable code.";
+    ABSL_LOG(FATAL) << "Unreachable code.";
   }
 };
 

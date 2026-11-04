@@ -36,8 +36,8 @@
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
 #include "absl/cleanup/cleanup.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_check.h"
+#include "absl/log/absl_log.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/js/ast/ast.generated.h"
@@ -121,7 +121,7 @@ JsirProgramBodyElementOpInterface AstToJsir::VisitProgramBodyElement(mlir::OpBui
   if (auto *export_all_declaration = dynamic_cast<const JsExportAllDeclaration *>(node)) {
     return VisitExportAllDeclaration(builder, export_all_declaration);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirDirectiveLiteralOp AstToJsir::VisitDirectiveLiteral(mlir::OpBuilder &builder, const JsDirectiveLiteral *node) {
@@ -272,7 +272,7 @@ JsirExpressionOpInterface AstToJsir::VisitExpression(mlir::OpBuilder &builder, c
   if (auto *meta_property = dynamic_cast<const JsMetaProperty *>(node)) {
     return VisitMetaProperty(builder, meta_property);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirPatternRefOpInterface AstToJsir::VisitPatternRef(mlir::OpBuilder &builder, const JsPattern *node) {
@@ -297,7 +297,7 @@ JsirPatternRefOpInterface AstToJsir::VisitPatternRef(mlir::OpBuilder &builder, c
   if (auto *assignment_pattern = dynamic_cast<const JsAssignmentPattern *>(node)) {
     return VisitAssignmentPatternRef(builder, assignment_pattern);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirLValRefOpInterface AstToJsir::VisitLValRef(mlir::OpBuilder &builder, const JsLVal *node) {
@@ -322,7 +322,7 @@ JsirLValRefOpInterface AstToJsir::VisitLValRef(mlir::OpBuilder &builder, const J
   if (auto *assignment_pattern = dynamic_cast<const JsAssignmentPattern *>(node)) {
     return VisitAssignmentPatternRef(builder, assignment_pattern);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirIdentifierOp AstToJsir::VisitIdentifier(mlir::OpBuilder &builder, const JsIdentifier *node) {
@@ -359,7 +359,7 @@ JsirLiteralOpInterface AstToJsir::VisitLiteral(mlir::OpBuilder &builder, const J
   if (auto *big_int_literal = dynamic_cast<const JsBigIntLiteral *>(node)) {
     return VisitBigIntLiteral(builder, big_int_literal);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirRegExpLiteralOp AstToJsir::VisitRegExpLiteral(mlir::OpBuilder &builder, const JsRegExpLiteral *node) {
@@ -472,7 +472,7 @@ JsirStatementOpInterface AstToJsir::VisitStatement(mlir::OpBuilder &builder, con
   if (auto *class_declaration = dynamic_cast<const JsClassDeclaration *>(node)) {
     return VisitClassDeclaration(builder, class_declaration);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JshirBlockStatementOp AstToJsir::VisitBlockStatement(mlir::OpBuilder &builder, const JsBlockStatement *node) {
@@ -656,7 +656,7 @@ JsirDeclarationOpInterface AstToJsir::VisitDeclaration(mlir::OpBuilder &builder,
   if (auto *class_declaration = dynamic_cast<const JsClassDeclaration *>(node)) {
     return VisitClassDeclaration(builder, class_declaration);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirVariableDeclaratorOp AstToJsir::VisitVariableDeclarator(mlir::OpBuilder &builder, const JsVariableDeclarator *node) {
@@ -756,7 +756,7 @@ JsirArrayExpressionOp AstToJsir::VisitArrayExpression(mlir::OpBuilder &builder, 
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     } else {
       mlir_element = CreateExpr<JsirNoneOp>(builder, node);
@@ -817,7 +817,7 @@ JsirBinaryExpressionOp AstToJsir::VisitBinaryExpression(mlir::OpBuilder &builder
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   mlir::Value mlir_right = VisitExpression(builder, node->right());
   return CreateExpr<JsirBinaryExpressionOp>(builder, node, mlir_operator, mlir_left, mlir_right);
@@ -874,7 +874,7 @@ JsirCallExpressionOp AstToJsir::VisitCallExpression(mlir::OpBuilder &builder, co
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   std::vector<mlir::Value> mlir_arguments;
   for (const auto &element : *node->arguments()) {
@@ -889,7 +889,7 @@ JsirCallExpressionOp AstToJsir::VisitCallExpression(mlir::OpBuilder &builder, co
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     mlir_arguments.push_back(std::move(mlir_element));
   }
@@ -911,7 +911,7 @@ JsirOptionalCallExpressionOp AstToJsir::VisitOptionalCallExpression(mlir::OpBuil
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     mlir_arguments.push_back(std::move(mlir_element));
   }
@@ -935,7 +935,7 @@ JsirNewExpressionOp AstToJsir::VisitNewExpression(mlir::OpBuilder &builder, cons
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   std::vector<mlir::Value> mlir_arguments;
   for (const auto &element : *node->arguments()) {
@@ -950,7 +950,7 @@ JsirNewExpressionOp AstToJsir::VisitNewExpression(mlir::OpBuilder &builder, cons
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     mlir_arguments.push_back(std::move(mlir_element));
   }
@@ -1023,7 +1023,7 @@ JsirObjectPatternRefOp AstToJsir::VisitObjectPatternRef(mlir::OpBuilder &builder
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
       mlir_properties.push_back(std::move(mlir_element));
     }
@@ -1104,7 +1104,7 @@ JsirClassBodyOp AstToJsir::VisitClassBody(mlir::OpBuilder &builder, const JsClas
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   });
@@ -1164,7 +1164,7 @@ JsirModuleDeclarationOpInterface AstToJsir::VisitModuleDeclaration(mlir::OpBuild
   if (auto *export_all_declaration = dynamic_cast<const JsExportAllDeclaration *>(node)) {
     return VisitExportAllDeclaration(builder, export_all_declaration);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 JsirImportDeclarationOp AstToJsir::VisitImportDeclaration(mlir::OpBuilder &builder, const JsImportDeclaration *node) {
@@ -1185,7 +1185,7 @@ JsirImportDeclarationOp AstToJsir::VisitImportDeclaration(mlir::OpBuilder &build
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     mlir_specifiers_data.push_back(std::move(mlir_element));
   }

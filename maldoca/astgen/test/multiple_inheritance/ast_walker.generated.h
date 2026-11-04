@@ -29,7 +29,7 @@
 #include <variant>
 #include <vector>
 
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "maldoca/astgen/test/multiple_inheritance/ast.generated.h"
 #include "maldoca/astgen/test/multiple_inheritance/ast_visitor.generated.h"
 
