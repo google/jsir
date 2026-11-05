@@ -624,6 +624,18 @@ absl::StatusOr<To> DynCastAstNode(std::unique_ptr<From> from) {
   return internal::DynCastAstNodeImpl<To>::Cast(std::move(from));
 }
 
+// Overload of DynCastAstNode() for a variant of AST nodes, e.g. the result of
+// an OpVariant() converter.
+template <typename To, typename... From>
+absl::StatusOr<To> DynCastAstNode(std::variant<std::unique_ptr<From>...> from) {
+  return std::visit(
+      [](auto&& node) -> absl::StatusOr<To> {
+        return internal::DynCastAstNodeImpl<To>::Cast(
+            std::forward<decltype(node)>(node));
+      },
+      std::move(from));
+}
+
 // Attr converters
 inline bool IsBool(mlir::Attribute attr) {
   return llvm::isa<mlir::BoolAttr>(attr);

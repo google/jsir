@@ -67,6 +67,14 @@ class AstToSir {
 
   static SirLoopOp VisitLoop(mlir::OpBuilder& builder, const SLoop* node);
 
+  static SirParenOp VisitParen(mlir::OpBuilder& builder, const SParen* node);
+
+  static SirParenRefOp VisitParenRef(mlir::OpBuilder& builder,
+                                     const SParen* node);
+
+  static SirSpecifierOp VisitSpecifier(mlir::OpBuilder& builder,
+                                       const SSpecifier* node);
+
  private:
   template <typename Op, typename... Args>
   static Op CreateExpr(mlir::OpBuilder& builder, const void* node,

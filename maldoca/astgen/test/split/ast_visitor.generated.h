@@ -41,12 +41,15 @@ class SPatternVisitor {
     const SPattern *pattern_ptr = &pattern;
     if (const SIdentifier *identifier = dynamic_cast<const SIdentifier *>(pattern_ptr)) {
       return VisitIdentifier(*identifier);
+    } else if (const SParen *paren = dynamic_cast<const SParen *>(pattern_ptr)) {
+      return VisitParen(*paren);
     }
 
     ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitIdentifier(const SIdentifier &identifier) = 0;
+  virtual R VisitParen(const SParen &paren) = 0;
 };
 
 template <typename R>
@@ -58,12 +61,15 @@ class MutableSPatternVisitor {
     SPattern *pattern_ptr = &pattern;
     if (SIdentifier *identifier = dynamic_cast<SIdentifier *>(pattern_ptr)) {
       return VisitIdentifier(*identifier);
+    } else if (SParen *paren = dynamic_cast<SParen *>(pattern_ptr)) {
+      return VisitParen(*paren);
     }
 
     ABSL_LOG(FATAL) << "Unreachable code.";
   }
 
   virtual R VisitIdentifier(SIdentifier &identifier) = 0;
+  virtual R VisitParen(SParen &paren) = 0;
 };
 
 template <typename R>

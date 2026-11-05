@@ -24,8 +24,6 @@
 #include "absl/base/attributes.h"
 #include "absl/log/absl_check.h"
 #include "absl/log/absl_log.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
@@ -71,7 +69,7 @@ Symbol GetRegionEndOp(FieldKind kind, bool is_list, absl::string_view ir_lang) {
   Symbol region_end_op;
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
-      LOG(FATAL) << "Unspecified FieldKind.";
+      ABSL_LOG(FATAL) << "Unspecified FieldKind.";
     case FIELD_KIND_ATTR:
       ABSL_LOG(FATAL) << "Unsupported FieldKind: " << kind;
     case FIELD_KIND_RVAL:
@@ -152,6 +150,7 @@ void AstToIrSourcePrinter::PrintAst(const AstDef& ast,
       "mlir/IR/Builders.h",
       "mlir/IR/BuiltinAttributes.h",
       "mlir/IR/BuiltinTypes.h",
+      "mlir/IR/Diagnostics.h",
       "mlir/IR/Operation.h",
       "mlir/IR/Region.h",
       "mlir/IR/Value.h",
@@ -205,7 +204,7 @@ void AstToIrSourcePrinter::PrintNonLeafNode(const AstDef& ast,
   } else {
     switch (kind) {
       case FIELD_KIND_UNSPECIFIED:
-        LOG(FATAL) << "Invalid FieldKind: FIELD_KIND_UNSPECIFIED.";
+        ABSL_LOG(FATAL) << "Invalid FieldKind: FIELD_KIND_UNSPECIFIED.";
       case FIELD_KIND_ATTR: {
         return_type = "mlir::Attribute";
         break;
@@ -285,7 +284,7 @@ void AstToIrSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
     case FIELD_KIND_ATTR:
-      LOG(FATAL) << "Unsupported kind: " << kind;
+      ABSL_LOG(FATAL) << "Unsupported kind: " << kind;
     case FIELD_KIND_LVAL:
     case FIELD_KIND_RVAL:
       creator += "Expr";
@@ -378,6 +377,10 @@ void AstToIrSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
   auto lhs = Symbol("mlir") + field.name();
   auto rhs = absl::StrCat("node->", field.name().ToCcVarName(), "()");
 
+  if (FieldHasPerMemberKinds(field)) {
+    return PrintPerMemberKindsField(ast, field, op_kind, lhs, rhs);
+  }
+
   if (std::unique_ptr<Type> narrowed = NarrowedIrType(ast, field, op_kind)) {
     // The op holds a narrower type than the AST field, e.g. only the
     // `Pattern` members of `Expression | Pattern` in an LVAL op. Downcast the
@@ -398,21 +401,123 @@ void AstToIrSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
           "const $NarrowedType$ *$narrowed_rhs$ = std::visit([](const auto "
           "*value) { return dynamic_cast<const $NarrowedType$ *>(value); }, "
           "$rhs$);");
-    } else {
       Println(
-          "const $NarrowedType$ *$narrowed_rhs$ = dynamic_cast<const "
-          "$NarrowedType$ *>($rhs$);");
+          "ABSL_CHECK($narrowed_rhs$ != nullptr) << \"$field$ must be a "
+          "$NarrowedType$.\";");
+      PrintToIr(ast, Action::kDef, *narrowed, RefOrVal::kRef, kind, lhs,
+                narrowed_rhs);
+      return;
     }
+
+    // A class-typed field (narrowed by FieldDef::LvalOpOverride::type) falls
+    // back to the field's own type when the AST holds a node without the
+    // narrowed form, e.g. `(a + b) = 1`.
+    // Both forms are values, i.e. ops of kind LVAL or RVAL.
+    ABSL_CHECK(kind == FIELD_KIND_LVAL || kind == FIELD_KIND_RVAL);
+    ABSL_CHECK(field.kind() == FIELD_KIND_LVAL ||
+               field.kind() == FIELD_KIND_RVAL);
+    auto field_vars = WithVars({
+        {"lhs", lhs.ToCcVarName()},
+    });
+    Println("mlir::Value $lhs$;");
     Println(
-        "ABSL_CHECK($narrowed_rhs$ != nullptr) << \"$field$ must be a "
-        "$NarrowedType$.\";");
-    PrintToIr(ast, Action::kDef, *narrowed, RefOrVal::kRef, kind, lhs,
-              narrowed_rhs);
+        "if (const $NarrowedType$ *$narrowed_rhs$ = dynamic_cast<const "
+        "$NarrowedType$ *>($rhs$)) {");
+    {
+      auto indent = WithIndent();
+      PrintToIr(ast, Action::kAssign, *narrowed, RefOrVal::kRef, kind, lhs,
+                narrowed_rhs);
+    }
+    Println("} else {");
+    {
+      auto indent = WithIndent();
+      Println(
+          "mlir::emitError(builder.getUnknownLoc(), \"$field$ must be a "
+          "$NarrowedType$.\");");
+      PrintToIr(ast, Action::kAssign, field.type(), RefOrVal::kRef,
+                field.kind(), lhs, rhs);
+    }
+    Println("}");
     return;
   }
 
   PrintNullableToIr(ast, Action::kDef, field.type(), maybe_null, RefOrVal::kRef,
                     kind, lhs, rhs);
+}
+
+void AstToIrSourcePrinter::PrintPerMemberKindsField(const AstDef& ast,
+                                                    const FieldDef& field,
+                                                    FieldKind op_kind,
+                                                    const Symbol& lhs,
+                                                    std::string rhs) {
+  ABSL_CHECK(field.type().IsA<VariantType>())
+      << field.name().ToCcVarName()
+      << ": Alternatives of different kinds require a variant field.";
+  const auto& variant_type = static_cast<const VariantType&>(field.type());
+  MaybeNull maybe_null = OptionalnessToMaybeNull(field.optionalness());
+
+  auto vars = WithVars({
+      {"lhs", lhs.ToCcVarName()},
+  });
+  // Each member is held by an LVAL or RVAL op, i.e. a value.
+  Println("mlir::Value $lhs$;");
+
+  auto print_switch = [&](const std::string& rhs) {
+    auto vars = WithVars({
+        {"rhs", rhs},
+    });
+    Println("switch ($rhs$.index()) {");
+    {
+      auto indent = WithIndent();
+      for (size_t i = 0; i != variant_type.types().size(); ++i) {
+        const ScalarType& member = *variant_type.types()[i];
+        ABSL_CHECK(member.IsA<ClassType>())
+            << field.name().ToCcVarName()
+            << ": Alternatives of different kinds require class members.";
+        const auto& class_type = static_cast<const ClassType&>(member);
+        FieldKind member_kind =
+            FieldMemberIrKind(field, class_type.name().ToPascalCase(), op_kind);
+        ABSL_CHECK(member_kind == FIELD_KIND_LVAL ||
+                   member_kind == FIELD_KIND_RVAL)
+            << field.name().ToCcVarName()
+            << ": Alternatives of different kinds must be LVAL or RVAL.";
+
+        auto vars = WithVars({
+            {"i", std::to_string(i)},
+        });
+        Println("case $i$: {");
+        {
+          auto indent = WithIndent();
+          PrintToIr(ast, Action::kAssign, class_type, RefOrVal::kRef,
+                    member_kind, lhs,
+                    absl::StrFormat("std::get<%zu>(%s)", i, rhs));
+          Println("break;");
+        }
+        Println("}");
+      }
+      Println("default:");
+      Println("  ABSL_LOG(FATAL) << \"Unreachable code.\";");
+    }
+    Println("}");
+  };
+
+  switch (maybe_null) {
+    case MaybeNull::kYes: {
+      auto vars = WithVars({
+          {"rhs", rhs},
+      });
+      Println("if ($rhs$.has_value()) {");
+      {
+        auto indent = WithIndent();
+        print_switch(absl::StrCat(rhs, ".value()"));
+      }
+      Println("}");
+      break;
+    }
+    case MaybeNull::kNo:
+      print_switch(rhs);
+      break;
+  }
 }
 
 void AstToIrSourcePrinter::PrintLiteralAttrField(const AstDef& ast,
@@ -651,7 +756,7 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
       Action action = [&] {
         switch (kind) {
           case FIELD_KIND_UNSPECIFIED:
-            LOG(FATAL) << "Unspecified FieldKind.";
+            ABSL_LOG(FATAL) << "Unspecified FieldKind.";
           case FIELD_KIND_ATTR:
             ABSL_LOG(FATAL) << "Unsupported FieldKind: " << kind;
           case FIELD_KIND_RVAL:
@@ -674,7 +779,7 @@ void AstToIrSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
 
       switch (action) {
         case Action::kAssign:
-          LOG(FATAL) << "Unsupported Action: Assign.";
+          ABSL_LOG(FATAL) << "Unsupported Action: Assign.";
         case Action::kCreate:
           break;
         case Action::kDef: {
@@ -900,10 +1005,10 @@ void AstToIrSourcePrinter::PrintListToIr(const AstDef& ast, Action action,
 
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
-      LOG(FATAL) << "FieldKind unspecified.";
+      ABSL_LOG(FATAL) << "FieldKind unspecified.";
     case FIELD_KIND_STMT: {
       // Case: List of Statements.
-      CHECK(action == Action::kCreate)
+      ABSL_CHECK(action == Action::kCreate)
           << "We never collect statement ops in a vector.";
 
       Println("for (const auto &$rhs_element$ : *$rhs$) {");
@@ -943,7 +1048,7 @@ void AstToIrSourcePrinter::PrintListToIr(const AstDef& ast, Action action,
           break;
         }
         case Action::kCreate:
-          LOG(FATAL) << "We never put attributes in a region.";
+          ABSL_LOG(FATAL) << "We never put attributes in a region.";
       }
       break;
     }
@@ -963,7 +1068,7 @@ void AstToIrSourcePrinter::PrintListToIr(const AstDef& ast, Action action,
           // Do nothing.
           break;
         case Action::kCreate:
-          LOG(FATAL) << "We must put expressions in a vector.";
+          ABSL_LOG(FATAL) << "We must put expressions in a vector.";
       }
 
       Println("for (const auto &$rhs_element$ : *$rhs$) {");
@@ -1042,7 +1147,7 @@ void AstToIrSourcePrinter::PrintToIr(const AstDef& ast, Action action,
 
     case TypeKind::kList: {
       const auto& list_type = static_cast<const ListType&>(type);
-      CHECK(ref_or_val == RefOrVal::kRef);
+      ABSL_CHECK(ref_or_val == RefOrVal::kRef);
       return PrintListToIr(ast, action, list_type, kind, lhs, rhs);
     }
   }

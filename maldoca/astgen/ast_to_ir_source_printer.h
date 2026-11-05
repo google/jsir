@@ -158,6 +158,30 @@ class AstToIrSourcePrinter : public CcPrinterBase {
   void PrintField(const AstDef& ast, const NodeDef& node, const FieldDef& field,
                   FieldKind op_kind);
 
+  // Prints the code that converts a variant field whose members are held by
+  // ops of different kinds (see FieldMemberIrKind() in ast_gen_utils.h) to an
+  // MLIR value.
+  //
+  // Example:
+  //
+  // mlir::Value mlir_local;
+  // if (node->local().has_value()) {
+  //   switch (node->local().value().index()) {
+  //     case 0: {
+  //       mlir_local = VisitIdentifierRef(builder, std::get<0>(...));
+  //       break;
+  //     }
+  //     case 1: {
+  //       mlir_local = VisitStringLiteral(builder, std::get<1>(...));
+  //       break;
+  //     }
+  //     ...
+  //   }
+  // }
+  void PrintPerMemberKindsField(const AstDef& ast, const FieldDef& field,
+                                FieldKind op_kind, const Symbol& lhs,
+                                std::string rhs);
+
   // Prints the code that converts an AST field to a region. The region has been
   // created and the code just populates blocks and ops in it.
   //

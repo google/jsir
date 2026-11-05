@@ -163,9 +163,12 @@ class FieldDef {
     FieldKind kind = FIELD_KIND_UNSPECIFIED;
 
     // The class the LVAL op holds, for a class-typed field holding another
-    // class there.
+    // class there. The AST -> IR conversion falls back to the field's own type
+    // (and emits an error) when the AST holds a node that isn't of this type,
+    // so the IR -> AST conversion accepts both.
     //
-    // Example: an `Expression` field whose `*_ref` op holds an `LVal`.
+    // Example: `ParenthesizedExpression.expression` is an `LVal` in the
+    // `parenthesized_expression_ref` op.
     std::optional<std::string> type;
   };
 

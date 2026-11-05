@@ -12,6 +12,14 @@
 #
 # - `alternatives` with `op_kind` on a variant field: a variant field held as
 #   an rvalue/lvalue only holds the members that support that kind.
+#
+# - `alternatives` with `op_kind` on a class field: a field holds a narrower
+#   type in the node's lvalue op.
+#
+# - `alternatives` of different kinds without `ir_name`s: some variant members
+#   are held as lvalues, the others as rvalues, in the same operand.
+#
+# - A field that is only in the AST (GENERATION_TARGET_AST_ONLY).
 
 lang_name: "s"
 
@@ -197,5 +205,57 @@ nodes {
     kind: FIELD_KIND_STMT
     enclose_in_region: true
   }
+  should_generate_ir_op: true
+}
+
+# interface Paren <: Expression, Pattern {
+#   expression: Expression
+# }
+#
+# The rvalue op holds an `Expression`; the lvalue op holds a `Pattern`, or an
+# `Expression` if the AST holds a node that isn't a `Pattern`.
+nodes {
+  name: "Paren"
+  type: "Paren"
+  parents: "Expression"
+  parents: "Pattern"
+  fields {
+    name: "expression"
+    type { class: "Expression" }
+    alternatives { op_kind: FIELD_KIND_RVAL }
+    alternatives {
+      type { class: "Pattern" }
+      op_kind: FIELD_KIND_LVAL
+    }
+  }
+  should_generate_ir_op: true
+}
+
+# interface Specifier {
+#   local?: Identifier | Call
+#   extra?: boolean
+# }
+#
+# An Identifier `local` is held by an `identifier_ref` op, but a Call `local`
+# by a `call` op. `extra` is not held in the IR.
+nodes {
+  name: "Specifier"
+  type: "Specifier"
+  fields {
+    name: "local"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    alternatives {
+      type { class: "Identifier" }
+      kind: FIELD_KIND_LVAL
+    }
+    alternatives { type { class: "Call" } }
+  }
+  fields {
+    name: "extra"
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    type { bool {} }
+    generation_target: GENERATION_TARGET_AST_ONLY
+  }
+  kinds: FIELD_KIND_STMT
   should_generate_ir_op: true
 }

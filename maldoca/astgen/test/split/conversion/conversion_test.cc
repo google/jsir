@@ -247,6 +247,136 @@ module {
   });
 }
 
+// `op_kind` on a class field: the lvalue op holds the `Pattern`.
+TEST(ConversionTest, ParenRef) {
+  constexpr char kAstJsonString[] = R"(
+    {
+      "type": "Paren",
+      "expression": {"type": "Identifier", "name": "a"}
+    }
+  )";
+
+  constexpr char kExpectedIr[] = R"(
+module {
+  %0 = "sir.identifier_ref"() <{name = "a"}> : () -> !sir.any
+  %1 = "sir.paren_ref"(%0) : (!sir.any) -> !sir.any
+}
+  )";
+
+  TestIrConversion<SParen, SirParenRefOp, SirDialect, AstToSir>({
+      .ast_json_string = kAstJsonString,
+      .ast_to_ir_visit = AstToSir::VisitParenRef,
+      .ir_to_ast_visit = &SirToAst::VisitParenRef,
+      .expected_ir_dump = kExpectedIr,
+  });
+}
+
+// `op_kind` on a class field: the lvalue op falls back to holding an
+// `Expression` if the AST holds a node that isn't a `Pattern`.
+TEST(ConversionTest, ParenRefWithExpression) {
+  constexpr char kAstJsonString[] = R"(
+    {
+      "type": "Paren",
+      "expression": {
+        "type": "Call",
+        "callee": {"type": "Identifier", "name": "a"}
+      }
+    }
+  )";
+
+  constexpr char kExpectedIr[] = R"(
+module {
+  %0 = "sir.identifier"() <{name = "a"}> : () -> !sir.any
+  %1 = "sir.call"(%0) : (!sir.any) -> !sir.any
+  %2 = "sir.paren_ref"(%1) : (!sir.any) -> !sir.any
+}
+  )";
+
+  TestIrConversion<SParen, SirParenRefOp, SirDialect, AstToSir>({
+      .ast_json_string = kAstJsonString,
+      .ast_to_ir_visit = AstToSir::VisitParenRef,
+      .ir_to_ast_visit = &SirToAst::VisitParenRef,
+      .expected_ir_dump = kExpectedIr,
+  });
+}
+
+// Alternatives of different kinds: the Identifier alternative is held by an
+// lvalue op.
+TEST(ConversionTest, SpecifierWithIdentifier) {
+  constexpr char kAstJsonString[] = R"(
+    {
+      "type": "Specifier",
+      "local": {"type": "Identifier", "name": "a"}
+    }
+  )";
+
+  constexpr char kExpectedIr[] = R"(
+module {
+  %0 = "sir.identifier_ref"() <{name = "a"}> : () -> !sir.any
+  "sir.specifier"(%0) : (!sir.any) -> ()
+}
+  )";
+
+  TestIrConversion<SSpecifier, SirSpecifierOp, SirDialect, AstToSir>({
+      .ast_json_string = kAstJsonString,
+      .ast_to_ir_visit = AstToSir::VisitSpecifier,
+      .ir_to_ast_visit = &SirToAst::VisitSpecifier,
+      .expected_ir_dump = kExpectedIr,
+  });
+}
+
+// Alternatives of different kinds: the Call alternative is held by an rvalue
+// op.
+TEST(ConversionTest, SpecifierWithCall) {
+  constexpr char kAstJsonString[] = R"(
+    {
+      "type": "Specifier",
+      "local": {
+        "type": "Call",
+        "callee": {"type": "Identifier", "name": "a"}
+      }
+    }
+  )";
+
+  constexpr char kExpectedIr[] = R"(
+module {
+  %0 = "sir.identifier"() <{name = "a"}> : () -> !sir.any
+  %1 = "sir.call"(%0) : (!sir.any) -> !sir.any
+  "sir.specifier"(%1) : (!sir.any) -> ()
+}
+  )";
+
+  TestIrConversion<SSpecifier, SirSpecifierOp, SirDialect, AstToSir>({
+      .ast_json_string = kAstJsonString,
+      .ast_to_ir_visit = AstToSir::VisitSpecifier,
+      .ir_to_ast_visit = &SirToAst::VisitSpecifier,
+      .expected_ir_dump = kExpectedIr,
+  });
+}
+
+// An unset optional `local`. `extra` is only in the AST, so the IR -> AST
+// conversion leaves it unset.
+TEST(ConversionTest, SpecifierWithoutLocal) {
+  constexpr char kAstJsonString[] = R"(
+    {
+      "type": "Specifier"
+    }
+  )";
+
+  constexpr char kExpectedIr[] = R"(
+module {
+  "sir.specifier"() : () -> ()
+}
+  )";
+
+  TestIrConversion<SSpecifier, SirSpecifierOp, SirDialect, AstToSir>({
+      .ast_json_string = kAstJsonString,
+      .ast_to_ir_visit = AstToSir::VisitSpecifier,
+      .ir_to_ast_visit = &SirToAst::VisitSpecifier,
+      .expected_ir_dump = kExpectedIr,
+  });
+}
+
 // The generated verifier requires exactly one of the literal attribute and the
 // operand to be set.
 TEST(VerifierTest, MemberRequiresExactlyOneProperty) {

@@ -68,6 +68,9 @@ SirToAst::VisitExpression(SirExpressionOpInterface op) {
     .Case([&](SirMemberOp op) {
       return VisitMember(op);
     })
+    .Case([&](SirParenOp op) {
+      return VisitParen(op);
+    })
     .Default([&](mlir::Operation* op) {
       return absl::InvalidArgumentError("Unrecognized op");
     });
@@ -79,6 +82,9 @@ SirToAst::VisitPatternRef(SirPatternRefOpInterface op) {
   return llvm::TypeSwitch<mlir::Operation*, Ret>(op)
     .Case([&](SirIdentifierRefOp op) {
       return VisitIdentifierRef(op);
+    })
+    .Case([&](SirParenRefOp op) {
+      return VisitParenRef(op);
     })
     .Default([&](mlir::Operation* op) {
       return absl::InvalidArgumentError("Unrecognized op");
@@ -308,6 +314,58 @@ SirToAst::VisitLoop(SirLoopOp op) {
       std::move(init),
       *std::move(left),
       std::move(body));
+}
+
+absl::StatusOr<std::unique_ptr<SParen>>
+SirToAst::VisitParen(SirParenOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto expression,
+      Convert(
+          op.getExpression(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  return Create<SParen>(
+      op,
+      std::move(expression));
+}
+
+absl::StatusOr<std::unique_ptr<SParen>>
+SirToAst::VisitParenRef(SirParenRefOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto expression_ir,
+      Convert(
+          op.getExpression(),
+          OpVariant(
+              ToOpConverter(VisitPatternRef),
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(auto expression, (DynCastAstNode<std::unique_ptr<SExpression>>(std::move(expression_ir))));
+  return Create<SParen>(
+      op,
+      std::move(expression));
+}
+
+absl::StatusOr<std::unique_ptr<SSpecifier>>
+SirToAst::VisitSpecifier(SirSpecifierOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto local,
+      Convert(
+          op.getLocal(),
+          Nullable<SirNoneOp>(
+              OpVariant(
+                  ToOpConverter(VisitIdentifierRef),
+                  ToOpConverter(VisitCall)
+              )
+          )
+      )
+  );
+  return Create<SSpecifier>(
+      op,
+      std::move(local),
+      std::nullopt);
 }
 
 // clang-format on

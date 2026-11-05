@@ -800,6 +800,38 @@ JsirToAst::VisitLabeledStatement(JshirLabeledStatementOp op) {
       std::move(body));
 }
 
+absl::StatusOr<std::unique_ptr<JsBreakStatement>>
+JsirToAst::VisitBreakStatement(JshirBreakStatementOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto label,
+      Convert(
+          op.getLabelAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  return Create<JsBreakStatement>(
+      op,
+      std::move(label));
+}
+
+absl::StatusOr<std::unique_ptr<JsContinueStatement>>
+JsirToAst::VisitContinueStatement(JshirContinueStatementOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto label,
+      Convert(
+          op.getLabelAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  return Create<JsContinueStatement>(
+      op,
+      std::move(label));
+}
+
 absl::StatusOr<std::unique_ptr<JsIfStatement>>
 JsirToAst::VisitIfStatement(JshirIfStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -1695,6 +1727,28 @@ JsirToAst::VisitObjectMethod(JsirObjectMethodOp op) {
       std::move(kind));
 }
 
+absl::StatusOr<std::unique_ptr<JsObjectExpression>>
+JsirToAst::VisitObjectExpression(JsirObjectExpressionOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto properties_,
+      Convert(
+          op.getRegion(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  OpVariant(
+                      ToOpConverter(VisitObjectProperty),
+                      ToOpConverter(VisitObjectMethod),
+                      ToOpConverter(VisitSpreadElement)
+                  )
+              )
+          )
+      )
+  );
+  return Create<JsObjectExpression>(
+      op,
+      std::move(properties_));
+}
+
 absl::StatusOr<std::unique_ptr<JsFunctionExpression>>
 JsirToAst::VisitFunctionExpression(JsirFunctionExpressionOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -2197,6 +2251,38 @@ JsirToAst::VisitSequenceExpression(JsirSequenceExpressionOp op) {
       std::move(expressions));
 }
 
+absl::StatusOr<std::unique_ptr<JsParenthesizedExpression>>
+JsirToAst::VisitParenthesizedExpression(JsirParenthesizedExpressionOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto expression,
+      Convert(
+          op.getExpression(),
+          ToOpConverter(VisitExpression)
+      )
+  );
+  return Create<JsParenthesizedExpression>(
+      op,
+      std::move(expression));
+}
+
+absl::StatusOr<std::unique_ptr<JsParenthesizedExpression>>
+JsirToAst::VisitParenthesizedExpressionRef(JsirParenthesizedExpressionRefOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto expression_ir,
+      Convert(
+          op.getExpression(),
+          OpVariant(
+              ToOpConverter(VisitLValRef),
+              ToOpConverter(VisitExpression)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(auto expression, (DynCastAstNode<std::unique_ptr<JsExpression>>(std::move(expression_ir))));
+  return Create<JsParenthesizedExpression>(
+      op,
+      std::move(expression));
+}
+
 absl::StatusOr<std::unique_ptr<JsTemplateElementValue>>
 JsirToAst::VisitTemplateElementValue(JsirTemplateElementValueOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -2467,6 +2553,85 @@ JsirToAst::VisitClassMethod(JsirClassMethodOp op) {
       std::move(kind),
       std::move(computed),
       std::move(static_));
+}
+
+absl::StatusOr<std::unique_ptr<JsClassPrivateMethod>>
+JsirToAst::VisitClassPrivateMethod(JsirClassPrivateMethodOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto id,
+      Convert(
+          op.getIdAttr(),
+          Nullable(
+              ToAttrConverter(VisitIdentifierAttr)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto params,
+      Convert(
+          op.getParams(),
+          ExprsRegion<JsirExprsRegionEndOp>(
+              List(
+                  ToOpConverter(VisitPatternRef)
+              )
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto generator,
+      Convert(
+          op.getGeneratorAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto async,
+      Convert(
+          op.getAsyncAttr(),
+          ToBool()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto body,
+      Convert(
+          op.getBody(),
+          StmtRegion(
+              ToOpConverter(VisitBlockStatement)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto key,
+      Convert(
+          op.getKeyAttr(),
+          ToAttrConverter(VisitPrivateNameAttr)
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto kind,
+      Convert(
+          op.getKindAttr(),
+          ToString()
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto static_,
+      Convert(
+          op.getStatic_Attr(),
+          ToBool()
+      )
+  );
+  return Create<JsClassPrivateMethod>(
+      op,
+      std::move(id),
+      std::move(params),
+      std::move(generator),
+      std::move(async),
+      std::move(body),
+      std::move(key),
+      std::move(kind),
+      std::move(static_),
+      std::nullopt);
 }
 
 absl::StatusOr<std::unique_ptr<JsClassProperty>>
@@ -2755,6 +2920,36 @@ JsirToAst::VisitImportDeclaration(JsirImportDeclarationOp op) {
       std::move(specifiers),
       std::move(source),
       std::move(assertions));
+}
+
+absl::StatusOr<std::unique_ptr<JsExportSpecifier>>
+JsirToAst::VisitExportSpecifier(JsirExportSpecifierOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto exported,
+      Convert(
+          op.getExportedAttr(),
+          AttrVariant(
+              ToAttrConverter(VisitIdentifierAttr),
+              ToAttrConverter(VisitStringLiteralAttr)
+          )
+      )
+  );
+  ABSL_ASSIGN_OR_RETURN(
+      auto local,
+      Convert(
+          op.getLocal(),
+          Nullable<JsirNoneOp>(
+              OpVariant(
+                  ToOpConverter(VisitIdentifierRef),
+                  ToOpConverter(VisitStringLiteral)
+              )
+          )
+      )
+  );
+  return Create<JsExportSpecifier>(
+      op,
+      std::move(exported),
+      std::move(local));
 }
 
 absl::StatusOr<std::unique_ptr<JsExportNamedDeclaration>>

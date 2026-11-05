@@ -18,4 +18,11 @@
 include "maldoca/astgen/test/split/sir_attrs.generated.td"
 include "maldoca/astgen/test/split/sir_ops.generated.td"
 
+// Holds a missing optional value, e.g. an unset `Specifier.local`.
+def SirNoneOp : Sir_Op<"none", [Pure]> {
+  let results = (outs
+    SirAnyType
+  );
+}
+
 #endif  // MALDOCA_ASTGEN_TEST_SPLIT_SIR_OPS_TD_

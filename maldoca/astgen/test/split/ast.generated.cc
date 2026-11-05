@@ -53,6 +53,8 @@ std::string_view SExpressionTypeToString(SExpressionType expression_type) {
       return "Call";
     case SExpressionType::kMember:
       return "Member";
+    case SExpressionType::kParen:
+      return "Paren";
   }
 }
 
@@ -61,6 +63,7 @@ absl::StatusOr<SExpressionType> StringToSExpressionType(std::string_view s) {
       {"Identifier", SExpressionType::kIdentifier},
       {"Call", SExpressionType::kCall},
       {"Member", SExpressionType::kMember},
+      {"Paren", SExpressionType::kParen},
   };
 
   auto it = kMap->find(s);
@@ -78,12 +81,15 @@ std::string_view SPatternTypeToString(SPatternType pattern_type) {
   switch (pattern_type) {
     case SPatternType::kIdentifier:
       return "Identifier";
+    case SPatternType::kParen:
+      return "Paren";
   }
 }
 
 absl::StatusOr<SPatternType> StringToSPatternType(std::string_view s) {
   static const auto *kMap = new absl::flat_hash_map<std::string_view, SPatternType> {
       {"Identifier", SPatternType::kIdentifier},
+      {"Paren", SPatternType::kParen},
   };
 
   auto it = kMap->find(s);
@@ -377,6 +383,88 @@ const SStatement* SLoop::body() const {
 
 void SLoop::set_body(std::unique_ptr<SStatement> body) {
   body_ = std::move(body);
+}
+
+// =============================================================================
+// SParen
+// =============================================================================
+
+SParen::SParen(
+    std::unique_ptr<SExpression> expression)
+    : SExpression(),
+      SPattern(),
+      expression_(std::move(expression)) {}
+
+SExpression* SParen::expression() {
+  return expression_.get();
+}
+
+const SExpression* SParen::expression() const {
+  return expression_.get();
+}
+
+void SParen::set_expression(std::unique_ptr<SExpression> expression) {
+  expression_ = std::move(expression);
+}
+
+// =============================================================================
+// SSpecifier
+// =============================================================================
+
+SSpecifier::SSpecifier(
+    std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>> local,
+    std::optional<bool> extra)
+    : local_(std::move(local)),
+      extra_(std::move(extra)) {}
+
+std::optional<std::variant<SIdentifier*, SCall*>> SSpecifier::local() {
+  if (!local_.has_value()) {
+    return std::nullopt;
+  } else {
+    switch (local_.value().index()) {
+      case 0: {
+        return std::get<0>(local_.value()).get();
+      }
+      case 1: {
+        return std::get<1>(local_.value()).get();
+      }
+      default:
+        ABSL_LOG(FATAL) << "Unreachable code.";
+    }
+  }
+}
+
+std::optional<std::variant<const SIdentifier*, const SCall*>> SSpecifier::local() const {
+  if (!local_.has_value()) {
+    return std::nullopt;
+  } else {
+    switch (local_.value().index()) {
+      case 0: {
+        return std::get<0>(local_.value()).get();
+      }
+      case 1: {
+        return std::get<1>(local_.value()).get();
+      }
+      default:
+        ABSL_LOG(FATAL) << "Unreachable code.";
+    }
+  }
+}
+
+void SSpecifier::set_local(std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>> local) {
+  local_ = std::move(local);
+}
+
+std::optional<bool> SSpecifier::extra() const {
+  if (!extra_.has_value()) {
+    return std::nullopt;
+  } else {
+    return extra_.value();
+  }
+}
+
+void SSpecifier::set_extra(std::optional<bool> extra) {
+  extra_ = extra;
 }
 
 // clang-format on

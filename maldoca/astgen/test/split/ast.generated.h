@@ -38,6 +38,7 @@ enum class SExpressionType {
   kIdentifier,
   kCall,
   kMember,
+  kParen,
 };
 
 std::string_view SExpressionTypeToString(SExpressionType expression_type);
@@ -62,6 +63,7 @@ class SExpression {
 
 enum class SPatternType {
   kIdentifier,
+  kParen,
 };
 
 std::string_view SPatternTypeToString(SPatternType pattern_type);
@@ -351,6 +353,74 @@ class SLoop : public virtual SStatement {
   std::optional<std::variant<std::unique_ptr<SDeclaration>, std::unique_ptr<SExpression>>> init_;
   std::variant<std::unique_ptr<SDeclaration>, std::unique_ptr<SPattern>> left_;
   std::unique_ptr<SStatement> body_;
+};
+
+class SParen : public virtual SExpression, public virtual SPattern {
+ public:
+  explicit SParen(
+      std::unique_ptr<SExpression> expression);
+
+  SExpressionType expression_type() const override {
+    return SExpressionType::kParen;
+  }
+
+  SPatternType pattern_type() const override {
+    return SPatternType::kParen;
+  }
+
+  void Serialize(std::ostream& os) const override;
+
+  static absl::StatusOr<std::unique_ptr<SParen>> FromJson(const nlohmann::json& json);
+
+  SExpression* expression();
+  const SExpression* expression() const;
+  void set_expression(std::unique_ptr<SExpression> expression);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+
+  // Internal functions used by FromJson().
+  // Extracts a field from a JSON object.
+  static absl::StatusOr<std::unique_ptr<SExpression>> GetExpression(const nlohmann::json& json);
+
+ private:
+  std::unique_ptr<SExpression> expression_;
+};
+
+class SSpecifier {
+ public:
+  explicit SSpecifier(
+      std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>> local,
+      std::optional<bool> extra);
+
+  void Serialize(std::ostream& os) const;
+
+  static absl::StatusOr<std::unique_ptr<SSpecifier>> FromJson(const nlohmann::json& json);
+
+  std::optional<std::variant<SIdentifier*, SCall*>> local();
+  std::optional<std::variant<const SIdentifier*, const SCall*>> local() const;
+  void set_local(std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>> local);
+
+  std::optional<bool> extra() const;
+  void set_extra(std::optional<bool> extra);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+
+  // Internal functions used by FromJson().
+  // Extracts a field from a JSON object.
+  static absl::StatusOr<std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>>> GetLocal(const nlohmann::json& json);
+  static absl::StatusOr<std::optional<bool>> GetExtra(const nlohmann::json& json);
+
+ private:
+  std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>> local_;
+  std::optional<bool> extra_;
 };
 
 // clang-format on

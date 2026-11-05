@@ -21,12 +21,8 @@
 #include <vector>
 
 #include "absl/algorithm/container.h"
-#include "absl/base/attributes.h"
-#include "absl/container/btree_map.h"
 #include "absl/log/absl_check.h"
 #include "absl/log/absl_log.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
@@ -167,7 +163,7 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
   } else {
     switch (kind) {
       case FIELD_KIND_UNSPECIFIED:
-        LOG(FATAL) << "Invalid FieldKind: FIELD_KIND_UNSPECIFIED.";
+        ABSL_LOG(FATAL) << "Invalid FieldKind: FIELD_KIND_UNSPECIFIED.";
       case FIELD_KIND_ATTR:
         input_type = "mlir::Attribute";
         break;
@@ -223,7 +219,7 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
         } else {
           auto ir_op = leaf->ir_op_name(ir_lang, kind);
           if (!ir_op.has_value()) {
-            LOG(FATAL) << "Leaf node " << leaf->name()
+            ABSL_LOG(FATAL) << "Leaf node " << leaf->name()
                        << " has no IR op name for " << ir_lang;
           }
           op_name = ir_op->ToPascalCase();
@@ -294,6 +290,16 @@ void IrToAstSourcePrinter::PrintLeafNode(const AstDef& ast, const NodeDef& node,
       Print("$name$");
 
       for (const FieldDef* field : node.aggregated_fields()) {
+        if (FieldIsOwnAstOnly(node, field)) {
+          // The IR doesn't hold the field. The fields inherited from the
+          // ancestors (e.g. the trivia of a `Node`) are filled in by
+          // `Create<>`; the node's own fields are passed as unset.
+          ABSL_CHECK(field->optionalness() != OPTIONALNESS_REQUIRED)
+              << node.name() << "." << field->name().ToCcVarName()
+              << ": A field that is only in the AST must be optional.";
+          Print(",\nstd::nullopt");
+          continue;
+        }
         if (!FieldIsInIrOp(field)) {
           continue;
         }
@@ -327,7 +333,7 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
   std::string rhs;
   switch (kind) {
     case FIELD_KIND_UNSPECIFIED:
-      LOG(FATAL) << "Unspecified FieldKind.";
+      ABSL_LOG(FATAL) << "Unspecified FieldKind.";
     case FIELD_KIND_ATTR: {
       rhs = absl::StrCat("op.", mlir_getter, "Attr()");
       break;
@@ -338,11 +344,17 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
       break;
     }
     case FIELD_KIND_STMT: {
-      LOG(FATAL) << "Unsupported FieldKind.";
+      ABSL_LOG(FATAL) << "Unsupported FieldKind.";
     }
   }
 
   std::unique_ptr<Type> narrowed = NarrowedIrType(ast, field, op_kind);
+  // A class-typed field narrowed in the LVAL op (see
+  // FieldDef::LvalOpOverride::type) also
+  // accepts an op of the field's own type, which the AST -> IR conversion
+  // falls back to when the AST holds a node without the narrowed form.
+  bool narrowed_with_fallback =
+      narrowed != nullptr && field.type().IsA<ClassType>();
   auto lhs = narrowed != nullptr ? (field.name() + "ir").ToCcVarName()
                                  : field.name().ToCcVarName();
 
@@ -359,8 +371,24 @@ void IrToAstSourcePrinter::PrintField(const AstDef& ast, const NodeDef& node,
     {
       auto indent = WithIndent(4);
       Println("$rhs$,");
-      PrintConverter(ast, narrowed != nullptr ? *narrowed : field.type(),
-                     ast.lang_name(), kind, maybe_null);
+      if (FieldHasPerMemberKinds(field)) {
+        PrintPerMemberKindsConverter(ast, field, op_kind, maybe_null);
+      } else if (narrowed_with_fallback) {
+        ABSL_CHECK(maybe_null == MaybeNull::kNo);
+        Println("OpVariant(");
+        {
+          auto indent = WithIndent(4);
+          PrintConverter(ast, *narrowed, ast.lang_name(), kind, MaybeNull::kNo);
+          Print(",\n");
+          PrintConverter(ast, field.type(), ast.lang_name(), field.kind(),
+                         MaybeNull::kNo);
+          Println();
+        }
+        Print(")");
+      } else {
+        PrintConverter(ast, narrowed != nullptr ? *narrowed : field.type(),
+                       ast.lang_name(), kind, maybe_null);
+      }
       Println();
     }
     Println(")");
@@ -594,7 +622,7 @@ void IrToAstSourcePrinter::PrintRegion(const AstDef& ast, const NodeDef& node,
   std::string converter_type = [&]() -> std::string {
     switch (kind) {
       case FIELD_KIND_UNSPECIFIED:
-        LOG(FATAL) << "Unspecified FieldKind.";
+        ABSL_LOG(FATAL) << "Unspecified FieldKind.";
       case FIELD_KIND_ATTR:
         ABSL_LOG(FATAL) << "Unsupported FieldKind: " << kind;
       case FIELD_KIND_RVAL:
@@ -743,7 +771,7 @@ void IrToAstSourcePrinter::PrintBuiltinConverter(
       Print("ToDouble()");
       break;
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -800,7 +828,54 @@ void IrToAstSourcePrinter::PrintVariantConverter(
   Print(")");
 }
 
+void IrToAstSourcePrinter::PrintPerMemberKindsConverter(const AstDef& ast,
+                                                        const FieldDef& field,
+                                                        FieldKind op_kind,
+                                                        MaybeNull maybe_null) {
+  absl::string_view ir_lang = ir_lang_name_.empty()
+                                  ? ast.lang_name()
+                                  : absl::string_view(ir_lang_name_);
+  ABSL_CHECK(field.type().IsA<VariantType>())
+      << field.name().ToCcVarName()
+      << ": Alternatives of different kinds require a variant field.";
+  const auto& variant_type = static_cast<const VariantType&>(field.type());
+
+  if (maybe_null == MaybeNull::kYes) {
+    std::string none_op = absl::StrCat(
+        Symbol(absl::StrCat(ir_lang, "ir")).ToPascalCase(), "NoneOp");
+    Print(absl::StrCat("Nullable<", none_op, ">(\n"));
+  }
+  {
+    auto indent = WithIndent(maybe_null == MaybeNull::kYes ? 4 : 0);
+    Println("OpVariant(");
+    {
+      auto indent = WithIndent(4);
+      TabPrinter tab_printer{{
+          .print_separator = [this] { Print(",\n"); },
+      }};
+      for (const auto& member : variant_type.types()) {
+        ABSL_CHECK(member->IsA<ClassType>())
+            << field.name().ToCcVarName()
+            << ": Alternatives of different kinds require class members.";
+        const auto& class_type = static_cast<const ClassType&>(*member);
+        tab_printer.Print();
+        PrintClassConverter(
+            class_type, ast.lang_name(),
+            FieldMemberIrKind(field, class_type.name().ToPascalCase(),
+                              op_kind));
+      }
+      Println();
+    }
+    Print(")");
+  }
+  if (maybe_null == MaybeNull::kYes) {
+    Println();
+    Print(")");
+  }
+}
+
 void IrToAstSourcePrinter::PrintListConverter(const AstDef& ast,
+
                                               const ListType& list_type,
                                               absl::string_view lang_name,
                                               FieldKind kind) {

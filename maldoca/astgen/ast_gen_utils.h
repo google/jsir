@@ -226,6 +226,15 @@ inline bool FieldIsInIrOp(const FieldDef* field) {
   return field->in_ast() && field->in_ir();
 }
 
+// Whether `field` is one of `node`'s own fields (not inherited from an
+// ancestor) and is only in the AST (GENERATION_TARGET_AST_ONLY).
+inline bool FieldIsOwnAstOnly(const NodeDef& node, const FieldDef* field) {
+  absl::Span<const FieldDef> own_fields = node.fields();
+  return field->generation_target() == GENERATION_TARGET_AST_ONLY &&
+         field >= own_fields.data() &&
+         field < own_fields.data() + own_fields.size();
+}
+
 // Whether the field is split across several operands/regions, one per
 // `ir_name` of its alternatives. See FieldDef::ir_splits().
 inline bool FieldIsSplit(const FieldDef* field) {
@@ -280,6 +289,29 @@ inline FieldKind FieldIrKind(const FieldDef& field, FieldKind op_kind) {
     return lval_op->kind;
   }
   return field.kind();
+}
+
+// The kind of the op that holds the variant member `member_name` of a field in
+// the op of `op_kind`: the kind of its alternative if the field has
+// alternatives of different kinds (see FieldDef::member_ir_kind()), otherwise
+// FieldIrKind().
+//
+// Example: an `ExportSpecifier`'s Identifier `local` is held by a
+// `jsir.identifier_ref` (LVAL) op, but its StringLiteral `local` by a
+// `jsir.string_literal` (RVAL) op.
+inline FieldKind FieldMemberIrKind(const FieldDef& field,
+                                   absl::string_view member_name,
+                                   FieldKind op_kind) {
+  if (std::optional<FieldKind> kind = field.member_ir_kind(member_name)) {
+    return *kind;
+  }
+  return FieldIrKind(field, op_kind);
+}
+
+// Whether the members of a variant field are held by ops of different kinds
+// (see FieldMemberIrKind()).
+inline bool FieldHasPerMemberKinds(const FieldDef& field) {
+  return field.has_member_ir_kinds();
 }
 
 // Builds the type `name` (a class) or `name1 | name2 | ...` (a variant).
@@ -338,9 +370,10 @@ inline std::unique_ptr<Type> NarrowedIrType(const AstDef& ast,
     }
     std::string name =
         static_cast<const ClassType&>(*member).name().ToPascalCase();
+    FieldKind member_kind = FieldMemberIrKind(field, name, op_kind);
     auto it = ast.nodes().find(name);
     if (it == ast.nodes().end() ||
-        absl::c_linear_search(it->second->aggregated_kinds(), kind)) {
+        absl::c_linear_search(it->second->aggregated_kinds(), member_kind)) {
       supported.push_back(std::move(name));
     }
   }

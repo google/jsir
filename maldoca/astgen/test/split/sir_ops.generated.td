@@ -217,4 +217,36 @@ def SirLoopOp : Sir_Op<
   );
 }
 
+def SirParenOp : Sir_Op<
+    "paren", [
+        SirExpressionOpInterfaceTraits
+    ]> {
+  let arguments = (ins
+    AnyType: $expression
+  );
+
+  let results = (outs
+    SirAnyType
+  );
+}
+
+def SirParenRefOp : Sir_Op<
+    "paren_ref", [
+        SirPatternRefOpInterfaceTraits
+    ]> {
+  let arguments = (ins
+    AnyType: $expression
+  );
+
+  let results = (outs
+    SirAnyType
+  );
+}
+
+def SirSpecifierOp : Sir_Op<"specifier", []> {
+  let arguments = (ins
+    Optional<AnyType>: $local
+  );
+}
+
 #endif  // MALDOCA_ASTGEN_TEST_SPLIT_SIR_OPS_GENERATED_TD_

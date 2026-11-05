@@ -365,6 +365,24 @@ def JshirLabeledStatementOp : Jshir_Op<
   );
 }
 
+def JshirBreakStatementOp : Jshir_Op<
+    "break_statement", [
+        JsirStatementOpInterfaceTraits
+    ]> {
+  let arguments = (ins
+    OptionalAttr<JsirIdentifierAttr>: $label
+  );
+}
+
+def JshirContinueStatementOp : Jshir_Op<
+    "continue_statement", [
+        JsirStatementOpInterfaceTraits
+    ]> {
+  let arguments = (ins
+    OptionalAttr<JsirIdentifierAttr>: $label
+  );
+}
+
 def JshirIfStatementOp : Jshir_Op<
     "if_statement", [
         JsirStatementOpInterfaceTraits,
@@ -713,6 +731,20 @@ def JsirObjectMethodOp : Jsir_Op<
   );
 }
 
+def JsirObjectExpressionOp : Jsir_Op<
+    "object_expression", [
+        JsirExpressionOpInterfaceTraits,
+        NoTerminator
+    ]> {
+  let regions = (region
+    ExprsRegion: $region
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
 def JsirFunctionExpressionOp : Jsir_Op<
     "function_expression", [
         JsirExpressionOpInterfaceTraits,
@@ -948,6 +980,39 @@ def JsirSequenceExpressionOp : Jsir_Op<
   );
 }
 
+def JsirParenthesizedExpressionOp : Jsir_Op<
+    "parenthesized_expression", [
+        JsirExpressionOpInterfaceTraits,
+        Pure
+    ]> {
+  let hasFolder = 1;
+
+  let arguments = (ins
+    AnyType: $expression
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
+def JsirParenthesizedExpressionRefOp : Jsir_Op<
+    "parenthesized_expression_ref", [
+        JsirPatternRefOpInterfaceTraits,
+        JsirLValRefOpInterfaceTraits,
+        Pure
+    ]> {
+  let hasFolder = 1;
+
+  let arguments = (ins
+    AnyType: $expression
+  );
+
+  let results = (outs
+    JsirAnyType
+  );
+}
+
 def JsirTemplateElementValueOp : Jsir_Op<"template_element_value", []> {
   let arguments = (ins
     OptionalAttr<StrAttr>: $cooked,
@@ -1088,6 +1153,26 @@ def JsirClassMethodOp : Jsir_Op<
   );
 }
 
+def JsirClassPrivateMethodOp : Jsir_Op<
+    "class_private_method", [
+        NoTerminator,
+        JsirFunctionOpInterfaceTraits
+    ]> {
+  let arguments = (ins
+    OptionalAttr<JsirIdentifierAttr>: $id,
+    BoolAttr: $generator,
+    BoolAttr: $async,
+    JsirPrivateNameAttr: $key,
+    StrAttr: $kind,
+    BoolAttr: $static_
+  );
+
+  let regions = (region
+    ExprsRegion: $params,
+    StmtRegion: $body
+  );
+}
+
 def JsirClassPropertyOp : Jsir_Op<
     "class_property", [
         NoTerminator,
@@ -1192,6 +1277,13 @@ def JsirImportDeclarationOp : Jsir_Op<
     TypedArrayAttrBase<AnyAttrOf<[JsirImportSpecifierAttr, JsirImportDefaultSpecifierAttr, JsirImportNamespaceSpecifierAttr]>, "">: $specifiers,
     JsirStringLiteralAttr: $source,
     OptionalAttr<JsirImportAttributeAttr>: $assertions
+  );
+}
+
+def JsirExportSpecifierOp : Jsir_Op<"export_specifier", []> {
+  let arguments = (ins
+    AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr]>: $exported,
+    Optional<AnyType>: $local
   );
 }
 

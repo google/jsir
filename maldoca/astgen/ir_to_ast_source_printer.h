@@ -78,6 +78,11 @@ class IrToAstSourcePrinter : public CcPrinterBase {
   void PrintVariantConverter(const AstDef& ast, const VariantType& variant_type,
                              absl::string_view lang_name, FieldKind kind);
 
+  // Prints the converter of a variant field whose members are held by ops of
+  // different kinds (see FieldMemberIrKind() in ast_gen_utils.h).
+  void PrintPerMemberKindsConverter(const AstDef& ast, const FieldDef& field,
+                                    FieldKind op_kind, MaybeNull maybe_null);
+
   void PrintListConverter(const AstDef& ast, const ListType& list_type,
                           absl::string_view lang_name, FieldKind kind);
 

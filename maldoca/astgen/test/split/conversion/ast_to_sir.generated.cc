@@ -33,6 +33,7 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
@@ -56,12 +57,18 @@ SirExpressionOpInterface AstToSir::VisitExpression(mlir::OpBuilder &builder, con
   if (auto *member = dynamic_cast<const SMember *>(node)) {
     return VisitMember(builder, member);
   }
+  if (auto *paren = dynamic_cast<const SParen *>(node)) {
+    return VisitParen(builder, paren);
+  }
   ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 SirPatternRefOpInterface AstToSir::VisitPatternRef(mlir::OpBuilder &builder, const SPattern *node) {
   if (auto *identifier = dynamic_cast<const SIdentifier *>(node)) {
     return VisitIdentifierRef(builder, identifier);
+  }
+  if (auto *paren = dynamic_cast<const SParen *>(node)) {
+    return VisitParenRef(builder, paren);
   }
   ABSL_LOG(FATAL) << "Unreachable code.";
 }
@@ -182,6 +189,41 @@ SirLoopOp AstToSir::VisitLoop(mlir::OpBuilder &builder, const SLoop *node) {
     VisitStatement(builder, node->body());
   });
   return op;
+}
+
+SirParenOp AstToSir::VisitParen(mlir::OpBuilder &builder, const SParen *node) {
+  mlir::Value mlir_expression = VisitExpression(builder, node->expression());
+  return CreateExpr<SirParenOp>(builder, node, mlir_expression);
+}
+
+SirParenRefOp AstToSir::VisitParenRef(mlir::OpBuilder &builder, const SParen *node) {
+  mlir::Value mlir_expression;
+  if (const SPattern *expression_ir = dynamic_cast<const SPattern *>(node->expression())) {
+    mlir_expression = VisitPatternRef(builder, expression_ir);
+  } else {
+    mlir::emitError(builder.getUnknownLoc(), "expression must be a SPattern.");
+    mlir_expression = VisitExpression(builder, node->expression());
+  }
+  return CreateExpr<SirParenRefOp>(builder, node, mlir_expression);
+}
+
+SirSpecifierOp AstToSir::VisitSpecifier(mlir::OpBuilder &builder, const SSpecifier *node) {
+  mlir::Value mlir_local;
+  if (node->local().has_value()) {
+    switch (node->local().value().index()) {
+      case 0: {
+        mlir_local = VisitIdentifierRef(builder, std::get<0>(node->local().value()));
+        break;
+      }
+      case 1: {
+        mlir_local = VisitCall(builder, std::get<1>(node->local().value()));
+        break;
+      }
+      default:
+        ABSL_LOG(FATAL) << "Unreachable code.";
+    }
+  }
+  return CreateStmt<SirSpecifierOp>(builder, node, mlir_local);
 }
 
 // clang-format on

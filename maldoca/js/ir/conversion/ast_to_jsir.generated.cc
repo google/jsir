@@ -33,6 +33,7 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
@@ -534,6 +535,22 @@ JshirLabeledStatementOp AstToJsir::VisitLabeledStatement(mlir::OpBuilder &builde
   return op;
 }
 
+JshirBreakStatementOp AstToJsir::VisitBreakStatement(mlir::OpBuilder &builder, const JsBreakStatement *node) {
+  JsirIdentifierAttr mlir_label;
+  if (node->label().has_value()) {
+    mlir_label = VisitIdentifierAttr(builder, node->label().value());
+  }
+  return CreateStmt<JshirBreakStatementOp>(builder, node, mlir_label);
+}
+
+JshirContinueStatementOp AstToJsir::VisitContinueStatement(mlir::OpBuilder &builder, const JsContinueStatement *node) {
+  JsirIdentifierAttr mlir_label;
+  if (node->label().has_value()) {
+    mlir_label = VisitIdentifierAttr(builder, node->label().value());
+  }
+  return CreateStmt<JshirContinueStatementOp>(builder, node, mlir_label);
+}
+
 JshirIfStatementOp AstToJsir::VisitIfStatement(mlir::OpBuilder &builder, const JsIfStatement *node) {
   mlir::Value mlir_test = VisitExpression(builder, node->test());
   auto op = CreateStmt<JshirIfStatementOp>(builder, node, mlir_test);
@@ -1003,6 +1020,36 @@ JsirObjectMethodOp AstToJsir::VisitObjectMethod(mlir::OpBuilder &builder, const 
   return op;
 }
 
+JsirObjectExpressionOp AstToJsir::VisitObjectExpression(mlir::OpBuilder &builder, const JsObjectExpression *node) {
+  auto op = CreateExpr<JsirObjectExpressionOp>(builder, node);
+  mlir::Region &mlir_properties_region = op.getRegion();
+  AppendNewBlockAndPopulate(builder, mlir_properties_region, [&] {
+    std::vector<mlir::Value> mlir_properties;
+    for (const auto &element : *node->properties_()) {
+      mlir::Value mlir_element;
+      switch (element.index()) {
+        case 0: {
+          mlir_element = VisitObjectProperty(builder, std::get<0>(element).get());
+          break;
+        }
+        case 1: {
+          mlir_element = VisitObjectMethod(builder, std::get<1>(element).get());
+          break;
+        }
+        case 2: {
+          mlir_element = VisitSpreadElement(builder, std::get<2>(element).get());
+          break;
+        }
+        default:
+          ABSL_LOG(FATAL) << "Unreachable code.";
+      }
+      mlir_properties.push_back(std::move(mlir_element));
+    }
+    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_properties);
+  });
+  return op;
+}
+
 JsirFunctionExpressionOp AstToJsir::VisitFunctionExpression(mlir::OpBuilder &builder, const JsFunctionExpression *node) {
   JsirIdentifierAttr mlir_id;
   if (node->id().has_value()) {
@@ -1315,6 +1362,22 @@ JsirSequenceExpressionOp AstToJsir::VisitSequenceExpression(mlir::OpBuilder &bui
   return CreateExpr<JsirSequenceExpressionOp>(builder, node, mlir_expressions);
 }
 
+JsirParenthesizedExpressionOp AstToJsir::VisitParenthesizedExpression(mlir::OpBuilder &builder, const JsParenthesizedExpression *node) {
+  mlir::Value mlir_expression = VisitExpression(builder, node->expression());
+  return CreateExpr<JsirParenthesizedExpressionOp>(builder, node, mlir_expression);
+}
+
+JsirParenthesizedExpressionRefOp AstToJsir::VisitParenthesizedExpressionRef(mlir::OpBuilder &builder, const JsParenthesizedExpression *node) {
+  mlir::Value mlir_expression;
+  if (const JsLVal *expression_ir = dynamic_cast<const JsLVal *>(node->expression())) {
+    mlir_expression = VisitLValRef(builder, expression_ir);
+  } else {
+    mlir::emitError(builder.getUnknownLoc(), "expression must be a JsLVal.");
+    mlir_expression = VisitExpression(builder, node->expression());
+  }
+  return CreateExpr<JsirParenthesizedExpressionRefOp>(builder, node, mlir_expression);
+}
+
 JsirTemplateElementValueOp AstToJsir::VisitTemplateElementValue(mlir::OpBuilder &builder, const JsTemplateElementValue *node) {
   mlir::StringAttr mlir_cooked;
   if (node->cooked().has_value()) {
@@ -1428,6 +1491,33 @@ JsirClassMethodOp AstToJsir::VisitClassMethod(mlir::OpBuilder &builder, const Js
   mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
   mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
   auto op = CreateStmt<JsirClassMethodOp>(builder, node, mlir_id, mlir_generator, mlir_async, mlir_literal_key, mlir_computed_key, mlir_kind, mlir_static);
+  mlir::Region &mlir_params_region = op.getParams();
+  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
+    std::vector<mlir::Value> mlir_params;
+    for (const auto &element : *node->params()) {
+      mlir::Value mlir_element = VisitPatternRef(builder, element.get());
+      mlir_params.push_back(std::move(mlir_element));
+    }
+    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
+  });
+  mlir::Region &mlir_body_region = op.getBody();
+  AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
+    VisitBlockStatement(builder, node->body());
+  });
+  return op;
+}
+
+JsirClassPrivateMethodOp AstToJsir::VisitClassPrivateMethod(mlir::OpBuilder &builder, const JsClassPrivateMethod *node) {
+  JsirIdentifierAttr mlir_id;
+  if (node->id().has_value()) {
+    mlir_id = VisitIdentifierAttr(builder, node->id().value());
+  }
+  mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
+  mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
+  JsirPrivateNameAttr mlir_key = VisitPrivateNameAttr(builder, node->key());
+  mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
+  mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
+  auto op = CreateStmt<JsirClassPrivateMethodOp>(builder, node, mlir_id, mlir_generator, mlir_async, mlir_key, mlir_kind, mlir_static);
   mlir::Region &mlir_params_region = op.getParams();
   AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
     std::vector<mlir::Value> mlir_params;
@@ -1618,6 +1708,38 @@ JsirImportDeclarationOp AstToJsir::VisitImportDeclaration(mlir::OpBuilder &build
     mlir_assertions = VisitImportAttributeAttr(builder, node->assertions().value());
   }
   return CreateStmt<JsirImportDeclarationOp>(builder, node, mlir_specifiers, mlir_source, mlir_assertions);
+}
+
+JsirExportSpecifierOp AstToJsir::VisitExportSpecifier(mlir::OpBuilder &builder, const JsExportSpecifier *node) {
+  mlir::Attribute mlir_exported;
+  switch (node->exported().index()) {
+    case 0: {
+      mlir_exported = VisitIdentifierAttr(builder, std::get<0>(node->exported()));
+      break;
+    }
+    case 1: {
+      mlir_exported = VisitStringLiteralAttr(builder, std::get<1>(node->exported()));
+      break;
+    }
+    default:
+      ABSL_LOG(FATAL) << "Unreachable code.";
+  }
+  mlir::Value mlir_local;
+  if (node->local().has_value()) {
+    switch (node->local().value().index()) {
+      case 0: {
+        mlir_local = VisitIdentifierRef(builder, std::get<0>(node->local().value()));
+        break;
+      }
+      case 1: {
+        mlir_local = VisitStringLiteral(builder, std::get<1>(node->local().value()));
+        break;
+      }
+      default:
+        ABSL_LOG(FATAL) << "Unreachable code.";
+    }
+  }
+  return CreateStmt<JsirExportSpecifierOp>(builder, node, mlir_exported, mlir_local);
 }
 
 JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuilder &builder, const JsExportNamedDeclaration *node) {

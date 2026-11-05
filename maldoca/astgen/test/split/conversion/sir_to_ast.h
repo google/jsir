@@ -66,6 +66,14 @@ class SirToAst {
 
   static absl::StatusOr<std::unique_ptr<SLoop>> VisitLoop(SirLoopOp op);
 
+  static absl::StatusOr<std::unique_ptr<SParen>> VisitParen(SirParenOp op);
+
+  static absl::StatusOr<std::unique_ptr<SParen>> VisitParenRef(
+      SirParenRefOp op);
+
+  static absl::StatusOr<std::unique_ptr<SSpecifier>> VisitSpecifier(
+      SirSpecifierOp op);
+
  private:
   template <typename T, typename... Args>
   static std::unique_ptr<T> Create(mlir::Operation* op, Args&&... args) {

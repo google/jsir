@@ -404,8 +404,7 @@ message FieldDefPb {
   // differs from the field name. Can't be combined with `alternatives`, except
   // with `op_kind` ones.
   //
-  // Example: with `enclose_in_region`, `ir_name: "region"` holds the field in
-  // the `region` region.
+  // Example: `ObjectExpression.properties` is held in the `region` region.
   optional string ir_name = 9;
 }
 

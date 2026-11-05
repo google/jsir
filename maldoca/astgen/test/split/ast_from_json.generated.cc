@@ -62,6 +62,7 @@ static bool IsExpression(const nlohmann::json& json) {
       "Identifier",
       "Call",
       "Member",
+      "Paren",
   };
 
   return kTypes->contains(type);
@@ -81,6 +82,8 @@ SExpression::FromJson(const nlohmann::json& json) {
     return SCall::FromJson(json);
   } else if (type == "Member") {
     return SMember::FromJson(json);
+  } else if (type == "Paren") {
+    return SParen::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -104,6 +107,7 @@ static bool IsPattern(const nlohmann::json& json) {
   const std::string &type = type_json.get<std::string>();
   static const auto *kTypes = new absl::flat_hash_set<std::string>{
       "Identifier",
+      "Paren",
   };
 
   return kTypes->contains(type);
@@ -119,6 +123,8 @@ SPattern::FromJson(const nlohmann::json& json) {
 
   if (type == "Identifier") {
     return SIdentifier::FromJson(json);
+  } else if (type == "Paren") {
+    return SParen::FromJson(json);
   }
   return absl::InvalidArgumentError(absl::StrCat("Invalid type: ", type));
 }
@@ -149,6 +155,22 @@ SStatement::FromJson(const nlohmann::json& json) {
 // SIdentifier
 // =============================================================================
 
+static bool IsIdentifier(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return false;
+  }
+  auto type_it = json.find("type");
+  if (type_it == json.end()) {
+    return false;
+  }
+  const nlohmann::json &type_json = type_it.value();
+  if (!type_json.is_string()) {
+    return false;
+  }
+  const std::string &type = type_json.get<std::string>();
+  return type == "Identifier";
+}
+
 absl::StatusOr<std::string>
 SIdentifier::GetName(const nlohmann::json& json) {
   return GetRequiredField<std::string>(
@@ -173,6 +195,22 @@ SIdentifier::FromJson(const nlohmann::json& json) {
 // =============================================================================
 // SCall
 // =============================================================================
+
+static bool IsCall(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return false;
+  }
+  auto type_it = json.find("type");
+  if (type_it == json.end()) {
+    return false;
+  }
+  const nlohmann::json &type_json = type_it.value();
+  if (!type_json.is_string()) {
+    return false;
+  }
+  const std::string &type = type_json.get<std::string>();
+  return type == "Call";
+}
 
 absl::StatusOr<std::unique_ptr<SExpression>>
 SCall::GetCallee(const nlohmann::json& json) {
@@ -402,6 +440,75 @@ SLoop::FromJson(const nlohmann::json& json) {
       std::move(init),
       std::move(left),
       std::move(body));
+}
+
+// =============================================================================
+// SParen
+// =============================================================================
+
+absl::StatusOr<std::unique_ptr<SExpression>>
+SParen::GetExpression(const nlohmann::json& json) {
+  return GetRequiredField<std::unique_ptr<SExpression>>(
+      json,
+      "expression",
+      SExpression::FromJson
+  );
+}
+
+absl::StatusOr<std::unique_ptr<SParen>>
+SParen::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  ABSL_ASSIGN_OR_RETURN(auto expression, SParen::GetExpression(json));
+
+  return absl::make_unique<SParen>(
+      std::move(expression));
+}
+
+// =============================================================================
+// SSpecifier
+// =============================================================================
+
+absl::StatusOr<std::optional<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>>>
+SSpecifier::GetLocal(const nlohmann::json& json) {
+  return GetOptionalField<std::variant<std::unique_ptr<SIdentifier>, std::unique_ptr<SCall>>>(
+      json,
+      "local",
+      Variant(
+          VariantOption<std::unique_ptr<SIdentifier>>{
+              .predicate = IsIdentifier,
+              .converter = SIdentifier::FromJson,
+          },
+          VariantOption<std::unique_ptr<SCall>>{
+              .predicate = IsCall,
+              .converter = SCall::FromJson,
+          })
+  );
+}
+
+absl::StatusOr<std::optional<bool>>
+SSpecifier::GetExtra(const nlohmann::json& json) {
+  return GetOptionalField<bool>(
+      json,
+      "extra",
+      JsonToBool
+  );
+}
+
+absl::StatusOr<std::unique_ptr<SSpecifier>>
+SSpecifier::FromJson(const nlohmann::json& json) {
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("JSON is not an object.");
+  }
+
+  ABSL_ASSIGN_OR_RETURN(auto local, SSpecifier::GetLocal(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, SSpecifier::GetExtra(json));
+
+  return absl::make_unique<SSpecifier>(
+      std::move(local),
+      std::move(extra));
 }
 
 // clang-format on

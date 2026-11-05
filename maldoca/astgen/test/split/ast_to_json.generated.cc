@@ -265,6 +265,66 @@ void SLoop::Serialize(std::ostream& os) const {
   os << "}";
 }
 
+// =============================================================================
+// SParen
+// =============================================================================
+
+void SParen::SerializeFields(std::ostream& os, bool &needs_comma) const {
+  MaybeAddComma(os, needs_comma);
+  os << "\"expression\":";
+  expression_->Serialize(os);
+}
+
+void SParen::Serialize(std::ostream& os) const {
+  os << "{";
+  {
+    bool needs_comma = false;
+    MaybeAddComma(os, needs_comma);
+    os << "\"type\":\"Paren\"";
+    SExpression::SerializeFields(os, needs_comma);
+    SPattern::SerializeFields(os, needs_comma);
+    SParen::SerializeFields(os, needs_comma);
+  }
+  os << "}";
+}
+
+// =============================================================================
+// SSpecifier
+// =============================================================================
+
+void SSpecifier::SerializeFields(std::ostream& os, bool &needs_comma) const {
+  if (local_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    switch (local_.value().index()) {
+      case 0: {
+        os << "\"local\":";
+        std::get<0>(local_.value())->Serialize(os);
+        break;
+      }
+      case 1: {
+        os << "\"local\":";
+        std::get<1>(local_.value())->Serialize(os);
+        break;
+      }
+      default:
+        ABSL_LOG(FATAL) << "Unreachable code.";
+    }
+  }
+  if (extra_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"extra\":" << (nlohmann::json(extra_.value())).dump();
+  }
+}
+
+void SSpecifier::Serialize(std::ostream& os) const {
+  os << "{";
+  {
+    bool needs_comma = false;
+    SSpecifier::SerializeFields(os, needs_comma);
+  }
+  os << "}";
+}
+
 // clang-format on
 // NOLINTEND(whitespace/line_length)
 // IWYU pragma: end_keep
