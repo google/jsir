@@ -15,7 +15,9 @@
 #ifndef MALDOCA_ASTGEN_IR_TABLE_GEN_PRINTER_H_
 #define MALDOCA_ASTGEN_IR_TABLE_GEN_PRINTER_H_
 
+#include <optional>
 #include <string>
+#include <vector>
 
 #include "absl/strings/string_view.h"
 #include "maldoca/astgen/ast_def.h"
@@ -48,7 +50,7 @@ class IrTableGenPrinter : public CcPrinterBase {
   // }
   void PrintNode(const AstDef& ast, const NodeDef& node, FieldKind kind);
 
-  // Prints an argument for an op in MLIR ODS.
+  // Returns the arguments that hold a field in an op in MLIR ODS.
   //
   // Format:
   //
@@ -59,20 +61,40 @@ class IrTableGenPrinter : public CcPrinterBase {
   // Example:
   //
   // AnyType: $object
-  void PrintArgument(const AstDef& ast, const NodeDef& node,
-                     const FieldDef& field);
+  //
+  // A field with a literal attribute (or a split) is held in several arguments,
+  // e.g.
+  //
+  // OptionalAttr<JsirIdentifierAttr>: $literal_property,
+  // Optional<AnyType>: $computed_property
+  std::vector<std::string> GetArguments(const AstDef& ast, const NodeDef& node,
+                                        const FieldDef& field,
+                                        FieldKind op_kind);
 
-  // Prints a region in an op in MLIR ODS.
+  // Returns the regions that hold a field in an op in MLIR ODS.
   //
   // Format:
   //
-  // AnyRegion: $<name>
+  // <RegionType>: $<name>
   //
   // Example:
   //
-  // AnyRegion: $body
-  void PrintRegion(const AstDef& ast, const NodeDef& node,
-                   const FieldDef& field);
+  // StmtRegion: $body
+  std::vector<std::string> GetRegions(const AstDef& ast, const NodeDef& node,
+                                      const FieldDef& field, FieldKind op_kind);
+
+  // If a field is held in several arguments/regions, returns a trait that
+  // verifies that exactly one of them is set (at most one, if the field is
+  // optional).
+  //
+  // Example:
+  //
+  // PredOpTrait<"exactly one of literal_property, computed_property is set",
+  //     CPred<"(int(...) + int(...)) == 1">>
+  std::optional<std::string> GetExclusiveSlotsTrait(const AstDef& ast,
+                                                    const NodeDef& node,
+                                                    const FieldDef& field,
+                                                    FieldKind op_kind);
 };
 
 // Prints the "<lang_name>ir_ops.generated.td" TableGen file.

@@ -173,196 +173,6 @@ JshirContinueStatementOp AstToJsir::VisitContinueStatement(
   return CreateStmt<JshirContinueStatementOp>(builder, node, mlir_label);
 }
 
-JshirForStatementOp AstToJsir::VisitForStatement(mlir::OpBuilder& builder,
-                                                 const JsForStatement* node) {
-  auto op = CreateStmt<JshirForStatementOp>(builder, node);
-  if (node->init().has_value()) {
-    auto init = node->init().value();
-    if (std::holds_alternative<const JsVariableDeclaration*>(init)) {
-      // A declaration is a statement, held in the `init_declaration` region.
-      AppendNewBlockAndPopulate(builder, op.getInitDeclaration(), [&] {
-        VisitVariableDeclaration(builder,
-                                 std::get<const JsVariableDeclaration*>(init));
-      });
-    } else {
-      // An expression is held in the `init_expression` region.
-      AppendNewBlockAndPopulate(builder, op.getInitExpression(), [&] {
-        mlir::Value mlir_init =
-            VisitExpression(builder, std::get<const JsExpression*>(init));
-        CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_init);
-      });
-    }
-  }
-  mlir::Region& test_region = op.getTest();
-  if (node->test().has_value()) {
-    const JsExpression* test = node->test().value();
-    AppendNewBlockAndPopulate(builder, test_region, [&] {
-      mlir::Value mlir_test = VisitExpression(builder, test);
-      CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_test);
-    });
-  }
-  mlir::Region& update_region = op.getUpdate();
-  if (node->update().has_value()) {
-    const JsExpression* update = node->update().value();
-    AppendNewBlockAndPopulate(builder, update_region, [&] {
-      mlir::Value mlir_update = VisitExpression(builder, update);
-      CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_update);
-    });
-  }
-  mlir::Region& body_region = op.getBody();
-  AppendNewBlockAndPopulate(builder, body_region,
-                            [&] { VisitStatement(builder, node->body()); });
-  return op;
-}
-
-// The `left` of a for-in/of statement is either an `LVal`, held in the
-// `left_lval` operand (e.g. `for (x of xs)`), or a `VariableDeclaration`, held
-// in the `left_declaration` region (e.g. `for (const x of xs)`).
-
-JshirForInStatementOp AstToJsir::VisitForInStatement(
-    mlir::OpBuilder& builder, const JsForInStatement* node) {
-  mlir::Value mlir_left_lval;
-  if (std::holds_alternative<const JsLVal*>(node->left())) {
-    mlir_left_lval =
-        VisitLValRef(builder, std::get<const JsLVal*>(node->left()));
-  }
-  mlir::Value mlir_right = VisitExpression(builder, node->right());
-  auto op = CreateStmt<JshirForInStatementOp>(builder, node, mlir_left_lval,
-                                              mlir_right);
-  if (std::holds_alternative<const JsVariableDeclaration*>(node->left())) {
-    AppendNewBlockAndPopulate(builder, op.getLeftDeclaration(), [&] {
-      VisitVariableDeclaration(
-          builder, std::get<const JsVariableDeclaration*>(node->left()));
-    });
-  }
-  mlir::Region& body_region = op.getBody();
-  AppendNewBlockAndPopulate(builder, body_region,
-                            [&] { VisitStatement(builder, node->body()); });
-  return op;
-}
-
-JshirForOfStatementOp AstToJsir::VisitForOfStatement(
-    mlir::OpBuilder& builder, const JsForOfStatement* node) {
-  mlir::Value mlir_left_lval;
-  if (std::holds_alternative<const JsLVal*>(node->left())) {
-    mlir_left_lval =
-        VisitLValRef(builder, std::get<const JsLVal*>(node->left()));
-  }
-  mlir::Value mlir_right = VisitExpression(builder, node->right());
-  mlir::BoolAttr mlir_await = builder.getBoolAttr(node->await());
-  auto op = CreateStmt<JshirForOfStatementOp>(builder, node, mlir_left_lval,
-                                              mlir_right, mlir_await);
-  if (std::holds_alternative<const JsVariableDeclaration*>(node->left())) {
-    AppendNewBlockAndPopulate(builder, op.getLeftDeclaration(), [&] {
-      VisitVariableDeclaration(
-          builder, std::get<const JsVariableDeclaration*>(node->left()));
-    });
-  }
-  mlir::Region& body_region = op.getBody();
-  AppendNewBlockAndPopulate(builder, body_region,
-                            [&] { VisitStatement(builder, node->body()); });
-  return op;
-}
-
-JsirArrowFunctionExpressionOp AstToJsir::VisitArrowFunctionExpression(
-    mlir::OpBuilder& builder, const JsArrowFunctionExpression* node) {
-  JsirIdentifierAttr mlir_id;
-  if (node->id().has_value()) {
-    mlir_id = VisitIdentifierAttr(builder, node->id().value());
-  }
-  mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
-  mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
-  auto op = CreateExpr<JsirArrowFunctionExpressionOp>(
-      builder, node, mlir_id, mlir_generator, mlir_async);
-  mlir::Region& mlir_params_region = op.getParams();
-  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
-    std::vector<mlir::Value> mlir_params;
-    for (const auto& param : *node->params()) {
-      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-      mlir_params.push_back(mlir_param);
-    }
-    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
-  });
-  if (std::holds_alternative<const JsBlockStatement*>(node->body())) {
-    // A block statement body is held in the `body_statement` region.
-    AppendNewBlockAndPopulate(builder, op.getBodyStatement(), [&] {
-      VisitBlockStatement(builder,
-                          std::get<const JsBlockStatement*>(node->body()));
-    });
-  } else {
-    // An expression body is held in the `body_expression` region.
-    AppendNewBlockAndPopulate(builder, op.getBodyExpression(), [&] {
-      mlir::Value mlir_body =
-          VisitExpression(builder, std::get<const JsExpression*>(node->body()));
-      CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_body);
-    });
-  }
-  return op;
-}
-
-JsirObjectPropertyOp AstToJsir::VisitObjectProperty(
-    mlir::OpBuilder& builder, const JsObjectProperty* node) {
-  auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
-  mlir::BoolAttr mlir_shorthand = builder.getBoolAttr(node->shorthand());
-  CHECK(std::holds_alternative<const JsExpression*>(node->value()));
-  mlir::Value mlir_value =
-      VisitExpression(builder, std::get<const JsExpression*>(node->value()));
-  return CreateExpr<JsirObjectPropertyOp>(builder, node, mlir_key.literal,
-                                          mlir_key.computed, mlir_shorthand,
-                                          mlir_value);
-}
-
-JsirObjectPropertyRefOp AstToJsir::VisitObjectPropertyRef(
-    mlir::OpBuilder& builder, const JsObjectProperty* node) {
-  auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
-  mlir::BoolAttr mlir_shorthand = builder.getBoolAttr(node->shorthand());
-  const JsPattern* value_pattern;
-  if (std::holds_alternative<const JsExpression*>(node->value())) {
-    const auto* value_expression = std::get<const JsExpression*>(node->value());
-    CHECK(value_pattern = dynamic_cast<const JsPattern*>(value_expression));
-  } else {
-    value_pattern = std::get<const JsPattern*>(node->value());
-  }
-  mlir::Value mlir_value = VisitPatternRef(builder, value_pattern);
-  return CreateExpr<JsirObjectPropertyRefOp>(builder, node, mlir_key.literal,
-                                             mlir_key.computed, mlir_shorthand,
-                                             mlir_value);
-}
-
-JsirObjectMethodOp AstToJsir::VisitObjectMethod(mlir::OpBuilder& builder,
-                                                const JsObjectMethod* node) {
-  // The computed key is deliberately evaluated here, in the enclosing region,
-  // and *not* inside the params region populated below. A computed key such as
-  // `{ [f() + 1](a) {} }` is evaluated exactly once, when the object literal is
-  // constructed - not once per call to the method. Parameter defaults have the
-  // opposite semantics, which is why only the params moved into a region.
-  auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
-  JsirIdentifierAttr mlir_id;
-  if (node->id().has_value()) {
-    mlir_id = VisitIdentifierAttr(builder, node->id().value());
-  }
-  mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
-  mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
-  mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
-  auto op = CreateExpr<JsirObjectMethodOp>(
-      builder, node, mlir_key.literal, mlir_key.computed, mlir_id,
-      mlir_generator, mlir_async, mlir_kind);
-  mlir::Region& mlir_params_region = op.getParams();
-  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
-    std::vector<mlir::Value> mlir_params;
-    for (const auto& param : *node->params()) {
-      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-      mlir_params.push_back(mlir_param);
-    }
-    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
-  });
-  mlir::Region& mlir_body_region = op.getBody();
-  AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
-    VisitBlockStatement(builder, node->body());
-  });
-  return op;
-}
-
 JsirObjectExpressionOp AstToJsir::VisitObjectExpression(
     mlir::OpBuilder& builder, const JsObjectExpression* node) {
   auto op = CreateExpr<JsirObjectExpressionOp>(builder, node);
@@ -401,85 +211,6 @@ JsirObjectExpressionOp AstToJsir::VisitObjectExpression(
   return op;
 }
 
-mlir::Value AstToJsir::VisitMemberExpressionObject(
-    mlir::OpBuilder& builder,
-    std::variant<const JsExpression*, const JsSuper*> object) {
-  if (std::holds_alternative<const JsExpression*>(object)) {
-    auto* object_expression = std::get<const JsExpression*>(object);
-    return VisitExpression(builder, object_expression);
-  } else if (std::holds_alternative<const JsSuper*>(object)) {
-    auto* object_super = std::get<const JsSuper*>(object);
-    return VisitSuper(builder, object_super);
-  } else {
-    LOG(FATAL) << "Unreachable code.";
-  }
-}
-
-AstToJsir::MemberExpressionProperty AstToJsir::VisitMemberExpressionProperty(
-    mlir::OpBuilder& builder,
-    std::variant<const JsExpression*, const JsPrivateName*> property,
-    bool computed) {
-  if (computed) {
-    // The op corresponds to a computed (`a[b]`) member expression and
-    // `property` is an `Expression`.
-    CHECK(std::holds_alternative<const JsExpression*>(property));
-    auto* property_expression = std::get<const JsExpression*>(property);
-    mlir::Value mlir_property = VisitExpression(builder, property_expression);
-    return {.literal = nullptr, .computed = mlir_property};
-  } else {
-    mlir::Attribute mlir_property;
-    // The op corresponds to a static (`a.b`) member expression and `property`
-    // is an `Identifier` or a `PrivateName`.
-    if (std::holds_alternative<const JsExpression*>(property)) {
-      auto* property_expression = std::get<const JsExpression*>(property);
-      auto* property_identifier =
-          dynamic_cast<const JsIdentifier*>(property_expression);
-      CHECK(property_identifier != nullptr)
-          << "If computed == false, then `property` can only be Identifier or "
-             "PrivateName.";
-      mlir_property = VisitIdentifierAttr(builder, property_identifier);
-    } else if (std::holds_alternative<const JsPrivateName*>(property)) {
-      auto* property_private_name = std::get<const JsPrivateName*>(property);
-      mlir_property = VisitPrivateNameAttr(builder, property_private_name);
-    }
-    return {.literal = mlir_property, .computed = nullptr};
-  }
-}
-
-JsirMemberExpressionOp AstToJsir::VisitMemberExpression(
-    mlir::OpBuilder& builder, const JsMemberExpression* node) {
-  mlir::Value mlir_object =
-      VisitMemberExpressionObject(builder, node->object());
-  MemberExpressionProperty mlir_property = VisitMemberExpressionProperty(
-      builder, node->property(), node->computed());
-  return CreateExpr<JsirMemberExpressionOp>(builder, node, mlir_object,
-                                            mlir_property.literal,
-                                            mlir_property.computed);
-}
-
-JsirMemberExpressionRefOp AstToJsir::VisitMemberExpressionRef(
-    mlir::OpBuilder& builder, const JsMemberExpression* node) {
-  mlir::Value mlir_object =
-      VisitMemberExpressionObject(builder, node->object());
-  MemberExpressionProperty mlir_property = VisitMemberExpressionProperty(
-      builder, node->property(), node->computed());
-  return CreateExpr<JsirMemberExpressionRefOp>(builder, node, mlir_object,
-                                               mlir_property.literal,
-                                               mlir_property.computed);
-}
-
-JsirOptionalMemberExpressionOp AstToJsir::VisitOptionalMemberExpression(
-    mlir::OpBuilder& builder, const JsOptionalMemberExpression* node) {
-  mlir::Value mlir_object =
-      VisitMemberExpressionObject(builder, node->object());
-  MemberExpressionProperty mlir_property = VisitMemberExpressionProperty(
-      builder, node->property(), node->computed());
-  mlir::BoolAttr mlir_optional = builder.getBoolAttr(node->optional());
-  return CreateExpr<JsirOptionalMemberExpressionOp>(
-      builder, node, mlir_object, mlir_property.literal, mlir_property.computed,
-      mlir_optional);
-}
-
 JsirParenthesizedExpressionOp AstToJsir::VisitParenthesizedExpression(
     mlir::OpBuilder& builder, const JsParenthesizedExpression* node) {
   mlir::Value mlir_expression = VisitExpression(builder, node->expression());
@@ -501,42 +232,6 @@ JsirParenthesizedExpressionRefOp AstToJsir::VisitParenthesizedExpressionRef(
   }();
   return CreateExpr<JsirParenthesizedExpressionRefOp>(builder, node,
                                                       mlir_expression);
-}
-
-JsirClassMethodOp AstToJsir::VisitClassMethod(mlir::OpBuilder& builder,
-                                              const JsClassMethod* node) {
-  JsirIdentifierAttr mlir_id;
-  if (node->id().has_value()) {
-    mlir_id = VisitIdentifierAttr(builder, node->id().value());
-  }
-  mlir::BoolAttr mlir_generator = builder.getBoolAttr(node->generator());
-  mlir::BoolAttr mlir_async = builder.getBoolAttr(node->async());
-  // The computed key is deliberately evaluated here, in the enclosing region
-  // (`jsir.class_body`), and *not* inside the params region populated below. A
-  // computed key such as `class C { [f() + 1](a) {} }` is evaluated exactly
-  // once, when the class body is constructed - not once per call to the method.
-  // Parameter defaults have the opposite semantics, which is why only the
-  // params moved into a region.
-  auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
-  mlir::StringAttr mlir_kind = builder.getStringAttr(node->kind());
-  mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
-  auto op = CreateStmt<JsirClassMethodOp>(
-      builder, node, mlir_id, mlir_generator, mlir_async, mlir_key.literal,
-      mlir_key.computed, mlir_kind, mlir_static);
-  mlir::Region& mlir_params_region = op.getParams();
-  AppendNewBlockAndPopulate(builder, mlir_params_region, [&] {
-    std::vector<mlir::Value> mlir_params;
-    for (const auto& param : *node->params()) {
-      mlir::Value mlir_param = VisitPatternRef(builder, param.get());
-      mlir_params.push_back(mlir_param);
-    }
-    CreateStmt<JsirExprsRegionEndOp>(builder, nullptr, mlir_params);
-  });
-  mlir::Region& mlir_body_region = op.getBody();
-  AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
-    VisitBlockStatement(builder, node->body());
-  });
-  return op;
 }
 
 JsirClassPrivateMethodOp AstToJsir::VisitClassPrivateMethod(
@@ -566,22 +261,6 @@ JsirClassPrivateMethodOp AstToJsir::VisitClassPrivateMethod(
   AppendNewBlockAndPopulate(builder, mlir_body_region, [&] {
     VisitBlockStatement(builder, node->body());
   });
-  return op;
-}
-
-JsirClassPropertyOp AstToJsir::VisitClassProperty(mlir::OpBuilder& builder,
-                                                  const JsClassProperty* node) {
-  auto mlir_key = GetObjectPropertyKey(builder, node->key(), node->computed());
-  mlir::BoolAttr mlir_static = builder.getBoolAttr(node->static_());
-  auto op = CreateStmt<JsirClassPropertyOp>(builder, node, mlir_key.literal,
-                                            mlir_key.computed, mlir_static);
-  if (node->value().has_value()) {
-    AppendNewBlockAndPopulate(builder, op.getValue(), [&] {
-      mlir::Value mlir_value = VisitExpression(builder, node->value().value());
-      CreateStmt<JsirExprRegionEndOp>(builder, nullptr,
-                                      mlir_value);
-    });
-  }
   return op;
 }
 
@@ -634,7 +313,8 @@ JsirExportSpecifierOp AstToJsir::VisitExportSpecifier(
   if (std::holds_alternative<const JsIdentifier*>(node->exported())) {
     auto* exported = std::get<const JsIdentifier*>(node->exported());
     mlir_exported = VisitIdentifierAttr(builder, exported);
-  } else if (std::holds_alternative<const JsStringLiteral*>(node->exported())) {
+  } else if (std::holds_alternative<const JsStringLiteral*>(
+                 node->exported())) {
     auto* exported = std::get<const JsStringLiteral*>(node->exported());
     mlir_exported = VisitStringLiteralAttr(builder, exported);
   } else {
@@ -661,34 +341,6 @@ JsirExportSpecifierOp AstToJsir::VisitExportSpecifier(
                                            mlir_local);
 }
 
-JsirExportDefaultDeclarationOp AstToJsir::VisitExportDefaultDeclaration(
-    mlir::OpBuilder& builder, const JsExportDefaultDeclaration* node) {
-  auto op = CreateStmt<JsirExportDefaultDeclarationOp>(builder, node);
-  if (std::holds_alternative<const JsFunctionDeclaration*>(
-          node->declaration())) {
-    // A function or class declaration is held in the `declaration_statement`
-    // region.
-    AppendNewBlockAndPopulate(builder, op.getDeclarationStatement(), [&] {
-      VisitFunctionDeclaration(
-          builder, std::get<const JsFunctionDeclaration*>(node->declaration()));
-    });
-  } else if (std::holds_alternative<const JsClassDeclaration*>(
-                 node->declaration())) {
-    AppendNewBlockAndPopulate(builder, op.getDeclarationStatement(), [&] {
-      VisitClassDeclaration(
-          builder, std::get<const JsClassDeclaration*>(node->declaration()));
-    });
-  } else {
-    // An expression is held in the `declaration_expression` region.
-    AppendNewBlockAndPopulate(builder, op.getDeclarationExpression(), [&] {
-      mlir::Value mlir_expression = VisitExpression(
-          builder, std::get<const JsExpression*>(node->declaration()));
-      CreateStmt<JsirExprRegionEndOp>(builder, nullptr, mlir_expression);
-    });
-  }
-  return op;
-}
-
 void AstToJsir::AppendNewBlockAndPopulate(mlir::OpBuilder& builder,
                                           mlir::Region& region,
                                           std::function<void()> populate) {
@@ -701,30 +353,6 @@ void AstToJsir::AppendNewBlockAndPopulate(mlir::OpBuilder& builder,
   builder.setInsertionPointToStart(&block);
 
   populate();
-}
-AstToJsir::ObjectPropertyKey AstToJsir::GetObjectPropertyKey(
-    mlir::OpBuilder& builder, const JsExpression* node, bool computed) {
-  if (!computed) {
-    mlir::Attribute attr;
-    if (auto* identifier = dynamic_cast<const JsIdentifier*>(node)) {
-      attr = VisitIdentifierAttr(builder, identifier);
-    } else if (auto* string_literal =
-                   dynamic_cast<const JsStringLiteral*>(node)) {
-      attr = VisitStringLiteralAttr(builder, string_literal);
-    } else if (auto* numeric_literal =
-                   dynamic_cast<const JsNumericLiteral*>(node)) {
-      attr = VisitNumericLiteralAttr(builder, numeric_literal);
-    } else if (auto* big_int_literal =
-                   dynamic_cast<const JsBigIntLiteral*>(node)) {
-      attr = VisitBigIntLiteralAttr(builder, big_int_literal);
-    } else {
-      LOG(FATAL) << "Invalid property name.";
-    }
-    return ObjectPropertyKey{.literal = attr, .computed = nullptr};
-  } else {
-    JsirExpressionOpInterface op = VisitExpression(builder, node);
-    return ObjectPropertyKey{.literal = nullptr, .computed = op};
-  }
 }
 
 }  // namespace maldoca

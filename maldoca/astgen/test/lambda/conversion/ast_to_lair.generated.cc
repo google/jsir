@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "llvm/ADT/APFloat.h"

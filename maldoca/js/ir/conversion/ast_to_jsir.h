@@ -137,55 +137,6 @@ class AstToJsir {
   static void AppendNewBlockAndPopulate(mlir::OpBuilder& builder,
                                         mlir::Region& region,
                                         std::function<void()> populate);
-
-  // The key of an object property.
-  //
-  // Example:
-  // {
-  //   a: 0
-  //   ~
-  //
-  //   "b": 1
-  //   ~~~
-  //
-  //   ["b"]: 2
-  //   ~~~~~
-  // }
-  //
-  // The key can be either literal or computed. Therefore, only one of them is
-  // non-null.
-  struct ObjectPropertyKey {
-    // JsirIdentifierAttr | JsirStringLiteralAttr | JsirNumericLiteralAttr
-    //                    | JsirBigIntLiteralAttr
-    mlir::Attribute literal;
-
-    // JsirExpressionOpInterface
-    mlir::Value computed;
-  };
-
-  // If computed == false:
-  //   ObjectPropertyKey::literal is non-null.
-  //   ObjectPropertyKey::computed is null.
-  // If computed == true:
-  //   ObjectPropertyKey::literal is null.
-  //   ObjectPropertyKey::computed is non-null.
-  static ObjectPropertyKey GetObjectPropertyKey(mlir::OpBuilder& builder,
-                                                const JsExpression* node,
-                                                bool computed);
-
-  static mlir::Value VisitMemberExpressionObject(
-      mlir::OpBuilder& builder,
-      std::variant<const JsExpression*, const JsSuper*> object);
-
-  struct MemberExpressionProperty {
-    mlir::Attribute literal;
-    mlir::Value computed;
-  };
-
-  static MemberExpressionProperty VisitMemberExpressionProperty(
-      mlir::OpBuilder& builder,
-      std::variant<const JsExpression*, const JsPrivateName*> property,
-      bool computed);
 };
 
 }  // namespace maldoca

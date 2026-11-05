@@ -113,20 +113,6 @@ class JsirToAst {
   static absl::StatusOr<std::unique_ptr<JsDeclaration>> VisitDeclaration(
       JsirDeclarationOpInterface op);
 
-  struct JsForInOfStatementFields {
-    std::variant<std::unique_ptr<JsVariableDeclaration>,
-                 std::unique_ptr<JsLVal>>
-        left;
-    std::unique_ptr<JsExpression> right;
-    std::unique_ptr<JsStatement> body;
-  };
-
-  // `left_declaration` and `left_lval` are the two forms of `left`, of which
-  // exactly one is set.
-  static absl::StatusOr<JsForInOfStatementFields> VisitForInOfStatement(
-      mlir::Region& left_declaration, mlir::Value left_lval, mlir::Value right,
-      mlir::Region& body_region);
-
   static absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
       JsirCommentAttrInterface attr);
 
@@ -170,28 +156,6 @@ class JsirToAst {
 
     return statements;
   }
-
-  struct ObjectPropertyKey {
-    std::unique_ptr<JsExpression> key;
-    bool computed;
-  };
-
-  static absl::StatusOr<ObjectPropertyKey> GetObjectPropertyKey(
-      mlir::Value computed_key, std::optional<mlir::Attribute> literal_key);
-
-  struct MemberExpressionProperty {
-    std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>>
-        property;
-    bool computed;
-  };
-
-  static absl::StatusOr<MemberExpressionProperty> GetMemberExpressionProperty(
-      mlir::Value computed_property,
-      std::optional<mlir::Attribute> literal_property);
-
-  static absl::StatusOr<
-      std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>>>
-      GetMemberExpressionObject(mlir::Value);
 
   static absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>,
                                      std::unique_ptr<JsStringLiteral>>>
