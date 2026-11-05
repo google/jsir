@@ -61,15 +61,19 @@ def JshirContinueStatementOp : Jshir_Op<
 
 // ForStatement-Related Ops
 //
+// `init` is either a `VariableDeclaration` (a statement, held in the
+// `init_declaration` region) or an expression (held in the `init_expression`
+// region). At most one of them is set.
+//
 // jshir.for_statement ( {
-//   %init = ...
-//   jsir.expr_region_end (%init)
+//   jsir.variable_declaration ...
+// },  {
 // },  {
 //   %test = ...
 //   jsir.expr_region_end (%test)
 // },  {
 //   %update = ...
-//   jsir.expr_region_update (%update)
+//   jsir.expr_region_end (%update)
 // },  {
 //   ...  // body
 // })
@@ -77,10 +81,12 @@ def JshirContinueStatementOp : Jshir_Op<
 def JshirForStatementOp : Jshir_Op<
     "for_statement", [
         JsirStatementOpInterfaceTraits,
-        NoTerminator
+        NoTerminator,
+        PredOpTrait<"at most one of init_declaration, init_expression is set", CPred<"(int(!::llvm::cast<JshirForStatementOp>(&$_op).getInitDeclaration().empty()) + int(!::llvm::cast<JshirForStatementOp>(&$_op).getInitExpression().empty())) <= 1">>
     ]> {
   let regions = (region
-    OptionalRegion<UnknownRegion>: $init,
+    OptionalRegion<StmtRegion>: $init_declaration,
+    OptionalRegion<ExprRegion>: $init_expression,
     OptionalRegion<ExprRegion>: $test,
     OptionalRegion<ExprRegion>: $update,
     StmtRegion: $body
@@ -89,29 +95,37 @@ def JshirForStatementOp : Jshir_Op<
 
 // For{In,Of}Statement-Related Ops
 //
-// %left = ...
+// `left` is either a `VariableDeclaration` (a statement, held in the
+// `left_declaration` region, e.g. `for (const x of xs)`) or an `LVal` (held in
+// the `left_lval` operand, e.g. `for (x of xs)`). Exactly one of them is set.
+//
 // %right = ...
-// jshir.for_in_statement (%left, %right) {
+// jshir.for_in_statement (%right) ({
+//   jsir.variable_declaration ...
+// }, {
 //   ...  // body
 // })
 //                                   - OR -
-// jshir.for_of_statement (%left, %right) {
+// %left = ...
+// %right = ...
+// jshir.for_of_statement (%left, %right) ({
+// }, {
 //   ...  // body
 // }) {await = true}
 
 def JshirForInStatementOp : Jshir_Op<
     "for_in_statement", [
         JsirStatementOpInterfaceTraits,
-        NoTerminator
+        NoTerminator,
+        PredOpTrait<"exactly one of left_declaration, left_lval is set", CPred<"(int(!::llvm::cast<JshirForInStatementOp>(&$_op).getLeftDeclaration().empty()) + int(::llvm::cast<JshirForInStatementOp>(&$_op).getLeftLval() != nullptr)) == 1">>
     ]> {
   let arguments = (ins
-    OptionalAttr<JsirForInOfDeclarationAttr>: $left_declaration,
-    AnyType: $left_lval,  // JsLVal
-    Optional<AnyType>: $left_init,  // JsExpression
-    AnyType: $right  // JsExpression
+    Optional<AnyType>: $left_lval,
+    AnyType: $right
   );
 
   let regions = (region
+    OptionalRegion<StmtRegion>: $left_declaration,
     StmtRegion: $body
   );
 }
@@ -119,35 +133,41 @@ def JshirForInStatementOp : Jshir_Op<
 def JshirForOfStatementOp : Jshir_Op<
     "for_of_statement", [
         JsirStatementOpInterfaceTraits,
-        NoTerminator
+        NoTerminator,
+        PredOpTrait<"exactly one of left_declaration, left_lval is set", CPred<"(int(!::llvm::cast<JshirForOfStatementOp>(&$_op).getLeftDeclaration().empty()) + int(::llvm::cast<JshirForOfStatementOp>(&$_op).getLeftLval() != nullptr)) == 1">>
     ]> {
   let arguments = (ins
-    OptionalAttr<JsirForInOfDeclarationAttr>: $left_declaration,
-    AnyType: $left_lval,  // JsLVal
-    AnyType: $right,  // JsExpression
+    Optional<AnyType>: $left_lval,
+    AnyType: $right,
     BoolAttr: $await
   );
 
   let regions = (region
+    OptionalRegion<StmtRegion>: $left_declaration,
     StmtRegion: $body
   );
 }
 
+// The body is either a `BlockStatement` (held in the `body_statement` region)
+// or an expression (held in the `body_expression` region). Exactly one of them
+// is set.
 def JsirArrowFunctionExpressionOp : Jsir_Op<
     "arrow_function_expression", [
         JsirExpressionOpInterfaceTraits,
         NoTerminator,
-        JsirFunctionOpInterfaceTraits
+        JsirFunctionOpInterfaceTraits,
+        PredOpTrait<"exactly one of body_statement, body_expression is set", CPred<"(int(!::llvm::cast<JsirArrowFunctionExpressionOp>(&$_op).getBodyStatement().empty()) + int(!::llvm::cast<JsirArrowFunctionExpressionOp>(&$_op).getBodyExpression().empty())) == 1">>
     ]> {
   let arguments = (ins
-    Optional<AnyType>: $id,
+    OptionalAttr<JsirIdentifierAttr>: $id,
     BoolAttr: $generator,
     BoolAttr: $async
   );
 
   let regions = (region
     ExprsRegion: $params,
-    UnknownRegion: $body
+    OptionalRegion<StmtRegion>: $body_statement,
+    OptionalRegion<ExprRegion>: $body_expression
   );
 
   let results = (outs
@@ -369,13 +389,18 @@ def JsirClassPropertyOp : Jsir_Op<"class_property", [NoTerminator]> {
   );
 }
 
+// `declaration` is either a function/class declaration (held in the
+// `declaration_statement` region) or an expression (held in the
+// `declaration_expression` region). Exactly one of them is set.
 def JsirExportDefaultDeclarationOp : Jsir_Op<
     "export_default_declaration", [
         JsirModuleDeclarationOpInterfaceTraits,
-        NoTerminator
+        NoTerminator,
+        PredOpTrait<"exactly one of declaration_statement, declaration_expression is set", CPred<"(int(!::llvm::cast<JsirExportDefaultDeclarationOp>(&$_op).getDeclarationStatement().empty()) + int(!::llvm::cast<JsirExportDefaultDeclarationOp>(&$_op).getDeclarationExpression().empty())) == 1">>
     ]> {
   let regions = (region
-    UnknownRegion: $declaration
+    OptionalRegion<StmtRegion>: $declaration_statement,
+    OptionalRegion<ExprRegion>: $declaration_expression
   );
 }
 

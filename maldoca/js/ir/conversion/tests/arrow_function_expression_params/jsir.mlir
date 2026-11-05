@@ -22,6 +22,7 @@
 // JSIR-NEXT:         %9 = "jsir.rest_element_ref"(%8) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:         "jsir.exprs_region_end"(%3, %7, %9) : (!jsir.any, !jsir.any, !jsir.any) -> ()
 // JSIR-NEXT:       }, {
+// JSIR-NEXT:       }, {
 // JSIR-NEXT:         %3 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
 // JSIR-NEXT:         %4 = "jsir.identifier"() <{name = "b"}> : () -> !jsir.any
 // JSIR-NEXT:         %5 = "jsir.binary_expression"(%3, %4) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any

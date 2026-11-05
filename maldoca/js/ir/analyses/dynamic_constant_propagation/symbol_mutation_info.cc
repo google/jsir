@@ -16,6 +16,7 @@
 
 #include "llvm/ADT/TypeSwitch.h"
 #include "mlir/IR/Operation.h"
+#include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
 #include "mlir/IR/ValueRange.h"
 #include "absl/container/flat_hash_map.h"
@@ -78,20 +79,47 @@ LvalueRootSymbols GetLvalueRootSymbols(const BabelScopes &scopes,
       .Default(Ret{});
 }
 
+namespace {
+
+// Whether `op` declares the target of a for-in/of statement, i.e. is in its
+// `left_declaration` region (`x` in `for (var x = 1 in o)`).
+bool IsForInOfHeadDeclarator(JsirVariableDeclaratorOp op) {
+  mlir::Operation *declaration = op->getParentOp();
+  mlir::Operation *loop =
+      declaration != nullptr ? declaration->getParentOp() : nullptr;
+  if (loop == nullptr) {
+    return false;
+  }
+  mlir::Region *region = declaration->getParentRegion();
+  return llvm::TypeSwitch<mlir::Operation *, bool>(loop)
+      .Case([&](JshirForInStatementOp loop) {
+        return region == &loop.getLeftDeclaration();
+      })
+      .Case([&](JshirForOfStatementOp loop) {
+        return region == &loop.getLeftDeclaration();
+      })
+      .Default(false);
+}
+
+}  // namespace
+
 absl::flat_hash_map<JsSymbolId, SymbolMutationInfo> GetSymbolMutationInfos(
     const BabelScopes &scopes, mlir::Operation *root) {
   absl::flat_hash_map<JsSymbolId, SymbolMutationInfo> infos;
   root->walk([&](mlir::Operation *op) {
     llvm::TypeSwitch<mlir::Operation *, void>(op)
         .Case([&](JsirVariableDeclaratorOp op) {
-          if (op.getInit() == nullptr) {
+          // The loop also assigns a for-in/of target each key/element, so it
+          // never has a single assignment.
+          bool in_loop_head = IsForInOfHeadDeclarator(op);
+          if (op.getInit() == nullptr && !in_loop_head) {
             return;
           }
 
           LvalueRootSymbols root_symbols =
               GetLvalueRootSymbols(scopes, op.getId());
           for (const JsSymbolId &symbol : root_symbols.assignment_symbols) {
-            infos[symbol].num_assignments++;
+            infos[symbol].num_assignments += in_loop_head ? 2 : 1;
           }
           for (const JsSymbolId &symbol : root_symbols.mutation_symbols) {
             infos[symbol].num_mutations++;

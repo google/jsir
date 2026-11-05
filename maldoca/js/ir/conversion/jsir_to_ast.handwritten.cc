@@ -138,11 +138,13 @@ absl::StatusOr<std::unique_ptr<JsForStatement>> JsirToAst::VisitForStatement(
   std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>,
                              std::unique_ptr<JsExpression>>>
       init;
-  if (!op.getInit().empty()) {
+  if (!op.getInitDeclaration().empty()) {
     ABSL_ASSIGN_OR_RETURN(
-        init, VisitStmtOrExprRegion(op.getInit(),
-                                    &JsirToAst::VisitVariableDeclaration,
-                                    &JsirToAst::VisitExpression));
+        init, VisitStmtRegion(op.getInitDeclaration(),
+                              &JsirToAst::VisitVariableDeclaration));
+  } else if (!op.getInitExpression().empty()) {
+    ABSL_ASSIGN_OR_RETURN(init, VisitExprRegion(op.getInitExpression(),
+                                                &JsirToAst::VisitExpression));
   }
   std::optional<std::unique_ptr<JsExpression>> test;
   if (!op.getTest().empty()) {
@@ -161,36 +163,22 @@ absl::StatusOr<std::unique_ptr<JsForStatement>> JsirToAst::VisitForStatement(
 }
 
 absl::StatusOr<JsirToAst::JsForInOfStatementFields>
-JsirToAst::VisitForInOfStatement(
-    std::optional<JsirForInOfDeclarationAttr> left_declaration,
-    mlir::Value left_lval, mlir::Value left_init, mlir::Value right,
-    mlir::Region& body_region) {
-  ABSL_ASSIGN_OR_RETURN(auto left_lval_op,
-                        Cast<JsirLValRefOpInterface>(left_lval));
-  ABSL_ASSIGN_OR_RETURN(auto left_lval_ast, VisitLValRef(left_lval_op));
-
+JsirToAst::VisitForInOfStatement(mlir::Region& left_declaration,
+                                 mlir::Value left_lval, mlir::Value right,
+                                 mlir::Region& body_region) {
   std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>>
       left;
-  if (!left_declaration.has_value()) {
-    left = std::move(left_lval_ast);
+  if (!left_declaration.empty()) {
+    ABSL_ASSIGN_OR_RETURN(
+        left, VisitStmtRegion(left_declaration,
+                              &JsirToAst::VisitVariableDeclaration));
+  } else if (left_lval != nullptr) {
+    ABSL_ASSIGN_OR_RETURN(auto left_lval_op,
+                          Cast<JsirLValRefOpInterface>(left_lval));
+    ABSL_ASSIGN_OR_RETURN(left, VisitLValRef(left_lval_op));
   } else {
-    std::optional<std::unique_ptr<JsExpression>> init;
-    if (left_init != nullptr) {
-      ABSL_ASSIGN_OR_RETURN(auto left_init_op,
-                            Cast<JsirExpressionOpInterface>(left_init));
-      ABSL_ASSIGN_OR_RETURN(init, VisitExpression(left_init_op));
-    }
-    auto declarator = CreateJsNodeWithTrivia<JsVariableDeclarator>(
-        left_declaration->getDeclaratorLoc(), std::move(left_lval_ast),
-        std::move(init));
-
-    std::vector<std::unique_ptr<JsVariableDeclarator>> declarations;
-    declarations.push_back(std::move(declarator));
-
-    std::string kind;
-    left = CreateJsNodeWithTrivia<JsVariableDeclaration>(
-        left_declaration->getDeclarationLoc(), std::move(declarations),
-        left_declaration->getKind().str());
+    return absl::InvalidArgumentError(
+        "Exactly one of left_declaration, left_lval must be set.");
   }
 
   ABSL_ASSIGN_OR_RETURN(auto right_op, Cast<JsirExpressionOpInterface>(right));
@@ -208,7 +196,7 @@ JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
       auto fields,
       VisitForInOfStatement(op.getLeftDeclaration(), op.getLeftLval(),
-                            op.getLeftInit(), op.getRight(), op.getBody()));
+                            op.getRight(), op.getBody()));
   return Create<JsForInStatement>(op, std::move(fields.left),
                                   std::move(fields.right),
                                   std::move(fields.body));
@@ -217,9 +205,9 @@ JsirToAst::VisitForInStatement(JshirForInStatementOp op) {
 absl::StatusOr<std::unique_ptr<JsForOfStatement>>
 JsirToAst::VisitForOfStatement(JshirForOfStatementOp op) {
   ABSL_ASSIGN_OR_RETURN(
-      auto fields, VisitForInOfStatement(
-                       op.getLeftDeclaration(), op.getLeftLval(),
-                       /*left_init=*/nullptr, op.getRight(), op.getBody()));
+      auto fields,
+      VisitForInOfStatement(op.getLeftDeclaration(), op.getLeftLval(),
+                            op.getRight(), op.getBody()));
   return Create<JsForOfStatement>(op, std::move(fields.left),
                                   std::move(fields.right),
                                   std::move(fields.body), op.getAwait());
@@ -228,9 +216,8 @@ JsirToAst::VisitForOfStatement(JshirForOfStatementOp op) {
 absl::StatusOr<std::unique_ptr<JsArrowFunctionExpression>>
 JsirToAst::VisitArrowFunctionExpression(JsirArrowFunctionExpressionOp op) {
   std::optional<std::unique_ptr<JsIdentifier>> id;
-  if (op.getId() != nullptr) {
-    ABSL_ASSIGN_OR_RETURN(auto mlir_id, Cast<JsirIdentifierRefOp>(op.getId()));
-    ABSL_ASSIGN_OR_RETURN(auto id, VisitIdentifierRef(mlir_id));
+  if (op.getId().has_value()) {
+    ABSL_ASSIGN_OR_RETURN(id, VisitIdentifierAttr(*op.getId()));
   }
   std::vector<std::unique_ptr<JsPattern>> params;
   ABSL_ASSIGN_OR_RETURN(mlir::ValueRange mlir_params,
@@ -243,10 +230,19 @@ JsirToAst::VisitArrowFunctionExpression(JsirArrowFunctionExpressionOp op) {
   }
   bool generator = op.getGenerator();
   bool async = op.getAsync();
-  ABSL_ASSIGN_OR_RETURN(
-      auto body,
-      VisitStmtOrExprRegion(op.getBody(), &JsirToAst::VisitBlockStatement,
-                            &JsirToAst::VisitExpression));
+  std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>>
+      body;
+  if (!op.getBodyStatement().empty()) {
+    ABSL_ASSIGN_OR_RETURN(body,
+                          VisitStmtRegion(op.getBodyStatement(),
+                                          &JsirToAst::VisitBlockStatement));
+  } else if (!op.getBodyExpression().empty()) {
+    ABSL_ASSIGN_OR_RETURN(body, VisitExprRegion(op.getBodyExpression(),
+                                                &JsirToAst::VisitExpression));
+  } else {
+    return absl::InvalidArgumentError(
+        "Exactly one of body_statement, body_expression must be set.");
+  }
   return Create<JsArrowFunctionExpression>(op, std::move(id), std::move(params),
                                            generator, async, std::move(body));
 }
@@ -674,28 +670,34 @@ JsirToAst::VisitExportSpecifier(JsirExportSpecifierOp op) {
 
 absl::StatusOr<std::unique_ptr<JsExportDefaultDeclaration>>
 JsirToAst::VisitExportDefaultDeclaration(JsirExportDefaultDeclarationOp op) {
-  ABSL_ASSIGN_OR_RETURN(mlir::Operation * mlir_declaration,
-                        GetStmtRegionOperation(op.getDeclaration()));
   std::variant<std::unique_ptr<JsFunctionDeclaration>,
                std::unique_ptr<JsClassDeclaration>,
                std::unique_ptr<JsExpression>>
       declaration;
-  if (auto mlir_declaration_op =
-          llvm::dyn_cast<JsirFunctionDeclarationOp>(mlir_declaration)) {
+  if (!op.getDeclarationStatement().empty()) {
+    // A function or class declaration.
+    ABSL_ASSIGN_OR_RETURN(mlir::Operation * mlir_declaration,
+                          GetStmtRegionOperation(op.getDeclarationStatement()));
+    if (auto mlir_declaration_op =
+            llvm::dyn_cast<JsirFunctionDeclarationOp>(mlir_declaration)) {
+      ABSL_ASSIGN_OR_RETURN(declaration,
+                            VisitFunctionDeclaration(mlir_declaration_op));
+    } else if (auto mlir_declaration_op =
+                   llvm::dyn_cast<JsirClassDeclarationOp>(mlir_declaration)) {
+      ABSL_ASSIGN_OR_RETURN(declaration,
+                            VisitClassDeclaration(mlir_declaration_op));
+    } else {
+      return absl::InvalidArgumentError(
+          "Invalid JsirExportDefaultDeclarationOp::declaration_statement()");
+    }
+  } else if (!op.getDeclarationExpression().empty()) {
     ABSL_ASSIGN_OR_RETURN(declaration,
-                          VisitFunctionDeclaration(mlir_declaration_op));
-  } else if (auto mlir_declaration_op =
-                 llvm::dyn_cast<JsirClassDeclarationOp>(mlir_declaration)) {
-    ABSL_ASSIGN_OR_RETURN(declaration,
-                          VisitClassDeclaration(mlir_declaration_op));
-  } else if (auto mlir_declaration_region_end_op =
-                 llvm::dyn_cast<JsirExprRegionEndOp>(mlir_declaration)) {
-    auto mlir_declaration_op = llvm::dyn_cast<JsirExpressionOpInterface>(
-        mlir_declaration_region_end_op.getArgument().getDefiningOp());
-    ABSL_ASSIGN_OR_RETURN(declaration, VisitExpression(mlir_declaration_op));
+                          VisitExprRegion(op.getDeclarationExpression(),
+                                          &JsirToAst::VisitExpression));
   } else {
     return absl::InvalidArgumentError(
-        "Invalid JsirExportDefaultDeclarationOp::declaration()");
+        "Exactly one of declaration_statement, declaration_expression must be "
+        "set.");
   }
   return Create<JsExportDefaultDeclaration>(op, std::move(declaration));
 }

@@ -121,9 +121,10 @@ class JsirToAst {
     std::unique_ptr<JsStatement> body;
   };
 
+  // `left_declaration` and `left_lval` are the two forms of `left`, of which
+  // exactly one is set.
   static absl::StatusOr<JsForInOfStatementFields> VisitForInOfStatement(
-      std::optional<JsirForInOfDeclarationAttr> left_declaration,
-      mlir::Value left_lval, mlir::Value left_init, mlir::Value right,
+      mlir::Region& left_declaration, mlir::Value left_lval, mlir::Value right,
       mlir::Region& body_region);
 
   static absl::StatusOr<std::unique_ptr<JsComment>> VisitCommentAttr(
@@ -280,26 +281,6 @@ class JsirToAst {
     }
     mlir::Block& block = region.front();
     return &block;
-  }
-
-  template <typename Stmt, typename StmtOp, typename Expr, typename ExprOp>
-  static absl::StatusOr<
-      std::variant<std::unique_ptr<Stmt>, std::unique_ptr<Expr>>>
-  VisitStmtOrExprRegion(mlir::Region& region,
-                        VisitFunc<Stmt, StmtOp> visit_stmt,
-                        VisitFunc<Expr, ExprOp> visit_expr) {
-    ABSL_ASSIGN_OR_RETURN(auto mlir_end, GetStmtRegionOperation(region));
-    if (auto mlir_stmt_op = llvm::dyn_cast<StmtOp>(mlir_end)) {
-      return visit_stmt(mlir_stmt_op);
-    } else if (auto mlir_end_op =
-                   llvm::dyn_cast<JsirExprRegionEndOp>(mlir_end)) {
-      auto mlir_expr_value = mlir_end_op.getArgument();
-      auto mlir_expr_op =
-          llvm::dyn_cast<ExprOp>(mlir_expr_value.getDefiningOp());
-      return visit_expr(mlir_expr_op);
-    } else {
-      return absl::InvalidArgumentError("Invalid op type.");
-    }
   }
 };
 

@@ -27,6 +27,7 @@
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/OpDefinition.h"
+#include "mlir/IR/Region.h"
 #include "mlir/Support/LLVM.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/log/log.h"
@@ -388,6 +389,13 @@ mlir::OpFoldResult JsirMemberExpressionOp::fold(FoldAdaptor adaptor) {
 
   return EmulateMemberAccessOp(getContext(), object, computed_property)
       .value_or(nullptr);
+}
+
+mlir::Region &GetJsirFunctionBody(JsirArrowFunctionExpressionOp op) {
+  if (!op.getBodyStatement().empty()) {
+    return op.getBodyStatement();
+  }
+  return op.getBodyExpression();
 }
 
 }  // namespace maldoca
