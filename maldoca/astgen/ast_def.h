@@ -264,6 +264,11 @@ class FieldDef {
   friend class AstDef;
 };
 
+// The name of a language's IR dialect: "<LangName>hir" for the high-level IR,
+// which holds ops with structured control flow, or "<LangName>ir" for the
+// low-level IR, which holds all other ops and the attributes.
+Symbol IrDialectName(absl::string_view lang_name, bool has_control_flow);
+
 // Definition of an AST node type.
 // This corresponds to a C++ class.
 class NodeDef {
@@ -451,9 +456,14 @@ class NodeDef {
   // LIR (low-level IR).
   bool has_control_flow() const { return has_control_flow_; }
 
+  // The IR dialect that holds this node's ops (see IrDialectName).
+  Symbol ir_dialect_name(absl::string_view lang_name) const {
+    return IrDialectName(lang_name, has_control_flow());
+  }
+
   // The MLIR op name (C++ class name).
   //
-  // <IrName>:
+  // <IrName>: ir_dialect_name(), i.e.
   //   has_control_flow:  <LangName>hir
   //   !has_control_flow: <LangName>ir
   //
@@ -594,6 +604,18 @@ class AstDef {
   static absl::StatusOr<AstDef> FromProto(const AstDefPb& pb);
 
   absl::string_view lang_name() const { return lang_name_; }
+
+  // The language's low-level IR dialect, which holds the attributes and all ops
+  // without structured control flow, e.g. "jsir" (see IrDialectName).
+  Symbol ir_dialect_name() const {
+    return IrDialectName(lang_name_, /*has_control_flow=*/false);
+  }
+
+  // The language's high-level IR dialect, which holds ops with structured
+  // control flow, e.g. "jshir" (see IrDialectName).
+  Symbol hir_dialect_name() const {
+    return IrDialectName(lang_name_, /*has_control_flow=*/true);
+  }
 
   absl::Span<const EnumDef> enum_defs() const { return enum_defs_; }
 

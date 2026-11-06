@@ -369,6 +369,10 @@ std::string FieldDef::Alternative::DebugName() const {
   return absl::StrCat("\"", absl::StrJoin(member_names, " | "), "\"");
 }
 
+Symbol IrDialectName(absl::string_view lang_name, bool has_control_flow) {
+  return Symbol(absl::StrCat(lang_name, has_control_flow ? "hir" : "ir"));
+}
+
 std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
                                           FieldKind kind) const {
   // If there's a custom IR op name, return it.
@@ -383,9 +387,7 @@ std::optional<Symbol> NodeDef::ir_op_name(absl::string_view lang_name,
     return std::nullopt;
   }
 
-  auto ir_name = absl::StrCat(lang_name, has_control_flow() ? "hir" : "ir");
-
-  Symbol result{ir_name};
+  Symbol result = ir_dialect_name(lang_name);
 
   result += name();
 
@@ -439,7 +441,7 @@ std::optional<Symbol> NodeDef::ir_op_mnemonic(FieldKind kind) const {
 }
 
 Symbol NodeDef::ir_attr_name(absl::string_view lang_name) const {
-  return Symbol(absl::StrCat(lang_name, "ir")) + name() + "Attr";
+  return IrDialectName(lang_name, /*has_control_flow=*/false) + name() + "Attr";
 }
 
 Symbol NodeDef::ir_attr_mnemonic() const { return Symbol(name()); }
