@@ -77,6 +77,19 @@ void AstSerializePrinter::PrintAst(const AstDef& ast,
   }
   needs_comma = true;
 }
+
+// JSON has no literal for non-finite numbers and nlohmann::json dumps them as
+// null. Spell them as "Infinity" / "-Infinity" / "NaN" strings instead, which
+// is what the JavaScript AST bridges produce and what JsonToDouble accepts.
+void SerializeDouble(std::ostream &$os_variable$, double value) {
+  if (std::isnan(value)) {
+    $os_variable$ << "\"NaN\"";
+  } else if (std::isinf(value)) {
+    $os_variable$ << (value > 0 ? "\"Infinity\"" : "\"-Infinity\"");
+  } else {
+    $os_variable$ << (nlohmann::json(value)).dump();
+  }
+}
 )");
 
   for (const auto& node : ast.topological_sorted_nodes()) {
@@ -111,6 +124,14 @@ void AstSerializePrinter::PrintBuiltinSerialize(const BuiltinType& type,
       {"lhs", lhs},
       {"rhs", rhs},
   });
+
+  if (type.builtin_kind() == BuiltinTypeKind::kDouble) {
+    if (!lhs.empty()) {
+      Println("$os_variable$ << $lhs$;");
+    }
+    Println("SerializeDouble($os_variable$, $rhs$);");
+    return;
+  }
 
   if (!lhs.empty()) {
     Println("$os_variable$ << $lhs$ << (nlohmann::json($rhs$)).dump();");

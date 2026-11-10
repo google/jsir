@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <string>
 #include <utility>
@@ -124,9 +125,26 @@ inline absl::StatusOr<int64_t> JsonToInt64(const nlohmann::json& json) {
 
 inline bool IsDouble(const nlohmann::json& json) { return json.is_number(); }
 
+// JSON has no literal for non-finite numbers, so the JavaScript AST bridges and
+// the generated serializers spell them as "Infinity" / "-Infinity" / "NaN"
+// strings (e.g. for the literal `2e308`). Accept those in addition to numbers.
 inline absl::StatusOr<double> JsonToDouble(const nlohmann::json& json) {
   if (json.is_null()) {
     return absl::InvalidArgumentError("json is null.");
+  }
+  if (json.is_string()) {
+    const std::string& value = json.get_ref<const std::string&>();
+    if (value == "Infinity") {
+      return std::numeric_limits<double>::infinity();
+    }
+    if (value == "-Infinity") {
+      return -std::numeric_limits<double>::infinity();
+    }
+    if (value == "NaN") {
+      return std::numeric_limits<double>::quiet_NaN();
+    }
+    return absl::InvalidArgumentError(
+        absl::StrCat("json is not a number: \"", value, "\"."));
   }
   if (!json.is_number()) {
     return absl::InvalidArgumentError("json is not a number.");

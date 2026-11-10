@@ -180,6 +180,46 @@ function base64DecodeStringValues(node) {
   mutateStrings(node, base64Decode);
 }
 
+/**
+ * `JSON.stringify` replacer that keeps non-finite numbers, which JSON cannot
+ * represent and would otherwise become `null`. Babel produces them for
+ * overflowing literals such as `2e308`. The C++ AST decoder accepts the
+ * resulting "Infinity" / "-Infinity" / "NaN" strings for number fields.
+ *
+ * @param {string} key
+ * @param {*} value
+ * @return {*}
+ */
+function nonFiniteNumberReplacer(key, value) {
+  if (typeof value === 'number' && !Number.isFinite(value)) {
+    return String(value);
+  }
+  return value;
+}
+
+/**
+ * `JSON.parse` reviver undoing `nonFiniteNumberReplacer` for the only number
+ * fields in the AST, `NumericLiteral.value` and `NumericLiteral.extra.rawValue`.
+ * Other "Infinity" strings (e.g. a `StringLiteral` value) are left alone.
+ *
+ * @this {!Object} The object holding `key`.
+ * @param {string} key
+ * @param {*} value
+ * @return {*}
+ */
+function nonFiniteNumberReviver(key, value) {
+  if (this.type !== 'NumericLiteral') {
+    return value;
+  }
+  if (key === 'value' && typeof value === 'string') {
+    return Number(value);
+  }
+  if (key === 'extra' && value && typeof value.rawValue === 'string') {
+    value.rawValue = Number(value.rawValue);
+  }
+  return value;
+}
+
 // =============================================================================
 
 /**
@@ -390,7 +430,11 @@ function parseInternal(source, options) {
   // the AST of TSCompiler (the other choice) cannot be directly serialized due
   // to the existence of parent pointers. Therefore, it would not be a fair
   // comparison if we serialize here for Babel.
-  return {ast: JSON.stringify(ast), scopes: Object.values(scopes), bindingToId};
+  return {
+    ast: JSON.stringify(ast, nonFiniteNumberReplacer),
+    scopes: Object.values(scopes),
+    bindingToId,
+  };
 }
 exports.parseInternal = parseInternal;
 
@@ -565,7 +609,7 @@ exports.parse = function(sourceCode, optionsSerialized) {
  */
 exports.generate = function(astString, optionsSerialized) {
   try {
-    let ast = JSON.parse(astString);
+    let ast = JSON.parse(astString, nonFiniteNumberReviver);
 
     let options = {};
     if (optionsSerialized) {
