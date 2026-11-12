@@ -191,6 +191,7 @@ def JsirBigIntLiteralExtraAttr : AttrDef<Jsir_Dialect, "JsirBigIntLiteralExtra",
 def JsirBigIntLiteralAttr : AttrDef<Jsir_Dialect, "JsirBigIntLiteral", []> {
   let mnemonic = "big_int_literal";
   let parameters = (ins
+    OptionalParameter<"JsirTriviaAttr">: $loc,
     "::mlir::StringAttr": $value,
     JsirBigIntLiteralExtraAttr: $extra
   );
@@ -237,6 +238,7 @@ def JsirImportNamespaceSpecifierAttr : AttrDef<
 def JsirImportAttributeAttr : AttrDef<Jsir_Dialect, "JsirImportAttribute", []> {
   let mnemonic = "import_attribute";
   let parameters = (ins
+    OptionalParameter<"JsirTriviaAttr">: $loc,
     JsirIdentifierAttr: $key,
     JsirStringLiteralAttr: $value
   );

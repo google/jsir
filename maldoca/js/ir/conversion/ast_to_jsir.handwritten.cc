@@ -146,12 +146,13 @@ JsirBigIntLiteralExtraAttr AstToJsir::VisitBigIntLiteralExtraAttr(
 
 JsirBigIntLiteralAttr AstToJsir::VisitBigIntLiteralAttr(
     mlir::OpBuilder& builder, const JsBigIntLiteral* node) {
+  auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
   mlir::StringAttr mlir_value = builder.getStringAttr(node->value());
   JsirBigIntLiteralExtraAttr mlir_extra;
   if (node->extra().has_value()) {
     mlir_extra = VisitBigIntLiteralExtraAttr(builder, node->extra().value());
   }
-  return JsirBigIntLiteralAttr::get(builder.getContext(), mlir_value,
+  return JsirBigIntLiteralAttr::get(builder.getContext(), loc, mlir_value,
                                     mlir_extra);
 }
 
@@ -191,10 +192,11 @@ JsirImportNamespaceSpecifierAttr AstToJsir::VisitImportNamespaceSpecifierAttr(
 
 JsirImportAttributeAttr AstToJsir::VisitImportAttributeAttr(
     mlir::OpBuilder& builder, const JsImportAttribute* node) {
+  auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
   JsirIdentifierAttr mlir_key = VisitIdentifierAttr(builder, node->key());
   JsirStringLiteralAttr mlir_value =
       VisitStringLiteralAttr(builder, node->value());
-  return JsirImportAttributeAttr::get(builder.getContext(), mlir_key,
+  return JsirImportAttributeAttr::get(builder.getContext(), loc, mlir_key,
                                       mlir_value);
 }
 
