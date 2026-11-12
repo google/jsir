@@ -1164,7 +1164,8 @@ def JsirClassPrivateMethodOp : Jsir_Op<
     BoolAttr: $async,
     JsirPrivateNameAttr: $key,
     StrAttr: $kind,
-    BoolAttr: $static_
+    BoolAttr: $static_,
+    OptionalAttr<BoolAttr>: $computed
   );
 
   let regions = (region

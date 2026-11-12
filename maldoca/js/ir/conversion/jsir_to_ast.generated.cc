@@ -2621,6 +2621,15 @@ JsirToAst::VisitClassPrivateMethod(JsirClassPrivateMethodOp op) {
           ToBool()
       )
   );
+  ABSL_ASSIGN_OR_RETURN(
+      auto computed,
+      Convert(
+          op.getComputedAttr(),
+          Nullable(
+              ToBool()
+          )
+      )
+  );
   return Create<JsClassPrivateMethod>(
       op,
       std::move(id),
@@ -2631,7 +2640,7 @@ JsirToAst::VisitClassPrivateMethod(JsirClassPrivateMethodOp op) {
       std::move(key),
       std::move(kind),
       std::move(static_),
-      std::nullopt);
+      std::move(computed));
 }
 
 absl::StatusOr<std::unique_ptr<JsClassProperty>>
