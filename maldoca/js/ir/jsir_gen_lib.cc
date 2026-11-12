@@ -154,6 +154,11 @@ absl::StatusOr<JsirGenOutput> JsirGen(
         {
           BabelParseRequest request;
           request.set_compute_scopes(true);
+          // Babel escapes unpaired UTF-16 surrogates in string values as
+          // `\uD800`-style escapes, which the JSON decoder rejects. Replacing
+          // them keeps such files parseable; `extra.raw` still holds the
+          // original spelling, so regenerated source is unchanged.
+          request.set_replace_invalid_surrogate_pairs(true);
 
           google::protobuf::Duration timeout;
           timeout.set_seconds(60);
