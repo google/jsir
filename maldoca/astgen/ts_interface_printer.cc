@@ -34,6 +34,9 @@ void TsInterfacePrinter::PrintAst(const AstDef& ast) {
 
   for (const auto& name : ast.node_names()) {
     const NodeDef& node = *ast.nodes().at(name);
+    if (!node.in_ast()) {
+      continue;
+    }
     PrintNode(node);
     Println();
   }
@@ -80,6 +83,9 @@ void TsInterfacePrinter::PrintNode(const NodeDef& node) {
   {
     auto indent = WithIndent();
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       PrintFieldDef(field);
     }
   }

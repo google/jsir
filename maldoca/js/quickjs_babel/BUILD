@@ -22,6 +22,12 @@ package(
     ],
 )
 
+# Also used directly in the browser by //maldoca/js/ir/wasm.
+exports_files(
+    ["native.js"],
+    visibility = ["//maldoca/js:__subpackages__"],
+)
+
 genrule(
     name = "native_cc_embed_data_genrule",
     srcs = ["native.js"],

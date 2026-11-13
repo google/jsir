@@ -36,7 +36,6 @@
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/babel.pb.h"
-#include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
 #include "maldoca/js/ir/analyses/constant_propagation/dynamic_analysis.h"
 #include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/ir.h"

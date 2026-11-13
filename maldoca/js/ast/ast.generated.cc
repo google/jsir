@@ -26,22 +26,22 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
 
-absl::string_view JsUnaryOperatorToString(JsUnaryOperator unary_operator) {
+std::string_view JsUnaryOperatorToString(JsUnaryOperator unary_operator) {
   switch (unary_operator) {
     case JsUnaryOperator::kMinus:
       return "-";
@@ -62,8 +62,8 @@ absl::string_view JsUnaryOperatorToString(JsUnaryOperator unary_operator) {
   }
 }
 
-absl::StatusOr<JsUnaryOperator> StringToJsUnaryOperator(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsUnaryOperator> {
+absl::StatusOr<JsUnaryOperator> StringToJsUnaryOperator(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsUnaryOperator> {
       {"-", JsUnaryOperator::kMinus},
       {"+", JsUnaryOperator::kPlus},
       {"!", JsUnaryOperator::kNot},
@@ -81,7 +81,7 @@ absl::StatusOr<JsUnaryOperator> StringToJsUnaryOperator(absl::string_view s) {
   return it->second;
 }
 
-absl::string_view JsUpdateOperatorToString(JsUpdateOperator update_operator) {
+std::string_view JsUpdateOperatorToString(JsUpdateOperator update_operator) {
   switch (update_operator) {
     case JsUpdateOperator::kIncrement:
       return "++";
@@ -90,8 +90,8 @@ absl::string_view JsUpdateOperatorToString(JsUpdateOperator update_operator) {
   }
 }
 
-absl::StatusOr<JsUpdateOperator> StringToJsUpdateOperator(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsUpdateOperator> {
+absl::StatusOr<JsUpdateOperator> StringToJsUpdateOperator(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsUpdateOperator> {
       {"++", JsUpdateOperator::kIncrement},
       {"--", JsUpdateOperator::kDecrement},
   };
@@ -103,7 +103,7 @@ absl::StatusOr<JsUpdateOperator> StringToJsUpdateOperator(absl::string_view s) {
   return it->second;
 }
 
-absl::string_view JsBinaryOperatorToString(JsBinaryOperator binary_operator) {
+std::string_view JsBinaryOperatorToString(JsBinaryOperator binary_operator) {
   switch (binary_operator) {
     case JsBinaryOperator::kEqual:
       return "==";
@@ -154,8 +154,8 @@ absl::string_view JsBinaryOperatorToString(JsBinaryOperator binary_operator) {
   }
 }
 
-absl::StatusOr<JsBinaryOperator> StringToJsBinaryOperator(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsBinaryOperator> {
+absl::StatusOr<JsBinaryOperator> StringToJsBinaryOperator(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsBinaryOperator> {
       {"==", JsBinaryOperator::kEqual},
       {"!=", JsBinaryOperator::kNotEqual},
       {"===", JsBinaryOperator::kStrictEqual},
@@ -188,7 +188,7 @@ absl::StatusOr<JsBinaryOperator> StringToJsBinaryOperator(absl::string_view s) {
   return it->second;
 }
 
-absl::string_view JsAssignmentOperatorToString(JsAssignmentOperator assignment_operator) {
+std::string_view JsAssignmentOperatorToString(JsAssignmentOperator assignment_operator) {
   switch (assignment_operator) {
     case JsAssignmentOperator::kAssign:
       return "=";
@@ -225,8 +225,8 @@ absl::string_view JsAssignmentOperatorToString(JsAssignmentOperator assignment_o
   }
 }
 
-absl::StatusOr<JsAssignmentOperator> StringToJsAssignmentOperator(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsAssignmentOperator> {
+absl::StatusOr<JsAssignmentOperator> StringToJsAssignmentOperator(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsAssignmentOperator> {
       {"=", JsAssignmentOperator::kAssign},
       {"+=", JsAssignmentOperator::kAddAssign},
       {"-=", JsAssignmentOperator::kSubtractAssign},
@@ -252,7 +252,7 @@ absl::StatusOr<JsAssignmentOperator> StringToJsAssignmentOperator(absl::string_v
   return it->second;
 }
 
-absl::string_view JsLogicalOperatorToString(JsLogicalOperator logical_operator) {
+std::string_view JsLogicalOperatorToString(JsLogicalOperator logical_operator) {
   switch (logical_operator) {
     case JsLogicalOperator::kOr:
       return "||";
@@ -263,8 +263,8 @@ absl::string_view JsLogicalOperatorToString(JsLogicalOperator logical_operator) 
   }
 }
 
-absl::StatusOr<JsLogicalOperator> StringToJsLogicalOperator(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsLogicalOperator> {
+absl::StatusOr<JsLogicalOperator> StringToJsLogicalOperator(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsLogicalOperator> {
       {"||", JsLogicalOperator::kOr},
       {"&&", JsLogicalOperator::kAnd},
       {"??", JsLogicalOperator::kNullishCoalesce},
@@ -339,7 +339,7 @@ void JsSourceLocation::set_end(std::unique_ptr<JsPosition> end) {
   end_ = std::move(end);
 }
 
-std::optional<absl::string_view> JsSourceLocation::identifier_name() const {
+std::optional<std::string_view> JsSourceLocation::identifier_name() const {
   if (!identifier_name_.has_value()) {
     return std::nullopt;
   } else {
@@ -355,7 +355,7 @@ void JsSourceLocation::set_identifier_name(std::optional<std::string> identifier
 // JsComment
 // =============================================================================
 
-absl::string_view JsCommentTypeToString(JsCommentType comment_type) {
+std::string_view JsCommentTypeToString(JsCommentType comment_type) {
   switch (comment_type) {
     case JsCommentType::kCommentBlock:
       return "CommentBlock";
@@ -364,8 +364,8 @@ absl::string_view JsCommentTypeToString(JsCommentType comment_type) {
   }
 }
 
-absl::StatusOr<JsCommentType> StringToJsCommentType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsCommentType> {
+absl::StatusOr<JsCommentType> StringToJsCommentType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsCommentType> {
       {"CommentBlock", JsCommentType::kCommentBlock},
       {"CommentLine", JsCommentType::kCommentLine},
   };
@@ -407,7 +407,7 @@ void JsComment::set_loc(std::optional<std::unique_ptr<JsSourceLocation>> loc) {
   loc_ = std::move(loc);
 }
 
-absl::string_view JsComment::value() const {
+std::string_view JsComment::value() const {
   return value_;
 }
 
@@ -471,7 +471,7 @@ JsSymbolId::JsSymbolId(
     : name_(std::move(name)),
       binding_uid_(std::move(binding_uid)) {}
 
-absl::string_view JsSymbolId::name() const {
+std::string_view JsSymbolId::name() const {
   return name_;
 }
 
@@ -495,7 +495,7 @@ void JsSymbolId::set_binding_uid(std::optional<int64_t> binding_uid) {
 // JsNode
 // =============================================================================
 
-absl::string_view JsNodeTypeToString(JsNodeType node_type) {
+std::string_view JsNodeTypeToString(JsNodeType node_type) {
   switch (node_type) {
     case JsNodeType::kFile:
       return "File";
@@ -672,8 +672,8 @@ absl::string_view JsNodeTypeToString(JsNodeType node_type) {
   }
 }
 
-absl::StatusOr<JsNodeType> StringToJsNodeType(absl::string_view s) {
-  static const auto *kMap = new absl::flat_hash_map<absl::string_view, JsNodeType> {
+absl::StatusOr<JsNodeType> StringToJsNodeType(std::string_view s) {
+  static const auto *kMap = new absl::flat_hash_map<std::string_view, JsNodeType> {
       {"File", JsNodeType::kFile},
       {"PrivateName", JsNodeType::kPrivateName},
       {"Program", JsNodeType::kProgram},
@@ -963,7 +963,7 @@ JsInterpreterDirective::JsInterpreterDirective(
     : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
       value_(std::move(value)) {}
 
-absl::string_view JsInterpreterDirective::value() const {
+std::string_view JsInterpreterDirective::value() const {
   return value_;
 }
 
@@ -997,7 +997,7 @@ JsDirectiveLiteralExtra::JsDirectiveLiteralExtra(
     : raw_(std::move(raw)),
       raw_value_(std::move(raw_value)) {}
 
-absl::string_view JsDirectiveLiteralExtra::raw() const {
+std::string_view JsDirectiveLiteralExtra::raw() const {
   return raw_;
 }
 
@@ -1005,7 +1005,7 @@ void JsDirectiveLiteralExtra::set_raw(std::string raw) {
   raw_ = std::move(raw);
 }
 
-absl::string_view JsDirectiveLiteralExtra::raw_value() const {
+std::string_view JsDirectiveLiteralExtra::raw_value() const {
   return raw_value_;
 }
 
@@ -1033,7 +1033,7 @@ JsDirectiveLiteral::JsDirectiveLiteral(
       value_(std::move(value)),
       extra_(std::move(extra)) {}
 
-absl::string_view JsDirectiveLiteral::value() const {
+std::string_view JsDirectiveLiteral::value() const {
   return value_;
 }
 
@@ -1135,7 +1135,7 @@ void JsProgram::set_interpreter(std::optional<std::unique_ptr<JsInterpreterDirec
   interpreter_ = std::move(interpreter);
 }
 
-absl::string_view JsProgram::source_type() const {
+std::string_view JsProgram::source_type() const {
   return source_type_;
 }
 
@@ -1288,7 +1288,7 @@ JsIdentifier::JsIdentifier(
       JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
       name_(std::move(name)) {}
 
-absl::string_view JsIdentifier::name() const {
+std::string_view JsIdentifier::name() const {
   return name_;
 }
 
@@ -1351,7 +1351,7 @@ JsRegExpLiteralExtra::JsRegExpLiteralExtra(
     std::string raw)
     : raw_(std::move(raw)) {}
 
-absl::string_view JsRegExpLiteralExtra::raw() const {
+std::string_view JsRegExpLiteralExtra::raw() const {
   return raw_;
 }
 
@@ -1383,7 +1383,7 @@ JsRegExpLiteral::JsRegExpLiteral(
       flags_(std::move(flags)),
       extra_(std::move(extra)) {}
 
-absl::string_view JsRegExpLiteral::pattern() const {
+std::string_view JsRegExpLiteral::pattern() const {
   return pattern_;
 }
 
@@ -1391,7 +1391,7 @@ void JsRegExpLiteral::set_pattern(std::string pattern) {
   pattern_ = std::move(pattern);
 }
 
-absl::string_view JsRegExpLiteral::flags() const {
+std::string_view JsRegExpLiteral::flags() const {
   return flags_;
 }
 
@@ -1447,7 +1447,7 @@ JsStringLiteralExtra::JsStringLiteralExtra(
     : raw_(std::move(raw)),
       raw_value_(std::move(raw_value)) {}
 
-absl::string_view JsStringLiteralExtra::raw() const {
+std::string_view JsStringLiteralExtra::raw() const {
   return raw_;
 }
 
@@ -1455,7 +1455,7 @@ void JsStringLiteralExtra::set_raw(std::string raw) {
   raw_ = std::move(raw);
 }
 
-absl::string_view JsStringLiteralExtra::raw_value() const {
+std::string_view JsStringLiteralExtra::raw_value() const {
   return raw_value_;
 }
 
@@ -1485,7 +1485,7 @@ JsStringLiteral::JsStringLiteral(
       value_(std::move(value)),
       extra_(std::move(extra)) {}
 
-absl::string_view JsStringLiteral::value() const {
+std::string_view JsStringLiteral::value() const {
   return value_;
 }
 
@@ -1551,7 +1551,7 @@ JsNumericLiteralExtra::JsNumericLiteralExtra(
     : raw_(std::move(raw)),
       raw_value_(std::move(raw_value)) {}
 
-absl::string_view JsNumericLiteralExtra::raw() const {
+std::string_view JsNumericLiteralExtra::raw() const {
   return raw_;
 }
 
@@ -1627,7 +1627,7 @@ JsBigIntLiteralExtra::JsBigIntLiteralExtra(
     : raw_(std::move(raw)),
       raw_value_(std::move(raw_value)) {}
 
-absl::string_view JsBigIntLiteralExtra::raw() const {
+std::string_view JsBigIntLiteralExtra::raw() const {
   return raw_;
 }
 
@@ -1635,7 +1635,7 @@ void JsBigIntLiteralExtra::set_raw(std::string raw) {
   raw_ = std::move(raw);
 }
 
-absl::string_view JsBigIntLiteralExtra::raw_value() const {
+std::string_view JsBigIntLiteralExtra::raw_value() const {
   return raw_value_;
 }
 
@@ -1665,7 +1665,7 @@ JsBigIntLiteral::JsBigIntLiteral(
       value_(std::move(value)),
       extra_(std::move(extra)) {}
 
-absl::string_view JsBigIntLiteral::value() const {
+std::string_view JsBigIntLiteral::value() const {
   return value_;
 }
 
@@ -2666,7 +2666,7 @@ void JsVariableDeclaration::set_declarations(std::vector<std::unique_ptr<JsVaria
   declarations_ = std::move(declarations);
 }
 
-absl::string_view JsVariableDeclaration::kind() const {
+std::string_view JsVariableDeclaration::kind() const {
   return kind_;
 }
 
@@ -2712,7 +2712,7 @@ std::optional<std::variant<JsVariableDeclaration*, JsExpression*>> JsForStatemen
         return std::get<1>(init_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -2729,7 +2729,7 @@ std::optional<std::variant<const JsVariableDeclaration*, const JsExpression*>> J
         return std::get<1>(init_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -2823,7 +2823,7 @@ std::variant<JsVariableDeclaration*, JsLVal*> JsForInStatement::left() {
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -2836,7 +2836,7 @@ std::variant<const JsVariableDeclaration*, const JsLVal*> JsForInStatement::left
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -2903,7 +2903,7 @@ std::variant<JsVariableDeclaration*, JsLVal*> JsForOfStatement::left() {
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -2916,7 +2916,7 @@ std::variant<const JsVariableDeclaration*, const JsLVal*> JsForOfStatement::left
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3064,7 +3064,7 @@ std::variant<JsBlockStatement*, JsExpression*> JsArrowFunctionExpression::body()
       return std::get<1>(body_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3077,7 +3077,7 @@ std::variant<const JsBlockStatement*, const JsExpression*> JsArrowFunctionExpres
       return std::get<1>(body_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3314,7 +3314,7 @@ std::variant<JsExpression*, JsPattern*> JsObjectProperty::value() {
       return std::get<1>(value_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3327,7 +3327,7 @@ std::variant<const JsExpression*, const JsPattern*> JsObjectProperty::value() co
       return std::get<1>(value_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3363,7 +3363,7 @@ JsObjectMethod::JsObjectMethod(
       JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
       kind_(std::move(kind)) {}
 
-absl::string_view JsObjectMethod::kind() const {
+std::string_view JsObjectMethod::kind() const {
   return kind_;
 }
 
@@ -3568,7 +3568,7 @@ std::variant<JsExpression*, JsPrivateName*> JsBinaryExpression::left() {
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3581,7 +3581,7 @@ std::variant<const JsExpression*, const JsPrivateName*> JsBinaryExpression::left
       return std::get<1>(left_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3745,7 +3745,7 @@ std::variant<JsExpression*, JsSuper*> JsMemberExpression::object() {
       return std::get<1>(object_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3758,7 +3758,7 @@ std::variant<const JsExpression*, const JsSuper*> JsMemberExpression::object() c
       return std::get<1>(object_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3775,7 +3775,7 @@ std::variant<JsExpression*, JsPrivateName*> JsMemberExpression::property() {
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3788,7 +3788,7 @@ std::variant<const JsExpression*, const JsPrivateName*> JsMemberExpression::prop
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3850,7 +3850,7 @@ std::variant<JsExpression*, JsPrivateName*> JsOptionalMemberExpression::property
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3863,7 +3863,7 @@ std::variant<const JsExpression*, const JsPrivateName*> JsOptionalMemberExpressi
       return std::get<1>(property_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3979,7 +3979,7 @@ std::variant<JsExpression*, JsSuper*, JsImport*> JsCallExpression::callee() {
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -3995,7 +3995,7 @@ std::variant<const JsExpression*, const JsSuper*, const JsImport*> JsCallExpress
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -4103,7 +4103,7 @@ std::variant<JsExpression*, JsSuper*, JsImport*> JsNewExpression::callee() {
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -4119,7 +4119,7 @@ std::variant<const JsExpression*, const JsSuper*, const JsImport*> JsNewExpressi
       return std::get<2>(callee_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -4213,7 +4213,7 @@ JsTemplateElementValue::JsTemplateElementValue(
     : cooked_(std::move(cooked)),
       raw_(std::move(raw)) {}
 
-std::optional<absl::string_view> JsTemplateElementValue::cooked() const {
+std::optional<std::string_view> JsTemplateElementValue::cooked() const {
   if (!cooked_.has_value()) {
     return std::nullopt;
   } else {
@@ -4225,7 +4225,7 @@ void JsTemplateElementValue::set_cooked(std::optional<std::string> cooked) {
   cooked_ = std::move(cooked);
 }
 
-absl::string_view JsTemplateElementValue::raw() const {
+std::string_view JsTemplateElementValue::raw() const {
   return raw_;
 }
 
@@ -4548,7 +4548,7 @@ void JsClassMethod::set_key(std::unique_ptr<JsExpression> key) {
   key_ = std::move(key);
 }
 
-absl::string_view JsClassMethod::kind() const {
+std::string_view JsClassMethod::kind() const {
   return kind_;
 }
 
@@ -4615,7 +4615,7 @@ void JsClassPrivateMethod::set_key(std::unique_ptr<JsPrivateName> key) {
   key_ = std::move(key);
 }
 
-absl::string_view JsClassPrivateMethod::kind() const {
+std::string_view JsClassPrivateMethod::kind() const {
   return kind_;
 }
 
@@ -5083,7 +5083,7 @@ std::variant<JsIdentifier*, JsStringLiteral*> JsImportSpecifier::imported() {
       return std::get<1>(imported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5096,7 +5096,7 @@ std::variant<const JsIdentifier*, const JsStringLiteral*> JsImportSpecifier::imp
       return std::get<1>(imported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5320,7 +5320,7 @@ std::variant<JsIdentifier*, JsStringLiteral*> JsExportSpecifier::exported() {
       return std::get<1>(exported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5333,7 +5333,7 @@ std::variant<const JsIdentifier*, const JsStringLiteral*> JsExportSpecifier::exp
       return std::get<1>(exported_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5353,7 +5353,7 @@ std::optional<std::variant<JsIdentifier*, JsStringLiteral*>> JsExportSpecifier::
         return std::get<1>(local_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -5370,7 +5370,7 @@ std::optional<std::variant<const JsIdentifier*, const JsStringLiteral*>> JsExpor
         return std::get<1>(local_.value()).get();
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -5509,7 +5509,7 @@ std::variant<JsFunctionDeclaration*, JsClassDeclaration*, JsExpression*> JsExpor
       return std::get<2>(declaration_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -5525,7 +5525,7 @@ std::variant<const JsFunctionDeclaration*, const JsClassDeclaration*, const JsEx
       return std::get<2>(declaration_).get();
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 

@@ -54,13 +54,14 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::Attribute attr) {
   return llvm::TypeSwitch<mlir::Attribute, JsirTriviaAttr>(attr)
       .Case([&](JsirStringLiteralAttr attr) { return attr.getLoc(); })
       .Case([&](JsirNumericLiteralAttr attr) { return attr.getLoc(); })
+      .Case([&](JsirBigIntLiteralAttr attr) { return attr.getLoc(); })
       .Case([&](JsirIdentifierAttr attr) { return attr.getLoc(); })
       .Case([&](JsirPrivateNameAttr attr) { return attr.getLoc(); })
       .Case([&](JsirImportSpecifierAttr attr) { return attr.getLoc(); })
       .Case([&](JsirImportDefaultSpecifierAttr attr) { return attr.getLoc(); })
       .Case(
           [&](JsirImportNamespaceSpecifierAttr attr) { return attr.getLoc(); })
-      .Case([&](JsirExportSpecifierAttr attr) { return attr.getLoc(); })
+      .Case([&](JsirImportAttributeAttr attr) { return attr.getLoc(); })
       .Case([&](JsirInterpreterDirectiveAttr attr) { return attr.getLoc(); })
       .Default([&](mlir::Attribute attr) {
         LOG(INFO) << "Unexpected mlir::Attribute to get source location from. "

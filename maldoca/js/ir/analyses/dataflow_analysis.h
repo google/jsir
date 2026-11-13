@@ -851,12 +851,7 @@ bool JsirDataFlowAnalysis<ValueT, StateT, direction>::IsEntryBlock(
   mlir::Operation* parent_op = block->getParentOp();
 
   if (llvm::isa<JsirProgramOp>(parent_op) || llvm::isa<JsirFileOp>(parent_op) ||
-      llvm::isa<JsirFunctionDeclarationOp>(parent_op) ||
-      llvm::isa<JsirFunctionExpressionOp>(parent_op) ||
-      llvm::isa<JsirObjectMethodOp>(parent_op) ||
-      llvm::isa<JsirClassMethodOp>(parent_op) ||
-      llvm::isa<JsirClassPrivateMethodOp>(parent_op) ||
-      llvm::isa<JsirArrowFunctionExpressionOp>(parent_op)) {
+      llvm::isa<JsirFunctionOpInterface>(parent_op)) {
     return block->isEntryBlock();
   }
 
@@ -927,7 +922,9 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     });
   }
 
-  // Handle ops with a single region.
+  // Handle ops with a single region, or with several regions of which at most
+  // one is set (JsirExportDefaultDeclarationOp holds either a
+  // `declaration_statement` or a `declaration_expression`).
   if (llvm::isa<JsirVariableDeclarationOp>(op) ||
       llvm::isa<JsirObjectExpressionOp>(op) ||
       llvm::isa<JsirClassPropertyOp>(op) ||
@@ -938,8 +935,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
       llvm::isa<JsirClassPrivatePropertyOp>(op) ||
       llvm::isa<JsirClassBodyOp>(op) ||
       llvm::isa<JsirClassDeclarationOp>(op) /* TODO Should this be here? */
-      || llvm::isa<JsirClassExpressionOp>(op) ||
-      llvm::isa<JsirExportNamedDeclarationOp>(op)) {
+      || llvm::isa<JsirClassExpressionOp>(op)) {
     if (llvm::isa<JshirWithStatementOp>(op)) {
       maybe_jump_targets = {
           .labeled_break_target = getProgramPointAfter(op),
@@ -947,14 +943,17 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
           .continue_target = std::nullopt,
       };
     }
-    if (!op->getRegion(0).empty()) {
+    llvm::MutableArrayRef<mlir::Region> regions = op->getRegions();
+    mlir::Region* region = llvm::find_if(
+        regions, [](mlir::Region& candidate) { return !candidate.empty(); });
+    if (region != regions.end()) {
       MaybeEmplaceCfgEdges({
           .from = Before(op),
-          .to = Before(op->getRegion(0)),
+          .to = Before(*region),
           .owner = &*op,
       });
       MaybeEmplaceCfgEdges({
-          .from = After(op->getRegion(0)),
+          .from = After(*region),
           .to = After(op),
           .owner = &*op,
       });
@@ -1048,6 +1047,43 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   }
 
   // ┌─────◄
+  // │     jsir.export_named_declaration (
+  // ├─────► ┌───────────────┐
+  // │       │ declaration   │ (optional)
+  // │  ┌──◄ └───────────────┘
+  // └──┴──► ┌───────────────┐
+  //         │ specifiers    │
+  // ┌─────◄ └───────────────┘
+  // │     );
+  // └─────►
+  if (auto export_decl = llvm::dyn_cast<JsirExportNamedDeclarationOp>(op);
+      export_decl != nullptr) {
+    if (!export_decl.getDeclaration().empty()) {
+      MaybeEmplaceCfgEdges({
+          .from = Before(export_decl),
+          .to = Before(export_decl.getDeclaration()),
+          .owner = &*export_decl,
+      });
+      MaybeEmplaceCfgEdges({
+          .from = After(export_decl.getDeclaration()),
+          .to = Before(export_decl.getSpecifiers()),
+          .owner = &*export_decl,
+      });
+    } else {
+      MaybeEmplaceCfgEdges({
+          .from = Before(export_decl),
+          .to = Before(export_decl.getSpecifiers()),
+          .owner = &*export_decl,
+      });
+    }
+    MaybeEmplaceCfgEdges({
+        .from = After(export_decl.getSpecifiers()),
+        .to = After(export_decl),
+        .owner = &*export_decl,
+    });
+  }
+
+  // ┌─────◄
   // │     jshir.while_statement (
   // ├─────► ┌───────────────┐
   // │       │ test region   │
@@ -1137,7 +1173,7 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
   //    ┌─────◄
   //    │     jshir.for_statement (
   //    └─────► ┌───────────────┐
-  //            │ init region   │
+  //            │ init region   │ (init_declaration or init_expression)
   // ┌────────◄ └───────────────┘
   // ├────────► ┌───────────────┐
   // │          │ test region   │
@@ -1158,10 +1194,18 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
         .continue_target = getProgramPointBefore(
             &GetForStatementContinueTargetRegion(for_stmt).front()),
     };
+    // At most one of `init_declaration` and `init_expression` is set.
+    mlir::Region* init_region = nullptr;
+    if (!for_stmt.getInitDeclaration().empty()) {
+      init_region = &for_stmt.getInitDeclaration();
+    } else if (!for_stmt.getInitExpression().empty()) {
+      init_region = &for_stmt.getInitExpression();
+    }
+
     // Emplace an edge into the first non-empty region of the for-statement.
     mlir::Region& first_region =
-        !for_stmt.getInit().empty()
-            ? for_stmt.getInit()
+        init_region != nullptr
+            ? *init_region
             : (!for_stmt.getTest().empty() ? for_stmt.getTest()
                                            : for_stmt.getBody());
     MaybeEmplaceCfgEdges({
@@ -1170,12 +1214,12 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
         .owner = &*for_stmt,
     });
 
-    if (!for_stmt.getInit().empty()) {
+    if (init_region != nullptr) {
       mlir::Region& successor =
           !for_stmt.getTest().empty() ? for_stmt.getTest() : for_stmt.getBody();
 
       MaybeEmplaceCfgEdges({
-          .from = After(for_stmt.getInit()),
+          .from = After(*init_region),
           .to = Before(successor),
           .owner = &*for_stmt,
       });
@@ -1218,68 +1262,71 @@ mlir::LogicalResult JsirDataFlowAnalysis<ValueT, StateT, direction>::initialize(
     }
   }
 
+  // A for-in/of statement enters its `left_declaration` region (if any, e.g.
+  // `for (const x of xs)`) once, before the loop, and then loops over its body:
+  //
   // ┌─────◄
-  // │     jshir.for_in_statement (
+  // │     jshir.for_in_statement / jshir.for_of_statement (
+  // └─────► ┌─────────────────────────┐
+  //         │ left_declaration region │ (if not empty)
+  // ┌─────◄ └─────────────────────────┘
   // └──┬──► ┌───────────────┐
   //    │    │ body region   │
   // ┌──┴──◄ └───────────────┘
   // │     );
   // └─────►
+  //
+  // The region is entered once because the only computation it holds is the
+  // initializer of a `var` declarator, which Annex B allows in a for-in head
+  // (`for (var x = 1 in o)`) and which is evaluated once, before the first
+  // iteration; `let`/`const` heads can't have initializers. The assignment of
+  // the next key/element to the target on each iteration is not modeled here.
+  auto emplace_for_in_of_edges = [&](mlir::Operation* loop,
+                                     mlir::Region& left_declaration,
+                                     mlir::Region& body) {
+    maybe_jump_targets = {
+        .labeled_break_target = getProgramPointAfter(loop),
+        .unlabeled_break_target = getProgramPointAfter(loop),
+        .continue_target = getProgramPointBefore(&body.front()),
+    };
+    if (left_declaration.empty()) {
+      MaybeEmplaceCfgEdges({
+          .from = Before(loop),
+          .to = Before(body),
+          .owner = loop,
+      });
+    } else {
+      MaybeEmplaceCfgEdges({
+          .from = Before(loop),
+          .to = Before(left_declaration),
+          .owner = loop,
+      });
+      MaybeEmplaceCfgEdges({
+          .from = After(left_declaration),
+          .to = Before(body),
+          .owner = loop,
+      });
+    }
+    MaybeEmplaceCfgEdges({
+        .from = After(body),
+        .to = Before(body),
+        .owner = loop,
+    });
+    MaybeEmplaceCfgEdges({
+        .from = After(body),
+        .to = After(loop),
+        .owner = loop,
+    });
+  };
   if (auto for_in_stmt = llvm::dyn_cast<JshirForInStatementOp>(op);
       for_in_stmt != nullptr) {
-    maybe_jump_targets = {
-        .labeled_break_target = getProgramPointAfter(for_in_stmt),
-        .unlabeled_break_target = getProgramPointAfter(for_in_stmt),
-        .continue_target =
-            getProgramPointBefore(&for_in_stmt.getBody().front()),
-    };
-    MaybeEmplaceCfgEdges({
-        .from = Before(for_in_stmt),
-        .to = Before(for_in_stmt.getBody()),
-        .owner = &*for_in_stmt,
-    });
-    MaybeEmplaceCfgEdges({
-        .from = After(for_in_stmt.getBody()),
-        .to = Before(for_in_stmt.getBody()),
-        .owner = &*for_in_stmt,
-    });
-    MaybeEmplaceCfgEdges({
-        .from = After(for_in_stmt.getBody()),
-        .to = After(for_in_stmt),
-        .owner = &*for_in_stmt,
-    });
+    emplace_for_in_of_edges(for_in_stmt, for_in_stmt.getLeftDeclaration(),
+                            for_in_stmt.getBody());
   }
-
-  // ┌─────◄
-  // │     jshir.for_of_statement (
-  // └──┬──► ┌───────────────┐
-  //    │    │ body region   │
-  // ┌──┴──◄ └───────────────┘
-  // │     );
-  // └─────►
   if (auto for_of_stmt = llvm::dyn_cast<JshirForOfStatementOp>(op);
       for_of_stmt != nullptr) {
-    maybe_jump_targets = {
-        .labeled_break_target = getProgramPointAfter(for_of_stmt),
-        .unlabeled_break_target = getProgramPointAfter(for_of_stmt),
-        .continue_target =
-            getProgramPointBefore(&for_of_stmt.getBody().front()),
-    };
-    MaybeEmplaceCfgEdges({
-        .from = Before(for_of_stmt),
-        .to = Before(for_of_stmt.getBody()),
-        .owner = &*for_of_stmt,
-    });
-    MaybeEmplaceCfgEdges({
-        .from = After(for_of_stmt.getBody()),
-        .to = Before(for_of_stmt.getBody()),
-        .owner = &*for_of_stmt,
-    });
-    MaybeEmplaceCfgEdges({
-        .from = After(for_of_stmt.getBody()),
-        .to = After(for_of_stmt),
-        .owner = &*for_of_stmt,
-    });
+    emplace_for_in_of_edges(for_of_stmt, for_of_stmt.getLeftDeclaration(),
+                            for_of_stmt.getBody());
   }
 
   // ┌─────◄

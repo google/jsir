@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -45,16 +45,16 @@ enum class JsUnaryOperator {
   kThrow,
 };
 
-absl::string_view JsUnaryOperatorToString(JsUnaryOperator unary_operator);
-absl::StatusOr<JsUnaryOperator> StringToJsUnaryOperator(absl::string_view s);
+std::string_view JsUnaryOperatorToString(JsUnaryOperator unary_operator);
+absl::StatusOr<JsUnaryOperator> StringToJsUnaryOperator(std::string_view s);
 
 enum class JsUpdateOperator {
   kIncrement,
   kDecrement,
 };
 
-absl::string_view JsUpdateOperatorToString(JsUpdateOperator update_operator);
-absl::StatusOr<JsUpdateOperator> StringToJsUpdateOperator(absl::string_view s);
+std::string_view JsUpdateOperatorToString(JsUpdateOperator update_operator);
+absl::StatusOr<JsUpdateOperator> StringToJsUpdateOperator(std::string_view s);
 
 enum class JsBinaryOperator {
   kEqual,
@@ -82,8 +82,8 @@ enum class JsBinaryOperator {
   kPipeline,
 };
 
-absl::string_view JsBinaryOperatorToString(JsBinaryOperator binary_operator);
-absl::StatusOr<JsBinaryOperator> StringToJsBinaryOperator(absl::string_view s);
+std::string_view JsBinaryOperatorToString(JsBinaryOperator binary_operator);
+absl::StatusOr<JsBinaryOperator> StringToJsBinaryOperator(std::string_view s);
 
 enum class JsAssignmentOperator {
   kAssign,
@@ -104,8 +104,8 @@ enum class JsAssignmentOperator {
   kNullishCoalesceAssign,
 };
 
-absl::string_view JsAssignmentOperatorToString(JsAssignmentOperator assignment_operator);
-absl::StatusOr<JsAssignmentOperator> StringToJsAssignmentOperator(absl::string_view s);
+std::string_view JsAssignmentOperatorToString(JsAssignmentOperator assignment_operator);
+absl::StatusOr<JsAssignmentOperator> StringToJsAssignmentOperator(std::string_view s);
 
 enum class JsLogicalOperator {
   kOr,
@@ -113,8 +113,8 @@ enum class JsLogicalOperator {
   kNullishCoalesce,
 };
 
-absl::string_view JsLogicalOperatorToString(JsLogicalOperator logical_operator);
-absl::StatusOr<JsLogicalOperator> StringToJsLogicalOperator(absl::string_view s);
+std::string_view JsLogicalOperatorToString(JsLogicalOperator logical_operator);
+absl::StatusOr<JsLogicalOperator> StringToJsLogicalOperator(std::string_view s);
 
 class JsPosition {
  public:
@@ -167,7 +167,7 @@ class JsSourceLocation {
   const JsPosition* end() const;
   void set_end(std::unique_ptr<JsPosition> end);
 
-  std::optional<absl::string_view> identifier_name() const;
+  std::optional<std::string_view> identifier_name() const;
   void set_identifier_name(std::optional<std::string> identifier_name);
 
  protected:
@@ -193,8 +193,8 @@ enum class JsCommentType {
   kCommentLine,
 };
 
-absl::string_view JsCommentTypeToString(JsCommentType comment_type);
-absl::StatusOr<JsCommentType> StringToJsCommentType(absl::string_view s);
+std::string_view JsCommentTypeToString(JsCommentType comment_type);
+absl::StatusOr<JsCommentType> StringToJsCommentType(std::string_view s);
 
 class JsComment {
  public:
@@ -216,7 +216,7 @@ class JsComment {
   std::optional<const JsSourceLocation*> loc() const;
   void set_loc(std::optional<std::unique_ptr<JsSourceLocation>> loc);
 
-  absl::string_view value() const;
+  std::string_view value() const;
   void set_value(std::string value);
 
   std::optional<int64_t> start() const;
@@ -301,7 +301,7 @@ class JsSymbolId {
 
   static absl::StatusOr<std::unique_ptr<JsSymbolId>> FromJson(const nlohmann::json& json);
 
-  absl::string_view name() const;
+  std::string_view name() const;
   void set_name(std::string name);
 
   std::optional<int64_t> binding_uid() const;
@@ -412,8 +412,8 @@ enum class JsNodeType {
   kImportAttribute,
 };
 
-absl::string_view JsNodeTypeToString(JsNodeType node_type);
-absl::StatusOr<JsNodeType> StringToJsNodeType(absl::string_view s);
+std::string_view JsNodeTypeToString(JsNodeType node_type);
+absl::StatusOr<JsNodeType> StringToJsNodeType(std::string_view s);
 
 class JsNode {
  public:
@@ -521,7 +521,7 @@ class JsInterpreterDirective : public virtual JsNode {
 
   static absl::StatusOr<std::unique_ptr<JsInterpreterDirective>> FromJson(const nlohmann::json& json);
 
-  absl::string_view value() const;
+  std::string_view value() const;
   void set_value(std::string value);
 
  protected:
@@ -570,10 +570,10 @@ class JsDirectiveLiteralExtra {
 
   static absl::StatusOr<std::unique_ptr<JsDirectiveLiteralExtra>> FromJson(const nlohmann::json& json);
 
-  absl::string_view raw() const;
+  std::string_view raw() const;
   void set_raw(std::string raw);
 
-  absl::string_view raw_value() const;
+  std::string_view raw_value() const;
   void set_raw_value(std::string raw_value);
 
  protected:
@@ -615,7 +615,7 @@ class JsDirectiveLiteral : public virtual JsNode {
 
   static absl::StatusOr<std::unique_ptr<JsDirectiveLiteral>> FromJson(const nlohmann::json& json);
 
-  absl::string_view value() const;
+  std::string_view value() const;
   void set_value(std::string value);
 
   std::optional<JsDirectiveLiteralExtra*> extra();
@@ -707,7 +707,7 @@ class JsProgram : public virtual JsNode {
   std::optional<const JsInterpreterDirective*> interpreter() const;
   void set_interpreter(std::optional<std::unique_ptr<JsInterpreterDirective>> interpreter);
 
-  absl::string_view source_type() const;
+  std::string_view source_type() const;
   void set_source_type(std::string source_type);
 
   std::vector<std::unique_ptr<JsProgramBodyElement>>* body();
@@ -873,7 +873,7 @@ class JsIdentifier : public virtual JsExpression, public virtual JsPattern, publ
 
   static absl::StatusOr<std::unique_ptr<JsIdentifier>> FromJson(const nlohmann::json& json);
 
-  absl::string_view name() const;
+  std::string_view name() const;
   void set_name(std::string name);
 
  protected:
@@ -961,7 +961,7 @@ class JsRegExpLiteralExtra {
 
   static absl::StatusOr<std::unique_ptr<JsRegExpLiteralExtra>> FromJson(const nlohmann::json& json);
 
-  absl::string_view raw() const;
+  std::string_view raw() const;
   void set_raw(std::string raw);
 
  protected:
@@ -1002,10 +1002,10 @@ class JsRegExpLiteral : public virtual JsLiteral {
 
   static absl::StatusOr<std::unique_ptr<JsRegExpLiteral>> FromJson(const nlohmann::json& json);
 
-  absl::string_view pattern() const;
+  std::string_view pattern() const;
   void set_pattern(std::string pattern);
 
-  absl::string_view flags() const;
+  std::string_view flags() const;
   void set_flags(std::string flags);
 
   std::optional<JsRegExpLiteralExtra*> extra();
@@ -1068,10 +1068,10 @@ class JsStringLiteralExtra {
 
   static absl::StatusOr<std::unique_ptr<JsStringLiteralExtra>> FromJson(const nlohmann::json& json);
 
-  absl::string_view raw() const;
+  std::string_view raw() const;
   void set_raw(std::string raw);
 
-  absl::string_view raw_value() const;
+  std::string_view raw_value() const;
   void set_raw_value(std::string raw_value);
 
  protected:
@@ -1113,7 +1113,7 @@ class JsStringLiteral : public virtual JsLiteral {
 
   static absl::StatusOr<std::unique_ptr<JsStringLiteral>> FromJson(const nlohmann::json& json);
 
-  absl::string_view value() const;
+  std::string_view value() const;
   void set_value(std::string value);
 
   std::optional<JsStringLiteralExtra*> extra();
@@ -1185,7 +1185,7 @@ class JsNumericLiteralExtra {
 
   static absl::StatusOr<std::unique_ptr<JsNumericLiteralExtra>> FromJson(const nlohmann::json& json);
 
-  absl::string_view raw() const;
+  std::string_view raw() const;
   void set_raw(std::string raw);
 
   double raw_value() const;
@@ -1263,10 +1263,10 @@ class JsBigIntLiteralExtra {
 
   static absl::StatusOr<std::unique_ptr<JsBigIntLiteralExtra>> FromJson(const nlohmann::json& json);
 
-  absl::string_view raw() const;
+  std::string_view raw() const;
   void set_raw(std::string raw);
 
-  absl::string_view raw_value() const;
+  std::string_view raw_value() const;
   void set_raw_value(std::string raw_value);
 
  protected:
@@ -1308,7 +1308,7 @@ class JsBigIntLiteral : public virtual JsLiteral {
 
   static absl::StatusOr<std::unique_ptr<JsBigIntLiteral>> FromJson(const nlohmann::json& json);
 
-  absl::string_view value() const;
+  std::string_view value() const;
   void set_value(std::string value);
 
   std::optional<JsBigIntLiteralExtra*> extra();
@@ -2280,7 +2280,7 @@ class JsVariableDeclaration : public virtual JsDeclaration {
   const std::vector<std::unique_ptr<JsVariableDeclarator>>* declarations() const;
   void set_declarations(std::vector<std::unique_ptr<JsVariableDeclarator>> declarations);
 
-  absl::string_view kind() const;
+  std::string_view kind() const;
   void set_kind(std::string kind);
 
  protected:
@@ -2918,7 +2918,7 @@ class JsObjectMethod : public virtual JsObjectMember, public virtual JsBlockStat
 
   static absl::StatusOr<std::unique_ptr<JsObjectMethod>> FromJson(const nlohmann::json& json);
 
-  absl::string_view kind() const;
+  std::string_view kind() const;
   void set_kind(std::string kind);
 
  protected:
@@ -3674,10 +3674,10 @@ class JsTemplateElementValue {
 
   static absl::StatusOr<std::unique_ptr<JsTemplateElementValue>> FromJson(const nlohmann::json& json);
 
-  std::optional<absl::string_view> cooked() const;
+  std::optional<std::string_view> cooked() const;
   void set_cooked(std::optional<std::string> cooked);
 
-  absl::string_view raw() const;
+  std::string_view raw() const;
   void set_raw(std::string raw);
 
  protected:
@@ -4037,7 +4037,7 @@ class JsClassMethod : public virtual JsBlockStatementFunction {
   const JsExpression* key() const;
   void set_key(std::unique_ptr<JsExpression> key);
 
-  absl::string_view kind() const;
+  std::string_view kind() const;
   void set_kind(std::string kind);
 
   bool computed() const;
@@ -4100,7 +4100,7 @@ class JsClassPrivateMethod : public virtual JsBlockStatementFunction {
   const JsPrivateName* key() const;
   void set_key(std::unique_ptr<JsPrivateName> key);
 
-  absl::string_view kind() const;
+  std::string_view kind() const;
   void set_kind(std::string kind);
 
   bool static_() const;

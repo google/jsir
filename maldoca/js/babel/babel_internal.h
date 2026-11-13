@@ -23,7 +23,7 @@ namespace maldoca {
 nlohmann::json BabelParseOptionsToJson(const BabelParseRequest &request);
 
 nlohmann::json BabelGenerateOptionsToJson(const BabelGenerateOptions &options,
-                                          bool string_literals_base64_encoded);
+                                          bool string_values_base64_encoded);
 
 }  // namespace maldoca
 

@@ -16,24 +16,92 @@ exports = {};
 // |---------+--------------------+---------------------------+
 // |   C++   | absl::Base64Escape | absl::WebSafeBase64Escape |
 // +---------+--------------------+---------------------------+
+const kBase64Chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const kBase64Lookup = new Uint8Array(256);
+for (let i = 0; i < kBase64Chars.length; i++) {
+  kBase64Lookup[kBase64Chars.charCodeAt(i)] = i;
+}
+
 /**
- * Base64-encodes a string.
+ * Base64-encodes a string using UTF-16LE encoding.
  *
  * @param {string} value
  * @return {string}
  */
 function base64Encode(value) {
-  return atob(value);
+  const binary = new Uint8Array(value.length * 2);
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    binary[i * 2] = code & 0xff;
+    binary[i * 2 + 1] = (code >> 8) & 0xff;
+  }
+  const res = [];
+  let i = 0;
+  for (; i + 2 < binary.length; i += 3) {
+    const triplet = (binary[i] << 16) | (binary[i + 1] << 8) | binary[i + 2];
+    res.push(
+        kBase64Chars[(triplet >> 18) & 0b111111] +
+        kBase64Chars[(triplet >> 12) & 0b111111] +
+        kBase64Chars[(triplet >> 6) & 0b111111] +
+        kBase64Chars[triplet & 0b111111]);
+  }
+  if (i < binary.length) {
+    if (i + 1 < binary.length) {
+      const triplet = (binary[i] << 16) | (binary[i + 1] << 8);
+      res.push(
+          kBase64Chars[(triplet >> 18) & 0b111111] +
+          kBase64Chars[(triplet >> 12) & 0b111111] +
+          kBase64Chars[(triplet >> 6) & 0b111111] +
+          '=');
+    } else {
+      const triplet = binary[i] << 16;
+      res.push(
+          kBase64Chars[(triplet >> 18) & 0b111111] +
+          kBase64Chars[(triplet >> 12) & 0b111111] +
+          '==');
+    }
+  }
+  return res.join('');
 }
 
 /**
- * Base64-decodes a string.
+ * Base64-decodes a string from UTF-16LE.
  *
  * @param {string} value
  * @return {string}
  */
 function base64Decode(value) {
-  return btoa(value);
+  const buffer = [];
+  let i = 0;
+  while (i < value.length) {
+    if (value[i] === '=') break;
+    const b0 = kBase64Lookup[value.charCodeAt(i++)];
+    if (i >= value.length || value[i] === '=') break;
+    const b1 = kBase64Lookup[value.charCodeAt(i++)];
+    if (i >= value.length || value[i] === '=') {
+      const triplet = (b0 << 18) | (b1 << 12);
+      buffer.push((triplet >> 16) & 0xff);
+      break;
+    }
+    const b2 = kBase64Lookup[value.charCodeAt(i++)];
+    if (i >= value.length || value[i] === '=') {
+      const triplet = (b0 << 18) | (b1 << 12) | (b2 << 6);
+      buffer.push((triplet >> 16) & 0xff);
+      buffer.push((triplet >> 8) & 0xff);
+      break;
+    }
+    const b3 = kBase64Lookup[value.charCodeAt(i++)];
+    const triplet = (b0 << 18) | (b1 << 12) | (b2 << 6) | b3;
+    buffer.push((triplet >> 16) & 0xff);
+    buffer.push((triplet >> 8) & 0xff);
+    buffer.push(triplet & 0xff);
+  }
+  const res = [];
+  for (let j = 0; j + 1 < buffer.length; j += 2) {
+    res.push(String.fromCharCode(buffer[j] | (buffer[j + 1] << 8)));
+  }
+  return res.join('');
 }
 
 /**
@@ -48,7 +116,7 @@ function traverseObjectInternal(node, visited, callback) {
     return;
   }
 
-  if (typeof(node) !== 'object') {
+  if (typeof (node) !== 'object') {
     return;
   }
 
@@ -78,75 +146,38 @@ function traverseObject(node, callback) {
 }
 
 /**
- * A StringLiteral looks like this:
- *
- * {
- *   type: 'StringLiteral',
- *   value: 'a',
- *   extra: {
- *     rawValue: 'a',
- *     raw: '"\u0061"',
- *   },
- * }
- *
- * We want to base64-encode/decode node.value and node.extra.rawValue.
- *
- * @param {!Object} node
- * @param {!Set<!Object>} visited
- * @param {function(string): string} mutate
- */
-function mutateStringLiteral(node, visited, mutate) {
-  if ('value' in node && typeof (node.value) === 'string') {
-    node.value = mutate(node.value);
-  }
-
-  if ('extra' in node && typeof (node.extra) === 'object') {
-    const extra = node.extra;
-
-    // Sometimes the same object appears multiple times in the AST, probably to
-    // reduce memory usage.
-    if (visited.has(extra)) {
-      return;
-    }
-    visited.add(extra);
-
-    if ('rawValue' in extra && typeof (extra.rawValue) === 'string') {
-      extra.rawValue = mutate(extra.rawValue);
-    }
-  }
-}
-
-/**
- * Base64-encode/decode all StringLiterals in the AST.
+ * Base64-encode/decode all string values in the AST.
  *
  * @param {!Object} node
  * @param {function(string): string} mutate
  */
-function mutateStringLiterals(node, mutate) {
-  const visited = new Set();
+function mutateStrings(node, mutate) {
   traverseObject(node, (n) => {
-    if ('type' in n && n.type === 'StringLiteral') {
-      mutateStringLiteral(n, visited, mutate);
+    for (const key of Object.keys(n)) {
+      const val = n[key];
+      if (typeof val === 'string') {
+        n[key] = mutate(val);
+      }
     }
   });
 }
 
 /**
- * Base64-encode all StringLiterals in the AST.
+ * Base64-encode all string values in the AST.
  *
  * @param {!Object} node
  */
-function base64EncodeStringLiterals(node) {
-  mutateStringLiterals(node, base64Encode);
+function base64EncodeStringValues(node) {
+  mutateStrings(node, base64Encode);
 }
 
 /**
- * Base64-decode all StringLiterals in the AST.
+ * Base64-decode all string values in the AST.
  *
  * @param {!Object} node
  */
-function base64DecodeStringLiterals(node) {
-  mutateStringLiterals(node, base64Decode);
+function base64DecodeStringValues(node) {
+  mutateStrings(node, base64Decode);
 }
 
 // =============================================================================
@@ -294,25 +325,7 @@ function parseInternal(source, options) {
   const ast = Babel.packages.parser.parse(source, options);
 
   if (options?.replaceInvalidSurrogatePairs) {
-    Babel.packages.traverse.default(ast, {
-      StringLiteral: (path) => {
-        const node = path.node;
-        if ('extra' in node) {
-          const extra = node.extra;
-          if ('rawValue' in extra) {
-            extra.rawValue = replaceInvalidSurrogatePairs(extra.rawValue);
-          }
-        }
-
-        if ('value' in node) {
-          node.value = replaceInvalidSurrogatePairs(node.value);
-        }
-      }
-    });
-  }
-
-  if (options?.base64EncodeStringLiterals) {
-    base64EncodeStringLiterals(ast);
+    mutateStrings(ast, replaceInvalidSurrogatePairs);
   }
 
   convertCommentsToCommentUids(ast);
@@ -369,6 +382,10 @@ function parseInternal(source, options) {
     }
   }
 
+  if (options && options.base64EncodeStringValues) {
+    base64EncodeStringValues(ast);
+  }
+
   // We don't serialize to JSON even though it's possible. The reason is that
   // the AST of TSCompiler (the other choice) cannot be directly serialized due
   // to the existence of parent pointers. Therefore, it would not be a fair
@@ -386,8 +403,8 @@ exports.parseInternal = parseInternal;
  * @return {string}
  */
 function generateInternal(ast, options) {
-  if (options.base64DecodeStringLiterals) {
-    base64DecodeStringLiterals(ast);
+  if (options && options.base64DecodeStringValues) {
+    base64DecodeStringValues(ast);
   }
 
   convertCommentUidsToComments(ast);
@@ -478,9 +495,13 @@ exports.parse = function(sourceCode, optionsSerialized) {
           }
         })();
 
+        let name = binding.identifier ? binding.identifier.name : undefined;
+        if (name && options?.base64EncodeStringValues) {
+          name = base64Decode(name);
+        }
         const bindingPb = {
           kind: bindingKindPb,
-          name: binding.identifier ? binding.identifier.name : undefined,
+          name: name,
           uid: bindingId,
         };
 

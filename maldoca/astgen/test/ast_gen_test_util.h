@@ -66,6 +66,18 @@ struct AstGenTestParam {
   // "maldoca/astgen/test/lambda/ast.generated.h"
   std::optional<std::string> expected_ast_header_path;
 
+  // Path to the expected "ast_visitor.generated.h" C++ header file.
+  // Should start with "google3/".
+  // Example:
+  // "maldoca/astgen/test/lambda/ast_visitor.generated.h"
+  std::optional<std::string> expected_ast_visitor_header_path;
+
+  // Path to the expected "ast_walker.generated.h" C++ header file.
+  // Should start with "google3/".
+  // Example:
+  // "maldoca/astgen/test/lambda/ast_walker.generated.h"
+  std::optional<std::string> expected_ast_walker_header_path;
+
   // Path to the expected "ast.generated.cc" C++ source file.
   // Should start with "google3/".
   // Example:
@@ -89,6 +101,10 @@ struct AstGenTestParam {
   // Example:
   // "maldoca/astgen/test/lambda/lambdair_ops.generated.td"
   std::optional<std::string> expected_ir_tablegen_path;
+
+  // Path to the expected "<lang_name>ir_attrs.generated.td" TableGen source
+  // file. Should start with "google3/".
+  std::optional<std::string> expected_ir_attr_tablegen_path;
 
   // Path to the expected "ast_to_<lang_name>ir.generated.cc" C++ source file.
   // Should start with "google3/".

@@ -18,16 +18,23 @@
 #include "maldoca/js/ir/transforms/constant_propagation/pass.h"
 
 #include <cassert>
+#include <optional>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "llvm/ADT/PostOrderIterator.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinAttributes.h"
+#include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/DialectRegistry.h"
 #include "mlir/IR/Dominance.h"
 #include "mlir/IR/MLIRContext.h"
@@ -37,26 +44,18 @@
 #include "mlir/Support/LLVM.h"
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/Transforms/FoldUtils.h"
-#include "maldoca/js/ast/ast.generated.h"
-#include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
-#include "maldoca/js/ir/analyses/dataflow_analysis.h"
-#include "maldoca/js/ir/analyses/constant_propagation/attrs.h"
-#include "maldoca/js/ir/ir.h"
-#include <optional>
-#include <string>
-#include <utility>
-
-#include "llvm/ADT/TypeSwitch.h"
-#include "llvm/Support/raw_ostream.h"
-#include "mlir/IR/BuiltinAttributes.h"
-#include "mlir/IR/Diagnostics.h"
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
+#include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/scope.h"
+#include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
+#include "maldoca/js/ir/analyses/constant_propagation/attrs.h"
 #include "maldoca/js/ir/analyses/constant_propagation/dynamic_analysis.h"
 #include "maldoca/js/ir/analyses/constant_propagation/dynamic_prelude.h"
+#include "maldoca/js/ir/analyses/dataflow_analysis.h"
+#include "maldoca/js/ir/ir.h"
 
 namespace maldoca {
 
@@ -309,9 +308,8 @@ mlir::LogicalResult PerformConstantPropagation(
   return mlir::success();
 }
 
-
 void JsirConstantPropagationPass::getDependentDialects(
-    mlir::DialectRegistry &registry) const {
+    mlir::DialectRegistry& registry) const {
   Base::getDependentDialects(registry);
   if (babel_ != nullptr) {
     registry.insert<JsirBuiltinDialect>();
@@ -328,7 +326,7 @@ void JsirConstantPropagationPass::runOnOperation() {
 
   // dynconstprop: prelude matching runs first, then the shared rewrite.
   JsirAnalysisResult::DynamicConstantPropagation detailed_analysis_result;
-  JsirAnalysisResult::DynamicConstantPropagation *analysis_result =
+  JsirAnalysisResult::DynamicConstantPropagation* analysis_result =
       &detailed_analysis_result;
 
   const mlir::LogicalResult result = PerformDynamicConstantPropagation(
@@ -338,8 +336,8 @@ void JsirConstantPropagationPass::runOnOperation() {
     return;
   }
   if (js_analysis_outputs_ != nullptr) {
-    JsAnalysisOutput *js_analysis_output = js_analysis_outputs_->add_outputs();
-    JsirAnalysisResult *jsir_analysis_output =
+    JsAnalysisOutput* js_analysis_output = js_analysis_outputs_->add_outputs();
+    JsirAnalysisResult* jsir_analysis_output =
         js_analysis_output->mutable_jsir_analysis();
     *jsir_analysis_output->mutable_dynamic_constant_propagation() =
         std::move(detailed_analysis_result);
@@ -347,10 +345,10 @@ void JsirConstantPropagationPass::runOnOperation() {
 }
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
-    mlir::Operation *op, const BabelScopes &scopes,
-    const JsirAnalysisConfig::DynamicConstantPropagation &config, Babel &babel,
-    JsirAnalysisResult::DynamicConstantPropagation
-        *absl_nullable analysis_result) {
+    mlir::Operation* op, const BabelScopes& scopes,
+    const JsirAnalysisConfig::DynamicConstantPropagation& config, Babel& babel,
+    JsirAnalysisResult::DynamicConstantPropagation* absl_nullable
+        analysis_result) {
   absl::StatusOr<DynamicPrelude> dynamic_prelude =
       DynamicPrelude::Create(config, babel);
   if (!dynamic_prelude.ok()) {
@@ -362,10 +360,10 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
 }
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
-    mlir::Operation *op, const BabelScopes &scopes,
-    DynamicPrelude *absl_nullable dynamic_prelude,
-    JsirAnalysisResult::DynamicConstantPropagation
-        *absl_nullable analysis_result) {
+    mlir::Operation* op, const BabelScopes& scopes,
+    DynamicPrelude* absl_nullable dynamic_prelude,
+    JsirAnalysisResult::DynamicConstantPropagation* absl_nullable
+        analysis_result) {
   using ComputedConstant =
       JsirAnalysisResult::DynamicConstantPropagation::ComputedConstant;
 
@@ -373,7 +371,7 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
   absl::flat_hash_map<JsSymbolId, mlir::Attribute> const_bindings =
       GetConstBindings(scopes, op);
 
-  auto *analysis = solver.load<JsirDynamicConstantPropagationAnalysis>(
+  auto* analysis = solver.load<JsirDynamicConstantPropagationAnalysis>(
       &scopes, dynamic_prelude, const_bindings);
 
   mlir::LogicalResult result = solver.initializeAndRun(op);
@@ -383,7 +381,7 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
 
   std::vector<ComputedConstant> computed_constants;
 
-  op->walk([&](mlir::Operation *walk_op) {
+  op->walk([&](mlir::Operation* walk_op) {
     ComputedConstant computed_constant;
 
     if (llvm::isa_and_nonnull<JsirLiteralOpInterface>(walk_op)) {
@@ -399,7 +397,7 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
       return;
     }
 
-    const JsirConstantPropagationValue &cp_value = cp_state_ref.value();
+    const JsirConstantPropagationValue& cp_value = cp_state_ref.value();
     if (cp_value.IsUninitialized() || cp_value.IsUnknown()) {
       return;
     }
@@ -457,7 +455,7 @@ mlir::LogicalResult PerformDynamicConstantPropagation(
 }
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
-    mlir::Operation *op, JsirDynamicConstantPropagationAnalysis &analysis) {
+    mlir::Operation* op, JsirDynamicConstantPropagationAnalysis& analysis) {
   return PerformConstantPropagation(op, analysis);
 }
 

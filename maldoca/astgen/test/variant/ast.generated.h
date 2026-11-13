@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -39,8 +39,8 @@ enum class VBaseClassType {
   kDerivedClass2,
 };
 
-absl::string_view VBaseClassTypeToString(VBaseClassType base_class_type);
-absl::StatusOr<VBaseClassType> StringToVBaseClassType(absl::string_view s);
+std::string_view VBaseClassTypeToString(VBaseClassType base_class_type);
+absl::StatusOr<VBaseClassType> StringToVBaseClassType(std::string_view s);
 
 class VBaseClass {
  public:
@@ -107,13 +107,13 @@ class VNode {
 
   static absl::StatusOr<std::unique_ptr<VNode>> FromJson(const nlohmann::json& json);
 
-  std::variant<double, absl::string_view> simple_variant_builtin() const;
+  std::variant<double, std::string_view> simple_variant_builtin() const;
   void set_simple_variant_builtin(std::variant<double, std::string> simple_variant_builtin);
 
-  std::optional<std::variant<double, absl::string_view>> nullable_variant_builtin() const;
+  std::optional<std::variant<double, std::string_view>> nullable_variant_builtin() const;
   void set_nullable_variant_builtin(std::optional<std::variant<double, std::string>> nullable_variant_builtin);
 
-  std::optional<std::variant<double, absl::string_view>> optional_variant_builtin() const;
+  std::optional<std::variant<double, std::string_view>> optional_variant_builtin() const;
   void set_optional_variant_builtin(std::optional<std::variant<double, std::string>> optional_variant_builtin);
 
   std::variant<VDerivedClass1*, VDerivedClass2*> simple_variant_class();

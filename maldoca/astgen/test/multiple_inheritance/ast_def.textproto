@@ -17,6 +17,7 @@ nodes {
     name: "end"
     type { double {} }
   }
+  should_generate_ir_attr: true
 }
 
 # interface Node {
@@ -28,6 +29,7 @@ nodes {
     name: "loc"
     type { class: "SourceLocation" }
   }
+  should_generate_ir_attr: true
 }
 
 # interface Function <: Node {
@@ -40,6 +42,7 @@ nodes {
     name: "id"
     type { string {} }
   }
+  should_generate_ir_attr: true
 }
 
 # interface ObjectMember <: Node {
@@ -52,6 +55,7 @@ nodes {
     name: "computed"
     type { bool {} }
   }
+  should_generate_ir_attr: true
 }
 
 # interface ObjectMethod <: ObjectMember, Function {
@@ -62,4 +66,5 @@ nodes {
   type: "ObjectMethod"
   parents: "ObjectMember"
   parents: "Function"
+  should_generate_ir_attr: true
 }

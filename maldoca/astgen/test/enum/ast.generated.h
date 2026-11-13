@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -45,16 +45,16 @@ enum class EUnaryOperator {
   kThrow,
 };
 
-absl::string_view EUnaryOperatorToString(EUnaryOperator unary_operator);
-absl::StatusOr<EUnaryOperator> StringToEUnaryOperator(absl::string_view s);
+std::string_view EUnaryOperatorToString(EUnaryOperator unary_operator);
+absl::StatusOr<EUnaryOperator> StringToEUnaryOperator(std::string_view s);
 
 enum class EEscapedChar {
   kTab,
   kBackslash,
 };
 
-absl::string_view EEscapedCharToString(EEscapedChar escaped_char);
-absl::StatusOr<EEscapedChar> StringToEEscapedChar(absl::string_view s);
+std::string_view EEscapedCharToString(EEscapedChar escaped_char);
+absl::StatusOr<EEscapedChar> StringToEEscapedChar(std::string_view s);
 
 class ENode {
  public:

@@ -29,6 +29,7 @@ cc_test(
     name = "ast_gen_test",
     srcs = ["ast_gen_test.cc"],
     data = [
+        "air_attrs.generated.td",
         "air_ops.generated.td",
         "ast.generated.cc",
         "ast.generated.h",
@@ -57,7 +58,7 @@ cc_library(
         "//maldoca/astgen:ast_from_json_utils",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",

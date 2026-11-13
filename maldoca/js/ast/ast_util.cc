@@ -32,8 +32,8 @@
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "maldoca/js/ast/ast.generated.h"
-#include "maldoca/js/ast/ast_visitor.h"
-#include "maldoca/js/ast/ast_walker.h"
+#include "maldoca/js/ast/ast_visitor.generated.h"
+#include "maldoca/js/ast/ast_walker.generated.h"
 #include "maldoca/js/babel/babel.h"
 #include "maldoca/js/babel/babel.pb.h"
 
@@ -123,7 +123,7 @@ BabelAstString GetAstStringFromFileAst(const JsFile& file) {
 
   BabelAstString result;
   result.set_value(ast_json_str);
-  result.set_string_literals_base64_encoded(false);
+  result.set_string_values_base64_encoded(false);
   return result;
 }
 

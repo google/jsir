@@ -27,7 +27,7 @@
 #include <utility>
 
 #include "maldoca/astgen/test/typed_lambda/ast.generated.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -87,7 +87,7 @@ void TlLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const {
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 

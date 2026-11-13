@@ -28,9 +28,14 @@ INSTANTIATE_TEST_SUITE_P(
             "ast_ts_interface.generated",
         .cc_namespace = "maldoca",
         .ast_path = "maldoca/astgen/test/multiple_inheritance",
+        .ir_path = "maldoca/astgen/test/multiple_inheritance",
         .expected_ast_header_path =
             "maldoca/astgen/test/"
             "multiple_inheritance/ast.generated.h",
+        .expected_ast_visitor_header_path =
+            "maldoca/astgen/test/multiple_inheritance/ast_visitor.generated.h",
+        .expected_ast_walker_header_path =
+            "maldoca/astgen/test/multiple_inheritance/ast_walker.generated.h",
         .expected_ast_source_path =
             "maldoca/astgen/test/"
             "multiple_inheritance/ast.generated.cc",
@@ -40,6 +45,8 @@ INSTANTIATE_TEST_SUITE_P(
         .expected_ast_from_json_path =
             "maldoca/astgen/test/"
             "multiple_inheritance/ast_from_json.generated.cc",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/multiple_inheritance/mir_attrs.generated.td",
     }));
 
 }  // namespace

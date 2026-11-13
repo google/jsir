@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_SYMBOL_MUTATION_INFO_H_
-#define MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_SYMBOL_MUTATION_INFO_H_
+#ifndef MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_SYMBOL_MUTATION_INFO_H_
+#define MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_SYMBOL_MUTATION_INFO_H_
 
 // TODO(tzx): Investigate if we can use Babel's binding information instead of
 // rolling our own.
@@ -107,4 +107,4 @@ absl::flat_hash_map<JsSymbolId, SymbolMutationInfo> GetSymbolMutationInfos(
 
 }  // namespace maldoca
 
-#endif  // MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_SYMBOL_MUTATION_INFO_H_
+#endif  // MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_SYMBOL_MUTATION_INFO_H_

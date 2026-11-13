@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_ATTRS_H_
-#define MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_ATTRS_H_
+#ifndef MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_ATTRS_H_
+#define MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_ATTRS_H_
 
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
@@ -27,4 +27,4 @@
 #define GET_ATTRDEF_CLASSES
 #include "maldoca/js/ir/analyses/constant_propagation/attrs.h.inc"
 
-#endif  // MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_ATTRS_H_
+#endif  // MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_ATTRS_H_

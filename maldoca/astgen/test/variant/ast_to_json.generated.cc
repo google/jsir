@@ -27,7 +27,7 @@
 #include <utility>
 
 #include "maldoca/astgen/test/variant/ast.generated.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -103,7 +103,7 @@ void VNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   if (nullable_variant_builtin_.has_value()) {
@@ -117,7 +117,7 @@ void VNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   } else {
     os << "\"nullableVariantBuiltin\":" << "null";
@@ -134,7 +134,7 @@ void VNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
   MaybeAddComma(os, needs_comma);
@@ -150,7 +150,7 @@ void VNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   if (nullable_variant_class_.has_value()) {
@@ -166,7 +166,7 @@ void VNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   } else {
     os << "\"nullableVariantClass\":" << "null";
@@ -185,7 +185,7 @@ void VNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }

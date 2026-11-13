@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "llvm/ADT/APFloat.h"
@@ -32,12 +33,13 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
 #include "absl/cleanup/cleanup.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_check.h"
+#include "absl/log/absl_log.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/test/list/ast.generated.h"
@@ -118,7 +120,7 @@ LiirListOfVariantOp AstToLiir::VisitListOfVariant(mlir::OpBuilder &builder, cons
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     mlir_variants_data.push_back(std::move(mlir_element));
   }
@@ -136,7 +138,7 @@ LiirListOfVariantOp AstToLiir::VisitListOfVariant(mlir::OpBuilder &builder, cons
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
     mlir_operations.push_back(std::move(mlir_element));
   }
@@ -175,7 +177,7 @@ LiirOptionalListOfVariantOp AstToLiir::VisitOptionalListOfVariant(mlir::OpBuilde
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
       mlir_variants_data.push_back(std::move(mlir_element));
     }
@@ -199,7 +201,7 @@ LiirListOfOptionalVariantOp AstToLiir::VisitListOfOptionalVariant(mlir::OpBuilde
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
     mlir_variants_data.push_back(std::move(mlir_element));
@@ -219,7 +221,7 @@ LiirListOfOptionalVariantOp AstToLiir::VisitListOfOptionalVariant(mlir::OpBuilde
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     } else {
       mlir_element = CreateExpr<LiirNoneOp>(builder, node);
@@ -246,7 +248,7 @@ LiirOptionalListOfOptionalVariantOp AstToLiir::VisitOptionalListOfOptionalVarian
             break;
           }
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       }
       mlir_variants_data.push_back(std::move(mlir_element));

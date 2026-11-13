@@ -35,6 +35,9 @@ cc_test(
         "ast_from_json.generated.cc",
         "ast_to_json.generated.cc",
         "ast_ts_interface.generated",
+        "ast_visitor.generated.h",
+        "ast_walker.generated.h",
+        "eir_attrs.generated.td",
         "eir_ops.generated.td",
         "//maldoca/astgen/test/enum/conversion:ast_to_eir.generated.cc",
         "//maldoca/astgen/test/enum/conversion:eir_to_ast.generated.cc",
@@ -42,6 +45,25 @@ cc_test(
     deps = [
         "//maldoca/astgen/test:ast_gen_test_util",
         "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "ast_visitor",
+    hdrs = ["ast_visitor.generated.h"],
+    deps = [
+        ":ast",
+        "@abseil-cpp//absl/log:absl_log",
+    ],
+)
+
+cc_library(
+    name = "ast_walker",
+    hdrs = ["ast_walker.generated.h"],
+    deps = [
+        ":ast",
+        ":ast_visitor",
+        "@abseil-cpp//absl/log:absl_log",
     ],
 )
 
@@ -59,7 +81,7 @@ cc_library(
         "//maldoca/astgen:ast_from_json_utils",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",

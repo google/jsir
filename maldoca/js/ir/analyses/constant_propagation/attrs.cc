@@ -14,9 +14,8 @@
 
 #include "maldoca/js/ir/analyses/constant_propagation/attrs.h"
 
-#include "llvm/ADT/TypeSwitch.h"  // NOLINT(misc-include-cleaner)
+#include "llvm/ADT/TypeSwitch.h"            // NOLINT(misc-include-cleaner)
 #include "mlir/IR/DialectImplementation.h"  // NOLINT(misc-include-cleaner)
-
 #include "maldoca/js/ir/analyses/constant_propagation/jsir_builtin_dialect.cc.inc"
 
 #define GET_ATTRDEF_CLASSES

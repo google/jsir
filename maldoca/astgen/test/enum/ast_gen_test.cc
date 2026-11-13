@@ -30,6 +30,10 @@ INSTANTIATE_TEST_SUITE_P(
         .ir_path = "maldoca/astgen/test/enum",
         .expected_ast_header_path =
             "maldoca/astgen/test/enum/ast.generated.h",
+        .expected_ast_visitor_header_path =
+            "maldoca/astgen/test/enum/ast_visitor.generated.h",
+        .expected_ast_walker_header_path =
+            "maldoca/astgen/test/enum/ast_walker.generated.h",
         .expected_ast_source_path =
             "maldoca/astgen/test/enum/ast.generated.cc",
         .expected_ast_to_json_path =
@@ -40,6 +44,8 @@ INSTANTIATE_TEST_SUITE_P(
             "enum/ast_from_json.generated.cc",
         .expected_ir_tablegen_path =
             "maldoca/astgen/test/enum/eir_ops.generated.td",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/enum/eir_attrs.generated.td",
         .expected_ast_to_ir_source_path =
             "maldoca/astgen/test/enum/conversion/"
             "ast_to_eir.generated.cc",

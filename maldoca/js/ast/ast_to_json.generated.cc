@@ -27,7 +27,7 @@
 #include <utility>
 
 #include "maldoca/js/ast/ast.generated.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_log.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
@@ -1375,7 +1375,7 @@ void JsForStatement::SerializeFields(std::ostream& os, bool &needs_comma) const 
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   } else {
     os << "\"init\":" << "null";
@@ -1431,7 +1431,7 @@ void JsForInStatement::SerializeFields(std::ostream& os, bool &needs_comma) cons
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"right\":";
@@ -1473,7 +1473,7 @@ void JsForOfStatement::SerializeFields(std::ostream& os, bool &needs_comma) cons
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"right\":";
@@ -1599,7 +1599,7 @@ void JsArrowFunctionExpression::SerializeFields(std::ostream& os, bool &needs_co
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -1717,7 +1717,7 @@ void JsArrayExpression::SerializeFields(std::ostream& os, bool &needs_comma) con
             break;
           }
           default:
-            LOG(FATAL) << "Unreachable code.";
+            ABSL_LOG(FATAL) << "Unreachable code.";
         }
       } else {
         os << "null";
@@ -1772,7 +1772,7 @@ void JsObjectProperty::SerializeFields(std::ostream& os, bool &needs_comma) cons
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 
@@ -1838,7 +1838,7 @@ void JsObjectExpression::SerializeFields(std::ostream& os, bool &needs_comma) co
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -1954,7 +1954,7 @@ void JsBinaryExpression::SerializeFields(std::ostream& os, bool &needs_comma) co
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"right\":";
@@ -2048,7 +2048,7 @@ void JsMemberExpression::SerializeFields(std::ostream& os, bool &needs_comma) co
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   switch (property_.index()) {
@@ -2063,7 +2063,7 @@ void JsMemberExpression::SerializeFields(std::ostream& os, bool &needs_comma) co
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"computed\":" << (nlohmann::json(computed_)).dump();
@@ -2105,7 +2105,7 @@ void JsOptionalMemberExpression::SerializeFields(std::ostream& os, bool &needs_c
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"computed\":" << (nlohmann::json(computed_)).dump();
@@ -2178,7 +2178,7 @@ void JsCallExpression::SerializeFields(std::ostream& os, bool &needs_comma) cons
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"arguments\":" << "[";
@@ -2196,7 +2196,7 @@ void JsCallExpression::SerializeFields(std::ostream& os, bool &needs_comma) cons
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -2240,7 +2240,7 @@ void JsOptionalCallExpression::SerializeFields(std::ostream& os, bool &needs_com
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -2285,7 +2285,7 @@ void JsNewExpression::SerializeFields(std::ostream& os, bool &needs_comma) const
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"arguments\":" << "[";
@@ -2303,7 +2303,7 @@ void JsNewExpression::SerializeFields(std::ostream& os, bool &needs_comma) const
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -2537,7 +2537,7 @@ void JsObjectPattern::SerializeFields(std::ostream& os, bool &needs_comma) const
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -2808,7 +2808,7 @@ void JsClassBody::SerializeFields(std::ostream& os, bool &needs_comma) const {
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -2960,7 +2960,7 @@ void JsImportSpecifier::SerializeFields(std::ostream& os, bool &needs_comma) con
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   MaybeAddComma(os, needs_comma);
   os << "\"local\":";
@@ -3076,7 +3076,7 @@ void JsImportDeclaration::SerializeFields(std::ostream& os, bool &needs_comma) c
           break;
         }
         default:
-          LOG(FATAL) << "Unreachable code.";
+          ABSL_LOG(FATAL) << "Unreachable code.";
       }
     }
   }
@@ -3123,7 +3123,7 @@ void JsExportSpecifier::SerializeFields(std::ostream& os, bool &needs_comma) con
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   if (local_.has_value()) {
     MaybeAddComma(os, needs_comma);
@@ -3139,7 +3139,7 @@ void JsExportSpecifier::SerializeFields(std::ostream& os, bool &needs_comma) con
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
 }
@@ -3237,7 +3237,7 @@ void JsExportDefaultDeclaration::SerializeFields(std::ostream& os, bool &needs_c
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
 }
 

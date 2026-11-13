@@ -154,8 +154,8 @@ absl::StatusOr<BabelParseResult> QuickJsBabel::Parse(
 
   BabelAstString ast_string;
   ast_string.set_value(std::move(*ast_json_string));
-  ast_string.set_string_literals_base64_encoded(
-      request.base64_encode_string_literals());
+  ast_string.set_string_values_base64_encoded(
+      request.base64_encode_string_values());
   *ast_string.mutable_scopes() = std::move(*response.mutable_scopes());
 
   BabelErrors errors;
@@ -171,13 +171,12 @@ absl::StatusOr<BabelParseResult> QuickJsBabel::Parse(
   };
 }
 
-// Not implemented. The version of @babel/standalone in //third_party doesn't
-// provide @babel/generator APIs.
+// Generates JavaScript source from a stringified AST using @babel/generator.
 absl::StatusOr<BabelGenerateResult> QuickJsBabel::Generate(
     const BabelAstString& ast_string, const BabelGenerateOptions& opts,
     absl::Duration timeout) {
   nlohmann::json options_json = BabelGenerateOptionsToJson(
-      opts, ast_string.string_literals_base64_encoded());
+      opts, ast_string.string_values_base64_encoded());
 
   std::string options_string = options_json.dump(/*indent=*/2);
 

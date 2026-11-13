@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_ANALYSIS_H_
-#define MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_ANALYSIS_H_
+#ifndef MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_DYNAMIC_ANALYSIS_H_
+#define MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_DYNAMIC_ANALYSIS_H_
 
 #include <cstdint>
 #include <optional>
@@ -21,12 +21,12 @@
 #include <vector>
 
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/Support/raw_ostream.h"
 #include "mlir/Analysis/DataFlowFramework.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/Operation.h"
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
-#include "llvm/Support/raw_ostream.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/driver/driver.pb.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
@@ -49,8 +49,8 @@ class JsirDynamicConstantPropagationAnalysis
     : public JsirConstantPropagationAnalysis {
  public:
   explicit JsirDynamicConstantPropagationAnalysis(
-      mlir::DataFlowSolver &solver, const BabelScopes *scopes,
-      DynamicPrelude *absl_nullable dynamic_prelude,
+      mlir::DataFlowSolver& solver, const BabelScopes* scopes,
+      DynamicPrelude* absl_nullable dynamic_prelude,
       absl::flat_hash_map<JsSymbolId, mlir::Attribute> const_bindings)
       : JsirConstantPropagationAnalysis(solver, scopes),
         dynamic_prelude_(dynamic_prelude),
@@ -92,10 +92,10 @@ class JsirDynamicConstantPropagationAnalysis
       JsirStateRef<JsirConstantPropagationState> after);
 
  private:
-  DynamicPrelude *absl_nullable dynamic_prelude_;
+  DynamicPrelude* absl_nullable dynamic_prelude_;
   absl::flat_hash_map<JsSymbolId, mlir::Attribute> const_bindings_;
 };
 
 }  // namespace maldoca
 
-#endif  // MALDOCA_JS_IR_ANALYSES_DYNAMIC_CONSTANT_PROPAGATION_ANALYSIS_H_
+#endif  // MALDOCA_JS_IR_ANALYSES_CONSTANT_PROPAGATION_DYNAMIC_ANALYSIS_H_

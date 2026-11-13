@@ -25,6 +25,8 @@
 #include <iostream>
 #include <string>
 #include "absl/flags/flag.h"
+#include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/strings/str_cat.h"
 #include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
@@ -33,11 +35,13 @@
 #include "maldoca/astgen/ast_serialize_printer.h"
 #include "maldoca/astgen/ast_source_printer.h"
 #include "maldoca/astgen/ast_to_ir_source_printer.h"
+#include "maldoca/astgen/ast_visitor_header_printer.h"
+#include "maldoca/astgen/ast_walker_header_printer.h"
+#include "maldoca/astgen/ir_attr_table_gen_printer.h"
 #include "maldoca/astgen/ir_table_gen_printer.h"
 #include "maldoca/astgen/ir_to_ast_source_printer.h"
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/path.h"
-#include "absl/status/status_macros.h"
 
 ABSL_FLAG(std::string, ast_def_path, "",
           "The path to the ast_def.textproto file.");
@@ -102,6 +106,18 @@ absl::Status AstGenMain() {
   std::cout << "Writing ast_hdr to " << ast_hdr_path << "\n";
   ABSL_RETURN_IF_ERROR(SetFileContents(ast_hdr_path, ast_hdr));
 
+  std::string ast_visitor_hdr =
+      PrintAstVisitorHeader(ast_def, cc_namespace, ast_path);
+  auto ast_visitor_hdr_path = JoinPath(ast_path, "ast_visitor.generated.h");
+  std::cout << "Writing ast_visitor_hdr to " << ast_visitor_hdr_path << "\n";
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_visitor_hdr_path, ast_visitor_hdr));
+
+  std::string ast_walker_hdr =
+      PrintAstWalkerHeader(ast_def, cc_namespace, ast_path);
+  auto ast_walker_hdr_path = JoinPath(ast_path, "ast_walker.generated.h");
+  std::cout << "Writing ast_walker_hdr to " << ast_walker_hdr_path << "\n";
+  ABSL_RETURN_IF_ERROR(SetFileContents(ast_walker_hdr_path, ast_walker_hdr));
+
   std::string ast_src = PrintAstSource(ast_def, cc_namespace, ast_path);
   auto ast_src_path = JoinPath(ast_path, "ast.generated.cc");
   std::cout << "Writing ast_src to " << ast_src_path << "\n";
@@ -113,8 +129,7 @@ absl::Status AstGenMain() {
   ABSL_RETURN_IF_ERROR(SetFileContents(ast_to_json_path, ast_to_json));
 
   std::string ast_from_json = PrintAstFromJson(ast_def, cc_namespace, ast_path);
-  auto ast_from_json_path =
-      JoinPath(ast_path, "ast_from_json.generated.cc");
+  auto ast_from_json_path = JoinPath(ast_path, "ast_from_json.generated.cc");
   std::cout << "Writing ast_from_json to " << ast_from_json_path << "\n";
   ABSL_RETURN_IF_ERROR(SetFileContents(ast_from_json_path, ast_from_json));
 
@@ -125,6 +140,14 @@ absl::Status AstGenMain() {
           ir_path, absl::StrCat(ast_def.lang_name(), "ir_ops.generated.td"));
       std::cout << "Writing ir_tablegen to " << ir_tablegen_path << "\n";
       ABSL_RETURN_IF_ERROR(SetFileContents(ir_tablegen_path, ir_tablegen));
+
+      std::string ir_attrs_tablegen = PrintIrAttrTableGen(ast_def, ir_path);
+      auto ir_attrs_tablegen_path = JoinPath(
+          ir_path, absl::StrCat(ast_def.lang_name(), "ir_attrs.generated.td"));
+      std::cout << "Writing ir_attrs_tablegen to " << ir_attrs_tablegen_path
+                << "\n";
+      ABSL_RETURN_IF_ERROR(
+          SetFileContents(ir_attrs_tablegen_path, ir_attrs_tablegen));
     }
 
     std::string ast_to_ir = PrintAstToIrSource(

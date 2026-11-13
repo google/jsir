@@ -2353,6 +2353,7 @@
 // SOURCE-NEXT:                                                         })
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { <_0x4a8534#95 : 0.000000e+00 : f64> }
 // SOURCE-NEXT:                                                     }, {
+// SOURCE-NEXT:                                                     }, {
 // SOURCE-NEXT:                                                       ^bb0:
 // SOURCE-NEXT:                                                           // <executable>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }

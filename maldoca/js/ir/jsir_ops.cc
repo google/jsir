@@ -27,6 +27,7 @@
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/OpDefinition.h"
+#include "mlir/IR/Region.h"
 #include "mlir/Support/LLVM.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/log/log.h"
@@ -154,8 +155,8 @@ std::optional<mlir::Attribute> QuickJsValueToMlirAttribute(
     absl::Cleanup cleanup_cstr = [&] { JS_FreeCString(qjs_context, cstr); };
 
     std::string s{cstr, len};
-    return builder.getAttr<JsirBigIntLiteralAttr>(builder.getStringAttr(s),
-                                                  /*extra=*/nullptr);
+    return builder.getAttr<JsirBigIntLiteralAttr>(
+        /*loc=*/nullptr, builder.getStringAttr(s), /*extra=*/nullptr);
   }
 
   return std::nullopt;
@@ -326,7 +327,7 @@ mlir::OpFoldResult JsirNullLiteralOp::fold(FoldAdaptor adaptor) {
 
 mlir::OpFoldResult JsirRegExpLiteralOp::fold(FoldAdaptor adaptor) {
   return JsirRegExpLiteralAttr::get(getContext(), getPatternAttr(),
-                                    getFlagsAttr());
+                                    getFlagsAttr(), getExtraAttr());
 }
 
 mlir::OpFoldResult JsirStringLiteralOp::fold(FoldAdaptor adaptor) {
@@ -343,7 +344,8 @@ mlir::OpFoldResult JsirNumericLiteralOp::fold(FoldAdaptor adaptor) {
 
 mlir::OpFoldResult JsirBigIntLiteralOp::fold(FoldAdaptor adaptor) {
   mlir::Builder builder(getContext());
-  return builder.getAttr<JsirBigIntLiteralAttr>(getValueAttr(), getExtraAttr());
+  return builder.getAttr<JsirBigIntLiteralAttr>(/*loc=*/nullptr, getValueAttr(),
+                                                getExtraAttr());
 }
 
 mlir::OpFoldResult JsirParenthesizedExpressionOp::fold(FoldAdaptor adaptor) {
@@ -388,6 +390,13 @@ mlir::OpFoldResult JsirMemberExpressionOp::fold(FoldAdaptor adaptor) {
 
   return EmulateMemberAccessOp(getContext(), object, computed_property)
       .value_or(nullptr);
+}
+
+mlir::Region &GetJsirFunctionBody(JsirArrowFunctionExpressionOp op) {
+  if (!op.getBodyStatement().empty()) {
+    return op.getBodyStatement();
+  }
+  return op.getBodyExpression();
 }
 
 }  // namespace maldoca

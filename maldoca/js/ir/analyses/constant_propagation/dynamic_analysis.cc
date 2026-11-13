@@ -57,10 +57,10 @@
 #include "absl/types/span.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/analyses/constant_propagation/analysis.h"
-#include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/analyses/constant_propagation/attrs.h"
 #include "maldoca/js/ir/analyses/constant_propagation/dynamic_prelude.h"
 #include "maldoca/js/ir/analyses/constant_propagation/symbol_mutation_info.h"
+#include "maldoca/js/ir/analyses/dataflow_analysis.h"
 #include "maldoca/js/ir/analyses/scope.h"
 #include "maldoca/js/ir/ir.h"
 #include "maldoca/js/ir/jsir_utils.h"
@@ -94,12 +94,7 @@ struct JsirInlineFunctionInfo {
                                                       mlir::Region &body);
 
   static std::optional<JsirInlineFunctionInfo> Create(
-      const BabelScopes &scopes, JsirFunctionExpressionOp op) {
-    return Create(scopes, op.getParams(), op.getBody());
-  }
-
-  static std::optional<JsirInlineFunctionInfo> Create(
-      const BabelScopes &scopes, JsirFunctionDeclarationOp op) {
+      const BabelScopes &scopes, JsirFunctionOpInterface op) {
     return Create(scopes, op.getParams(), op.getBody());
   }
 };
@@ -109,9 +104,7 @@ std::optional<JsirInlineFunctionInfo> JsirInlineFunctionInfo::Create(
   llvm::SmallVector<JsirReturnStatementOp> return_ops;
   body.walk([&](mlir::Operation* op) {
     // Skip nested functions
-    if (llvm::isa<JsirFunctionDeclarationOp, JsirFunctionExpressionOp,
-                  JsirArrowFunctionExpressionOp, JsirClassMethodOp,
-                  JsirClassPrivateMethodOp, JsirObjectMethodOp>(op)) {
+    if (llvm::isa<JsirFunctionOpInterface>(op)) {
       return mlir::WalkResult::skip();
     }
     if (auto return_op = llvm::dyn_cast<JsirReturnStatementOp>(op)) {

@@ -53,6 +53,7 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
   Println("#include <memory>");
   Println("#include <optional>");
   Println("#include <string>");
+  Println("#include <string_view>");
   Println("#include <utility>");
   Println("#include <variant>");
   Println("#include <vector>");
@@ -60,11 +61,10 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
 
   PrintIncludeHeader("absl/container/flat_hash_map.h");
   PrintIncludeHeader("absl/memory/memory.h");
-  PrintIncludeHeader("absl/log/log.h");
+  PrintIncludeHeader("absl/log/absl_log.h");
   PrintIncludeHeader("absl/status/status.h");
   PrintIncludeHeader("absl/status/statusor.h");
   PrintIncludeHeader("absl/strings/str_cat.h");
-  PrintIncludeHeader("absl/strings/string_view.h");
   PrintIncludeHeader("nlohmann/json.hpp");
   Println();
 
@@ -77,6 +77,9 @@ void AstSourcePrinter::PrintAst(const AstDef& ast,
   }
 
   for (const NodeDef* node : ast.topological_sorted_nodes()) {
+    if (!node->in_ast()) {
+      continue;
+    }
     PrintNode(*node, ast.lang_name());
   }
 
@@ -95,7 +98,7 @@ void AstSourcePrinter::PrintEnum(const EnumDef& enum_def,
       {"enum_name", enum_def.name().ToSnakeCase()},
   });
 
-  Println("absl::string_view $EnumName$ToString($EnumName$ $enum_name$) {");
+  Println("std::string_view $EnumName$ToString($EnumName$ $enum_name$) {");
   {
     auto indent = WithIndent();
     Println("switch ($enum_name$) {");
@@ -117,13 +120,13 @@ void AstSourcePrinter::PrintEnum(const EnumDef& enum_def,
   Println();
 
   Println(
-      "absl::StatusOr<$EnumName$> StringTo$EnumName$(absl::string_view s) {");
+      "absl::StatusOr<$EnumName$> StringTo$EnumName$(std::string_view s) {");
   {
     auto indent = WithIndent();
 
     Println(
         "static const auto *kMap = "
-        "new absl::flat_hash_map<absl::string_view, $EnumName$> {");
+        "new absl::flat_hash_map<std::string_view, $EnumName$> {");
     {
       auto indent = WithIndent(4);
       for (const EnumMemberDef& member : enum_def.members()) {
@@ -164,12 +167,15 @@ void AstSourcePrinter::PrintNode(const NodeDef& node,
     Println();
   }
 
-  if (!node.aggregated_fields().empty()) {
+  if (node.has_aggregated_ast_fields()) {
     PrintConstructor(node, lang_name);
     Println();
   }
 
   for (const FieldDef& field : node.fields()) {
+    if (!field.in_ast()) {
+      continue;
+    }
     const Type& type = field.type();
     bool is_optional = field.optionalness() != OPTIONALNESS_REQUIRED;
 
@@ -221,7 +227,7 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
       {"NodeType", (Symbol(lang_name) + node.name()).ToPascalCase()},
   });
   Print("$NodeType$::$NodeType$(");
-  if (!node.aggregated_fields().empty()) {
+  if (node.has_aggregated_ast_fields()) {
     Println();
     auto indent = WithIndent(4);
 
@@ -229,6 +235,9 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
         .print_separator = [this] { Print(",\n"); },
     }};
     for (const FieldDef* field : node.aggregated_fields()) {
+      if (!field->in_ast()) {
+        continue;
+      }
       auto vars = WithVars({
           {"cc_type", CcType(*field)},
           {"field_name", field->name().ToCcVarName()},
@@ -261,25 +270,34 @@ void AstSourcePrinter::PrintConstructor(const NodeDef& node,
       });
       Print("$AncestorType$(");
 
-      TabPrinter ancestor_tab_printer{{
-          .print_separator = [&] { Print(", "); },
-      }};
-      for (const FieldDef* field : ancestor->aggregated_fields()) {
-        ancestor_tab_printer.Print();
+      bool ancestor_has_ast_fields = ancestor->has_aggregated_ast_fields();
+      if (ancestor_has_ast_fields) {
+        TabPrinter ancestor_tab_printer{{
+            .print_separator = [&] { Print(", "); },
+        }};
+        for (const FieldDef* field : ancestor->aggregated_fields()) {
+          if (!field->in_ast()) {
+            continue;
+          }
+          ancestor_tab_printer.Print();
 
-        auto vars = WithVars({
-            {"field_name", field->name().ToCcVarName()},
-        });
-        Print("std::move($field_name$)");
+          auto vars = WithVars({
+              {"field_name", field->name().ToCcVarName()},
+          });
+          Print("std::move($field_name$)");
+        }
       }
 
       Print(")");
-      if (!ancestor->aggregated_fields().empty()) {
+      if (ancestor_has_ast_fields) {
         Print(" /* NOLINT */");
       }
     }
 
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       auto vars = WithVars({
           {"field_name", field.name().ToCcVarName()},
       });
@@ -337,7 +355,7 @@ void AstSourcePrinter::PrintGetterBody(const std::string& cc_expr,
         }
 
         Println("default:");
-        Println("  LOG(FATAL) << \"Unreachable code.\";");
+        Println("  ABSL_LOG(FATAL) << \"Unreachable code.\";");
       }
       Println("}");
 

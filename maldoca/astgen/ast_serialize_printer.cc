@@ -59,7 +59,7 @@ void AstSerializePrinter::PrintAst(const AstDef& ast,
 
   PrintIncludeHeaders({
       std::string(header_path),
-      "absl/log/log.h",
+      "absl/log/absl_log.h",
       "absl/memory/memory.h",
       "absl/status/status.h",
       "absl/strings/string_view.h",
@@ -80,6 +80,9 @@ void AstSerializePrinter::PrintAst(const AstDef& ast,
 )");
 
   for (const auto& node : ast.topological_sorted_nodes()) {
+    if (!node->in_ast()) {
+      continue;
+    }
     PrintTitle((Symbol(ast.lang_name()) + node->name()).ToPascalCase());
     Println();
 
@@ -180,7 +183,7 @@ void AstSerializePrinter::PrintVariantSerialize(const VariantType& variant_type,
     }
 
     Println("default:");
-    Println("  LOG(FATAL) << \"Unreachable code.\";");
+    Println("  ABSL_LOG(FATAL) << \"Unreachable code.\";");
   }
   Println("}");
 }
@@ -320,6 +323,9 @@ void AstSerializePrinter::PrintSerializeFieldsFunction(
     auto indent = WithIndent();
 
     for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast()) {
+        continue;
+      }
       // E.g. "\"fieldName\":"
       auto lhs = absl::StrFormat(R"("\"%s\":")", field.name().ToCamelCase());
 

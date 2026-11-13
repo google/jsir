@@ -39,19 +39,19 @@ mlir::LogicalResult PerformConstantPropagation(
     mlir::Operation *op, JsirConstantPropagationAnalysis &analysis);
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
-    mlir::Operation *op, const BabelScopes &scopes,
-    const JsirAnalysisConfig::DynamicConstantPropagation &config, Babel &babel,
-    JsirAnalysisResult::DynamicConstantPropagation
-        *absl_nullable analysis_result);
+    mlir::Operation* op, const BabelScopes& scopes,
+    const JsirAnalysisConfig::DynamicConstantPropagation& config, Babel& babel,
+    JsirAnalysisResult::DynamicConstantPropagation* absl_nullable
+        analysis_result);
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
-    mlir::Operation *op, const BabelScopes &scopes,
-    DynamicPrelude *absl_nullable dynamic_prelude,
-    JsirAnalysisResult::DynamicConstantPropagation
-        *absl_nullable analysis_result);
+    mlir::Operation* op, const BabelScopes& scopes,
+    DynamicPrelude* absl_nullable dynamic_prelude,
+    JsirAnalysisResult::DynamicConstantPropagation* absl_nullable
+        analysis_result);
 
 mlir::LogicalResult PerformDynamicConstantPropagation(
-    mlir::Operation *op, JsirDynamicConstantPropagationAnalysis &analysis);
+    mlir::Operation* op, JsirDynamicConstantPropagationAnalysis& analysis);
 
 // Ordinary (constprop) and dynamic (dynconstprop) share this pass. When babel
 // is set, prelude matching runs first; otherwise the analysis falls back.
@@ -65,24 +65,24 @@ struct JsirConstantPropagationPass
       : Base(), scopes_(*scopes) {}
 
   JsirConstantPropagationPass(
-      const BabelScopes *absl_nonnull scopes,
+      const BabelScopes* absl_nonnull scopes,
       JsirAnalysisConfig::DynamicConstantPropagation config,
-      Babel *absl_nonnull babel,
-      JsAnalysisOutputs *absl_nullable js_analysis_outputs)
+      Babel* absl_nonnull babel,
+      JsAnalysisOutputs* absl_nullable js_analysis_outputs)
       : Base(),
         scopes_(*scopes),
         dynamic_config_(std::move(config)),
         babel_(babel),
         js_analysis_outputs_(js_analysis_outputs) {}
 
-  void getDependentDialects(mlir::DialectRegistry &registry) const override;
+  void getDependentDialects(mlir::DialectRegistry& registry) const override;
 
   void runOnOperation() override;
 
   const BabelScopes &scopes_;
   JsirAnalysisConfig::DynamicConstantPropagation dynamic_config_;
-  Babel *absl_nullable babel_ = nullptr;
-  JsAnalysisOutputs *absl_nullable js_analysis_outputs_ = nullptr;
+  Babel* absl_nullable babel_ = nullptr;
+  JsAnalysisOutputs* absl_nullable js_analysis_outputs_ = nullptr;
 };
 
 }  // namespace maldoca

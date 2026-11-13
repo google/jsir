@@ -152,8 +152,35 @@ class AstToIrSourcePrinter : public CcPrinterBase {
   // Example:
   //
   // mlir::Value mlir_object = VisitExpression(node->object());
-  void PrintField(const AstDef& ast, const NodeDef& node,
-                  const FieldDef& field);
+  //
+  // - op_kind: The kind of the op being created (e.g. FIELD_KIND_LVAL for a
+  //   *RefOp), which might change the field's kind (see FieldIrKind()).
+  void PrintField(const AstDef& ast, const NodeDef& node, const FieldDef& field,
+                  FieldKind op_kind);
+
+  // Prints the code that converts a variant field whose members are held by
+  // ops of different kinds (see FieldMemberIrKind() in ast_gen_utils.h) to an
+  // MLIR value.
+  //
+  // Example:
+  //
+  // mlir::Value mlir_local;
+  // if (node->local().has_value()) {
+  //   switch (node->local().value().index()) {
+  //     case 0: {
+  //       mlir_local = VisitIdentifierRef(builder, std::get<0>(...));
+  //       break;
+  //     }
+  //     case 1: {
+  //       mlir_local = VisitStringLiteral(builder, std::get<1>(...));
+  //       break;
+  //     }
+  //     ...
+  //   }
+  // }
+  void PrintPerMemberKindsField(const AstDef& ast, const FieldDef& field,
+                                FieldKind op_kind, const Symbol& lhs,
+                                std::string rhs);
 
   // Prints the code that converts an AST field to a region. The region has been
   // created and the code just populates blocks and ops in it.
@@ -174,7 +201,33 @@ class AstToIrSourcePrinter : public CcPrinterBase {
   //   }
   // });
   void PrintRegion(const AstDef& ast, const NodeDef& node,
-                   const FieldDef& field);
+                   const FieldDef& field, FieldKind op_kind);
+
+  // Prints the code that converts a field held either in a literal attribute
+  // or in an operand (see FieldDef::literal_attr()).
+  //
+  // Example:
+  //
+  // mlir::Attribute mlir_literal_property;
+  // mlir::Value mlir_computed_property;
+  // if (!node->computed()) {
+  //   if (const auto *property_identifier = ...) {
+  //     mlir_literal_property = VisitIdentifierAttr(builder, ...);
+  //   } else {
+  //     LOG(FATAL) << ...;
+  //   }
+  // } else {
+  //   mlir_computed_property = VisitExpression(builder, ...);
+  // }
+  void PrintLiteralAttrField(const AstDef& ast, const NodeDef& node,
+                             const FieldDef& field, FieldKind op_kind);
+
+  // Prints the code that converts a split field (see FieldDef::ir_splits()):
+  // a switch over the variant members that converts each member into its
+  // split's operand (if !regions) or region (if regions).
+  //
+  // Operands are converted before the op is created, regions after.
+  void PrintSplitField(const AstDef& ast, const FieldDef& field, bool regions);
 
  private:
   std::string ir_lang_name_;

@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "llvm/ADT/APFloat.h"
@@ -32,12 +33,13 @@
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Region.h"
 #include "mlir/IR/Value.h"
 #include "absl/cleanup/cleanup.h"
-#include "absl/log/check.h"
-#include "absl/log/log.h"
+#include "absl/log/absl_check.h"
+#include "absl/log/absl_log.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "maldoca/astgen/test/variant/ast.generated.h"
@@ -52,7 +54,7 @@ VirBaseClassOpInterface AstToVir::VisitBaseClass(mlir::OpBuilder &builder, const
   if (auto *derived_class2 = dynamic_cast<const VDerivedClass2 *>(node)) {
     return VisitDerivedClass2(builder, derived_class2);
   }
-  LOG(FATAL) << "Unreachable code.";
+  ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
 VirDerivedClass1Op AstToVir::VisitDerivedClass1(mlir::OpBuilder &builder, const VDerivedClass1 *node) {
@@ -75,7 +77,7 @@ VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   mlir::Attribute mlir_nullable_variant_builtin;
   if (node->nullable_variant_builtin().has_value()) {
@@ -89,7 +91,7 @@ VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
   mlir::Attribute mlir_optional_variant_builtin;
@@ -104,7 +106,7 @@ VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
   mlir::Value mlir_simple_variant_class;
@@ -118,7 +120,7 @@ VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
       break;
     }
     default:
-      LOG(FATAL) << "Unreachable code.";
+      ABSL_LOG(FATAL) << "Unreachable code.";
   }
   mlir::Value mlir_nullable_variant_class;
   if (node->nullable_variant_class().has_value()) {
@@ -132,7 +134,7 @@ VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
   mlir::Value mlir_optional_variant_class;
@@ -147,7 +149,7 @@ VirNodeOp AstToVir::VisitNode(mlir::OpBuilder &builder, const VNode *node) {
         break;
       }
       default:
-        LOG(FATAL) << "Unreachable code.";
+        ABSL_LOG(FATAL) << "Unreachable code.";
     }
   }
   return CreateExpr<VirNodeOp>(builder, node, mlir_simple_variant_builtin, mlir_nullable_variant_builtin, mlir_optional_variant_builtin, mlir_simple_variant_class, mlir_nullable_variant_class, mlir_optional_variant_class);

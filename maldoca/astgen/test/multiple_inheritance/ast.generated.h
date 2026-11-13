@@ -25,11 +25,11 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "nlohmann/json.hpp"
 
 namespace maldoca {
@@ -70,8 +70,8 @@ enum class MNodeType {
   kObjectMethod,
 };
 
-absl::string_view MNodeTypeToString(MNodeType node_type);
-absl::StatusOr<MNodeType> StringToMNodeType(absl::string_view s);
+std::string_view MNodeTypeToString(MNodeType node_type);
+absl::StatusOr<MNodeType> StringToMNodeType(std::string_view s);
 
 class MNode {
  public:
@@ -112,7 +112,7 @@ class MFunction : public virtual MNode {
 
   static absl::StatusOr<std::unique_ptr<MFunction>> FromJson(const nlohmann::json& json);
 
-  absl::string_view id() const;
+  std::string_view id() const;
   void set_id(std::string id);
 
  protected:

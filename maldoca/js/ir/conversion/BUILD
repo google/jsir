@@ -41,6 +41,8 @@ cc_library(
         "//maldoca/js/ir:trivia",
         "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_check",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",

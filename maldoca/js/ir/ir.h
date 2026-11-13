@@ -16,6 +16,7 @@
 #define MALDOCA_JS_IR_IR_H_
 
 #include <optional>
+#include <type_traits>
 
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/TypeSwitch.h"
@@ -163,7 +164,7 @@
   ATTRIB(ImportNamespaceSpecifier)                                  \
   ATTRIB(ImportAttribute)                                           \
   CIR_OP(ExportNamedDeclaration)                                    \
-  ATTRIB(ExportSpecifier)                                           \
+  CIR_OP(ExportSpecifier)                                           \
   CIR_OP(ExportDefaultDeclaration)                                  \
   CIR_OP(ExportAllDeclaration)
 
@@ -313,6 +314,27 @@ QjsValue EmulateBinOp(JSContext *qjs_context, std::string op, QjsValue left,
 // Emulates a Unary operation in QuickJS.
 QjsValue EmulateUnaryOp(JSContext *qjs_context, std::string op,
                        QjsValue operand);
+
+class JsirArrowFunctionExpressionOp;
+
+// Returns the body region of a function op. Implements
+// JsirFunctionOpInterface::getBody().
+//
+// JsirArrowFunctionExpressionOp gets its getBody() from
+// JsirFunctionOpInterface, which calls GetJsirFunctionBody(), so this template
+// must never be chosen for it: it would recurse. The constraint turns that into
+// a compile error; the arrow op uses the overload below.
+template <typename FunctionOpT,
+          std::enable_if_t<
+              !std::is_same_v<FunctionOpT, JsirArrowFunctionExpressionOp>,
+              bool> = true>
+mlir::Region &GetJsirFunctionBody(FunctionOpT op) {
+  return op.getBody();
+}
+
+// The body of an arrow function is either a block statement (`body_statement`)
+// or an expression (`body_expression`). Returns whichever region is set.
+mlir::Region &GetJsirFunctionBody(JsirArrowFunctionExpressionOp op);
 
 }  // namespace maldoca
 

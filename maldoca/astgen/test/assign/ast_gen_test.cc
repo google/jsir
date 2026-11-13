@@ -37,6 +37,8 @@ INSTANTIATE_TEST_SUITE_P(
                                        "assign/ast_from_json.generated.cc",
         .expected_ir_tablegen_path = "maldoca/astgen/test/"
                                      "assign/air_ops.generated.td",
+        .expected_ir_attr_tablegen_path =
+            "maldoca/astgen/test/assign/air_attrs.generated.td",
         .expected_ast_to_ir_source_path =
             "maldoca/astgen/test/assign/conversion/"
             "ast_to_air.generated.cc",

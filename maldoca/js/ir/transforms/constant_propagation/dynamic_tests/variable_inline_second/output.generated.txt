@@ -2060,6 +2060,7 @@
 // SOURCE-NEXT:                                 })
 // SOURCE-NEXT:                                   // State [default = <unknown>] { <_0x9c5c81#57 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4710fc#58 : #jsir_builtin<builtin_function "_0x4a57">> <_0x19ea73#63 : 0.000000e+00 : f64> }
 // SOURCE-NEXT:                             }, {
+// SOURCE-NEXT:                             }, {
 // SOURCE-NEXT:                               ^bb0:
 // SOURCE-NEXT:                                   // <executable>
 // SOURCE-NEXT:                                   // State [default = <unknown>] { <_0x9c5c81#57 : #jsir_builtin<builtin_function "_0x4a57">> <_0x4710fc#58 : #jsir_builtin<builtin_function "_0x4a57">> }

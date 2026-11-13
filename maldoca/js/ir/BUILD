@@ -110,6 +110,7 @@ gentbl_cc_library(
 td_library(
     name = "jsir_attrs_td_files",
     srcs = [
+        "jsir_attrs.generated.td",
         "jsir_attrs.td",
     ],
     deps = [

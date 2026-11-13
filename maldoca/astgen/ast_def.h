@@ -21,9 +21,11 @@
 #include <utility>
 #include <vector>
 
+#include "absl/algorithm/container.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/log/log.h"
+#include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
@@ -37,6 +39,12 @@ namespace maldoca {
 class FieldDef;
 class NodeDef;
 class AstDef;
+
+// Name of the well-known node that holds a node's source location, comments,
+// and symbol references, and that lowers to the IR's `mlir::Location`
+// attribute. Nodes with `ir_attr_has_loc` get an IR-only `loc` field of this
+// type.
+inline constexpr absl::string_view kTriviaNodeName = "Trivia";
 
 class EnumMemberDef {
  public:
@@ -80,10 +88,156 @@ class FieldDef {
   const Type& type() const { return *type_; }
   Type& type() { return *type_; }
   FieldKind kind() const { return kind_; }
-  bool ignore_in_ir() const { return ignore_in_ir_; }
+  GenerationTarget generation_target() const { return generation_target_; }
+  bool in_ast() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_AST_ONLY;
+  }
+  bool in_ir() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_IR_ONLY;
+  }
   bool enclose_in_region() const { return enclose_in_region_; }
 
+  // Whether the generated MLIR attribute parameter is wrapped in
+  // `OptionalParameter<>`, which lets callers omit it.
+  //
+  // This is opt-in rather than derived from optionalness(): existing optional
+  // class-typed fields are spelled unwrapped, and wrapping them would change
+  // the builder APIs of the attributes that already ship.
+  bool ir_attr_optional_parameter() const {
+    return ir_attr_optional_parameter_;
+  }
+
+  // How the IR holds a field is resolved by AstDef::FromProto() from the
+  // field's `ir_name` and `alternatives` (see FieldDefPb). By default, the IR
+  // op of the field's node holds the field in one argument or region named
+  // after it, with the field's type and kind. The accessors below describe how
+  // a field departs from that.
+
+  // One of the operands/regions of a field split across several of them: the
+  // alternatives sharing an `ir_name`. See ir_splits().
+  struct IrSplit {
+    // Name of the optional operand or region.
+    std::string name;
+
+    // Whether `name` is a region (a `StmtRegion` for FIELD_KIND_STMT, an
+    // `ExprRegion` for FIELD_KIND_RVAL/FIELD_KIND_LVAL) rather than an operand.
+    bool is_region = false;
+
+    // Kind of the members held in it: FIELD_KIND_STMT, FIELD_KIND_RVAL or
+    // FIELD_KIND_LVAL.
+    FieldKind kind = FIELD_KIND_UNSPECIFIED;
+
+    // The variant members (node names) held in it.
+    std::vector<std::string> types;
+  };
+
+  // The attribute that holds a field instead of its operand, depending on a
+  // bool sibling field: the field's `unless` alternatives. See literal_attr().
+  //
+  // Example: a static member expression `a.b` holds its property in the
+  // `literal_property` attribute, whereas a computed one `a[b]` holds it in the
+  // `computed_property` operand (ir_name()).
+  struct LiteralAttr {
+    // Name of the optional attribute.
+    std::string name;
+
+    // The node types the attribute can hold, each with
+    // `should_generate_ir_attr`. The AST -> IR conversion dispatches on the
+    // field value's runtime type over them.
+    std::vector<std::string> types;
+
+    // Name of the required bool sibling field (in camelCase). When it's false,
+    // the field is held in the attribute; when it's true, in the operand. It
+    // isn't stored in the IR (see derived_in_ir()): the IR -> AST conversion
+    // recomputes it from which of them is set.
+    std::string discriminator;
+  };
+
+  // How the node's LVAL (`*RefOp`) op holds the field, when that differs from
+  // its other ops: the field's `op_kind: FIELD_KIND_LVAL` alternative. See
+  // lval_op_override().
+  struct LvalOpOverride {
+    // Kind of the field in the LVAL op.
+    FieldKind kind = FIELD_KIND_UNSPECIFIED;
+
+    // The class the LVAL op holds, for a class-typed field holding another
+    // class there. The AST -> IR conversion falls back to the field's own type
+    // (and emits an error) when the AST holds a node that isn't of this type,
+    // so the IR -> AST conversion accepts both.
+    //
+    // Example: `ParenthesizedExpression.expression` is an `LVal` in the
+    // `parenthesized_expression_ref` op.
+    std::optional<std::string> type;
+  };
+
+  // Name of the single operand/region that holds the field (also the operand
+  // of a field with a literal_attr()): its `ir_name` if set, otherwise its
+  // name. Unused for a field with ir_splits().
+  Symbol ir_name() const {
+    return ir_name_.has_value() ? Symbol(*ir_name_) : name_;
+  }
+
+  // Whether the field is left out of the IR because it is recomputed from how
+  // another field is represented, i.e. whether a sibling field's alternatives
+  // name it in `when`/`unless` (it's that field's literal_attr()
+  // discriminator).
+  //
+  // Example: `MemberExpression.computed` is true iff the IR holds `property`
+  // in the `computed_property` operand rather than the `literal_property`
+  // attribute.
+  bool derived_in_ir() const { return derived_in_ir_; }
+
+  // If the field's `alternatives` have `ir_name`s (and no selectors), the
+  // field is split across several IR operands/regions: one per distinct
+  // `ir_name`, in the order the names first appear, of which exactly one is
+  // set (at most one if the field is optional). Empty otherwise.
+  absl::Span<const IrSplit> ir_splits() const { return ir_splits_; }
+
+  // If the field has `when`/`unless` alternatives, the attribute that holds it
+  // unless the discriminator is true. nullptr otherwise.
+  const LiteralAttr* literal_attr() const {
+    return literal_attr_.has_value() ? &*literal_attr_ : nullptr;
+  }
+
+  // If the field has `op_kind` alternatives and the node's LVAL op holds it
+  // with another kind or type than its other ops, how. nullptr otherwise.
+  const LvalOpOverride* lval_op_override() const {
+    return lval_op_override_.has_value() ? &*lval_op_override_ : nullptr;
+  }
+
+  // For a field with `alternatives` without `ir_name`s, the kind of the IR op
+  // holding the variant member `member_name` if it differs from the field's
+  // kind (FIELD_KIND_LVAL for an lvalue alternative of the FIELD_KIND_RVAL
+  // field), or nullopt.
+  std::optional<FieldKind> member_ir_kind(absl::string_view member_name) const {
+    auto it = member_ir_kinds_.find(member_name);
+    if (it == member_ir_kinds_.end()) {
+      return std::nullopt;
+    }
+    return it->second;
+  }
+
+  // Whether member_ir_kind() is set for some variant member.
+  bool has_member_ir_kinds() const { return !member_ir_kinds_.empty(); }
+
  private:
+  // An alternative of the field (see FieldAlternativePb).
+  struct Alternative {
+    // The class names of the alternative's type, or empty if it holds the
+    // field's whole type.
+    std::vector<std::string> member_names;
+    std::optional<std::string> ir_name;
+    std::optional<FieldKind> kind;
+    std::optional<std::string> when;
+    std::optional<std::string> unless;
+    std::optional<FieldKind> op_kind;
+
+    // How the alternative is named in error messages.
+    std::string DebugName() const;
+  };
+
   // Only allows creation from proto.
   FieldDef() = default;
 
@@ -91,9 +245,29 @@ class FieldDef {
   Optionalness optionalness_;
   std::unique_ptr<Type> type_;
   FieldKind kind_;
-  bool ignore_in_ir_;
+  GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
   bool enclose_in_region_;
+  bool ir_attr_optional_parameter_ = false;
+  bool derived_in_ir_ = false;
+
+  // As declared in the proto (empty if the field has no `alternatives`).
+  std::vector<Alternative> alternatives_;
+
+  // Resolved from `ir_name` and `alternatives_` by FromFieldDefPb() and
+  // AstDef::ResolveAlternatives().
+  std::optional<std::string> ir_name_;
+  std::vector<IrSplit> ir_splits_;
+  std::optional<LiteralAttr> literal_attr_;
+  std::optional<LvalOpOverride> lval_op_override_;
+  absl::flat_hash_map<std::string, FieldKind> member_ir_kinds_;
+
+  friend class AstDef;
 };
+
+// The name of a language's IR dialect: "<LangName>hir" for the high-level IR,
+// which holds ops with structured control flow, or "<LangName>ir" for the
+// low-level IR, which holds all other ops and the attributes.
+Symbol IrDialectName(absl::string_view lang_name, bool has_control_flow);
 
 // Definition of an AST node type.
 // This corresponds to a C++ class.
@@ -153,6 +327,20 @@ class NodeDef {
   // All fields, including those defined by ancestors.
   absl::Span<const FieldDef* const> aggregated_fields() const {
     return aggregated_fields_;
+  }
+
+  bool has_ast_fields() const {
+    for (const auto& field : fields_) {
+      if (field.in_ast()) return true;
+    }
+    return false;
+  }
+
+  bool has_aggregated_ast_fields() const {
+    for (const auto* field : aggregated_fields_) {
+      if (field->in_ast()) return true;
+    }
+    return false;
   }
 
   // Direct children of this class.
@@ -268,9 +456,14 @@ class NodeDef {
   // LIR (low-level IR).
   bool has_control_flow() const { return has_control_flow_; }
 
+  // The IR dialect that holds this node's ops (see IrDialectName).
+  Symbol ir_dialect_name(absl::string_view lang_name) const {
+    return IrDialectName(lang_name, has_control_flow());
+  }
+
   // The MLIR op name (C++ class name).
   //
-  // <IrName>:
+  // <IrName>: ir_dialect_name(), i.e.
   //   has_control_flow:  <LangName>hir
   //   !has_control_flow: <LangName>ir
   //
@@ -302,13 +495,66 @@ class NodeDef {
 
   bool has_fold() const { return has_fold_; }
 
+  // Whether the op of `kind` has a folder. See NodeDefPb::fold_kinds.
+  bool has_fold(FieldKind kind) const {
+    return has_fold_ &&
+           (fold_kinds_.empty() || absl::c_linear_search(fold_kinds_, kind));
+  }
+
+  // Whether an IR attribute should be automatically generated.
+  bool should_generate_ir_attr() const { return should_generate_ir_attr_; }
+
+  // Whether this attribute has a "$loc: JsirTriviaAttr" parameter.
+  //
+  // This is sugar for an IR-only `loc` field of type `Trivia`, which is
+  // synthesized in AstDef::FromProto. Prefer in_ir()/aggregated_fields() over
+  // this accessor when generating code.
+  bool ir_attr_has_loc() const { return ir_attr_has_loc_; }
+
+  // Target representation for code generation of this node.
+  GenerationTarget generation_target() const { return generation_target_; }
+
+  // Whether this node is generated in the AST.
+  bool in_ast() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_AST_ONLY;
+  }
+
+  // Whether this node is generated in the IR.
+  bool in_ir() const {
+    return generation_target_ == GENERATION_TARGET_BOTH ||
+           generation_target_ == GENERATION_TARGET_IR_ONLY;
+  }
+
+  // Whether the generated attribute is a `LocationAttrDef` rather than a plain
+  // `AttrDef`, i.e. a custom `::mlir::LocationAttr` subclass.
+  bool ir_attr_is_location() const { return ir_attr_is_location_; }
+
+  // Whether this class is plain data attached to the AST (e.g. source
+  // locations, comments) rather than a node carrying information necessary to
+  // represent the program's structure. See NodeDefPb::is_plain_object.
+  bool is_plain_object() const { return is_plain_object_; }
+
+  // Additional traits/interfaces to add to the AttrDef definition.
+  absl::Span<const std::string> additional_attr_traits() const {
+    return additional_attr_traits_;
+  }
+
+  // The MLIR attribute name (C++ class name): "<LangName>ir<ClassName>Attr"
+  Symbol ir_attr_name(absl::string_view lang_name) const;
+
+  // The stringified MLIR attribute mnemonic (without dialect name):
+  // "<class_name>"
+  Symbol ir_attr_mnemonic() const;
+
   // Additional MLIR traits to add to the op definition in ODS.
   absl::Span<const MlirTrait> additional_mlir_traits() const {
     return additional_mlir_traits_;
   }
 
   // Additional MLIR traits to add to the op definition in ODS, including those
-  // from ancestors.
+  // from ancestors, minus the node's excluded ones (see
+  // NodeDefPb::excluded_mlir_traits).
   absl::Span<const MlirTrait> aggregated_additional_mlir_traits() const {
     return aggregated_additional_mlir_traits_;
   }
@@ -328,6 +574,12 @@ class NodeDef {
   std::vector<NodeDef*> leaves_;
   std::optional<EnumDef> node_type_enum_;
   bool should_generate_ir_op_;
+  bool should_generate_ir_attr_ = false;
+  bool ir_attr_has_loc_ = false;
+  GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
+  bool ir_attr_is_location_ = false;
+  bool is_plain_object_ = false;
+  std::vector<std::string> additional_attr_traits_;
   std::vector<FieldKind> kinds_;
   std::vector<FieldKind> aggregated_kinds_;
   bool has_control_flow_;
@@ -336,7 +588,9 @@ class NodeDef {
   absl::flat_hash_map<std::string, DispatchOverride> dispatch_overrides_;
   absl::flat_hash_set<std::string> dispatch_skip_;
   bool has_fold_;
+  std::vector<FieldKind> fold_kinds_;
   std::vector<MlirTrait> additional_mlir_traits_;
+  std::vector<MlirTrait> excluded_mlir_traits_;
   std::vector<MlirTrait> aggregated_additional_mlir_traits_;
 
   friend class AstDef;
@@ -350,6 +604,18 @@ class AstDef {
   static absl::StatusOr<AstDef> FromProto(const AstDefPb& pb);
 
   absl::string_view lang_name() const { return lang_name_; }
+
+  // The language's low-level IR dialect, which holds the attributes and all ops
+  // without structured control flow, e.g. "jsir" (see IrDialectName).
+  Symbol ir_dialect_name() const {
+    return IrDialectName(lang_name_, /*has_control_flow=*/false);
+  }
+
+  // The language's high-level IR dialect, which holds ops with structured
+  // control flow, e.g. "jshir" (see IrDialectName).
+  Symbol hir_dialect_name() const {
+    return IrDialectName(lang_name_, /*has_control_flow=*/true);
+  }
 
   absl::Span<const EnumDef> enum_defs() const { return enum_defs_; }
 
@@ -394,6 +660,24 @@ class AstDef {
 
   static void ResolveClassType(
       Type& type, absl::Span<const NodeDef* const> topological_sorted_nodes);
+
+  // Infers the kinds of the field's `alternatives`, validates them against the
+  // rest of `node`, and resolves the field's kind(), ir_name(), ir_splits(),
+  // literal_attr(), lval_op_override() and member_ir_kind()s. Marks the bool
+  // sibling named by `when`/`unless` (if any) as derived_in_ir().
+  static absl::Status ResolveAlternatives(
+      const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+      NodeDef& node, FieldDef& field);
+
+  // ResolveAlternatives() for alternatives with `when`/`unless`.
+  static absl::Status ResolveSiblingAlternatives(
+      const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+      NodeDef& node, FieldDef& field, absl::Span<const FieldKind> kinds);
+
+  // ResolveAlternatives() for alternatives with `op_kind`.
+  static absl::Status ResolveOpKindAlternatives(
+      const absl::flat_hash_map<std::string, std::unique_ptr<NodeDef>>& nodes,
+      const NodeDef& node, FieldDef& field, absl::Span<const FieldKind> kinds);
 };
 
 }  // namespace maldoca
