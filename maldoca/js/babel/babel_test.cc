@@ -330,7 +330,7 @@ TEST_P(BabelTest, ParseFunc) {
 TEST_P(BabelTest, ParseBrokenCode) {
   constexpr char kExpectedErrorMessage[] = "Unexpected token (1:3)";
 
-  const auto expected_response =
+  [[maybe_unused]] const auto expected_response =
       absl::StrFormat(R"pb(
                         errors {
                           name: "SyntaxError"
@@ -361,7 +361,7 @@ let a = {
   std::unique_ptr<Babel> babel = GetParam().babel_factory();
   BabelParseRequest request;
   {
-    const auto expected_response =
+    [[maybe_unused]] const auto expected_response =
         absl::StrFormat(R"pb(
                           errors {
                             name: "SyntaxError"
