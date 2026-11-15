@@ -542,6 +542,10 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
       node->fold_kinds_.push_back(static_cast<FieldKind>(kind));
     }
 
+    for (const auto& key : node_pb.visitor_keys()) {
+      node->visitor_keys_.push_back(key);
+    }
+
     node_names.push_back(node_pb.name());
     nodes.emplace(node_pb.name(), std::move(node));
   }
@@ -643,6 +647,26 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
     }
     for (FieldDef& field : node.fields_) {
       node.aggregated_fields_.push_back(&field);
+    }
+  }
+
+  // Check that visitor_keys names fields of the node, each at most once.
+  for (const std::string& name : node_names) {
+    const NodeDef& node = *nodes.at(name);
+    absl::flat_hash_set<std::string> seen_keys;
+    for (const std::string& key : node.visitor_keys_) {
+      if (!seen_keys.insert(key).second) {
+        return absl::InvalidArgumentError(absl::StrCat(
+            name, ": visitor_keys lists \"", key, "\" more than once."));
+      }
+      const bool is_field = absl::c_any_of(
+          node.aggregated_fields_, [&](const FieldDef* field) {
+            return field->name().ToCamelCase() == key;
+          });
+      if (!is_field) {
+        return absl::InvalidArgumentError(absl::StrCat(
+            name, ": visitor_keys lists \"", key, "\", which is not a field."));
+      }
     }
   }
 

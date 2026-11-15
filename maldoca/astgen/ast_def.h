@@ -559,6 +559,10 @@ class NodeDef {
     return aggregated_additional_mlir_traits_;
   }
 
+  // The order in which a traversal visits the child nodes, as field names. See
+  // NodeDefPb::visitor_keys. Empty for the default order.
+  absl::Span<const std::string> visitor_keys() const { return visitor_keys_; }
+
  private:
   // Only AstDef can create NodeDefs.
   NodeDef() = default;
@@ -592,6 +596,7 @@ class NodeDef {
   std::vector<MlirTrait> additional_mlir_traits_;
   std::vector<MlirTrait> excluded_mlir_traits_;
   std::vector<MlirTrait> aggregated_additional_mlir_traits_;
+  std::vector<std::string> visitor_keys_;
 
   friend class AstDef;
 };
