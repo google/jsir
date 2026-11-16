@@ -406,13 +406,24 @@ message FieldDefPb {
   //
   // Example: `ObjectExpression.properties` is held in the `region` region.
   optional string ir_name = 9;
+
+  // [Optional] Whether traversal skips this field even though it holds AST
+  // nodes, i.e. whether the field is left out of the node's visitor keys.
+  //
+  // Only the generated Python traversal (the `VISITOR_KEYS` of the Python AST
+  // classes and JSIR ops) honors this. The C++ AST walker, visitor and
+  // conversion are unaffected.
+  //
+  // Example: Babel's `traverse()` doesn't visit `Program.interpreter` (the
+  // `#!/usr/bin/env node` line), although `InterpreterDirective` is a node.
+  optional bool skip_traversal = 10 [default = false];
 }
 
 // MLIR traits.
 enum MlirTrait {
   MLIR_TRAIT_INVALID = 0;
-  MLIR_TRAIT_PURE = 1;                 // Pure
-  MLIR_TRAIT_ISOLATED_FROM_ABOVE = 2;  // IsolatedFromAbove
+  MLIR_TRAIT_PURE = 1;                        // Pure
+  MLIR_TRAIT_ISOLATED_FROM_ABOVE = 2;         // IsolatedFromAbove
   MLIR_TRAIT_JSIR_FUNCTION_OP_INTERFACE = 3;  // JsirFunctionOpInterfaceTraits
 }
 
@@ -510,30 +521,19 @@ message NodeDefPb {
   // `::mlir::Location` on an operation.
   optional bool ir_attr_is_location = 15 [default = false];
 
-  // Whether this class is plain data attached to the AST rather than an AST
-  // node in its own right, i.e. whether it carries auxiliary information
-  // (source locations, comments, symbol references, ...) instead of
-  // information necessary to represent the program's structure. E.g. Babel's
-  // `SourceLocation` (`node.loc`) and comments hang off nodes, but traversal
-  // doesn't descend into them.
-  //
-  // Generated code that models nodes (e.g. Python AST node classes, visitor
-  // keys) treats such a class as plain data.
-  optional bool is_plain_object = 16 [default = false];
-
   // MLIR traits that this node's ops must not have, even though an ancestor
   // adds them via `additional_mlir_traits`.
   //
   // Example: `MemberExpression` derives from `Pattern` and `LVal`, which are
   // `Pure`, but evaluating a member expression may run a getter.
-  repeated MlirTrait excluded_mlir_traits = 17 [packed = true];
+  repeated MlirTrait excluded_mlir_traits = 16 [packed = true];
 
   // If non-empty, only the ops of these kinds have a folder. Requires
   // `has_fold`. If empty, all the node's ops have a folder.
   //
   // Example: `MemberExpression` folds its rvalue op, but not its lvalue
   // (`*RefOp`) op.
-  repeated FieldKind fold_kinds = 18 [packed = true];
+  repeated FieldKind fold_kinds = 17 [packed = true];
 }
 
 // Definition of a tagged union node type.

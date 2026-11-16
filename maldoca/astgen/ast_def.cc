@@ -340,6 +340,7 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
     field.generation_target_ = field_pb.generation_target();
   }
   field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
+  field.skip_traversal_ = field_pb.skip_traversal();
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
   if (field_pb.has_ir_name()) {
@@ -493,7 +494,6 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
       node->generation_target_ = node_pb.generation_target();
     }
     node->ir_attr_is_location_ = node_pb.ir_attr_is_location();
-    node->is_plain_object_ = node_pb.is_plain_object();
 
     // `ir_attr_has_loc` is sugar for an IR-only `loc` field holding the node's
     // trivia. Desugaring it here rather than special-casing it in each IR
@@ -630,6 +630,18 @@ absl::StatusOr<AstDef> AstDef::FromProto(const AstDefPb& pb) {
 
     node.ancestors_ = TopologicalSortDependencies(
         &node, [](NodeDef* node) { return node->parents_; });
+  }
+
+  // A class is an AST node iff it is the root node or descends from it.
+  // Anything else is plain data attached to the AST.
+  for (const std::string& name : node_names) {
+    NodeDef& node = *nodes.at(name);
+    const bool is_node =
+        node.name_ == kRootNodeName ||
+        absl::c_any_of(node.ancestors_, [](const NodeDef* ancestor) {
+          return ancestor->name_ == kRootNodeName;
+        });
+    node.is_plain_object_ = !is_node;
   }
 
   // Set aggregated_fields vector.

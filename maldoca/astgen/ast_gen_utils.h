@@ -448,8 +448,8 @@ inline std::vector<std::string> MemberNames(const Type& type) {
   return names;
 }
 
-// Whether a class type refers to an AST node, i.e. is not marked
-// `is_plain_object` in the AST definition. See NodeDefPb::is_plain_object.
+// Whether a class type refers to an AST node, i.e. to `Node` or one of its
+// descendants rather than to a plain object. See NodeDef::is_plain_object().
 inline bool IsAstNodeClass(const AstDef& ast, const ClassType& type) {
   auto it = ast.nodes().find(type.name().ToPascalCase());
   return it == ast.nodes().end() || !it->second->is_plain_object();

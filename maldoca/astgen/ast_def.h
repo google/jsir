@@ -46,6 +46,11 @@ class AstDef;
 // type.
 inline constexpr absl::string_view kTriviaNodeName = "Trivia";
 
+// Name of the root of the AST node hierarchy. A class is an AST node iff it is
+// this class or descends from it; any other class is plain data attached to
+// the AST (see NodeDef::is_plain_object()).
+inline constexpr absl::string_view kRootNodeName = "Node";
+
 class EnumMemberDef {
  public:
   explicit EnumMemberDef(Symbol name, std::string string_value)
@@ -108,6 +113,10 @@ class FieldDef {
   bool ir_attr_optional_parameter() const {
     return ir_attr_optional_parameter_;
   }
+
+  // Whether traversal skips this field even though it holds AST nodes. Only
+  // the generated Python traversal honors this. See FieldDefPb::skip_traversal.
+  bool skip_traversal() const { return skip_traversal_; }
 
   // How the IR holds a field is resolved by AstDef::FromProto() from the
   // field's `ir_name` and `alternatives` (see FieldDefPb). By default, the IR
@@ -248,6 +257,7 @@ class FieldDef {
   GenerationTarget generation_target_ = GENERATION_TARGET_BOTH;
   bool enclose_in_region_;
   bool ir_attr_optional_parameter_ = false;
+  bool skip_traversal_ = false;
   bool derived_in_ir_ = false;
 
   // As declared in the proto (empty if the field has no `alternatives`).
@@ -531,8 +541,8 @@ class NodeDef {
   bool ir_attr_is_location() const { return ir_attr_is_location_; }
 
   // Whether this class is plain data attached to the AST (e.g. source
-  // locations, comments) rather than a node carrying information necessary to
-  // represent the program's structure. See NodeDefPb::is_plain_object.
+  // locations, comments) rather than an AST node, i.e. whether it is neither
+  // the root node (kRootNodeName) nor one of its descendants.
   bool is_plain_object() const { return is_plain_object_; }
 
   // Additional traits/interfaces to add to the AttrDef definition.
