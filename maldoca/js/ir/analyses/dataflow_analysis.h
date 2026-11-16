@@ -628,6 +628,13 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
     return for_stmt.getBody();
   }
 
+  // Sets up the initial states and the CFG edges of `op` and, recursively, of
+  // all ops nested in it. It is first called on the root op of the analysis.
+  //
+  // Subclasses may override it to add analysis-specific CFG edges (see
+  // `MaybeEmplaceCfgEdges()`); overrides must call the base implementation.
+  mlir::LogicalResult initialize(mlir::Operation* op) override;
+
  private:
   // TODO(b/425421947) Could this be not a member variable?
   JumpEnv jump_env_;
@@ -648,8 +655,6 @@ class JsirDataFlowAnalysis : public mlir::DataFlowAnalysis,
     }
     return std::nullopt;
   }
-
-  mlir::LogicalResult initialize(mlir::Operation* op) override;
 
   void VisitOp(mlir::Operation* op, const StateT* input,
                JsirStateRef<StateT> output);
