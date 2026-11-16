@@ -89,7 +89,8 @@ class JsirConditionalForwardPerVarDataFlowAnalysis
   void WriteDenseAfterState(mlir::Operation *op, llvm::StringRef name,
                             const ValueT &value, const StateT *before,
                             JsirStateRef<StateT> after) {
-    const JsSymbolId target_symbol = GetSymbolId(scopes_, op, name);
+    const JsSymbolId target_symbol =
+        GetSymbolId(scopes_, op, name, BabelBinding::KIND_UNKNOWN);
 
     after.Join(*before);
     after.Write([&](StateT *after) {

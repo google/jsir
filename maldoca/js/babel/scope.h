@@ -46,9 +46,8 @@ inline bool operator<(const JsSymbolId& lhs, const JsSymbolId& rhs) {
 
 template <typename Sink>
 void AbslStringify(Sink& sink, const JsSymbolId& s) {
-  std::string id = s.binding_uid().has_value()
-                       ? absl::StrCat(*s.binding_uid())
-                       : "undeclared";
+  std::string id = s.binding_uid().has_value() ? absl::StrCat(*s.binding_uid())
+                                               : "undeclared";
   absl::Format(&sink, "%s#%s", s.name(), id);
 }
 
@@ -58,20 +57,51 @@ inline std::ostream& operator<<(std::ostream& os, const JsSymbolId& s) {
 
 // Searches all scopes from `scope_uid` to the global scope for a symbol.
 // Returns the binding_uid of the symbol if found, otherwise std::nullopt.
-std::optional<int64_t> FindSymbolBindingUid(const BabelScopes &scopes,
-                                            int64_t scope_uid,
-                                            absl::string_view name);
+//
+// `declaration_kind` is the kind of the binding that Babel registers for the
+// declaration being resolved, e.g. `KIND_VAR` for a `var` declarator or
+// `KIND_PARAM` for a function parameter. It is `KIND_UNKNOWN` for references
+// and assignments, which do not declare the symbol.
+//
+// For references, assignments, and declarations of any kind other than
+// `KIND_VAR`, returns the nearest binding of any kind, since Babel registers
+// the bindings of those declarations in the scope where they are written.
+//
+// For `KIND_VAR`, skips block-scoped bindings (`KIND_LET` and `KIND_CONST`,
+// which include catch clause parameters and class declarations) and returns
+// the nearest binding of any other kind (`KIND_HOISTED`,
+// `KIND_LOCAL`, `KIND_PARAM`, `KIND_VAR`, `KIND_MODULE`). This is how a `var`
+// declaration finds its binding: the lookup starts in the scope where the `var`
+// is written, but Babel registers the binding in the enclosing function or
+// program scope. For example, in `try { ... } catch (e) { var e = 1; }`, the
+// lookup starts in the catch clause scope, whose `e` is the catch parameter
+// (`KIND_LET`), and has to continue to the enclosing scope to find the `var`
+// binding.
+//
+// That binding is not necessarily `KIND_VAR`: if the name is already bound in
+// the scope that the `var` is hoisted to, Babel reuses that binding and keeps
+// its kind, e.g. `KIND_HOISTED` in `function a() {} var a;`, `KIND_PARAM` in
+// `function f(a) { var a; }`, or `KIND_LOCAL` in `(function a() { var a; })`.
+// Skipping only block-scoped bindings is enough because, in valid JavaScript,
+// a catch clause parameter is the only binding of the same name that can be in
+// a scope between a `var` and the scope that it is hoisted to; any other would
+// be a redeclaration error.
+std::optional<int64_t> FindSymbolBindingUid(
+    const BabelScopes& scopes, int64_t scope_uid, absl::string_view name,
+    BabelBinding::Kind declaration_kind);
 
 // Turns a symbol name into a JsSymbolId, by searching all scopes from
 // `scope_uid` to the global scope. If the symbol is not found, assume it has
 // `scope_uid` 0.
-JsSymbolId GetSymbolId(const BabelScopes& scopes, int64_t scope_uid,
-                       absl::string_view name);
+// See `FindSymbolBindingUid` for how `declaration_kind` affects the search.
+JsSymbolId GetSymbolId(
+    const BabelScopes& scopes, int64_t scope_uid, absl::string_view name,
+    BabelBinding::Kind declaration_kind);
 
 // Returns the definition scope uids of a symbol. If `symbol.binding_uid()` is
 // set, searches `scopes` for the scopes containing that binding uid.
 absl::InlinedVector<int64_t, 4> FindDefScopeUids(const BabelScopes& scopes,
-                                                const JsSymbolId& symbol);
+                                                 const JsSymbolId& symbol);
 
 }  // namespace maldoca
 

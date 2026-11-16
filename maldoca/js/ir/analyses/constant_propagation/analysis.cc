@@ -230,7 +230,8 @@ void JsirConstantPropagationAnalysis::VisitUpdateExpression(
     return after.Join(*before);
   }
 
-  JsSymbolId symbol_id = GetSymbolId(scopes_, op, id.getName());
+  JsSymbolId symbol_id =
+      GetSymbolId(scopes_, op, id.getName(), BabelBinding::KIND_UNKNOWN);
   const auto &value_before = before->Get(symbol_id);
   if (value_before.IsUninitialized() || value_before.IsUnknown()) {
     results[0].Join(value_before);

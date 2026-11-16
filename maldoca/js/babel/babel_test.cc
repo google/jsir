@@ -15,6 +15,7 @@
 #include "maldoca/js/babel/babel_test.h"
 
 #include <cstddef>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <string>
@@ -304,17 +305,48 @@ TEST_P(BabelTest, ParseFunc) {
               )pb"));
 
   // From any scope, we will find "foo_0" at the top scope.
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 0, "foo_0"), 0);
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 1, "foo_0"), 0);
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 2, "foo_0"), 0);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 0, "foo_0", BabelBinding::KIND_UNKNOWN), 0);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 1, "foo_0", BabelBinding::KIND_UNKNOWN), 0);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 2, "foo_0", BabelBinding::KIND_UNKNOWN), 0);
 
   // However, scope 3 does not exist, so we can't perform the lookup.
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 3, "foo_0"), std::nullopt);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 3, "foo_0", BabelBinding::KIND_UNKNOWN),
+      std::nullopt);
 
   // We can only find "arg_1" in scope 1 (binding UID 2).
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 0, "arg_1"), std::nullopt);
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 1, "arg_1"), 2);
-  EXPECT_EQ(FindSymbolBindingUid(scopes, 2, "arg_1"), std::nullopt);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 0, "arg_1", BabelBinding::KIND_UNKNOWN),
+      std::nullopt);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 1, "arg_1", BabelBinding::KIND_UNKNOWN), 2);
+  EXPECT_EQ(
+      FindSymbolBindingUid(scopes, 2, "arg_1", BabelBinding::KIND_UNKNOWN),
+      std::nullopt);
+
+  // A declaration of any kind other than KIND_VAR finds the nearest binding.
+  for (BabelBinding::Kind kind :
+       {BabelBinding::KIND_UNKNOWN, BabelBinding::KIND_LET,
+        BabelBinding::KIND_CONST, BabelBinding::KIND_MODULE,
+        BabelBinding::KIND_HOISTED, BabelBinding::KIND_PARAM,
+        BabelBinding::KIND_LOCAL}) {
+    EXPECT_EQ(FindSymbolBindingUid(scopes, 1, "local_1", kind), 3)
+        << BabelBinding::Kind_Name(kind);
+  }
+
+  // A KIND_VAR declaration skips block-scoped bindings (KIND_LET, KIND_CONST),
+  // and bindings of any other kind match.
+  EXPECT_EQ(FindSymbolBindingUid(scopes, 1, "foo_0", BabelBinding::KIND_VAR),
+            0);
+  EXPECT_EQ(FindSymbolBindingUid(scopes, 1, "arg_1", BabelBinding::KIND_VAR),
+            2);
+  EXPECT_EQ(FindSymbolBindingUid(scopes, 1, "local_1", BabelBinding::KIND_VAR),
+            std::nullopt);
+  EXPECT_EQ(GetSymbolId(scopes, 1, "local_1", BabelBinding::KIND_VAR),
+            (JsSymbolId{"local_1", std::nullopt}));
 
   // Definition scopes for symbols.
   EXPECT_THAT(FindDefScopeUids(scopes, JsSymbolId{"foo_0", 0}),

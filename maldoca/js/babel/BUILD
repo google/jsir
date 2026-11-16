@@ -71,6 +71,8 @@ cc_library(
         "//maldoca/js/ast",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/container:inlined_vector",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
     ],
