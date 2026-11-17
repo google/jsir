@@ -492,6 +492,36 @@ inline bool IsAstNodeType(const AstDef& ast, const Type& type) {
   return false;
 }
 
+// Orders the fields of `node` that a traversal visits by
+// `node.visitor_keys()`: the listed fields first, in the listed order, then the
+// others, in their order in `fields` (the default order). See
+// NodeDefPb::visitor_keys.
+//
+// Both the Python AST (`VISITOR_KEYS`) and the JSIR ops and attributes that
+// mirror AST nodes use this order, so that both traversals visit the children
+// of a node in the same order.
+inline std::vector<const FieldDef*> OrderVisitorKeyFields(
+    const NodeDef& node, std::vector<const FieldDef*> fields) {
+  if (node.visitor_keys().empty()) {
+    return fields;
+  }
+  std::vector<const FieldDef*> ordered;
+  ordered.reserve(fields.size());
+  for (const std::string& key : node.visitor_keys()) {
+    for (const FieldDef* field : fields) {
+      if (field->name().ToCamelCase() == key) {
+        ordered.push_back(field);
+      }
+    }
+  }
+  for (const FieldDef* field : fields) {
+    if (!absl::c_linear_search(ordered, field)) {
+      ordered.push_back(field);
+    }
+  }
+  return ordered;
+}
+
 // Whether `name` is a reserved word in Python.
 inline bool IsPythonKeyword(absl::string_view name) {
   static const auto* const kKeywords =

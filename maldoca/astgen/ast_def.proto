@@ -548,7 +548,9 @@ message NodeDefPb {
   // Example: `ClassMethod` inherits `id`, `params` and `body` from `Function`,
   // but Babel visits its own `key` first.
   //
-  // Only the Python AST (`VISITOR_KEYS`) uses this order.
+  // Only the generated Python traversal uses this order: the `VISITOR_KEYS` of
+  // the Python AST classes and of the JSIR ops and attributes that mirror AST
+  // nodes.
   repeated string visitor_keys = 19;
 }
 
