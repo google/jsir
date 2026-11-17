@@ -44,7 +44,8 @@
 #include "maldoca/base/path.h"
 
 ABSL_FLAG(std::string, ast_def_path, "",
-          "The path to the ast_def.textproto file.");
+          "The path to the ast_def.textproto file, relative to the google3 "
+          "root. Generated files may name it as their source.");
 
 ABSL_FLAG(std::string, cc_namespace, "",
           "The C++ namespace for the AST classes in C++.");

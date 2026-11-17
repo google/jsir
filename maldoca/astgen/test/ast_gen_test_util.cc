@@ -37,6 +37,7 @@
 #include "maldoca/astgen/ts_interface_printer.h"
 #include "maldoca/base/filesystem.h"
 #include "maldoca/base/get_runfiles_dir.h"
+#include "maldoca/base/path.h"
 #include "maldoca/base/testing/status_matchers.h"
 
 namespace maldoca {
@@ -47,6 +48,10 @@ absl::StatusOr<AstDef> AstGenTest::LoadAstDef() const {
   ABSL_RETURN_IF_ERROR(ParseTextProtoFile(ast_def_path, &ast_def_pb));
   ABSL_ASSIGN_OR_RETURN(AstDef ast_def, AstDef::FromProto(ast_def_pb));
   return ast_def;
+}
+
+std::string AstGenTest::AstDefSourcePath() const {
+  return JoinPath(GetParam().ast_path, "ast_def.textproto");
 }
 
 TEST_P(AstGenTest, PrintTsInterfaceTest) {

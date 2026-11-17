@@ -309,7 +309,8 @@ void IrTableGenPrinter::PrintNode(const AstDef& ast, const NodeDef& node,
         traits.push_back("IsolatedFromAbove");
         break;
       case MLIR_TRAIT_JSIR_FUNCTION_OP_INTERFACE:
-        traits.push_back("JsirFunctionOpInterfaceTraits");
+        traits.push_back(absl::StrCat(Symbol(ir_name).ToPascalCase(),
+                                      "FunctionOpInterfaceTraits"));
         break;
     }
   }

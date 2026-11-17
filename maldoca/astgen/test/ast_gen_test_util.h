@@ -122,6 +122,10 @@ struct AstGenTestParam {
 class AstGenTest : public ::testing::TestWithParam<AstGenTestParam> {
  protected:
   absl::StatusOr<AstDef> LoadAstDef() const;
+
+  // The AST definition as the generated files name it: "ast_def.textproto" in
+  // `ast_path`, relative to the google3 root.
+  std::string AstDefSourcePath() const;
 };
 
 }  // namespace maldoca

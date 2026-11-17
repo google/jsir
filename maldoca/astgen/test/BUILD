@@ -44,6 +44,7 @@ cc_library(
         "//maldoca/astgen:ts_interface_printer",
         "//maldoca/base:filesystem",
         "//maldoca/base:get_runfiles_dir",
+        "//maldoca/base:path",
         "//maldoca/base/testing:status_matchers",
         "@abseil-cpp//absl/log:absl_log",
         "@abseil-cpp//absl/status",
