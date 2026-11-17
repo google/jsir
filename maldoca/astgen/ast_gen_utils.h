@@ -27,8 +27,10 @@
 #include <vector>
 
 #include "absl/algorithm/container.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/log/absl_check.h"
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -488,6 +490,29 @@ inline bool IsAstNodeType(const AstDef& ast, const Type& type) {
     return false;
   }
   return false;
+}
+
+// Whether `name` is a reserved word in Python.
+inline bool IsPythonKeyword(absl::string_view name) {
+  static const auto* const kKeywords =
+      new absl::flat_hash_set<absl::string_view>{
+          "False",  "None",     "True",  "and",    "as",       "assert",
+          "async",  "await",    "break", "class",  "continue", "def",
+          "del",    "elif",     "else",  "except", "finally",  "for",
+          "from",   "global",   "if",    "import", "in",       "is",
+          "lambda", "nonlocal", "not",   "or",     "pass",     "raise",
+          "return", "try",      "while", "with",   "yield",
+      };
+  return kKeywords->contains(name);
+}
+
+// Escapes a Python reserved word by appending an underscore, the way both the
+// Python AST dataclass fields and the MLIR Python op accessors are named.
+inline std::string SanitizePythonName(absl::string_view name) {
+  if (IsPythonKeyword(name)) {
+    return absl::StrCat(name, "_");
+  }
+  return std::string(name);
 }
 
 }  // namespace maldoca

@@ -88,6 +88,7 @@ cc_library(
         ":type_cc_proto",
         "//maldoca/base:path",
         "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/log:absl_check",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
