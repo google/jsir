@@ -534,6 +534,22 @@ message NodeDefPb {
   // Example: `MemberExpression` folds its rvalue op, but not its lvalue
   // (`*RefOp`) op.
   repeated FieldKind fold_kinds = 17 [packed = true];
+
+  // The order in which a traversal visits the child nodes of this node, as
+  // field names (e.g. "superClass"). Each name must be a field of the node or
+  // of an ancestor.
+  //
+  // By default, a traversal visits the fields of the ancestors first, then the
+  // node's own fields, each in definition order. Set this to follow another
+  // order, e.g. Babel's `VISITOR_KEYS`, when the definition order differs.
+  // Fields that are not listed are visited after the listed ones, in the
+  // default order.
+  //
+  // Example: `ClassMethod` inherits `id`, `params` and `body` from `Function`,
+  // but Babel visits its own `key` first.
+  //
+  // Only the Python AST (`VISITOR_KEYS`) uses this order.
+  repeated string visitor_keys = 19;
 }
 
 // Definition of a tagged union node type.
