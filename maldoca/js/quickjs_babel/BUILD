@@ -22,64 +22,22 @@ package(
     ],
 )
 
-# Also used directly in the browser by //maldoca/js/ir/wasm.
-exports_files(
-    ["native.js"],
-    visibility = ["//maldoca/js:__subpackages__"],
-)
-
-genrule(
-    name = "native_cc_embed_data_genrule",
-    srcs = ["native.js"],
-    outs = ["native_cc_embed_data.cc.inc"],
-    cmd = "( echo \"constexpr char kNative[] = {\"" +
-          "&& od -t x1 $(location native.js) | sed -e 's/ /,0x/g' -e 's/$$/,/' -e 's/[^,]*,//' -e 's/0x,//g' && echo \"};\"" +
-          "&& echo -n \"constexpr size_t kNativeSize = \"" +
-          "&& wc -c < $(location native.js)" +
-          "&& echo \";\" )" +
-          "> \"$@\"",
-)
-
-cc_library(
-    name = "native_cc_embed_data",
-    hdrs = ["native_cc_embed_data.cc.inc"],
-    deps = [":native_cc_embed_data_genrule"],
-)
-
-genrule(
-    name = "babel_standalone_cc_embed_data_genrule",
-    srcs = ["//third_party/babel_standalone:babel.min.js"],
-    outs = ["babel_standalone_cc_embed_data.cc.inc"],
-    cmd = "( echo \"constexpr char kBabelStandalone[] = {\"" +
-          "&& od -t x1 $(location //third_party/babel_standalone:babel.min.js) | sed -e 's/ /,0x/g' -e 's/$$/,/' -e 's/[^,]*,//' -e 's/0x,//g' && echo \"};\"" +
-          "&& echo -n \"constexpr size_t kBabelStandaloneSize = \"" +
-          "&& wc -c < $(location //third_party/babel_standalone:babel.min.js)" +
-          "&& echo \";\" )" +
-          "> \"$@\"",
-)
-
-cc_library(
-    name = "babel_standalone_cc_embed_data",
-    hdrs = ["babel_standalone_cc_embed_data.cc.inc"],
-    deps = [":babel_standalone_cc_embed_data_genrule"],
-)
-
 cc_library(
     name = "quickjs_babel",
     srcs = ["quickjs_babel.cc"],
     hdrs = ["quickjs_babel.h"],
     deps = [
-        ":babel_standalone_cc_embed_data",
-        ":native_cc_embed_data",
         "//maldoca/js/babel",
         "//maldoca/js/babel:babel_cc_proto",
         "//maldoca/js/babel:babel_internal",
         "//maldoca/js/babel:babel_internal_cc_proto",
+        "//maldoca/js/babel_ts:babel_bundle_embed",
         "//maldoca/js/quickjs",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/time",
         "@com_google_protobuf//:json",
