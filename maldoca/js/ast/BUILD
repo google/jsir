@@ -29,6 +29,7 @@ cc_library(
     srcs = [
         "ast.generated.cc",
         "ast_from_json.generated.cc",
+        "ast_omit_null.cc",
         "ast_to_json.generated.cc",
     ],
     hdrs = ["ast.generated.h"],

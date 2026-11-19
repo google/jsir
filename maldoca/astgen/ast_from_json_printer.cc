@@ -230,7 +230,8 @@ void AstFromJsonPrinter::PrintGetFieldFunction(const std::string& node_name,
       case OPTIONALNESS_REQUIRED:
         return "GetRequiredField";
       case OPTIONALNESS_MAYBE_NULL:
-        return "GetNullableField";
+        return field.missing_means_null() ? "GetNullableOrMissingField"
+                                          : "GetNullableField";
       case OPTIONALNESS_MAYBE_UNDEFINED:
         return "GetOptionalField";
       default:

@@ -362,6 +362,23 @@ void AstSerializePrinter::PrintSerializeFieldsFunction(
           break;
         }
         case OPTIONALNESS_MAYBE_NULL: {
+          if (field.missing_means_null()) {
+            // The handwritten ShouldOmitNull<FieldName>() decides whether a
+            // null value is left out, as the parser would leave it out.
+            auto vars = WithVars({
+                {"rhs", rhs},
+                {"FieldName", field.name().ToPascalCase()},
+            });
+            Println("if ($rhs$.has_value() || !ShouldOmitNull$FieldName$()) {");
+            {
+              auto indent = WithIndent();
+              Println("MaybeAddComma($os_variable$, needs_comma);");
+              PrintNullableToJson(field.type(), MaybeNull::kYes, lhs, rhs,
+                                  lang_name);
+            }
+            Println("}");
+            break;
+          }
           Println("MaybeAddComma($os_variable$, needs_comma);");
           PrintNullableToJson(field.type(), MaybeNull::kYes, lhs, rhs,
                               lang_name);

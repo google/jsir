@@ -246,6 +246,22 @@ void AstHeaderPrinter::PrintNode(const NodeDef& node,
         "void SerializeFields(std::ostream& $os_variable$, "
         "bool &needs_comma) const;");
 
+    // ShouldOmitNull<FieldName>() functions, implemented by hand.
+    for (const FieldDef& field : node.fields()) {
+      if (!field.in_ast() || !field.missing_means_null()) {
+        continue;
+      }
+      auto vars = WithVars({
+          {"fieldName", field.name().ToCamelCase()},
+          {"FieldName", field.name().ToPascalCase()},
+      });
+      Println();
+      Println("// Handwritten. Whether Serialize() leaves out \"$fieldName$\"");
+      Println("// when it is null, instead of writing `null`.");
+      Println("// See FieldDefPb.missing_means_null.");
+      Println("bool ShouldOmitNull$FieldName$() const;");
+    }
+
     // Get<FieldName>FromJson() functions.
     if (node.has_ast_fields()) {
       Println();

@@ -1288,6 +1288,12 @@ def JsirExportSpecifierOp : Jsir_Op<"export_specifier", []> {
   );
 }
 
+def JsirExportNamespaceSpecifierOp : Jsir_Op<"export_namespace_specifier", []> {
+  let arguments = (ins
+    AnyAttrOf<[JsirIdentifierAttr, JsirStringLiteralAttr]>: $exported
+  );
+}
+
 def JsirExportNamedDeclarationOp : Jsir_Op<
     "export_named_declaration", [
         JsirModuleDeclarationOpInterfaceTraits,

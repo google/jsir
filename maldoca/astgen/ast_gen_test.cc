@@ -32,6 +32,7 @@
 #include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/ast_from_json_printer.h"
 #include "maldoca/astgen/ast_header_printer.h"
+#include "maldoca/astgen/ast_serialize_printer.h"
 #include "maldoca/astgen/symbol.h"
 #include "maldoca/astgen/ts_interface_printer.h"
 #include "maldoca/astgen/type.h"
@@ -1002,6 +1003,72 @@ TEST(IrMappingValidation, NarrowingOpKindRequiresARequiredField) {
                 })pb")),
               absl_testing::StatusIs(absl::StatusCode::kInvalidArgument,
                                      ::testing::HasSubstr("required field")));
+}
+
+// A nullable "decl" field of the "Holder" node, with `extra` properties.
+std::string NullableDeclField(absl::string_view extra) {
+  return absl::StrCat(R"pb(
+                        fields { name: "decl"
+                                 type { class: "Declaration" }
+                                 kind: FIELD_KIND_STMT
+                                 enclose_in_region: true
+                      )pb",
+                      extra, "}");
+}
+
+TEST(MissingMeansNull, GeneratesTolerantReaderAndSerializeHook) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(
+      AstDef ast, LoadIrMappingAstDef(
+                      NullableDeclField("optionalness: OPTIONALNESS_MAYBE_NULL "
+                                        "missing_means_null: true")));
+  EXPECT_TRUE(HolderField(ast).missing_means_null());
+
+  // The header declares the handwritten predicate.
+  EXPECT_THAT(PrintAstHeader(ast, "maldoca", "path/to/ast"),
+              ::testing::HasSubstr("bool ShouldOmitNullDecl() const;"));
+
+  // FromJson reads a missing key as null.
+  EXPECT_THAT(
+      PrintAstFromJson(ast, "maldoca", "path/to/ast"),
+      ::testing::HasSubstr("return GetNullableOrMissingField<std::unique_ptr<"
+                           "TDeclaration>>("));
+
+  // Serialize asks the predicate before it writes `null`.
+  EXPECT_THAT(
+      PrintAstToJson(ast, "maldoca", "path/to/ast"),
+      ::testing::HasSubstr("if (decl_.has_value() || !ShouldOmitNullDecl()) {\n"
+                           "    MaybeAddComma(os, needs_comma);\n"));
+}
+
+TEST(MissingMeansNull, NullableFieldsAreStrictByDefault) {
+  MALDOCA_ASSERT_OK_AND_ASSIGN(AstDef ast,
+                               LoadIrMappingAstDef(NullableDeclField(
+                                   "optionalness: OPTIONALNESS_MAYBE_NULL")));
+  EXPECT_FALSE(HolderField(ast).missing_means_null());
+
+  EXPECT_THAT(PrintAstHeader(ast, "maldoca", "path/to/ast"),
+              ::testing::Not(::testing::HasSubstr("ShouldOmitNull")));
+  std::string from_json = PrintAstFromJson(ast, "maldoca", "path/to/ast");
+  EXPECT_THAT(from_json, ::testing::HasSubstr("return GetNullableField<"));
+  EXPECT_THAT(
+      from_json,
+      ::testing::Not(::testing::HasSubstr("GetNullableOrMissingField")));
+  EXPECT_THAT(PrintAstToJson(ast, "maldoca", "path/to/ast"),
+              ::testing::Not(::testing::HasSubstr("ShouldOmitNull")));
+}
+
+TEST(MissingMeansNull, RequiresMaybeNull) {
+  for (absl::string_view optionalness :
+       {"OPTIONALNESS_REQUIRED", "OPTIONALNESS_MAYBE_UNDEFINED"}) {
+    EXPECT_THAT(
+        LoadIrMappingAstDef(NullableDeclField(absl::StrCat(
+            "optionalness: ", optionalness, " missing_means_null: true"))),
+        absl_testing::StatusIs(
+            absl::StatusCode::kInvalidArgument,
+            ::testing::HasSubstr(
+                "missing_means_null requires OPTIONALNESS_MAYBE_NULL")))
+        << optionalness;
+  }
 }
 
 }  // namespace

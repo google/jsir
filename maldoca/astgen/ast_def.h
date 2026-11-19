@@ -118,6 +118,11 @@ class FieldDef {
   // the generated Python traversal honors this. See FieldDefPb::skip_traversal.
   bool skip_traversal() const { return skip_traversal_; }
 
+  // Whether `FromJson` reads a missing key as null for this nullable field,
+  // and `Serialize` asks the handwritten `ShouldOmitNull<FieldName>()` whether
+  // to leave out a null value. See FieldDefPb::missing_means_null.
+  bool missing_means_null() const { return missing_means_null_; }
+
   // How the IR holds a field is resolved by AstDef::FromProto() from the
   // field's `ir_name` and `alternatives` (see FieldDefPb). By default, the IR
   // op of the field's node holds the field in one argument or region named
@@ -258,6 +263,7 @@ class FieldDef {
   bool enclose_in_region_;
   bool ir_attr_optional_parameter_ = false;
   bool skip_traversal_ = false;
+  bool missing_means_null_ = false;
   bool derived_in_ir_ = false;
 
   // As declared in the proto (empty if the field has no `alternatives`).

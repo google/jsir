@@ -417,6 +417,23 @@ message FieldDefPb {
   // Example: Babel's `traverse()` doesn't visit `Program.interpreter` (the
   // `#!/usr/bin/env node` line), although `InterpreterDirective` is a node.
   optional bool skip_traversal = 10 [default = false];
+
+  // [Optional] Whether a missing JSON key means null for this field. Only
+  // valid with `OPTIONALNESS_MAYBE_NULL`.
+  //
+  // By default, a nullable field must be present in the JSON (as a value or as
+  // `null`), and `FromJson` rejects a missing key. With this option,
+  // `FromJson` reads a missing key as null, for this field only.
+  //
+  // To write the JSON back as the parser wrote it, the generated `Serialize`
+  // asks a handwritten predicate when the field is null: the node class
+  // declares `bool ShouldOmitNull<FieldName>() const;`, which the language
+  // implements by hand. If it returns true, `Serialize` leaves the key out;
+  // otherwise it writes `null`.
+  //
+  // Example: for `export * as ns from "m"`, @babel/parser never assigns
+  // `ExportNamedDeclaration.declaration`, so the key is missing in its JSON.
+  optional bool missing_means_null = 11 [default = false];
 }
 
 // MLIR traits.

@@ -341,6 +341,17 @@ absl::StatusOr<FieldDef> FieldDef::FromFieldDefPb(const FieldDefPb& field_pb,
   }
   field.ir_attr_optional_parameter_ = field_pb.ir_attr_optional_parameter();
   field.skip_traversal_ = field_pb.skip_traversal();
+  if (field_pb.missing_means_null()) {
+    if (field.optionalness_ != OPTIONALNESS_MAYBE_NULL) {
+      return field_error(
+          "missing_means_null requires OPTIONALNESS_MAYBE_NULL.");
+    }
+    if (!field.in_ast()) {
+      return field_error(
+          "missing_means_null requires a field that is in the AST.");
+    }
+  }
+  field.missing_means_null_ = field_pb.missing_means_null();
   field.enclose_in_region_ = field_pb.enclose_in_region();
 
   if (field_pb.has_ir_name()) {

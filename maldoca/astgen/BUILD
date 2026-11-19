@@ -354,6 +354,7 @@ cc_test(
         ":ast_def_cc_proto",
         ":ast_from_json_printer",
         ":ast_header_printer",
+        ":ast_serialize_printer",
         ":symbol",
         ":ts_interface_printer",
         "//maldoca/base:filesystem",

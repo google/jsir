@@ -84,6 +84,23 @@ absl::StatusOr<std::optional<T>> GetNullableField(const nlohmann::json& json,
   return converter(json_field);
 }
 
+// Like GetNullableField(), but reads a missing key as null too. Only for the
+// fields with `missing_means_null` (see FieldDefPb::missing_means_null).
+template <typename T>
+absl::StatusOr<std::optional<T>> GetNullableOrMissingField(
+    const nlohmann::json& json, absl::string_view field_name,
+    Converter<T> converter) {
+  auto field_it = json.find(field_name);
+  if (field_it == json.end()) {
+    return std::nullopt;
+  }
+  const nlohmann::json& json_field = field_it.value();
+  if (json_field.is_null()) {
+    return std::nullopt;
+  }
+  return converter(json_field);
+}
+
 inline bool IsString(const nlohmann::json& json) { return json.is_string(); }
 
 inline absl::StatusOr<std::string> JsonToString(const nlohmann::json& json) {
