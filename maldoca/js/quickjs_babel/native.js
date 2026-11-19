@@ -180,6 +180,51 @@ function base64DecodeStringValues(node) {
   mutateStrings(node, base64Decode);
 }
 
+/**
+ * Converts non-finite `NumericLiteral.value` and `NumericLiteral.extra.rawValue`
+ * fields to `"Infinity"` / `"-Infinity"` / `"NaN"` strings before optional
+ * UTF-16LE base64 string encoding and `JSON.stringify` (which would otherwise
+ * emit `null` for non-finite numbers such as `2e308`).
+ *
+ * @param {!Object} ast
+ */
+function stringifyNonFiniteNumbers(ast) {
+  traverseObject(ast, (node) => {
+    if (node.type !== 'NumericLiteral') {
+      return;
+    }
+    if (typeof node.value === 'number' && !Number.isFinite(node.value)) {
+      node.value = String(node.value);
+    }
+    if (node.extra && typeof node.extra.rawValue === 'number' &&
+        !Number.isFinite(node.extra.rawValue)) {
+      node.extra.rawValue = String(node.extra.rawValue);
+    }
+  });
+}
+
+/**
+ * Restores stringified non-finite `NumericLiteral.value` and
+ * `NumericLiteral.extra.rawValue` fields back to `number` values after optional
+ * UTF-16LE base64 string decoding. Other `"Infinity"` strings (e.g. a
+ * `StringLiteral` value) are left untouched.
+ *
+ * @param {!Object} ast
+ */
+function reviveNonFiniteNumbers(ast) {
+  traverseObject(ast, (node) => {
+    if (node.type !== 'NumericLiteral') {
+      return;
+    }
+    if (typeof node.value === 'string') {
+      node.value = Number(node.value);
+    }
+    if (node.extra && typeof node.extra.rawValue === 'string') {
+      node.extra.rawValue = Number(node.extra.rawValue);
+    }
+  });
+}
+
 // =============================================================================
 
 /**
@@ -382,6 +427,8 @@ function parseInternal(source, options) {
     }
   }
 
+  stringifyNonFiniteNumbers(ast);
+
   if (options && options.base64EncodeStringValues) {
     base64EncodeStringValues(ast);
   }
@@ -390,7 +437,11 @@ function parseInternal(source, options) {
   // the AST of TSCompiler (the other choice) cannot be directly serialized due
   // to the existence of parent pointers. Therefore, it would not be a fair
   // comparison if we serialize here for Babel.
-  return {ast: JSON.stringify(ast), scopes: Object.values(scopes), bindingToId};
+  return {
+    ast: JSON.stringify(ast),
+    scopes: Object.values(scopes),
+    bindingToId,
+  };
 }
 exports.parseInternal = parseInternal;
 
@@ -406,6 +457,7 @@ function generateInternal(ast, options) {
   if (options && options.base64DecodeStringValues) {
     base64DecodeStringValues(ast);
   }
+  reviveNonFiniteNumbers(ast);
 
   convertCommentUidsToComments(ast);
 

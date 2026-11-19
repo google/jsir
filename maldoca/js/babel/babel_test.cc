@@ -148,6 +148,33 @@ TEST_P(BabelTest, ParseInvalidSurrogate) {
   EXPECT_EQ(generate_result.error, std::nullopt);
 }
 
+// Verifies that overflowing numeric literals (`2e308`, `-2e308`) and string
+// literals spelled `"Infinity"` round-trip through `Parse` and `Generate` with
+// both plain and base64-encoded string values.
+TEST_P(BabelTest, ParseAndGenerateNonFiniteNumericLiteral) {
+  static constexpr char kNonFiniteSource[] =
+      "var x = 2e308;\n"
+      "var y = -2e308;\n"
+      "var s = \"Infinity\";";
+  std::unique_ptr<Babel> babel = GetParam().babel_factory();
+
+  for (bool base64_encode : {false, true}) {
+    BabelParseRequest request;
+    request.set_base64_encode_string_values(base64_encode);
+    MALDOCA_ASSERT_OK_AND_ASSIGN(
+        BabelParseResult parse_result,
+        babel->Parse(kNonFiniteSource, request, absl::InfiniteDuration()));
+
+    BabelGenerateOptions generate_options;
+    MALDOCA_ASSERT_OK_AND_ASSIGN(
+        BabelGenerateResult generate_result,
+        babel->Generate(parse_result.ast_string, generate_options,
+                        absl::InfiniteDuration()));
+    EXPECT_EQ(generate_result.source_code, kNonFiniteSource);
+    EXPECT_EQ(generate_result.error, std::nullopt);
+  }
+}
+
 TEST_P(BabelTest, ParseVarDef) {
   std::unique_ptr<Babel> babel = GetParam().babel_factory();
   BabelParseRequest request;

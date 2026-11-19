@@ -353,6 +353,7 @@ cc_test(
         ":ast_def",
         ":ast_def_cc_proto",
         ":ast_from_json_printer",
+        ":ast_from_json_utils",
         ":ast_header_printer",
         ":ast_serialize_printer",
         ":symbol",
@@ -366,6 +367,7 @@ cc_test(
         "@abseil-cpp//absl/strings",
         "@com_google_protobuf//src/google/protobuf/io",
         "@googletest//:gtest_main",
+        "@nlohmann_json//:json",
     ],
 )
 

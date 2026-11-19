@@ -42,6 +42,19 @@ void MaybeAddComma(std::ostream &os, bool &needs_comma) {
   needs_comma = true;
 }
 
+// JSON has no literal for non-finite numbers and nlohmann::json dumps them as
+// null. Spell them as "Infinity" / "-Infinity" / "NaN" strings instead, which
+// is what the JavaScript AST bridges produce and what JsonToDouble accepts.
+void SerializeDouble(std::ostream &os, double value) {
+  if (std::isnan(value)) {
+    os << "\"NaN\"";
+  } else if (std::isinf(value)) {
+    os << (value > 0 ? "\"Infinity\"" : "\"-Infinity\"");
+  } else {
+    os << (nlohmann::json(value)).dump();
+  }
+}
+
 // =============================================================================
 // JsPosition
 // =============================================================================
@@ -659,7 +672,8 @@ void JsNumericLiteralExtra::SerializeFields(std::ostream& os, bool &needs_comma)
   MaybeAddComma(os, needs_comma);
   os << "\"raw\":" << (nlohmann::json(raw_)).dump();
   MaybeAddComma(os, needs_comma);
-  os << "\"rawValue\":" << (nlohmann::json(raw_value_)).dump();
+  os << "\"rawValue\":";
+  SerializeDouble(os, raw_value_);
 }
 
 void JsNumericLiteralExtra::Serialize(std::ostream& os) const {
@@ -677,7 +691,8 @@ void JsNumericLiteralExtra::Serialize(std::ostream& os) const {
 
 void JsNumericLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
-  os << "\"value\":" << (nlohmann::json(value_)).dump();
+  os << "\"value\":";
+  SerializeDouble(os, value_);
   if (extra_.has_value()) {
     MaybeAddComma(os, needs_comma);
     os << "\"extra\":";

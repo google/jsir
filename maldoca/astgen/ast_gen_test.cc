@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cmath>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -28,9 +31,11 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "nlohmann/json.hpp"
 #include "maldoca/astgen/ast_def.h"
 #include "maldoca/astgen/ast_def.pb.h"
 #include "maldoca/astgen/ast_from_json_printer.h"
+#include "maldoca/astgen/ast_from_json_utils.h"
 #include "maldoca/astgen/ast_header_printer.h"
 #include "maldoca/astgen/ast_serialize_printer.h"
 #include "maldoca/astgen/symbol.h"
@@ -1069,6 +1074,44 @@ TEST(MissingMeansNull, RequiresMaybeNull) {
                 "missing_means_null requires OPTIONALNESS_MAYBE_NULL")))
         << optionalness;
   }
+}
+
+// Verifies that `IsDouble` and `Variant<double, std::string>` route
+// `"Infinity"`,
+// `"-Infinity"`, and `"NaN"` strings into the `double` variant arm while
+// keeping other strings in the `std::string` arm.
+TEST(AstFromJsonUtilsTest, VariantDoubleAcceptsNonFiniteStrings) {
+  using NumberOrString = std::variant<double, std::string>;
+  Converter<NumberOrString> converter = Variant(
+      VariantOption<double>{
+          .predicate = IsDouble,
+          .converter = JsonToDouble,
+      },
+      VariantOption<std::string>{
+          .predicate = IsString,
+          .converter = JsonToString,
+      });
+
+  MALDOCA_ASSERT_OK_AND_ASSIGN(NumberOrString pos_inf,
+                               converter(nlohmann::json("Infinity")));
+  ASSERT_TRUE(std::holds_alternative<double>(pos_inf));
+  EXPECT_EQ(std::get<double>(pos_inf), std::numeric_limits<double>::infinity());
+
+  MALDOCA_ASSERT_OK_AND_ASSIGN(NumberOrString neg_inf,
+                               converter(nlohmann::json("-Infinity")));
+  ASSERT_TRUE(std::holds_alternative<double>(neg_inf));
+  EXPECT_EQ(std::get<double>(neg_inf),
+            -std::numeric_limits<double>::infinity());
+
+  MALDOCA_ASSERT_OK_AND_ASSIGN(NumberOrString nan_val,
+                               converter(nlohmann::json("NaN")));
+  ASSERT_TRUE(std::holds_alternative<double>(nan_val));
+  EXPECT_TRUE(std::isnan(std::get<double>(nan_val)));
+
+  MALDOCA_ASSERT_OK_AND_ASSIGN(NumberOrString plain_str,
+                               converter(nlohmann::json("hello")));
+  ASSERT_TRUE(std::holds_alternative<std::string>(plain_str));
+  EXPECT_EQ(std::get<std::string>(plain_str), "hello");
 }
 
 }  // namespace
