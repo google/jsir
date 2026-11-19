@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<!--
+Copyright 2026 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSIR Explorer (WebAssembly)</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --panel: #252526;
+      --border: #3c3c3c;
+      --fg: #d4d4d4;
+      --muted: #9d9d9d;
+      --accent: #4fc1ff;
+      --ok: #89d185;
+      --err: #f48771;
+      --warn: #cca700;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      font-size: 13px;
+    }
+    body { display: flex; flex-direction: column; }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 15px;
+      margin: 0;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    header .subtitle { color: var(--muted); }
+    .controls {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .controls label {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      color: var(--fg);
+      cursor: pointer;
+    }
+    select, button {
+      background: #3c3c3c;
+      color: var(--fg);
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 12px;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #4a4a4a; }
+    main { flex: 1; display: flex; min-height: 0; }
+    .pane { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .pane + .pane { border-left: 1px solid var(--border); }
+    .pane-title {
+      padding: 5px 12px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .editor { flex: 1; min-height: 0; }
+    .editor textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      resize: none;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Menlo, Consolas, "Courier New", monospace;
+      font-size: 13px;
+      padding: 8px;
+      outline: none;
+    }
+    footer {
+      padding: 4px 12px;
+      background: #007acc;
+      color: white;
+      font-size: 12px;
+      display: flex;
+      gap: 16px;
+    }
+    footer.error { background: #a1260d; }
+    footer.loading { background: #6c5b00; }
+    footer .timing { margin-left: auto; opacity: 0.85; }
+    /* An op and its source, highlighted on hover (see linkEditorsOnHover). */
+    .linked-highlight { background: rgba(79, 193, 255, 0.25); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>JSIR Explorer</h1>
+    <span class="subtitle">
+      Babel (JS) &rarr; AST JSON &rarr; JSIR (C++ / WebAssembly)
+    </span>
+    <div class="controls">
+      <label>Source type
+        <select id="source-type">
+          <option value="unambiguous">unambiguous</option>
+          <option value="script">script</option>
+          <option value="module">module</option>
+        </select>
+      </label>
+      <label>Output
+        <select id="output-kind">
+          <option value="jshir">JSHIR</option>
+          <option value="ast">Babel AST JSON</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="print-locations"> Locations</label>
+      <select id="examples">
+        <option value="">Examples&hellip;</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <div class="pane">
+      <div class="pane-title"><span>JavaScript</span></div>
+      <div id="input" class="editor"></div>
+    </div>
+    <div class="pane">
+      <div class="pane-title"><span id="output-title">JSHIR</span></div>
+      <div id="output" class="editor"></div>
+    </div>
+  </main>
+
+  <footer id="status" class="loading">
+    <span id="status-text">Loading WebAssembly module&hellip;</span>
+    <span id="timing" class="timing"></span>
+  </footer>
+
+  <!--
+    Babel must load before Monaco's AMD loader: Babel's UMD wrapper would
+    otherwise register itself as an AMD module instead of defining `Babel`.
+  -->
+  <script src="babel.min.js"></script>
+  <!--
+    JSIR's Babel glue (the same code that runs inside QuickJS natively). It
+    defines a global `exports` object with `parse()` / `generate()`.
+  -->
+  <script src="native.js"></script>
+  <!-- Defines the `loadJsirWasm()` Emscripten module factory. -->
+  <script src="jsir_wasm_bin.js"></script>
+  <!-- Monaco's AMD loader (//third_party/javascript/monaco_editor). -->
+  <script src="vs/loader.js"></script>
+  <!-- Compiled from main.ts. -->
+  <script src="app.js"></script>
+</body>
+</html>
