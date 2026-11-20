@@ -141,6 +141,51 @@ message BabelParseRequest {
   // - Each AST node will have an additional scopeUid field, specifying which
   //   scope it belongs to
   optional bool compute_scopes = 6 [default = true];
+
+  // @babel/parser's `createParenthesizedExpressions`. If true, parentheses
+  // become `ParenthesizedExpression` nodes. If false, Babel instead sets
+  // `extra.parenthesized` on the inner expression. The AST definition models
+  // both.
+  optional bool create_parenthesized_expressions = 7 [default = true];
+
+  // @babel/parser options that only make the parser accept more input. They do
+  // not change the shape of the AST. Babel's default for each is false.
+  optional bool allow_return_outside_function = 8;
+  optional bool allow_await_outside_function = 9;
+  optional bool allow_import_export_everywhere = 10;
+  optional bool allow_super_outside_method = 11;
+  optional bool allow_undeclared_exports = 12;
+
+  // @babel/parser syntax plugins that produce only node types and child fields
+  // that the AST definition models. This enum is the allowlist: plugins that
+  // add other syntax (e.g. `jsx`, `typescript`, `flow`, `decorators`,
+  // `estree`) are deliberately absent.
+  enum ParserPlugin {
+    PARSER_PLUGIN_UNSPECIFIED = 0;
+
+    // Syntax that @babel/parser 7.25 enables by default. Accepted so that
+    // callers can pass existing plugin lists unchanged.
+    PARSER_PLUGIN_BIG_INT = 1;
+    PARSER_PLUGIN_CLASS_PROPERTIES = 2;
+    PARSER_PLUGIN_CLASS_PRIVATE_PROPERTIES = 3;
+    PARSER_PLUGIN_CLASS_PRIVATE_METHODS = 4;
+    PARSER_PLUGIN_CLASS_STATIC_BLOCK = 5;
+    PARSER_PLUGIN_DYNAMIC_IMPORT = 6;
+    PARSER_PLUGIN_EXPORT_NAMESPACE_FROM = 7;
+    PARSER_PLUGIN_IMPORT_META = 8;
+    PARSER_PLUGIN_LOGICAL_ASSIGNMENT = 9;
+    PARSER_PLUGIN_NULLISH_COALESCING_OPERATOR = 10;
+    PARSER_PLUGIN_NUMERIC_SEPARATOR = 11;
+    PARSER_PLUGIN_OBJECT_REST_SPREAD = 12;
+    PARSER_PLUGIN_OPTIONAL_CATCH_BINDING = 13;
+    PARSER_PLUGIN_OPTIONAL_CHAINING = 14;
+    PARSER_PLUGIN_PRIVATE_IN = 15;
+    PARSER_PLUGIN_TOP_LEVEL_AWAIT = 16;
+
+    // Proposals.
+    PARSER_PLUGIN_EXPORT_DEFAULT_FROM = 17;
+  }
+  repeated ParserPlugin plugins = 13 [packed = true];
 }
 
 // Babel AST in the form of JSON string.
