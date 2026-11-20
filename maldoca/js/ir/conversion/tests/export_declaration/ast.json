@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 216,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "module",
 // AST-NEXT:     "body": [
@@ -163,11 +166,11 @@
 // AST-NEXT:               "start": 60,
 // AST-NEXT:               "end": 76,
 // AST-NEXT:               "scopeUid": 0,
-// AST-NEXT:               "value": "string_literal",
 // AST-NEXT:               "extra": {
 // AST-NEXT:                 "raw": "\"string_literal\"",
 // AST-NEXT:                 "rawValue": "string_literal"
-// AST-NEXT:               }
+// AST-NEXT:               },
+// AST-NEXT:               "value": "string_literal"
 // AST-NEXT:             },
 // AST-NEXT:             "local": {
 // AST-NEXT:               "type": "StringLiteral",
@@ -184,11 +187,11 @@
 // AST-NEXT:               "start": 60,
 // AST-NEXT:               "end": 76,
 // AST-NEXT:               "scopeUid": 0,
-// AST-NEXT:               "value": "string_literal",
 // AST-NEXT:               "extra": {
 // AST-NEXT:                 "raw": "\"string_literal\"",
 // AST-NEXT:                 "rawValue": "string_literal"
-// AST-NEXT:               }
+// AST-NEXT:               },
+// AST-NEXT:               "value": "string_literal"
 // AST-NEXT:             }
 // AST-NEXT:           }
 // AST-NEXT:         ],
@@ -207,11 +210,11 @@
 // AST-NEXT:           "start": 83,
 // AST-NEXT:           "end": 88,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "foo",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"foo\"",
 // AST-NEXT:             "rawValue": "foo"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "foo"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -330,11 +333,11 @@
 // AST-NEXT:           "start": 131,
 // AST-NEXT:           "end": 136,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "foo",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"foo\"",
 // AST-NEXT:             "rawValue": "foo"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "foo"
 // AST-NEXT:         }
 // AST-NEXT:       }
 // AST-NEXT:     ],

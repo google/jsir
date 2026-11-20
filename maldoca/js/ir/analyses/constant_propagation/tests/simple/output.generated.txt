@@ -1,7 +1,7 @@
 // JSIR:      "jsir.file"() <{comments = []}> ({
 // JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
-// JSIR-NEXT:     %0 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
-// JSIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %0 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %1 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:     %2 = "jsir.binary_expression"(%0, %1) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:     "jsir.expression_statement"(%2) : (!jsir.any) -> ()
 // JSIR-NEXT:   }, {
@@ -16,10 +16,10 @@
 // JSIR-NEXT:       ^bb0:
 // JSIR-NEXT:           // <executable>
 // JSIR-NEXT:           // State [default = <unknown>] { }
-// JSIR-NEXT:         %0 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:         %0 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:           // %0 = 1.000000e+00 : f64
 // JSIR-NEXT:           // State [default = <unknown>] { }
-// JSIR-NEXT:         %1 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:         %1 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:           // %1 = 1.000000e+00 : f64
 // JSIR-NEXT:           // State [default = <unknown>] { }
 // JSIR-NEXT:         %2 = jsir.binary_expression (%0, %1) {"+"}

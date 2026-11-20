@@ -155,8 +155,8 @@ std::optional<mlir::Attribute> QuickJsValueToMlirAttribute(
     absl::Cleanup cleanup_cstr = [&] { JS_FreeCString(qjs_context, cstr); };
 
     std::string s{cstr, len};
-    return builder.getAttr<JsirBigIntLiteralAttr>(
-        /*loc=*/nullptr, builder.getStringAttr(s), /*extra=*/nullptr);
+    return builder.getAttr<JsirBigIntLiteralAttr>(/*loc=*/nullptr,
+                                                  builder.getStringAttr(s));
   }
 
   return std::nullopt;
@@ -325,9 +325,25 @@ mlir::OpFoldResult JsirNullLiteralOp::fold(FoldAdaptor adaptor) {
   return JsirNullLiteralAttr::get(getContext());
 }
 
+// Returns a trivia with only the `extra` of `op` (e.g. the raw spelling of a
+// literal), or nullptr if `op` has no `extra`. The fold results of literals
+// keep `extra` but not the source location, so that equal literals fold to
+// equal attributes.
+static JsirTriviaAttr GetFoldTrivia(mlir::Operation* op) {
+  auto op_trivia = llvm::dyn_cast<JsirTriviaAttr>(op->getLoc());
+  if (op_trivia == nullptr || op_trivia.getExtra() == nullptr) {
+    return nullptr;
+  }
+  return JsirTriviaAttr::get(
+      op->getContext(), /*loc=*/nullptr, /*leading_comment_uids=*/{},
+      /*trailing_comment_uids=*/{}, /*inner_comment_uids=*/{},
+      /*referenced_symbol=*/nullptr, /*defined_symbols=*/{},
+      op_trivia.getExtra());
+}
+
 mlir::OpFoldResult JsirRegExpLiteralOp::fold(FoldAdaptor adaptor) {
-  return JsirRegExpLiteralAttr::get(getContext(), getPatternAttr(),
-                                    getFlagsAttr(), getExtraAttr());
+  return JsirRegExpLiteralAttr::get(getContext(), GetFoldTrivia(*this),
+                                    getPatternAttr(), getFlagsAttr());
 }
 
 mlir::OpFoldResult JsirStringLiteralOp::fold(FoldAdaptor adaptor) {
@@ -344,8 +360,8 @@ mlir::OpFoldResult JsirNumericLiteralOp::fold(FoldAdaptor adaptor) {
 
 mlir::OpFoldResult JsirBigIntLiteralOp::fold(FoldAdaptor adaptor) {
   mlir::Builder builder(getContext());
-  return builder.getAttr<JsirBigIntLiteralAttr>(/*loc=*/nullptr, getValueAttr(),
-                                                getExtraAttr());
+  return builder.getAttr<JsirBigIntLiteralAttr>(GetFoldTrivia(*this),
+                                                getValueAttr());
 }
 
 mlir::OpFoldResult JsirParenthesizedExpressionOp::fold(FoldAdaptor adaptor) {

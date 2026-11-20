@@ -428,7 +428,8 @@ class JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   virtual ~JsNode() = default;
 
@@ -471,6 +472,10 @@ class JsNode {
   std::optional<const std::vector<std::unique_ptr<JsSymbolId>>*> defined_symbols() const;
   void set_defined_symbols(std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
 
+  std::optional<nlohmann::json*> extra();
+  std::optional<const nlohmann::json*> extra() const;
+  void set_extra(std::optional<nlohmann::json> extra);
+
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -488,6 +493,7 @@ class JsNode {
   static absl::StatusOr<std::optional<int64_t>> GetScopeUid(const nlohmann::json& json);
   static absl::StatusOr<std::optional<std::unique_ptr<JsSymbolId>>> GetReferencedSymbol(const nlohmann::json& json);
   static absl::StatusOr<std::optional<std::vector<std::unique_ptr<JsSymbolId>>>> GetDefinedSymbols(const nlohmann::json& json);
+  static absl::StatusOr<std::optional<nlohmann::json>> GetExtra(const nlohmann::json& json);
 
  private:
   std::optional<std::unique_ptr<JsSourceLocation>> loc_;
@@ -499,6 +505,7 @@ class JsNode {
   std::optional<int64_t> scope_uid_;
   std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol_;
   std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols_;
+  std::optional<nlohmann::json> extra_;
 };
 
 class JsInterpreterDirective : public virtual JsNode {
@@ -513,6 +520,7 @@ class JsInterpreterDirective : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::string value);
 
   JsNodeType node_type() const override {
@@ -551,7 +559,8 @@ class JsProgramBodyElement : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsProgramBodyElement>> FromJson(const nlohmann::json& json);
 
@@ -560,38 +569,6 @@ class JsProgramBodyElement : public virtual JsNode {
   // Sets the fields defined in this class.
   // Does not set fields defined in ancestors.
   void SerializeFields(std::ostream& os, bool &needs_comma) const;
-};
-
-class JsDirectiveLiteralExtra {
- public:
-  explicit JsDirectiveLiteralExtra(
-      std::string raw,
-      std::string raw_value);
-
-  void Serialize(std::ostream& os) const;
-
-  static absl::StatusOr<std::unique_ptr<JsDirectiveLiteralExtra>> FromJson(const nlohmann::json& json);
-
-  std::string_view raw() const;
-  void set_raw(std::string raw);
-
-  std::string_view raw_value() const;
-  void set_raw_value(std::string raw_value);
-
- protected:
-  // Internal function used by Serialize().
-  // Sets the fields defined in this class.
-  // Does not set fields defined in ancestors.
-  void SerializeFields(std::ostream& os, bool &needs_comma) const;
-
-  // Internal functions used by FromJson().
-  // Extracts a field from a JSON object.
-  static absl::StatusOr<std::string> GetRaw(const nlohmann::json& json);
-  static absl::StatusOr<std::string> GetRawValue(const nlohmann::json& json);
-
- private:
-  std::string raw_;
-  std::string raw_value_;
 };
 
 class JsDirectiveLiteral : public virtual JsNode {
@@ -606,8 +583,8 @@ class JsDirectiveLiteral : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-      std::string value,
-      std::optional<std::unique_ptr<JsDirectiveLiteralExtra>> extra);
+      std::optional<nlohmann::json> extra,
+      std::string value);
 
   JsNodeType node_type() const override {
     return JsNodeType::kDirectiveLiteral;
@@ -620,10 +597,6 @@ class JsDirectiveLiteral : public virtual JsNode {
   std::string_view value() const;
   void set_value(std::string value);
 
-  std::optional<JsDirectiveLiteralExtra*> extra();
-  std::optional<const JsDirectiveLiteralExtra*> extra() const;
-  void set_extra(std::optional<std::unique_ptr<JsDirectiveLiteralExtra>> extra);
-
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -633,11 +606,9 @@ class JsDirectiveLiteral : public virtual JsNode {
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::string> GetValue(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsDirectiveLiteralExtra>>> GetExtra(const nlohmann::json& json);
 
  private:
   std::string value_;
-  std::optional<std::unique_ptr<JsDirectiveLiteralExtra>> extra_;
 };
 
 class JsDirective : public virtual JsNode {
@@ -652,6 +623,7 @@ class JsDirective : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsDirectiveLiteral> value);
 
   JsNodeType node_type() const override {
@@ -692,6 +664,7 @@ class JsProgram : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsInterpreterDirective>> interpreter,
       std::string source_type,
       std::vector<std::unique_ptr<JsProgramBodyElement>> body,
@@ -752,6 +725,7 @@ class JsFile : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsProgram> program,
       std::optional<std::vector<std::unique_ptr<JsComment>>> comments);
 
@@ -798,7 +772,8 @@ class JsExpression : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsExpression>> FromJson(const nlohmann::json& json);
 
@@ -820,7 +795,8 @@ class JsPattern : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsPattern>> FromJson(const nlohmann::json& json);
 
@@ -842,7 +818,8 @@ class JsLVal : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsLVal>> FromJson(const nlohmann::json& json);
 
@@ -865,6 +842,7 @@ class JsIdentifier : public virtual JsExpression, public virtual JsPattern, publ
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::string name);
 
   JsNodeType node_type() const override {
@@ -904,6 +882,7 @@ class JsPrivateName : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> id);
 
   JsNodeType node_type() const override {
@@ -943,7 +922,8 @@ class JsLiteral : public virtual JsExpression {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsLiteral>> FromJson(const nlohmann::json& json);
 
@@ -952,32 +932,6 @@ class JsLiteral : public virtual JsExpression {
   // Sets the fields defined in this class.
   // Does not set fields defined in ancestors.
   void SerializeFields(std::ostream& os, bool &needs_comma) const;
-};
-
-class JsRegExpLiteralExtra {
- public:
-  explicit JsRegExpLiteralExtra(
-      std::string raw);
-
-  void Serialize(std::ostream& os) const;
-
-  static absl::StatusOr<std::unique_ptr<JsRegExpLiteralExtra>> FromJson(const nlohmann::json& json);
-
-  std::string_view raw() const;
-  void set_raw(std::string raw);
-
- protected:
-  // Internal function used by Serialize().
-  // Sets the fields defined in this class.
-  // Does not set fields defined in ancestors.
-  void SerializeFields(std::ostream& os, bool &needs_comma) const;
-
-  // Internal functions used by FromJson().
-  // Extracts a field from a JSON object.
-  static absl::StatusOr<std::string> GetRaw(const nlohmann::json& json);
-
- private:
-  std::string raw_;
 };
 
 class JsRegExpLiteral : public virtual JsLiteral {
@@ -992,9 +946,9 @@ class JsRegExpLiteral : public virtual JsLiteral {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::string pattern,
-      std::string flags,
-      std::optional<std::unique_ptr<JsRegExpLiteralExtra>> extra);
+      std::string flags);
 
   JsNodeType node_type() const override {
     return JsNodeType::kRegExpLiteral;
@@ -1010,10 +964,6 @@ class JsRegExpLiteral : public virtual JsLiteral {
   std::string_view flags() const;
   void set_flags(std::string flags);
 
-  std::optional<JsRegExpLiteralExtra*> extra();
-  std::optional<const JsRegExpLiteralExtra*> extra() const;
-  void set_extra(std::optional<std::unique_ptr<JsRegExpLiteralExtra>> extra);
-
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -1024,12 +974,10 @@ class JsRegExpLiteral : public virtual JsLiteral {
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::string> GetPattern(const nlohmann::json& json);
   static absl::StatusOr<std::string> GetFlags(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsRegExpLiteralExtra>>> GetExtra(const nlohmann::json& json);
 
  private:
   std::string pattern_;
   std::string flags_;
-  std::optional<std::unique_ptr<JsRegExpLiteralExtra>> extra_;
 };
 
 class JsNullLiteral : public virtual JsLiteral {
@@ -1043,7 +991,8 @@ class JsNullLiteral : public virtual JsLiteral {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   JsNodeType node_type() const override {
     return JsNodeType::kNullLiteral;
@@ -1060,38 +1009,6 @@ class JsNullLiteral : public virtual JsLiteral {
   void SerializeFields(std::ostream& os, bool &needs_comma) const;
 };
 
-class JsStringLiteralExtra {
- public:
-  explicit JsStringLiteralExtra(
-      std::string raw,
-      std::string raw_value);
-
-  void Serialize(std::ostream& os) const;
-
-  static absl::StatusOr<std::unique_ptr<JsStringLiteralExtra>> FromJson(const nlohmann::json& json);
-
-  std::string_view raw() const;
-  void set_raw(std::string raw);
-
-  std::string_view raw_value() const;
-  void set_raw_value(std::string raw_value);
-
- protected:
-  // Internal function used by Serialize().
-  // Sets the fields defined in this class.
-  // Does not set fields defined in ancestors.
-  void SerializeFields(std::ostream& os, bool &needs_comma) const;
-
-  // Internal functions used by FromJson().
-  // Extracts a field from a JSON object.
-  static absl::StatusOr<std::string> GetRaw(const nlohmann::json& json);
-  static absl::StatusOr<std::string> GetRawValue(const nlohmann::json& json);
-
- private:
-  std::string raw_;
-  std::string raw_value_;
-};
-
 class JsStringLiteral : public virtual JsLiteral {
  public:
   explicit JsStringLiteral(
@@ -1104,8 +1021,8 @@ class JsStringLiteral : public virtual JsLiteral {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-      std::string value,
-      std::optional<std::unique_ptr<JsStringLiteralExtra>> extra);
+      std::optional<nlohmann::json> extra,
+      std::string value);
 
   JsNodeType node_type() const override {
     return JsNodeType::kStringLiteral;
@@ -1118,10 +1035,6 @@ class JsStringLiteral : public virtual JsLiteral {
   std::string_view value() const;
   void set_value(std::string value);
 
-  std::optional<JsStringLiteralExtra*> extra();
-  std::optional<const JsStringLiteralExtra*> extra() const;
-  void set_extra(std::optional<std::unique_ptr<JsStringLiteralExtra>> extra);
-
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -1131,11 +1044,9 @@ class JsStringLiteral : public virtual JsLiteral {
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::string> GetValue(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsStringLiteralExtra>>> GetExtra(const nlohmann::json& json);
 
  private:
   std::string value_;
-  std::optional<std::unique_ptr<JsStringLiteralExtra>> extra_;
 };
 
 class JsBooleanLiteral : public virtual JsLiteral {
@@ -1150,6 +1061,7 @@ class JsBooleanLiteral : public virtual JsLiteral {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       bool value);
 
   JsNodeType node_type() const override {
@@ -1177,38 +1089,6 @@ class JsBooleanLiteral : public virtual JsLiteral {
   bool value_;
 };
 
-class JsNumericLiteralExtra {
- public:
-  explicit JsNumericLiteralExtra(
-      std::string raw,
-      double raw_value);
-
-  void Serialize(std::ostream& os) const;
-
-  static absl::StatusOr<std::unique_ptr<JsNumericLiteralExtra>> FromJson(const nlohmann::json& json);
-
-  std::string_view raw() const;
-  void set_raw(std::string raw);
-
-  double raw_value() const;
-  void set_raw_value(double raw_value);
-
- protected:
-  // Internal function used by Serialize().
-  // Sets the fields defined in this class.
-  // Does not set fields defined in ancestors.
-  void SerializeFields(std::ostream& os, bool &needs_comma) const;
-
-  // Internal functions used by FromJson().
-  // Extracts a field from a JSON object.
-  static absl::StatusOr<std::string> GetRaw(const nlohmann::json& json);
-  static absl::StatusOr<double> GetRawValue(const nlohmann::json& json);
-
- private:
-  std::string raw_;
-  double raw_value_;
-};
-
 class JsNumericLiteral : public virtual JsLiteral {
  public:
   explicit JsNumericLiteral(
@@ -1221,8 +1101,8 @@ class JsNumericLiteral : public virtual JsLiteral {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-      double value,
-      std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra);
+      std::optional<nlohmann::json> extra,
+      double value);
 
   JsNodeType node_type() const override {
     return JsNodeType::kNumericLiteral;
@@ -1235,10 +1115,6 @@ class JsNumericLiteral : public virtual JsLiteral {
   double value() const;
   void set_value(double value);
 
-  std::optional<JsNumericLiteralExtra*> extra();
-  std::optional<const JsNumericLiteralExtra*> extra() const;
-  void set_extra(std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra);
-
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -1248,43 +1124,9 @@ class JsNumericLiteral : public virtual JsLiteral {
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
   static absl::StatusOr<double> GetValue(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsNumericLiteralExtra>>> GetExtra(const nlohmann::json& json);
 
  private:
   double value_;
-  std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra_;
-};
-
-class JsBigIntLiteralExtra {
- public:
-  explicit JsBigIntLiteralExtra(
-      std::string raw,
-      std::string raw_value);
-
-  void Serialize(std::ostream& os) const;
-
-  static absl::StatusOr<std::unique_ptr<JsBigIntLiteralExtra>> FromJson(const nlohmann::json& json);
-
-  std::string_view raw() const;
-  void set_raw(std::string raw);
-
-  std::string_view raw_value() const;
-  void set_raw_value(std::string raw_value);
-
- protected:
-  // Internal function used by Serialize().
-  // Sets the fields defined in this class.
-  // Does not set fields defined in ancestors.
-  void SerializeFields(std::ostream& os, bool &needs_comma) const;
-
-  // Internal functions used by FromJson().
-  // Extracts a field from a JSON object.
-  static absl::StatusOr<std::string> GetRaw(const nlohmann::json& json);
-  static absl::StatusOr<std::string> GetRawValue(const nlohmann::json& json);
-
- private:
-  std::string raw_;
-  std::string raw_value_;
 };
 
 class JsBigIntLiteral : public virtual JsLiteral {
@@ -1299,8 +1141,8 @@ class JsBigIntLiteral : public virtual JsLiteral {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-      std::string value,
-      std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra);
+      std::optional<nlohmann::json> extra,
+      std::string value);
 
   JsNodeType node_type() const override {
     return JsNodeType::kBigIntLiteral;
@@ -1313,10 +1155,6 @@ class JsBigIntLiteral : public virtual JsLiteral {
   std::string_view value() const;
   void set_value(std::string value);
 
-  std::optional<JsBigIntLiteralExtra*> extra();
-  std::optional<const JsBigIntLiteralExtra*> extra() const;
-  void set_extra(std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra);
-
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -1326,11 +1164,9 @@ class JsBigIntLiteral : public virtual JsLiteral {
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::string> GetValue(const nlohmann::json& json);
-  static absl::StatusOr<std::optional<std::unique_ptr<JsBigIntLiteralExtra>>> GetExtra(const nlohmann::json& json);
 
  private:
   std::string value_;
-  std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra_;
 };
 
 class JsFunction : public virtual JsNode {
@@ -1345,6 +1181,7 @@ class JsFunction : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -1397,7 +1234,8 @@ class JsStatement : public virtual JsNode, public virtual JsProgramBodyElement {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsStatement>> FromJson(const nlohmann::json& json);
 
@@ -1420,6 +1258,7 @@ class JsBlockStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::unique_ptr<JsStatement>> body,
       std::vector<std::unique_ptr<JsDirective>> directives);
 
@@ -1467,6 +1306,7 @@ class JsBlockStatementFunction : public virtual JsFunction {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -1505,6 +1345,7 @@ class JsExpressionStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> expression);
 
   JsNodeType node_type() const override {
@@ -1544,7 +1385,8 @@ class JsEmptyStatement : public virtual JsStatement {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   JsNodeType node_type() const override {
     return JsNodeType::kEmptyStatement;
@@ -1572,7 +1414,8 @@ class JsDebuggerStatement : public virtual JsStatement {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   JsNodeType node_type() const override {
     return JsNodeType::kDebuggerStatement;
@@ -1601,6 +1444,7 @@ class JsWithStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> object,
       std::unique_ptr<JsStatement> body);
 
@@ -1648,6 +1492,7 @@ class JsReturnStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> argument);
 
   JsNodeType node_type() const override {
@@ -1688,6 +1533,7 @@ class JsLabeledStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> label,
       std::unique_ptr<JsStatement> body);
 
@@ -1735,6 +1581,7 @@ class JsBreakStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> label);
 
   JsNodeType node_type() const override {
@@ -1775,6 +1622,7 @@ class JsContinueStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> label);
 
   JsNodeType node_type() const override {
@@ -1815,6 +1663,7 @@ class JsIfStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> test,
       std::unique_ptr<JsStatement> consequent,
       std::optional<std::unique_ptr<JsStatement>> alternate);
@@ -1869,6 +1718,7 @@ class JsSwitchCase : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> test,
       std::vector<std::unique_ptr<JsStatement>> consequent);
 
@@ -1916,6 +1766,7 @@ class JsSwitchStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> discriminant,
       std::vector<std::unique_ptr<JsSwitchCase>> cases);
 
@@ -1963,6 +1814,7 @@ class JsThrowStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> argument);
 
   JsNodeType node_type() const override {
@@ -2003,6 +1855,7 @@ class JsCatchClause : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsPattern>> param,
       std::unique_ptr<JsBlockStatement> body);
 
@@ -2050,6 +1903,7 @@ class JsTryStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsBlockStatement> block,
       std::optional<std::unique_ptr<JsCatchClause>> handler,
       std::optional<std::unique_ptr<JsBlockStatement>> finalizer);
@@ -2104,6 +1958,7 @@ class JsWhileStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> test,
       std::unique_ptr<JsStatement> body);
 
@@ -2151,6 +2006,7 @@ class JsDoWhileStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsStatement> body,
       std::unique_ptr<JsExpression> test);
 
@@ -2197,7 +2053,8 @@ class JsDeclaration : public virtual JsStatement {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsDeclaration>> FromJson(const nlohmann::json& json);
 
@@ -2220,6 +2077,7 @@ class JsVariableDeclarator : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsLVal> id,
       std::optional<std::unique_ptr<JsExpression>> init);
 
@@ -2267,6 +2125,7 @@ class JsVariableDeclaration : public virtual JsDeclaration {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::unique_ptr<JsVariableDeclarator>> declarations,
       std::string kind);
 
@@ -2313,6 +2172,7 @@ class JsForStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>> init,
       std::optional<std::unique_ptr<JsExpression>> test,
       std::optional<std::unique_ptr<JsExpression>> update,
@@ -2374,6 +2234,7 @@ class JsForInStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>> left,
       std::unique_ptr<JsExpression> right,
       std::unique_ptr<JsStatement> body);
@@ -2428,6 +2289,7 @@ class JsForOfStatement : public virtual JsStatement {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>> left,
       std::unique_ptr<JsExpression> right,
       std::unique_ptr<JsStatement> body,
@@ -2488,6 +2350,7 @@ class JsFunctionDeclaration : public virtual JsBlockStatementFunction, public vi
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -2520,7 +2383,8 @@ class JsSuper : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   JsNodeType node_type() const override {
     return JsNodeType::kSuper;
@@ -2548,7 +2412,8 @@ class JsImport : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   JsNodeType node_type() const override {
     return JsNodeType::kImport;
@@ -2576,7 +2441,8 @@ class JsThisExpression : public virtual JsExpression {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   JsNodeType node_type() const override {
     return JsNodeType::kThisExpression;
@@ -2605,6 +2471,7 @@ class JsArrowFunctionExpression : public virtual JsFunction, public virtual JsEx
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -2649,6 +2516,7 @@ class JsYieldExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> argument,
       bool delegate);
 
@@ -2695,6 +2563,7 @@ class JsAwaitExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> argument);
 
   JsNodeType node_type() const override {
@@ -2735,6 +2604,7 @@ class JsSpreadElement : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> argument);
 
   JsNodeType node_type() const override {
@@ -2775,6 +2645,7 @@ class JsArrayExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>> elements);
 
   JsNodeType node_type() const override {
@@ -2815,6 +2686,7 @@ class JsObjectMember : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> key,
       bool computed);
 
@@ -2855,6 +2727,7 @@ class JsObjectProperty : public virtual JsObjectMember {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> key,
       bool computed,
       bool shorthand,
@@ -2903,6 +2776,7 @@ class JsObjectMethod : public virtual JsObjectMember, public virtual JsBlockStat
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> key,
       bool computed,
       std::optional<std::unique_ptr<JsIdentifier>> id,
@@ -2949,6 +2823,7 @@ class JsObjectExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>> properties_);
 
   JsNodeType node_type() const override {
@@ -2989,6 +2864,7 @@ class JsFunctionExpression : public virtual JsBlockStatementFunction, public vir
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -3022,6 +2898,7 @@ class JsUnaryExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       JsUnaryOperator operator_,
       bool prefix,
       std::unique_ptr<JsExpression> argument);
@@ -3074,6 +2951,7 @@ class JsUpdateExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       JsUpdateOperator operator_,
       std::unique_ptr<JsLVal> argument,
       bool prefix);
@@ -3126,6 +3004,7 @@ class JsBinaryExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       JsBinaryOperator operator_,
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> left,
       std::unique_ptr<JsExpression> right);
@@ -3179,6 +3058,7 @@ class JsAssignmentExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       JsAssignmentOperator operator_,
       std::unique_ptr<JsLVal> left,
       std::unique_ptr<JsExpression> right);
@@ -3232,6 +3112,7 @@ class JsLogicalExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       JsLogicalOperator operator_,
       std::unique_ptr<JsExpression> left,
       std::unique_ptr<JsExpression> right);
@@ -3285,6 +3166,7 @@ class JsMemberExpression : public virtual JsExpression, public virtual JsPattern
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>> object,
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property,
       bool computed);
@@ -3338,6 +3220,7 @@ class JsOptionalMemberExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> object,
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property,
       bool computed,
@@ -3397,6 +3280,7 @@ class JsConditionalExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> test,
       std::unique_ptr<JsExpression> alternate,
       std::unique_ptr<JsExpression> consequent);
@@ -3451,6 +3335,7 @@ class JsCallExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>> callee,
       std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments);
 
@@ -3498,6 +3383,7 @@ class JsOptionalCallExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> callee,
       std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments,
       bool optional);
@@ -3551,6 +3437,7 @@ class JsNewExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>> callee,
       std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments);
 
@@ -3598,6 +3485,7 @@ class JsSequenceExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::unique_ptr<JsExpression>> expressions);
 
   JsNodeType node_type() const override {
@@ -3638,6 +3526,7 @@ class JsParenthesizedExpression : public virtual JsExpression, public virtual Js
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> expression);
 
   JsNodeType node_type() const override {
@@ -3710,6 +3599,7 @@ class JsTemplateElement : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       bool tail,
       std::unique_ptr<JsTemplateElementValue> value);
 
@@ -3756,6 +3646,7 @@ class JsTemplateLiteral : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::unique_ptr<JsTemplateElement>> quasis,
       std::vector<std::unique_ptr<JsExpression>> expressions);
 
@@ -3803,6 +3694,7 @@ class JsTaggedTemplateExpression : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> tag,
       std::unique_ptr<JsTemplateLiteral> quasi);
 
@@ -3850,6 +3742,7 @@ class JsRestElement : public virtual JsPattern, public virtual JsLVal {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsLVal> argument);
 
   JsNodeType node_type() const override {
@@ -3890,6 +3783,7 @@ class JsObjectPattern : public virtual JsPattern, public virtual JsLVal {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>> properties_);
 
   JsNodeType node_type() const override {
@@ -3930,6 +3824,7 @@ class JsArrayPattern : public virtual JsPattern, public virtual JsLVal {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::optional<std::unique_ptr<JsPattern>>> elements);
 
   JsNodeType node_type() const override {
@@ -3970,6 +3865,7 @@ class JsAssignmentPattern : public virtual JsPattern, public virtual JsLVal {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsPattern> left,
       std::unique_ptr<JsExpression> right);
 
@@ -4017,6 +3913,7 @@ class JsClassMethod : public virtual JsBlockStatementFunction {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -4080,6 +3977,7 @@ class JsClassPrivateMethod : public virtual JsBlockStatementFunction {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsIdentifier>> id,
       std::vector<std::unique_ptr<JsPattern>> params,
       bool generator,
@@ -4143,6 +4041,7 @@ class JsClassProperty : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsExpression> key,
       std::optional<std::unique_ptr<JsExpression>> value,
       bool static_,
@@ -4202,6 +4101,7 @@ class JsClassPrivateProperty : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsPrivateName> key,
       std::optional<std::unique_ptr<JsExpression>> value,
       bool static_);
@@ -4255,6 +4155,7 @@ class JsStaticBlock : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::unique_ptr<JsStatement>> body);
 
   JsNodeType node_type() const override {
@@ -4295,6 +4196,7 @@ class JsClassBody : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body);
 
   JsNodeType node_type() const override {
@@ -4335,6 +4237,7 @@ class JsClass : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> super_class,
       std::unique_ptr<JsClassBody> body);
 
@@ -4376,6 +4279,7 @@ class JsClassDeclaration : public virtual JsClass, public virtual JsDeclaration 
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> super_class,
       std::unique_ptr<JsClassBody> body,
       std::optional<std::unique_ptr<JsIdentifier>> id);
@@ -4418,6 +4322,7 @@ class JsClassExpression : public virtual JsClass, public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsExpression>> super_class,
       std::unique_ptr<JsClassBody> body,
       std::optional<std::unique_ptr<JsIdentifier>> id);
@@ -4460,6 +4365,7 @@ class JsMetaProperty : public virtual JsExpression {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> meta,
       std::unique_ptr<JsIdentifier> property);
 
@@ -4506,7 +4412,8 @@ class JsModuleDeclaration : public virtual JsStatement, public virtual JsProgram
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsModuleDeclaration>> FromJson(const nlohmann::json& json);
 
@@ -4528,7 +4435,8 @@ class JsModuleSpecifier : public virtual JsNode {
       std::optional<std::vector<int64_t>> inner_comment_uids,
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols);
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra);
 
   static absl::StatusOr<std::unique_ptr<JsModuleSpecifier>> FromJson(const nlohmann::json& json);
 
@@ -4551,6 +4459,7 @@ class JsImportSpecifier : public virtual JsModuleSpecifier {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> imported,
       std::unique_ptr<JsIdentifier> local);
 
@@ -4598,6 +4507,7 @@ class JsImportDefaultSpecifier : public virtual JsModuleSpecifier {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> local);
 
   JsNodeType node_type() const override {
@@ -4638,6 +4548,7 @@ class JsImportNamespaceSpecifier : public virtual JsModuleSpecifier {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> local);
 
   JsNodeType node_type() const override {
@@ -4678,6 +4589,7 @@ class JsImportAttribute : public virtual JsNode {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> key,
       std::unique_ptr<JsStringLiteral> value);
 
@@ -4725,6 +4637,7 @@ class JsImportDeclaration : public virtual JsModuleDeclaration {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>> specifiers,
       std::unique_ptr<JsStringLiteral> source,
       std::optional<std::unique_ptr<JsImportAttribute>> assertions);
@@ -4779,6 +4692,7 @@ class JsExportSpecifier : public virtual JsModuleSpecifier {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported,
       std::optional<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>> local);
 
@@ -4826,6 +4740,7 @@ class JsExportNamespaceSpecifier : public virtual JsModuleSpecifier {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported);
 
   JsNodeType node_type() const override {
@@ -4866,6 +4781,7 @@ class JsExportDefaultSpecifier : public virtual JsModuleSpecifier {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsIdentifier> exported);
 
   JsNodeType node_type() const override {
@@ -4906,6 +4822,7 @@ class JsExportNamedDeclaration : public virtual JsModuleDeclaration {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::optional<std::unique_ptr<JsDeclaration>> declaration,
       std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>> specifiers,
       std::optional<std::unique_ptr<JsStringLiteral>> source,
@@ -4972,6 +4889,7 @@ class JsExportDefaultDeclaration : public virtual JsModuleDeclaration {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::variant<std::unique_ptr<JsFunctionDeclaration>, std::unique_ptr<JsClassDeclaration>, std::unique_ptr<JsExpression>> declaration);
 
   JsNodeType node_type() const override {
@@ -5012,6 +4930,7 @@ class JsExportAllDeclaration : public virtual JsModuleDeclaration {
       std::optional<int64_t> scope_uid,
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::optional<nlohmann::json> extra,
       std::unique_ptr<JsStringLiteral> source,
       std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions);
 

@@ -78,7 +78,8 @@ def JsirTriviaAttr : LocationAttrDef<Jsir_Dialect, "JsirTrivia", []> {
     OptionalArrayRefParameter<"int64_t">: $trailing_comment_uids,
     OptionalArrayRefParameter<"int64_t">: $inner_comment_uids,
     OptionalParameter<"JsirSymbolIdAttr">: $referenced_symbol,
-    OptionalArrayRefParameter<"JsirSymbolIdAttr">: $defined_symbols
+    OptionalArrayRefParameter<"JsirSymbolIdAttr">: $defined_symbols,
+    OptionalParameter<"::mlir::DictionaryAttr">: $extra
   );
   let assemblyFormat = "params";
 }
@@ -88,15 +89,6 @@ def JsirInterpreterDirectiveAttr : AttrDef<Jsir_Dialect, "JsirInterpreterDirecti
   let parameters = (ins
     OptionalParameter<"JsirTriviaAttr">: $loc,
     "::mlir::StringAttr": $value
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirDirectiveLiteralExtraAttr : AttrDef<Jsir_Dialect, "JsirDirectiveLiteralExtra", []> {
-  let mnemonic = "directive_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::StringAttr": $raw_value
   );
   let assemblyFormat = "params";
 }
@@ -119,20 +111,12 @@ def JsirPrivateNameAttr : AttrDef<Jsir_Dialect, "JsirPrivateName", []> {
   let assemblyFormat = "params";
 }
 
-def JsirRegExpLiteralExtraAttr : AttrDef<Jsir_Dialect, "JsirRegExpLiteralExtra", []> {
-  let mnemonic = "reg_exp_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw
-  );
-  let assemblyFormat = "params";
-}
-
 def JsirRegExpLiteralAttr : AttrDef<Jsir_Dialect, "JsirRegExpLiteral", []> {
   let mnemonic = "reg_exp_literal";
   let parameters = (ins
+    OptionalParameter<"JsirTriviaAttr">: $loc,
     "::mlir::StringAttr": $pattern,
-    "::mlir::StringAttr": $flags,
-    OptionalParameter<"JsirRegExpLiteralExtraAttr">: $extra
+    "::mlir::StringAttr": $flags
   );
   let assemblyFormat = "params";
 }
@@ -141,30 +125,11 @@ def JsirNullLiteralAttr : AttrDef<Jsir_Dialect, "JsirNullLiteral", []> {
   let mnemonic = "null_literal";
 }
 
-def JsirStringLiteralExtraAttr : AttrDef<Jsir_Dialect, "JsirStringLiteralExtra", []> {
-  let mnemonic = "string_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::StringAttr": $raw_value
-  );
-  let assemblyFormat = "params";
-}
-
 def JsirStringLiteralAttr : AttrDef<Jsir_Dialect, "JsirStringLiteral", []> {
   let mnemonic = "string_literal";
   let parameters = (ins
     OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::StringAttr": $value,
-    JsirStringLiteralExtraAttr: $extra
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirNumericLiteralExtraAttr : AttrDef<Jsir_Dialect, "JsirNumericLiteralExtra", []> {
-  let mnemonic = "numeric_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::FloatAttr": $raw_value
+    "::mlir::StringAttr": $value
   );
   let assemblyFormat = "params";
 }
@@ -173,17 +138,7 @@ def JsirNumericLiteralAttr : AttrDef<Jsir_Dialect, "JsirNumericLiteral", []> {
   let mnemonic = "numeric_literal";
   let parameters = (ins
     OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::FloatAttr": $value,
-    JsirNumericLiteralExtraAttr: $extra
-  );
-  let assemblyFormat = "params";
-}
-
-def JsirBigIntLiteralExtraAttr : AttrDef<Jsir_Dialect, "JsirBigIntLiteralExtra", []> {
-  let mnemonic = "big_int_literal_extra";
-  let parameters = (ins
-    "::mlir::StringAttr": $raw,
-    "::mlir::StringAttr": $raw_value
+    "::mlir::FloatAttr": $value
   );
   let assemblyFormat = "params";
 }
@@ -192,8 +147,7 @@ def JsirBigIntLiteralAttr : AttrDef<Jsir_Dialect, "JsirBigIntLiteral", []> {
   let mnemonic = "big_int_literal";
   let parameters = (ins
     OptionalParameter<"JsirTriviaAttr">: $loc,
-    "::mlir::StringAttr": $value,
-    JsirBigIntLiteralExtraAttr: $extra
+    "::mlir::StringAttr": $value
   );
   let assemblyFormat = "params";
 }

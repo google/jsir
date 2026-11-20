@@ -62,7 +62,8 @@ class AExpression {
 class AIdentifier : public virtual AExpression {
  public:
   explicit AIdentifier(
-      std::string name);
+      std::string name,
+      std::optional<nlohmann::json> metadata);
 
   AExpressionType expression_type() const override {
     return AExpressionType::kIdentifier;
@@ -75,6 +76,10 @@ class AIdentifier : public virtual AExpression {
   std::string_view name() const;
   void set_name(std::string name);
 
+  std::optional<nlohmann::json*> metadata();
+  std::optional<const nlohmann::json*> metadata() const;
+  void set_metadata(std::optional<nlohmann::json> metadata);
+
  protected:
   // Internal function used by Serialize().
   // Sets the fields defined in this class.
@@ -84,9 +89,11 @@ class AIdentifier : public virtual AExpression {
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::string> GetName(const nlohmann::json& json);
+  static absl::StatusOr<std::optional<nlohmann::json>> GetMetadata(const nlohmann::json& json);
 
  private:
   std::string name_;
+  std::optional<nlohmann::json> metadata_;
 };
 
 class AAssignment : public virtual AExpression {

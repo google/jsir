@@ -4,10 +4,10 @@
 // JSIR-NEXT:       %12 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
 // JSIR-NEXT:       %13 = "jsir.boolean_literal"() <{value = true}> : () -> !jsir.any
 // JSIR-NEXT:       %14 = "jshir.conditional_expression"(%13) ({
-// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, value = 2.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{value = 2.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%16) : (!jsir.any) -> ()
 // JSIR-NEXT:       }, {
-// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%16) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %15 = "jsir.variable_declarator"(%12, %14) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -17,10 +17,10 @@
 // JSIR-NEXT:       %12 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
 // JSIR-NEXT:       %13 = "jsir.boolean_literal"() <{value = false}> : () -> !jsir.any
 // JSIR-NEXT:       %14 = "jshir.conditional_expression"(%13) ({
-// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "4", 4.000000e+00 : f64>, value = 4.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{value = 4.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%16) : (!jsir.any) -> ()
 // JSIR-NEXT:       }, {
-// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, value = 3.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{value = 3.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%16) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %15 = "jsir.variable_declarator"(%12, %14) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -30,10 +30,10 @@
 // JSIR-NEXT:       %12 = "jsir.identifier_ref"() <{name = "c"}> : () -> !jsir.any
 // JSIR-NEXT:       %13 = "jsir.identifier"() <{name = "x"}> : () -> !jsir.any
 // JSIR-NEXT:       %14 = "jshir.conditional_expression"(%13) ({
-// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "6", 6.000000e+00 : f64>, value = 6.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{value = 6.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%16) : (!jsir.any) -> ()
 // JSIR-NEXT:       }, {
-// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, value = 5.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %16 = "jsir.numeric_literal"() <{value = 5.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%16) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %15 = "jsir.variable_declarator"(%12, %14) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -80,7 +80,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <not executable>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
-// JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
+// JSIR-NEXT:                 %16 = jsir.numeric_literal {2.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = <uninitialized>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
@@ -89,7 +89,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
 // JSIR-NEXT:                   // State [default = <unknown>] { }
-// JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:                 %16 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = 1.000000e+00 : f64
 // JSIR-NEXT:                   // State [default = <unknown>] { }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
@@ -118,7 +118,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
-// JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "4", 4.000000e+00 : f64>, 4.000000e+00 : f64}
+// JSIR-NEXT:                 %16 = jsir.numeric_literal {4.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = 4.000000e+00 : f64
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
@@ -127,7 +127,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <not executable>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
-// JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, 3.000000e+00 : f64}
+// JSIR-NEXT:                 %16 = jsir.numeric_literal {3.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = <uninitialized>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
@@ -156,7 +156,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
-// JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "6", 6.000000e+00 : f64>, 6.000000e+00 : f64}
+// JSIR-NEXT:                 %16 = jsir.numeric_literal {6.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = 6.000000e+00 : f64
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)
@@ -165,7 +165,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
-// JSIR-NEXT:                 %16 = jsir.numeric_literal {#jsir<numeric_literal_extra "5", 5.000000e+00 : f64>, 5.000000e+00 : f64}
+// JSIR-NEXT:                 %16 = jsir.numeric_literal {5.000000e+00 : f64}
 // JSIR-NEXT:                   // %16 = 5.000000e+00 : f64
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : 1.000000e+00 : f64> <b#1 : 4.000000e+00 : f64> }
 // JSIR-NEXT:                 jsir.expr_region_end (%16)

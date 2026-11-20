@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 148,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "module",
 // AST-NEXT:     "body": [
@@ -96,11 +99,11 @@
 // AST-NEXT:           "start": 20,
 // AST-NEXT:           "end": 25,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "mod",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"mod\"",
 // AST-NEXT:             "rawValue": "mod"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "mod"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -149,11 +152,11 @@
 // AST-NEXT:               "start": 39,
 // AST-NEXT:               "end": 52,
 // AST-NEXT:               "scopeUid": 0,
-// AST-NEXT:               "value": "string name",
 // AST-NEXT:               "extra": {
 // AST-NEXT:                 "raw": "\"string name\"",
 // AST-NEXT:                 "rawValue": "string name"
-// AST-NEXT:               }
+// AST-NEXT:               },
+// AST-NEXT:               "value": "string name"
 // AST-NEXT:             }
 // AST-NEXT:           }
 // AST-NEXT:         ],
@@ -172,11 +175,11 @@
 // AST-NEXT:           "start": 58,
 // AST-NEXT:           "end": 63,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "mod",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"mod\"",
 // AST-NEXT:             "rawValue": "mod"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "mod"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -245,11 +248,11 @@
 // AST-NEXT:           "start": 90,
 // AST-NEXT:           "end": 95,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "mod",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"mod\"",
 // AST-NEXT:             "rawValue": "mod"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "mod"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -282,11 +285,11 @@
 // AST-NEXT:           "start": 111,
 // AST-NEXT:           "end": 116,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "mod",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"mod\"",
 // AST-NEXT:             "rawValue": "mod"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "mod"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -374,11 +377,11 @@
 // AST-NEXT:           "start": 141,
 // AST-NEXT:           "end": 146,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "mod",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"mod\"",
 // AST-NEXT:             "rawValue": "mod"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "mod"
 // AST-NEXT:         }
 // AST-NEXT:       }
 // AST-NEXT:     ],

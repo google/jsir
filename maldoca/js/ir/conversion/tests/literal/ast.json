@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 105,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "script",
 // AST-NEXT:     "body": [
@@ -66,11 +69,11 @@
 // AST-NEXT:           "start": 22,
 // AST-NEXT:           "end": 25,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "pattern": "1",
-// AST-NEXT:           "flags": "",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "/1/"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "pattern": "1",
+// AST-NEXT:           "flags": ""
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -147,11 +150,11 @@
 // AST-NEXT:           "start": 52,
 // AST-NEXT:           "end": 55,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "a",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "'a'",
 // AST-NEXT:             "rawValue": "a"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "a"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -229,11 +232,11 @@
 // AST-NEXT:           "start": 86,
 // AST-NEXT:           "end": 87,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": 1.0,
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "1",
-// AST-NEXT:             "rawValue": 1.0
-// AST-NEXT:           }
+// AST-NEXT:             "rawValue": 1
+// AST-NEXT:           },
+// AST-NEXT:           "value": 1.0
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -269,11 +272,11 @@
 // AST-NEXT:           "start": 101,
 // AST-NEXT:           "end": 103,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "1",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "1n",
 // AST-NEXT:             "rawValue": "1"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "1"
 // AST-NEXT:         }
 // AST-NEXT:       }
 // AST-NEXT:     ],

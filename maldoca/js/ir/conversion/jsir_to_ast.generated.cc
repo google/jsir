@@ -148,19 +148,9 @@ JsirToAst::VisitDirectiveLiteral(JsirDirectiveLiteralOp op) {
           ToString()
       )
   );
-  ABSL_ASSIGN_OR_RETURN(
-      auto extra,
-      Convert(
-          op.getExtraAttr(),
-          Nullable(
-              ToAttrConverter(VisitDirectiveLiteralExtraAttr)
-          )
-      )
-  );
   return Create<JsDirectiveLiteral>(
       op,
-      std::move(value),
-      std::move(extra));
+      std::move(value));
 }
 
 absl::StatusOr<std::unique_ptr<JsDirective>>
@@ -500,20 +490,10 @@ JsirToAst::VisitRegExpLiteral(JsirRegExpLiteralOp op) {
           ToString()
       )
   );
-  ABSL_ASSIGN_OR_RETURN(
-      auto extra,
-      Convert(
-          op.getExtraAttr(),
-          Nullable(
-              ToAttrConverter(VisitRegExpLiteralExtraAttr)
-          )
-      )
-  );
   return Create<JsRegExpLiteral>(
       op,
       std::move(pattern),
-      std::move(flags),
-      std::move(extra));
+      std::move(flags));
 }
 
 absl::StatusOr<std::unique_ptr<JsNullLiteral>>
@@ -531,19 +511,9 @@ JsirToAst::VisitStringLiteral(JsirStringLiteralOp op) {
           ToString()
       )
   );
-  ABSL_ASSIGN_OR_RETURN(
-      auto extra,
-      Convert(
-          op.getExtraAttr(),
-          Nullable(
-              ToAttrConverter(VisitStringLiteralExtraAttr)
-          )
-      )
-  );
   return Create<JsStringLiteral>(
       op,
-      std::move(value),
-      std::move(extra));
+      std::move(value));
 }
 
 absl::StatusOr<std::unique_ptr<JsBooleanLiteral>>
@@ -569,19 +539,9 @@ JsirToAst::VisitNumericLiteral(JsirNumericLiteralOp op) {
           ToDouble()
       )
   );
-  ABSL_ASSIGN_OR_RETURN(
-      auto extra,
-      Convert(
-          op.getExtraAttr(),
-          Nullable(
-              ToAttrConverter(VisitNumericLiteralExtraAttr)
-          )
-      )
-  );
   return Create<JsNumericLiteral>(
       op,
-      std::move(value),
-      std::move(extra));
+      std::move(value));
 }
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteral>>
@@ -593,19 +553,9 @@ JsirToAst::VisitBigIntLiteral(JsirBigIntLiteralOp op) {
           ToString()
       )
   );
-  ABSL_ASSIGN_OR_RETURN(
-      auto extra,
-      Convert(
-          op.getExtraAttr(),
-          Nullable(
-              ToAttrConverter(VisitBigIntLiteralExtraAttr)
-          )
-      )
-  );
   return Create<JsBigIntLiteral>(
       op,
-      std::move(value),
-      std::move(extra));
+      std::move(value));
 }
 
 absl::StatusOr<std::unique_ptr<JsStatement>>

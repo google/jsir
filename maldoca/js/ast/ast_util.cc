@@ -31,6 +31,7 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
+#include "nlohmann/json.hpp"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ast/ast_visitor.generated.h"
 #include "maldoca/js/ast/ast_walker.generated.h"
@@ -91,15 +92,16 @@ void CUnescapeStringLiteral(JsStringLiteral& string_literal) {
   string_literal.set_value(unescaped_string_literal);
 
   if (string_literal.extra().has_value()) {
-    JsStringLiteralExtra* extra = string_literal.extra().value();
-
-    std::string raw_value;
-    absl::CUnescape(extra->raw_value(), &raw_value);
-    extra->set_raw_value(raw_value);
-
-    std::string raw;
-    absl::CUnescape(extra->raw(), &raw);
-    extra->set_raw(raw);
+    nlohmann::json* extra = string_literal.extra().value();
+    for (const char* key : {"rawValue", "raw"}) {
+      auto it = extra->find(key);
+      if (it == extra->end() || !it->is_string()) {
+        continue;
+      }
+      std::string unescaped;
+      absl::CUnescape(it->get_ref<const std::string&>(), &unescaped);
+      *it = std::move(unescaped);
+    }
   }
 }
 

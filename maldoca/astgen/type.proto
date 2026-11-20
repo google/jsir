@@ -20,7 +20,7 @@ option java_multiple_files = true;
 
 // The Type Hierarchy
 //
-// BuiltinType ::= BoolType, DoubleType, StringType
+// BuiltinType ::= BoolType, DoubleType, StringType, JsonType
 // ScalarType  ::= BuiltinType, ClassType
 // NonListType ::= ScalarType, VariantType
 // Type        ::= NonListType, ListType
@@ -52,6 +52,9 @@ message TypePb {
     string class = 6;
     VariantTypePb variant = 7;
     ListTypePb list = 8;
+    // An arbitrary JSON value. Only allowed as a top-level field type (not in
+    // lists or variants). Used for Babel's untyped `extra` object.
+    JsonTypePb json = 9;
   }
 }
 
@@ -92,6 +95,7 @@ message BoolTypePb {}
 message Int64TypePb {}
 message DoubleTypePb {}
 message StringTypePb {}
+message JsonTypePb {}
 
 message VariantTypePb {
   repeated ScalarTypePb types = 1;

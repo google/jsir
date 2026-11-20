@@ -270,6 +270,10 @@ void JsNode::SerializeFields(std::ostream& os, bool &needs_comma) const {
     }
     os << "]";
   }
+  if (extra_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"extra\":" << (nlohmann::json(extra_.value())).dump();
+  }
 }
 
 // =============================================================================
@@ -301,37 +305,12 @@ void JsProgramBodyElement::SerializeFields(std::ostream& os, bool &needs_comma) 
 }
 
 // =============================================================================
-// JsDirectiveLiteralExtra
-// =============================================================================
-
-void JsDirectiveLiteralExtra::SerializeFields(std::ostream& os, bool &needs_comma) const {
-  MaybeAddComma(os, needs_comma);
-  os << "\"raw\":" << (nlohmann::json(raw_)).dump();
-  MaybeAddComma(os, needs_comma);
-  os << "\"rawValue\":" << (nlohmann::json(raw_value_)).dump();
-}
-
-void JsDirectiveLiteralExtra::Serialize(std::ostream& os) const {
-  os << "{";
-  {
-    bool needs_comma = false;
-    JsDirectiveLiteralExtra::SerializeFields(os, needs_comma);
-  }
-  os << "}";
-}
-
-// =============================================================================
 // JsDirectiveLiteral
 // =============================================================================
 
 void JsDirectiveLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
   os << "\"value\":" << (nlohmann::json(value_)).dump();
-  if (extra_.has_value()) {
-    MaybeAddComma(os, needs_comma);
-    os << "\"extra\":";
-    extra_.value()->Serialize(os);
-  }
 }
 
 void JsDirectiveLiteral::Serialize(std::ostream& os) const {
@@ -525,24 +504,6 @@ void JsLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const {
 }
 
 // =============================================================================
-// JsRegExpLiteralExtra
-// =============================================================================
-
-void JsRegExpLiteralExtra::SerializeFields(std::ostream& os, bool &needs_comma) const {
-  MaybeAddComma(os, needs_comma);
-  os << "\"raw\":" << (nlohmann::json(raw_)).dump();
-}
-
-void JsRegExpLiteralExtra::Serialize(std::ostream& os) const {
-  os << "{";
-  {
-    bool needs_comma = false;
-    JsRegExpLiteralExtra::SerializeFields(os, needs_comma);
-  }
-  os << "}";
-}
-
-// =============================================================================
 // JsRegExpLiteral
 // =============================================================================
 
@@ -551,11 +512,6 @@ void JsRegExpLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const
   os << "\"pattern\":" << (nlohmann::json(pattern_)).dump();
   MaybeAddComma(os, needs_comma);
   os << "\"flags\":" << (nlohmann::json(flags_)).dump();
-  if (extra_.has_value()) {
-    MaybeAddComma(os, needs_comma);
-    os << "\"extra\":";
-    extra_.value()->Serialize(os);
-  }
 }
 
 void JsRegExpLiteral::Serialize(std::ostream& os) const {
@@ -594,37 +550,12 @@ void JsNullLiteral::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
-// JsStringLiteralExtra
-// =============================================================================
-
-void JsStringLiteralExtra::SerializeFields(std::ostream& os, bool &needs_comma) const {
-  MaybeAddComma(os, needs_comma);
-  os << "\"raw\":" << (nlohmann::json(raw_)).dump();
-  MaybeAddComma(os, needs_comma);
-  os << "\"rawValue\":" << (nlohmann::json(raw_value_)).dump();
-}
-
-void JsStringLiteralExtra::Serialize(std::ostream& os) const {
-  os << "{";
-  {
-    bool needs_comma = false;
-    JsStringLiteralExtra::SerializeFields(os, needs_comma);
-  }
-  os << "}";
-}
-
-// =============================================================================
 // JsStringLiteral
 // =============================================================================
 
 void JsStringLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
   os << "\"value\":" << (nlohmann::json(value_)).dump();
-  if (extra_.has_value()) {
-    MaybeAddComma(os, needs_comma);
-    os << "\"extra\":";
-    extra_.value()->Serialize(os);
-  }
 }
 
 void JsStringLiteral::Serialize(std::ostream& os) const {
@@ -665,27 +596,6 @@ void JsBooleanLiteral::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
-// JsNumericLiteralExtra
-// =============================================================================
-
-void JsNumericLiteralExtra::SerializeFields(std::ostream& os, bool &needs_comma) const {
-  MaybeAddComma(os, needs_comma);
-  os << "\"raw\":" << (nlohmann::json(raw_)).dump();
-  MaybeAddComma(os, needs_comma);
-  os << "\"rawValue\":";
-  SerializeDouble(os, raw_value_);
-}
-
-void JsNumericLiteralExtra::Serialize(std::ostream& os) const {
-  os << "{";
-  {
-    bool needs_comma = false;
-    JsNumericLiteralExtra::SerializeFields(os, needs_comma);
-  }
-  os << "}";
-}
-
-// =============================================================================
 // JsNumericLiteral
 // =============================================================================
 
@@ -693,11 +603,6 @@ void JsNumericLiteral::SerializeFields(std::ostream& os, bool &needs_comma) cons
   MaybeAddComma(os, needs_comma);
   os << "\"value\":";
   SerializeDouble(os, value_);
-  if (extra_.has_value()) {
-    MaybeAddComma(os, needs_comma);
-    os << "\"extra\":";
-    extra_.value()->Serialize(os);
-  }
 }
 
 void JsNumericLiteral::Serialize(std::ostream& os) const {
@@ -715,37 +620,12 @@ void JsNumericLiteral::Serialize(std::ostream& os) const {
 }
 
 // =============================================================================
-// JsBigIntLiteralExtra
-// =============================================================================
-
-void JsBigIntLiteralExtra::SerializeFields(std::ostream& os, bool &needs_comma) const {
-  MaybeAddComma(os, needs_comma);
-  os << "\"raw\":" << (nlohmann::json(raw_)).dump();
-  MaybeAddComma(os, needs_comma);
-  os << "\"rawValue\":" << (nlohmann::json(raw_value_)).dump();
-}
-
-void JsBigIntLiteralExtra::Serialize(std::ostream& os) const {
-  os << "{";
-  {
-    bool needs_comma = false;
-    JsBigIntLiteralExtra::SerializeFields(os, needs_comma);
-  }
-  os << "}";
-}
-
-// =============================================================================
 // JsBigIntLiteral
 // =============================================================================
 
 void JsBigIntLiteral::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
   os << "\"value\":" << (nlohmann::json(value_)).dump();
-  if (extra_.has_value()) {
-    MaybeAddComma(os, needs_comma);
-    os << "\"extra\":";
-    extra_.value()->Serialize(os);
-  }
 }
 
 void JsBigIntLiteral::Serialize(std::ostream& os) const {

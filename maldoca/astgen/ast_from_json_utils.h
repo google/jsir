@@ -175,6 +175,20 @@ inline absl::StatusOr<double> JsonToDouble(const nlohmann::json& json) {
   return json.get<double>();
 }
 
+inline bool IsJson(const nlohmann::json& json) { return json.is_object(); }
+
+// Converter for the builtin JSON type (BuiltinTypeKind::kJson). The value must
+// be a JSON object (e.g. Babel's `extra`). The object is kept as-is.
+inline absl::StatusOr<nlohmann::json> JsonToJson(const nlohmann::json& json) {
+  if (json.is_null()) {
+    return absl::InvalidArgumentError("json is null.");
+  }
+  if (!json.is_object()) {
+    return absl::InvalidArgumentError("json is not an object.");
+  }
+  return json;
+}
+
 template <typename T>
 inline Converter<T> Enum(
     std::function<absl::StatusOr<T>(absl::string_view)> string_to_enum) {

@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 159,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "module",
 // AST-NEXT:     "body": [
@@ -102,11 +105,11 @@
 // AST-NEXT:           "start": 30,
 // AST-NEXT:           "end": 35,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "src",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"src\"",
 // AST-NEXT:             "rawValue": "src"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "src"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -199,11 +202,11 @@
 // AST-NEXT:           "start": 62,
 // AST-NEXT:           "end": 67,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "src",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"src\"",
 // AST-NEXT:             "rawValue": "src"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "src"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -354,11 +357,11 @@
 // AST-NEXT:           "start": 107,
 // AST-NEXT:           "end": 112,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "src",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"src\"",
 // AST-NEXT:             "rawValue": "src"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "src"
 // AST-NEXT:         }
 // AST-NEXT:       },
 // AST-NEXT:       {
@@ -433,11 +436,11 @@
 // AST-NEXT:           "start": 152,
 // AST-NEXT:           "end": 157,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "src",
 // AST-NEXT:           "extra": {
 // AST-NEXT:             "raw": "\"src\"",
 // AST-NEXT:             "rawValue": "src"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "src"
 // AST-NEXT:         }
 // AST-NEXT:       }
 // AST-NEXT:     ],

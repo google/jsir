@@ -47,12 +47,6 @@ JsirToAst::VisitInterpreterDirectiveAttr(JsirInterpreterDirectiveAttr attr) {
   return Create<JsInterpreterDirective>(attr, attr.getValue().str());
 }
 
-absl::StatusOr<std::unique_ptr<JsDirectiveLiteralExtra>>
-JsirToAst::VisitDirectiveLiteralExtraAttr(JsirDirectiveLiteralExtraAttr attr) {
-  return Create<JsDirectiveLiteralExtra>(attr, attr.getRaw().str(),
-                                         attr.getRawValue().str());
-}
-
 absl::StatusOr<std::unique_ptr<JsIdentifier>> JsirToAst::VisitIdentifierAttr(
     JsirIdentifierAttr attr) {
   return Create<JsIdentifier>(attr, attr.getName().str());
@@ -64,55 +58,19 @@ absl::StatusOr<std::unique_ptr<JsPrivateName>> JsirToAst::VisitPrivateNameAttr(
   return Create<JsPrivateName>(attr, std::move(id));
 }
 
-absl::StatusOr<std::unique_ptr<JsRegExpLiteralExtra>>
-JsirToAst::VisitRegExpLiteralExtraAttr(JsirRegExpLiteralExtraAttr attr) {
-  return Create<JsRegExpLiteralExtra>(attr, attr.getRaw().str());
-}
-
-absl::StatusOr<std::unique_ptr<JsStringLiteralExtra>>
-JsirToAst::VisitStringLiteralExtraAttr(JsirStringLiteralExtraAttr attr) {
-  return Create<JsStringLiteralExtra>(attr, attr.getRaw().str(),
-                                      attr.getRawValue().str());
-}
-
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsirToAst::VisitStringLiteralAttr(JsirStringLiteralAttr attr) {
-  std::optional<std::unique_ptr<JsStringLiteralExtra>> extra;
-  if (attr.getExtra() != nullptr) {
-    ABSL_ASSIGN_OR_RETURN(extra, VisitStringLiteralExtraAttr(attr.getExtra()));
-  }
-  return Create<JsStringLiteral>(attr, attr.getValue().str(), std::move(extra));
-}
-
-absl::StatusOr<std::unique_ptr<JsNumericLiteralExtra>>
-JsirToAst::VisitNumericLiteralExtraAttr(JsirNumericLiteralExtraAttr attr) {
-  return Create<JsNumericLiteralExtra>(attr, attr.getRaw().str(),
-                                       attr.getRawValue().getValueAsDouble());
+  return Create<JsStringLiteral>(attr, attr.getValue().str());
 }
 
 absl::StatusOr<std::unique_ptr<JsNumericLiteral>>
 JsirToAst::VisitNumericLiteralAttr(JsirNumericLiteralAttr attr) {
-  std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra;
-  if (attr.getExtra() != nullptr) {
-    ABSL_ASSIGN_OR_RETURN(extra, VisitNumericLiteralExtraAttr(attr.getExtra()));
-  }
-  return Create<JsNumericLiteral>(attr, attr.getValue().getValueAsDouble(),
-                                  std::move(extra));
-}
-
-absl::StatusOr<std::unique_ptr<JsBigIntLiteralExtra>>
-JsirToAst::VisitBigIntLiteralExtraAttr(JsirBigIntLiteralExtraAttr attr) {
-  return Create<JsBigIntLiteralExtra>(attr, attr.getRaw().str(),
-                                      attr.getRawValue().str());
+  return Create<JsNumericLiteral>(attr, attr.getValue().getValueAsDouble());
 }
 
 absl::StatusOr<std::unique_ptr<JsBigIntLiteral>>
 JsirToAst::VisitBigIntLiteralAttr(JsirBigIntLiteralAttr attr) {
-  std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra;
-  if (attr.getExtra() != nullptr) {
-    ABSL_ASSIGN_OR_RETURN(extra, VisitBigIntLiteralExtraAttr(attr.getExtra()));
-  }
-  return Create<JsBigIntLiteral>(attr, attr.getValue().str(), std::move(extra));
+  return Create<JsBigIntLiteral>(attr, attr.getValue().str());
 }
 
 absl::StatusOr<std::variant<std::unique_ptr<JsIdentifier>,

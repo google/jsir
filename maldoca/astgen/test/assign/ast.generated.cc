@@ -72,9 +72,11 @@ absl::StatusOr<AExpressionType> StringToAExpressionType(std::string_view s) {
 // =============================================================================
 
 AIdentifier::AIdentifier(
-    std::string name)
+    std::string name,
+    std::optional<nlohmann::json> metadata)
     : AExpression(),
-      name_(std::move(name)) {}
+      name_(std::move(name)),
+      metadata_(std::move(metadata)) {}
 
 std::string_view AIdentifier::name() const {
   return name_;
@@ -82,6 +84,26 @@ std::string_view AIdentifier::name() const {
 
 void AIdentifier::set_name(std::string name) {
   name_ = std::move(name);
+}
+
+std::optional<nlohmann::json*> AIdentifier::metadata() {
+  if (!metadata_.has_value()) {
+    return std::nullopt;
+  } else {
+    return &metadata_.value();
+  }
+}
+
+std::optional<const nlohmann::json*> AIdentifier::metadata() const {
+  if (!metadata_.has_value()) {
+    return std::nullopt;
+  } else {
+    return &metadata_.value();
+  }
+}
+
+void AIdentifier::set_metadata(std::optional<nlohmann::json> metadata) {
+  metadata_ = std::move(metadata);
 }
 
 // =============================================================================

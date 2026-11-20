@@ -33,7 +33,7 @@
 // SOURCE-NEXT:         %2 = jsir.identifier {"prelude"}
 // SOURCE-NEXT:           // %2 = #jsir_builtin<builtin_function "prelude">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %3 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:         %3 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:           // %3 = 0.000000e+00 : f64
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %4 = jsir.call_expression (%2, %3)
@@ -70,7 +70,7 @@
 // SOURCE-NEXT:         %8 = jsir.identifier {"wrapper_1"}
 // SOURCE-NEXT:           // %8 = #jsir_builtin<builtin_function "prelude">
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper_1#1 : #jsir_builtin<builtin_function "prelude">> }
-// SOURCE-NEXT:         %9 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:         %9 = jsir.numeric_literal {1.000000e+00 : f64}
 // SOURCE-NEXT:           // %9 = 1.000000e+00 : f64
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper_1#1 : #jsir_builtin<builtin_function "prelude">> }
 // SOURCE-NEXT:         %10 = jsir.call_expression (%8, %9)
@@ -107,7 +107,7 @@
 // SOURCE-NEXT:         %14 = jsir.identifier {"wrapper_2"}
 // SOURCE-NEXT:           // %14 = #jsir_builtin<builtin_function "prelude">
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper_1#1 : #jsir_builtin<builtin_function "prelude">> <wrapper_2#2 : #jsir_builtin<builtin_function "prelude">> }
-// SOURCE-NEXT:         %15 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
+// SOURCE-NEXT:         %15 = jsir.numeric_literal {2.000000e+00 : f64}
 // SOURCE-NEXT:           // %15 = 2.000000e+00 : f64
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper_1#1 : #jsir_builtin<builtin_function "prelude">> <wrapper_2#2 : #jsir_builtin<builtin_function "prelude">> }
 // SOURCE-NEXT:         %16 = jsir.call_expression (%14, %15)
@@ -144,7 +144,7 @@
 // SOURCE-NEXT:         %20 = jsir.identifier {"wrapper_3"}
 // SOURCE-NEXT:           // %20 = #jsir_builtin<builtin_function "prelude">
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper_1#1 : #jsir_builtin<builtin_function "prelude">> <wrapper_2#2 : #jsir_builtin<builtin_function "prelude">> <wrapper_3#3 : #jsir_builtin<builtin_function "prelude">> }
-// SOURCE-NEXT:         %21 = jsir.numeric_literal {#jsir<numeric_literal_extra "3", 3.000000e+00 : f64>, 3.000000e+00 : f64}
+// SOURCE-NEXT:         %21 = jsir.numeric_literal {3.000000e+00 : f64}
 // SOURCE-NEXT:           // %21 = 3.000000e+00 : f64
 // SOURCE-NEXT:           // State [default = <unknown>] { <wrapper_1#1 : #jsir_builtin<builtin_function "prelude">> <wrapper_2#2 : #jsir_builtin<builtin_function "prelude">> <wrapper_3#3 : #jsir_builtin<builtin_function "prelude">> }
 // SOURCE-NEXT:         %22 = jsir.call_expression (%20, %21)

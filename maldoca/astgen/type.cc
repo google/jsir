@@ -56,6 +56,10 @@ std::unique_ptr<BuiltinType> FromStringTypePb(const StringTypePb& pb) {
   return absl::make_unique<BuiltinType>(BuiltinTypeKind::kString, "");
 }
 
+std::unique_ptr<BuiltinType> FromJsonTypePb(const JsonTypePb& pb) {
+  return absl::make_unique<BuiltinType>(BuiltinTypeKind::kJson, "");
+}
+
 std::unique_ptr<EnumType> FromEnumTypePb(absl::string_view enum_,
                                          absl::string_view lang_name_) {
   return absl::make_unique<EnumType>(Symbol(enum_), lang_name_);
@@ -188,6 +192,9 @@ absl::StatusOr<std::unique_ptr<Type>> FromTypePb(const TypePb& pb,
 
     case TypePb::KindCase::kList:
       return FromListTypePb(pb.list(), lang_name);
+
+    case TypePb::KindCase::kJson:
+      return FromJsonTypePb(pb.json());
   }
 }
 
@@ -227,6 +234,8 @@ std::string BuiltinType::JsType() const {
       return "/*double*/number";
     case BuiltinTypeKind::kString:
       return "string";
+    case BuiltinTypeKind::kJson:
+      return "Record<string, unknown>";
   }
 }
 
@@ -281,6 +290,8 @@ std::string BuiltinType::CcType() const {
       return "double";
     case BuiltinTypeKind::kString:
       return "std::string";
+    case BuiltinTypeKind::kJson:
+      return "nlohmann::json";
   }
 }
 
@@ -369,6 +380,13 @@ std::string BuiltinType::CcGetterType(CcGetterKind getter_kind) const {
       return "double";
     case BuiltinTypeKind::kString:
       return "std::string_view";
+    case BuiltinTypeKind::kJson:
+      switch (getter_kind) {
+        case CcGetterKind::kMutable:
+          return "nlohmann::json*";
+        case CcGetterKind::kConst:
+          return "const nlohmann::json*";
+      }
   }
 }
 
@@ -467,6 +485,8 @@ std::string BuiltinType::CcMlirType(absl::string_view ir_lang_name,
       return "mlir::FloatAttr";
     case BuiltinTypeKind::kString:
       return "mlir::StringAttr";
+    case BuiltinTypeKind::kJson:
+      return "mlir::DictionaryAttr";
   }
 }
 
@@ -620,6 +640,8 @@ std::string BuiltinType::TdType(FieldKind kind) const {
       return "F64Attr";
     case BuiltinTypeKind::kString:
       return "StrAttr";
+    case BuiltinTypeKind::kJson:
+      return "DictionaryAttr";
   }
 }
 

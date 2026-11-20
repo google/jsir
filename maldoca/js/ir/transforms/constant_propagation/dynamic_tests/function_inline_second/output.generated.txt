@@ -395,13 +395,13 @@
 // SOURCE-NEXT:                         })
 // SOURCE-NEXT:                           // %18 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %19 = jsir.object_property (%18) {#jsir<string_literal <L 158 C 4>, <L 158 C 11>, 5380, 5387, 18, "cmIIa", "'cmIIa'", "cmIIa">, false}
+// SOURCE-NEXT:                         %19 = jsir.object_property (%18) {#jsir<string_literal <L 158 C 4>, <L 158 C 11>, 5380, 5387, 18, {raw = "'cmIIa'", rawValue = "cmIIa"}, "cmIIa">, false}
 // SOURCE-NEXT:                           // %19 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %20 = jsir.string_literal {#jsir<string_literal_extra "'LtmRg'", "LtmRg">, "LtmRg"}
+// SOURCE-NEXT:                         %20 = jsir.string_literal {"LtmRg"}
 // SOURCE-NEXT:                           // %20 = "LtmRg"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %21 = jsir.object_property (%20) {#jsir<string_literal <L 161 C 4>, <L 161 C 11>, 5471, 5478, 18, "rvTTb", "'rvTTb'", "rvTTb">, false}
+// SOURCE-NEXT:                         %21 = jsir.object_property (%20) {#jsir<string_literal <L 161 C 4>, <L 161 C 11>, 5471, 5478, 18, {raw = "'rvTTb'", rawValue = "rvTTb"}, "rvTTb">, false}
 // SOURCE-NEXT:                           // %21 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %22 = jsir.function_expression {false, false} ({
@@ -444,25 +444,25 @@
 // SOURCE-NEXT:                         })
 // SOURCE-NEXT:                           // %22 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %23 = jsir.object_property (%22) {#jsir<string_literal <L 162 C 4>, <L 162 C 11>, 5493, 5500, 18, "BLRju", "'BLRju'", "BLRju">, false}
+// SOURCE-NEXT:                         %23 = jsir.object_property (%22) {#jsir<string_literal <L 162 C 4>, <L 162 C 11>, 5493, 5500, 18, {raw = "'BLRju'", rawValue = "BLRju"}, "BLRju">, false}
 // SOURCE-NEXT:                           // %23 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %24 = jsir.string_literal {#jsir<string_literal_extra "'snjPo'", "snjPo">, "snjPo"}
+// SOURCE-NEXT:                         %24 = jsir.string_literal {"snjPo"}
 // SOURCE-NEXT:                           // %24 = "snjPo"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %25 = jsir.object_property (%24) {#jsir<string_literal <L 165 C 4>, <L 165 C 11>, 5584, 5591, 18, "INEBZ", "'INEBZ'", "INEBZ">, false}
+// SOURCE-NEXT:                         %25 = jsir.object_property (%24) {#jsir<string_literal <L 165 C 4>, <L 165 C 11>, 5584, 5591, 18, {raw = "'INEBZ'", rawValue = "INEBZ"}, "INEBZ">, false}
 // SOURCE-NEXT:                           // %25 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %26 = jsir.string_literal {#jsir<string_literal_extra "'Nngrv'", "Nngrv">, "Nngrv"}
+// SOURCE-NEXT:                         %26 = jsir.string_literal {"Nngrv"}
 // SOURCE-NEXT:                           // %26 = "Nngrv"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %27 = jsir.object_property (%26) {#jsir<string_literal <L 166 C 4>, <L 166 C 11>, 5606, 5613, 18, "gCfqE", "'gCfqE'", "gCfqE">, false}
+// SOURCE-NEXT:                         %27 = jsir.object_property (%26) {#jsir<string_literal <L 166 C 4>, <L 166 C 11>, 5606, 5613, 18, {raw = "'gCfqE'", rawValue = "gCfqE"}, "gCfqE">, false}
 // SOURCE-NEXT:                           // %27 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %28 = jsir.string_literal {#jsir<string_literal_extra "'2|0|4|3|1'", "2|0|4|3|1">, "2|0|4|3|1"}
+// SOURCE-NEXT:                         %28 = jsir.string_literal {"2|0|4|3|1"}
 // SOURCE-NEXT:                           // %28 = "2|0|4|3|1"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %29 = jsir.object_property (%28) {#jsir<string_literal <L 167 C 4>, <L 167 C 11>, 5628, 5635, 18, "ZUNtd", "'ZUNtd'", "ZUNtd">, false}
+// SOURCE-NEXT:                         %29 = jsir.object_property (%28) {#jsir<string_literal <L 167 C 4>, <L 167 C 11>, 5628, 5635, 18, {raw = "'ZUNtd'", rawValue = "ZUNtd"}, "ZUNtd">, false}
 // SOURCE-NEXT:                           // %29 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %30 = jsir.function_expression {false, false} ({
@@ -505,7 +505,7 @@
 // SOURCE-NEXT:                         })
 // SOURCE-NEXT:                           // %30 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %31 = jsir.object_property (%30) {#jsir<string_literal <L 168 C 4>, <L 168 C 11>, 5654, 5661, 18, "soDZs", "'soDZs'", "soDZs">, false}
+// SOURCE-NEXT:                         %31 = jsir.object_property (%30) {#jsir<string_literal <L 168 C 4>, <L 168 C 11>, 5654, 5661, 18, {raw = "'soDZs'", rawValue = "soDZs"}, "soDZs">, false}
 // SOURCE-NEXT:                           // %31 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %32 = jsir.function_expression {false, false} ({
@@ -548,19 +548,19 @@
 // SOURCE-NEXT:                         })
 // SOURCE-NEXT:                           // %32 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %33 = jsir.object_property (%32) {#jsir<string_literal <L 171 C 4>, <L 171 C 11>, 5742, 5749, 18, "NieDC", "'NieDC'", "NieDC">, false}
+// SOURCE-NEXT:                         %33 = jsir.object_property (%32) {#jsir<string_literal <L 171 C 4>, <L 171 C 11>, 5742, 5749, 18, {raw = "'NieDC'", rawValue = "NieDC"}, "NieDC">, false}
 // SOURCE-NEXT:                           // %33 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %34 = jsir.string_literal {#jsir<string_literal_extra "'return (function() '", "return (function() ">, "return (function() "}
+// SOURCE-NEXT:                         %34 = jsir.string_literal {"return (function() "}
 // SOURCE-NEXT:                           // %34 = "return (function() "
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %35 = jsir.object_property (%34) {#jsir<string_literal <L 174 C 4>, <L 174 C 11>, 5831, 5838, 18, "yEDez", "'yEDez'", "yEDez">, false}
+// SOURCE-NEXT:                         %35 = jsir.object_property (%34) {#jsir<string_literal <L 174 C 4>, <L 174 C 11>, 5831, 5838, 18, {raw = "'yEDez'", rawValue = "yEDez"}, "yEDez">, false}
 // SOURCE-NEXT:                           // %35 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %36 = jsir.string_literal {#jsir<string_literal_extra "'{}.constructor(\22return this\22)( )'", "{}.constructor(\22return this\22)( )">, "{}.constructor(\22return this\22)( )"}
+// SOURCE-NEXT:                         %36 = jsir.string_literal {"{}.constructor(\22return this\22)( )"}
 // SOURCE-NEXT:                           // %36 = "{}.constructor(\22return this\22)( )"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %37 = jsir.object_property (%36) {#jsir<string_literal <L 175 C 4>, <L 175 C 11>, 5867, 5874, 18, "ZEmIi", "'ZEmIi'", "ZEmIi">, false}
+// SOURCE-NEXT:                         %37 = jsir.object_property (%36) {#jsir<string_literal <L 175 C 4>, <L 175 C 11>, 5867, 5874, 18, {raw = "'ZEmIi'", rawValue = "ZEmIi"}, "ZEmIi">, false}
 // SOURCE-NEXT:                           // %37 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %38 = jsir.function_expression {false, false} ({
@@ -603,49 +603,49 @@
 // SOURCE-NEXT:                         })
 // SOURCE-NEXT:                           // %38 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %39 = jsir.object_property (%38) {#jsir<string_literal <L 176 C 4>, <L 176 C 11>, 5916, 5923, 18, "jXOCo", "'jXOCo'", "jXOCo">, false}
+// SOURCE-NEXT:                         %39 = jsir.object_property (%38) {#jsir<string_literal <L 176 C 4>, <L 176 C 11>, 5916, 5923, 18, {raw = "'jXOCo'", rawValue = "jXOCo"}, "jXOCo">, false}
 // SOURCE-NEXT:                           // %39 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %40 = jsir.string_literal {#jsir<string_literal_extra "'3|0|2|4|5|1'", "3|0|2|4|5|1">, "3|0|2|4|5|1"}
+// SOURCE-NEXT:                         %40 = jsir.string_literal {"3|0|2|4|5|1"}
 // SOURCE-NEXT:                           // %40 = "3|0|2|4|5|1"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %41 = jsir.object_property (%40) {#jsir<string_literal <L 179 C 4>, <L 179 C 11>, 6005, 6012, 18, "GyCwQ", "'GyCwQ'", "GyCwQ">, false}
+// SOURCE-NEXT:                         %41 = jsir.object_property (%40) {#jsir<string_literal <L 179 C 4>, <L 179 C 11>, 6005, 6012, 18, {raw = "'GyCwQ'", rawValue = "GyCwQ"}, "GyCwQ">, false}
 // SOURCE-NEXT:                           // %41 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %42 = jsir.string_literal {#jsir<string_literal_extra "'log'", "log">, "log"}
+// SOURCE-NEXT:                         %42 = jsir.string_literal {"log"}
 // SOURCE-NEXT:                           // %42 = "log"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %43 = jsir.object_property (%42) {#jsir<string_literal <L 180 C 4>, <L 180 C 11>, 6033, 6040, 18, "Fmzmy", "'Fmzmy'", "Fmzmy">, false}
+// SOURCE-NEXT:                         %43 = jsir.object_property (%42) {#jsir<string_literal <L 180 C 4>, <L 180 C 11>, 6033, 6040, 18, {raw = "'Fmzmy'", rawValue = "Fmzmy"}, "Fmzmy">, false}
 // SOURCE-NEXT:                           // %43 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %44 = jsir.string_literal {#jsir<string_literal_extra "'warn'", "warn">, "warn"}
+// SOURCE-NEXT:                         %44 = jsir.string_literal {"warn"}
 // SOURCE-NEXT:                           // %44 = "warn"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %45 = jsir.object_property (%44) {#jsir<string_literal <L 181 C 4>, <L 181 C 11>, 6053, 6060, 18, "bDDQL", "'bDDQL'", "bDDQL">, false}
+// SOURCE-NEXT:                         %45 = jsir.object_property (%44) {#jsir<string_literal <L 181 C 4>, <L 181 C 11>, 6053, 6060, 18, {raw = "'bDDQL'", rawValue = "bDDQL"}, "bDDQL">, false}
 // SOURCE-NEXT:                           // %45 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %46 = jsir.string_literal {#jsir<string_literal_extra "'info'", "info">, "info"}
+// SOURCE-NEXT:                         %46 = jsir.string_literal {"info"}
 // SOURCE-NEXT:                           // %46 = "info"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %47 = jsir.object_property (%46) {#jsir<string_literal <L 182 C 4>, <L 182 C 11>, 6074, 6081, 18, "wkULH", "'wkULH'", "wkULH">, false}
+// SOURCE-NEXT:                         %47 = jsir.object_property (%46) {#jsir<string_literal <L 182 C 4>, <L 182 C 11>, 6074, 6081, 18, {raw = "'wkULH'", rawValue = "wkULH"}, "wkULH">, false}
 // SOURCE-NEXT:                           // %47 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %48 = jsir.string_literal {#jsir<string_literal_extra "'error'", "error">, "error"}
+// SOURCE-NEXT:                         %48 = jsir.string_literal {"error"}
 // SOURCE-NEXT:                           // %48 = "error"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %49 = jsir.object_property (%48) {#jsir<string_literal <L 183 C 4>, <L 183 C 11>, 6095, 6102, 18, "Wftmu", "'Wftmu'", "Wftmu">, false}
+// SOURCE-NEXT:                         %49 = jsir.object_property (%48) {#jsir<string_literal <L 183 C 4>, <L 183 C 11>, 6095, 6102, 18, {raw = "'Wftmu'", rawValue = "Wftmu"}, "Wftmu">, false}
 // SOURCE-NEXT:                           // %49 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %50 = jsir.string_literal {#jsir<string_literal_extra "'exception'", "exception">, "exception"}
+// SOURCE-NEXT:                         %50 = jsir.string_literal {"exception"}
 // SOURCE-NEXT:                           // %50 = "exception"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %51 = jsir.object_property (%50) {#jsir<string_literal <L 184 C 4>, <L 184 C 11>, 6117, 6124, 18, "gXlVo", "'gXlVo'", "gXlVo">, false}
+// SOURCE-NEXT:                         %51 = jsir.object_property (%50) {#jsir<string_literal <L 184 C 4>, <L 184 C 11>, 6117, 6124, 18, {raw = "'gXlVo'", rawValue = "gXlVo"}, "gXlVo">, false}
 // SOURCE-NEXT:                           // %51 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %52 = jsir.string_literal {#jsir<string_literal_extra "'table'", "table">, "table"}
+// SOURCE-NEXT:                         %52 = jsir.string_literal {"table"}
 // SOURCE-NEXT:                           // %52 = "table"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %53 = jsir.object_property (%52) {#jsir<string_literal <L 185 C 4>, <L 185 C 11>, 6143, 6150, 18, "DRyXW", "'DRyXW'", "DRyXW">, false}
+// SOURCE-NEXT:                         %53 = jsir.object_property (%52) {#jsir<string_literal <L 185 C 4>, <L 185 C 11>, 6143, 6150, 18, {raw = "'DRyXW'", rawValue = "DRyXW"}, "DRyXW">, false}
 // SOURCE-NEXT:                           // %53 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %54 = jsir.function_expression {false, false} ({
@@ -682,13 +682,13 @@
 // SOURCE-NEXT:                         })
 // SOURCE-NEXT:                           // %54 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %55 = jsir.object_property (%54) {#jsir<string_literal <L 186 C 4>, <L 186 C 11>, 6165, 6172, 18, "fPEpB", "'fPEpB'", "fPEpB">, false}
+// SOURCE-NEXT:                         %55 = jsir.object_property (%54) {#jsir<string_literal <L 186 C 4>, <L 186 C 11>, 6165, 6172, 18, {raw = "'fPEpB'", rawValue = "fPEpB"}, "fPEpB">, false}
 // SOURCE-NEXT:                           // %55 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %56 = jsir.string_literal {#jsir<string_literal_extra "'Hello World!'", "Hello World!">, "Hello World!"}
+// SOURCE-NEXT:                         %56 = jsir.string_literal {"Hello World!"}
 // SOURCE-NEXT:                           // %56 = "Hello World!"
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %57 = jsir.object_property (%56) {#jsir<string_literal <L 189 C 4>, <L 189 C 11>, 6233, 6240, 18, "Xxejz", "'Xxejz'", "Xxejz">, false}
+// SOURCE-NEXT:                         %57 = jsir.object_property (%56) {#jsir<string_literal <L 189 C 4>, <L 189 C 11>, 6233, 6240, 18, {raw = "'Xxejz'", rawValue = "Xxejz"}, "Xxejz">, false}
 // SOURCE-NEXT:                           // %57 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         jsir.exprs_region_end (%19, %21, %23, %25, %27, %29, %31, %33, %35, %37, %39, %41, %43, %45, %47, %49, %51, %53, %55, %57)
@@ -735,7 +735,7 @@
 // SOURCE-NEXT:                         %16 = jsir.identifier {"_0x1150ec"}
 // SOURCE-NEXT:                           // %16 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %17 = jsir.numeric_literal {#jsir<numeric_literal_extra "343", 3.430000e+02 : f64>, 3.430000e+02 : f64}
+// SOURCE-NEXT:                         %17 = jsir.numeric_literal {3.430000e+02 : f64}
 // SOURCE-NEXT:                           // %17 = 3.430000e+02 : f64
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %18 = jsir.unary_expression (%17) {"-", true}
@@ -856,7 +856,7 @@
 // SOURCE-NEXT:                                             %30 = jsir.identifier {"_0x8ab890"}
 // SOURCE-NEXT:                                               // %30 = <unknown>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                             %31 = jsir.numeric_literal {#jsir<numeric_literal_extra "283", 2.830000e+02 : f64>, 2.830000e+02 : f64}
+// SOURCE-NEXT:                                             %31 = jsir.numeric_literal {2.830000e+02 : f64}
 // SOURCE-NEXT:                                               // %31 = 2.830000e+02 : f64
 // SOURCE-NEXT:                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                             %32 = jsir.binary_expression (%30, %31) {"-"}
@@ -910,7 +910,7 @@
 // SOURCE-NEXT:                                             %30 = jsir.identifier {"_0x4957e3"}
 // SOURCE-NEXT:                                               // %30 = <unknown>
 // SOURCE-NEXT:                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                             %31 = jsir.numeric_literal {#jsir<numeric_literal_extra "491", 4.910000e+02 : f64>, 4.910000e+02 : f64}
+// SOURCE-NEXT:                                             %31 = jsir.numeric_literal {4.910000e+02 : f64}
 // SOURCE-NEXT:                                               // %31 = 4.910000e+02 : f64
 // SOURCE-NEXT:                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                             %32 = jsir.binary_expression (%30, %31) {"-"}
@@ -935,7 +935,7 @@
 // SOURCE-NEXT:                                     %21 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                       // %21 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %22 = jsir.string_literal {#jsir<string_literal_extra "'cmIIa'", "cmIIa">, "cmIIa"}
+// SOURCE-NEXT:                                     %22 = jsir.string_literal {"cmIIa"}
 // SOURCE-NEXT:                                       // %22 = "cmIIa"
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %23 = jsir.member_expression (%21, %22)
@@ -944,13 +944,13 @@
 // SOURCE-NEXT:                                     %24 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                       // %24 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %25 = jsir.string_literal {#jsir<string_literal_extra "'rvTTb'", "rvTTb">, "rvTTb"}
+// SOURCE-NEXT:                                     %25 = jsir.string_literal {"rvTTb"}
 // SOURCE-NEXT:                                       // %25 = "rvTTb"
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %26 = jsir.member_expression (%24, %25)
 // SOURCE-NEXT:                                       // %26 = "LtmRg"
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %27 = jsir.string_literal {#jsir<string_literal_extra "'VmyVp'", "VmyVp">, "VmyVp"}
+// SOURCE-NEXT:                                     %27 = jsir.string_literal {"VmyVp"}
 // SOURCE-NEXT:                                       // %27 = "VmyVp"
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %28 = jsir.call_expression (%23, %26, %27)
@@ -1053,7 +1053,7 @@
 // SOURCE-NEXT:                                                                     %42 = jsir.identifier {"_0x5b91b5"}
 // SOURCE-NEXT:                                                                       // %42 = <unknown>
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                     %43 = jsir.numeric_literal {#jsir<numeric_literal_extra "273", 2.730000e+02 : f64>, 2.730000e+02 : f64}
+// SOURCE-NEXT:                                                                     %43 = jsir.numeric_literal {2.730000e+02 : f64}
 // SOURCE-NEXT:                                                                       // %43 = 2.730000e+02 : f64
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                     %44 = jsir.binary_expression (%42, %43) {"-"}
@@ -1065,7 +1065,7 @@
 // SOURCE-NEXT:                                                                     %46 = jsir.identifier {"_0x102518"}
 // SOURCE-NEXT:                                                                       // %46 = <unknown>
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                     %47 = jsir.numeric_literal {#jsir<numeric_literal_extra "81", 8.100000e+01 : f64>, 8.100000e+01 : f64}
+// SOURCE-NEXT:                                                                     %47 = jsir.numeric_literal {8.100000e+01 : f64}
 // SOURCE-NEXT:                                                                       // %47 = 8.100000e+01 : f64
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                     %48 = jsir.binary_expression (%46, %47) {"-"}
@@ -1074,7 +1074,7 @@
 // SOURCE-NEXT:                                                                     %49 = jsir.identifier {"_0x102518"}
 // SOURCE-NEXT:                                                                       // %49 = <unknown>
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                     %50 = jsir.numeric_literal {#jsir<numeric_literal_extra "946", 9.460000e+02 : f64>, 9.460000e+02 : f64}
+// SOURCE-NEXT:                                                                     %50 = jsir.numeric_literal {9.460000e+02 : f64}
 // SOURCE-NEXT:                                                                       // %50 = 9.460000e+02 : f64
 // SOURCE-NEXT:                                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                     %51 = jsir.unary_expression (%50) {"-", true}
@@ -1117,7 +1117,7 @@
 // SOURCE-NEXT:                                                                         %47 = jsir.identifier {"_0x293663"}
 // SOURCE-NEXT:                                                                           // %47 = <unknown>
 // SOURCE-NEXT:                                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                         %48 = jsir.string_literal {#jsir<string_literal_extra "'apply'", "apply">, "apply"}
+// SOURCE-NEXT:                                                                         %48 = jsir.string_literal {"apply"}
 // SOURCE-NEXT:                                                                           // %48 = "apply"
 // SOURCE-NEXT:                                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                         %49 = jsir.member_expression (%47, %48)
@@ -1298,7 +1298,7 @@
 // SOURCE-NEXT:                                                                         %47 = jsir.identifier {"_0x4f3fc0"}
 // SOURCE-NEXT:                                                                           // %47 = <unknown>
 // SOURCE-NEXT:                                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                         %48 = jsir.string_literal {#jsir<string_literal_extra "'apply'", "apply">, "apply"}
+// SOURCE-NEXT:                                                                         %48 = jsir.string_literal {"apply"}
 // SOURCE-NEXT:                                                                           // %48 = "apply"
 // SOURCE-NEXT:                                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                         %49 = jsir.member_expression (%47, %48)
@@ -1460,7 +1460,7 @@
 // SOURCE-NEXT:                         %16 = jsir.identifier {"_0x1176c2"}
 // SOURCE-NEXT:                           // %16 = <unknown>
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                         %17 = jsir.numeric_literal {#jsir<numeric_literal_extra "122", 1.220000e+02 : f64>, 1.220000e+02 : f64}
+// SOURCE-NEXT:                         %17 = jsir.numeric_literal {1.220000e+02 : f64}
 // SOURCE-NEXT:                           // %17 = 1.220000e+02 : f64
 // SOURCE-NEXT:                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                         %18 = jsir.unary_expression (%17) {"-", true}
@@ -1544,7 +1544,7 @@
 // SOURCE-NEXT:                                     %32 = jsir.identifier {"_0x497bbc"}
 // SOURCE-NEXT:                                       // %32 = <unknown>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %33 = jsir.numeric_literal {#jsir<numeric_literal_extra "457", 4.570000e+02 : f64>, 4.570000e+02 : f64}
+// SOURCE-NEXT:                                     %33 = jsir.numeric_literal {4.570000e+02 : f64}
 // SOURCE-NEXT:                                       // %33 = 4.570000e+02 : f64
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %34 = jsir.binary_expression (%32, %33) {"-"}
@@ -1556,7 +1556,7 @@
 // SOURCE-NEXT:                                     %36 = jsir.identifier {"_0x2d9ed5"}
 // SOURCE-NEXT:                                       // %36 = <unknown>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %37 = jsir.numeric_literal {#jsir<numeric_literal_extra "369", 3.690000e+02 : f64>, 3.690000e+02 : f64}
+// SOURCE-NEXT:                                     %37 = jsir.numeric_literal {3.690000e+02 : f64}
 // SOURCE-NEXT:                                       // %37 = 3.690000e+02 : f64
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %38 = jsir.binary_expression (%36, %37) {"-"}
@@ -1565,7 +1565,7 @@
 // SOURCE-NEXT:                                     %39 = jsir.identifier {"_0x497bbc"}
 // SOURCE-NEXT:                                       // %39 = <unknown>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %40 = jsir.numeric_literal {#jsir<numeric_literal_extra "84", 8.400000e+01 : f64>, 8.400000e+01 : f64}
+// SOURCE-NEXT:                                     %40 = jsir.numeric_literal {8.400000e+01 : f64}
 // SOURCE-NEXT:                                       // %40 = 8.400000e+01 : f64
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %41 = jsir.binary_expression (%39, %40) {"-"}
@@ -1616,7 +1616,7 @@
 // SOURCE-NEXT:                                     %32 = jsir.identifier {"_0x425af0"}
 // SOURCE-NEXT:                                       // %32 = <unknown>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %33 = jsir.numeric_literal {#jsir<numeric_literal_extra "88", 8.800000e+01 : f64>, 8.800000e+01 : f64}
+// SOURCE-NEXT:                                     %33 = jsir.numeric_literal {8.800000e+01 : f64}
 // SOURCE-NEXT:                                       // %33 = 8.800000e+01 : f64
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %34 = jsir.binary_expression (%32, %33) {"-"}
@@ -1625,7 +1625,7 @@
 // SOURCE-NEXT:                                     %35 = jsir.identifier {"_0x2a4dc9"}
 // SOURCE-NEXT:                                       // %35 = <unknown>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %36 = jsir.numeric_literal {#jsir<numeric_literal_extra "394", 3.940000e+02 : f64>, 3.940000e+02 : f64}
+// SOURCE-NEXT:                                     %36 = jsir.numeric_literal {3.940000e+02 : f64}
 // SOURCE-NEXT:                                       // %36 = 3.940000e+02 : f64
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %37 = jsir.binary_expression (%35, %36) {"-"}
@@ -1637,7 +1637,7 @@
 // SOURCE-NEXT:                                     %39 = jsir.identifier {"_0x5d56ca"}
 // SOURCE-NEXT:                                       // %39 = <unknown>
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                     %40 = jsir.numeric_literal {#jsir<numeric_literal_extra "446", 4.460000e+02 : f64>, 4.460000e+02 : f64}
+// SOURCE-NEXT:                                     %40 = jsir.numeric_literal {4.460000e+02 : f64}
 // SOURCE-NEXT:                                       // %40 = 4.460000e+02 : f64
 // SOURCE-NEXT:                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                     %41 = jsir.binary_expression (%39, %40) {"-"}
@@ -1659,7 +1659,7 @@
 // SOURCE-NEXT:                             %21 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                               // %21 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             %22 = jsir.string_literal {#jsir<string_literal_extra "'BLRju'", "BLRju">, "BLRju"}
+// SOURCE-NEXT:                             %22 = jsir.string_literal {"BLRju"}
 // SOURCE-NEXT:                               // %22 = "BLRju"
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                             %23 = jsir.member_expression (%21, %22)
@@ -1668,7 +1668,7 @@
 // SOURCE-NEXT:                             %24 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                               // %24 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             %25 = jsir.string_literal {#jsir<string_literal_extra "'INEBZ'", "INEBZ">, "INEBZ"}
+// SOURCE-NEXT:                             %25 = jsir.string_literal {"INEBZ"}
 // SOURCE-NEXT:                               // %25 = "INEBZ"
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                             %26 = jsir.member_expression (%24, %25)
@@ -1677,7 +1677,7 @@
 // SOURCE-NEXT:                             %27 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                               // %27 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                             %28 = jsir.string_literal {#jsir<string_literal_extra "'gCfqE'", "gCfqE">, "gCfqE"}
+// SOURCE-NEXT:                             %28 = jsir.string_literal {"gCfqE"}
 // SOURCE-NEXT:                               // %28 = "gCfqE"
 // SOURCE-NEXT:                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                             %29 = jsir.member_expression (%27, %28)
@@ -1701,16 +1701,16 @@
 // SOURCE-NEXT:                                         %31 = jsir.identifier_ref {"_0x2abedf"}
 // SOURCE-NEXT:                                           // %31 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                         %32 = jsir.string_literal {#jsir<string_literal_extra "'5|2|1|4|3|0'", "5|2|1|4|3|0">, "5|2|1|4|3|0"}
+// SOURCE-NEXT:                                         %32 = jsir.string_literal {"5|2|1|4|3|0"}
 // SOURCE-NEXT:                                           // %32 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                         %33 = jsir.string_literal {#jsir<string_literal_extra "'split'", "split">, "split"}
+// SOURCE-NEXT:                                         %33 = jsir.string_literal {"split"}
 // SOURCE-NEXT:                                           // %33 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                         %34 = jsir.member_expression (%32, %33)
 // SOURCE-NEXT:                                           // %34 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                         %35 = jsir.string_literal {#jsir<string_literal_extra "'|'", "|">, "|"}
+// SOURCE-NEXT:                                         %35 = jsir.string_literal {"|"}
 // SOURCE-NEXT:                                           // %35 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                         %36 = jsir.call_expression (%34, %35)
@@ -1722,7 +1722,7 @@
 // SOURCE-NEXT:                                         %38 = jsir.identifier_ref {"_0x53335d"}
 // SOURCE-NEXT:                                           // %38 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                         %39 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                                         %39 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:                                           // %39 = <uninitialized>
 // SOURCE-NEXT:                                           // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                         %40 = jsir.variable_declarator (%38, %39)
@@ -1775,7 +1775,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <not executable>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'0'", "0">, "0"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"0"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -1809,7 +1809,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <not executable>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'1'", "1">, "1"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"1"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -1861,7 +1861,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <not executable>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'2'", "2">, "2"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"2"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -1901,7 +1901,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <not executable>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'3'", "3">, "3"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"3"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -1913,7 +1913,7 @@
 // SOURCE-NEXT:                                                     %35 = jsir.identifier {"_0x185f9c"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %36 = jsir.string_literal {#jsir<string_literal_extra "'toString'", "toString">, "toString"}
+// SOURCE-NEXT:                                                     %36 = jsir.string_literal {"toString"}
 // SOURCE-NEXT:                                                       // %36 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     %37 = jsir.member_expression_ref (%35, %36)
@@ -1922,13 +1922,13 @@
 // SOURCE-NEXT:                                                     %38 = jsir.identifier {"_0x527da8"}
 // SOURCE-NEXT:                                                       // %38 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %39 = jsir.string_literal {#jsir<string_literal_extra "'toString'", "toString">, "toString"}
+// SOURCE-NEXT:                                                     %39 = jsir.string_literal {"toString"}
 // SOURCE-NEXT:                                                       // %39 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     %40 = jsir.member_expression (%38, %39)
 // SOURCE-NEXT:                                                       // %40 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %41 = jsir.string_literal {#jsir<string_literal_extra "'bind'", "bind">, "bind"}
+// SOURCE-NEXT:                                                     %41 = jsir.string_literal {"bind"}
 // SOURCE-NEXT:                                                       // %41 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     %42 = jsir.member_expression (%40, %41)
@@ -1953,7 +1953,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <not executable>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'4'", "4">, "4"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"4"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -1965,7 +1965,7 @@
 // SOURCE-NEXT:                                                     %35 = jsir.identifier {"_0x185f9c"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %36 = jsir.string_literal {#jsir<string_literal_extra "'__proto__'", "__proto__">, "__proto__"}
+// SOURCE-NEXT:                                                     %36 = jsir.string_literal {"__proto__"}
 // SOURCE-NEXT:                                                       // %36 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     %37 = jsir.member_expression_ref (%35, %36)
@@ -1974,7 +1974,7 @@
 // SOURCE-NEXT:                                                     %38 = jsir.identifier {"_0x486a8b"}
 // SOURCE-NEXT:                                                       // %38 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %39 = jsir.string_literal {#jsir<string_literal_extra "'bind'", "bind">, "bind"}
+// SOURCE-NEXT:                                                     %39 = jsir.string_literal {"bind"}
 // SOURCE-NEXT:                                                       // %39 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     %40 = jsir.member_expression (%38, %39)
@@ -1999,7 +1999,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <not executable>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'5'", "5">, "5"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"5"}
 // SOURCE-NEXT:                                                       // %35 = <uninitialized>
 // SOURCE-NEXT:                                                       // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -2018,19 +2018,19 @@
 // SOURCE-NEXT:                                                         %36 = jsir.identifier {"_0x4b92d5"}
 // SOURCE-NEXT:                                                           // %36 = <uninitialized>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                         %37 = jsir.string_literal {#jsir<string_literal_extra "'constructor'", "constructor">, "constructor"}
+// SOURCE-NEXT:                                                         %37 = jsir.string_literal {"constructor"}
 // SOURCE-NEXT:                                                           // %37 = <uninitialized>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                         %38 = jsir.member_expression (%36, %37)
 // SOURCE-NEXT:                                                           // %38 = <uninitialized>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                         %39 = jsir.string_literal {#jsir<string_literal_extra "'prototype'", "prototype">, "prototype"}
+// SOURCE-NEXT:                                                         %39 = jsir.string_literal {"prototype"}
 // SOURCE-NEXT:                                                           // %39 = <uninitialized>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                         %40 = jsir.member_expression (%38, %39)
 // SOURCE-NEXT:                                                           // %40 = <uninitialized>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
-// SOURCE-NEXT:                                                         %41 = jsir.string_literal {#jsir<string_literal_extra "'bind'", "bind">, "bind"}
+// SOURCE-NEXT:                                                         %41 = jsir.string_literal {"bind"}
 // SOURCE-NEXT:                                                           // %41 = <uninitialized>
 // SOURCE-NEXT:                                                           // State [default = <uninitialized>] { }
 // SOURCE-NEXT:                                                         %42 = jsir.member_expression (%40, %41)
@@ -2089,19 +2089,19 @@
 // SOURCE-NEXT:                                         %32 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                           // %32 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                         %33 = jsir.string_literal {#jsir<string_literal_extra "'ZUNtd'", "ZUNtd">, "ZUNtd"}
+// SOURCE-NEXT:                                         %33 = jsir.string_literal {"ZUNtd"}
 // SOURCE-NEXT:                                           // %33 = "ZUNtd"
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                         %34 = jsir.member_expression (%32, %33)
 // SOURCE-NEXT:                                           // %34 = "2|0|4|3|1"
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                         %35 = jsir.string_literal {#jsir<string_literal_extra "'split'", "split">, "split"}
+// SOURCE-NEXT:                                         %35 = jsir.string_literal {"split"}
 // SOURCE-NEXT:                                           // %35 = "split"
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                         %36 = jsir.member_expression (%34, %35)
 // SOURCE-NEXT:                                           // %36 = <unknown>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                         %37 = jsir.string_literal {#jsir<string_literal_extra "'|'", "|">, "|"}
+// SOURCE-NEXT:                                         %37 = jsir.string_literal {"|"}
 // SOURCE-NEXT:                                           // %37 = "|"
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                         %38 = jsir.call_expression (%36, %37)
@@ -2113,7 +2113,7 @@
 // SOURCE-NEXT:                                         %40 = jsir.identifier_ref {"_0x50c043"}
 // SOURCE-NEXT:                                           // %40 = <unknown>
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                         %41 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                                         %41 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:                                           // %41 = 0.000000e+00 : f64
 // SOURCE-NEXT:                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                         %42 = jsir.variable_declarator (%40, %41)
@@ -2166,7 +2166,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'0'", "0">, "0"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"0"}
 // SOURCE-NEXT:                                                       // %35 = "0"
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -2193,7 +2193,7 @@
 // SOURCE-NEXT:                                                                 %40 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                                   // %40 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %41 = jsir.string_literal {#jsir<string_literal_extra "'soDZs'", "soDZs">, "soDZs"}
+// SOURCE-NEXT:                                                                 %41 = jsir.string_literal {"soDZs"}
 // SOURCE-NEXT:                                                                   // %41 = "soDZs"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %42 = jsir.member_expression (%40, %41)
@@ -2205,7 +2205,7 @@
 // SOURCE-NEXT:                                                                 %44 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                                   // %44 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %45 = jsir.string_literal {#jsir<string_literal_extra "'NieDC'", "NieDC">, "NieDC"}
+// SOURCE-NEXT:                                                                 %45 = jsir.string_literal {"NieDC"}
 // SOURCE-NEXT:                                                                   // %45 = "NieDC"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %46 = jsir.member_expression (%44, %45)
@@ -2214,7 +2214,7 @@
 // SOURCE-NEXT:                                                                 %47 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                                   // %47 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %48 = jsir.string_literal {#jsir<string_literal_extra "'NieDC'", "NieDC">, "NieDC"}
+// SOURCE-NEXT:                                                                 %48 = jsir.string_literal {"NieDC"}
 // SOURCE-NEXT:                                                                   // %48 = "NieDC"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %49 = jsir.member_expression (%47, %48)
@@ -2223,7 +2223,7 @@
 // SOURCE-NEXT:                                                                 %50 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                                   // %50 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %51 = jsir.string_literal {#jsir<string_literal_extra "'yEDez'", "yEDez">, "yEDez"}
+// SOURCE-NEXT:                                                                 %51 = jsir.string_literal {"yEDez"}
 // SOURCE-NEXT:                                                                   // %51 = "yEDez"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %52 = jsir.member_expression (%50, %51)
@@ -2232,7 +2232,7 @@
 // SOURCE-NEXT:                                                                 %53 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                                   // %53 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %54 = jsir.string_literal {#jsir<string_literal_extra "'ZEmIi'", "ZEmIi">, "ZEmIi"}
+// SOURCE-NEXT:                                                                 %54 = jsir.string_literal {"ZEmIi"}
 // SOURCE-NEXT:                                                                   // %54 = "ZEmIi"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %55 = jsir.member_expression (%53, %54)
@@ -2241,7 +2241,7 @@
 // SOURCE-NEXT:                                                                 %56 = jsir.call_expression (%49, %52, %55)
 // SOURCE-NEXT:                                                                   // %56 = "return (function() {}.constructor(\22return this\22)( )"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %57 = jsir.string_literal {#jsir<string_literal_extra "');'", ");">, ");"}
+// SOURCE-NEXT:                                                                 %57 = jsir.string_literal {");"}
 // SOURCE-NEXT:                                                                   // %57 = ");"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %58 = jsir.call_expression (%46, %56, %57)
@@ -2322,7 +2322,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'1'", "1">, "1"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"1"}
 // SOURCE-NEXT:                                                       // %35 = "1"
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -2342,7 +2342,7 @@
 // SOURCE-NEXT:                                                             %35 = jsir.identifier_ref {"_0x4a8534"}
 // SOURCE-NEXT:                                                               // %35 = <unknown>
 // SOURCE-NEXT:                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                             %36 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                                                             %36 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:                                                               // %36 = 0.000000e+00 : f64
 // SOURCE-NEXT:                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                             %37 = jsir.variable_declarator (%35, %36)
@@ -2360,19 +2360,19 @@
 // SOURCE-NEXT:                                                         %35 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %35 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %36 = jsir.string_literal {#jsir<string_literal_extra "'jXOCo'", "jXOCo">, "jXOCo"}
+// SOURCE-NEXT:                                                         %36 = jsir.string_literal {"jXOCo"}
 // SOURCE-NEXT:                                                           // %36 = "jXOCo"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %37 = jsir.member_expression (%35, %36)
 // SOURCE-NEXT:                                                           // %37 = #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %38 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                                                         %38 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:                                                           // %38 = 0.000000e+00 : f64
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %39 = jsir.identifier {"_0x27bc28"}
 // SOURCE-NEXT:                                                           // %39 = <unknown>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %40 = jsir.string_literal {#jsir<string_literal_extra "'length'", "length">, "length"}
+// SOURCE-NEXT:                                                         %40 = jsir.string_literal {"length"}
 // SOURCE-NEXT:                                                           // %40 = "length"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %41 = jsir.member_expression (%39, %40)
@@ -2413,19 +2413,19 @@
 // SOURCE-NEXT:                                                                 %36 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                                   // %36 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %37 = jsir.string_literal {#jsir<string_literal_extra "'GyCwQ'", "GyCwQ">, "GyCwQ"}
+// SOURCE-NEXT:                                                                 %37 = jsir.string_literal {"GyCwQ"}
 // SOURCE-NEXT:                                                                   // %37 = "GyCwQ"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %38 = jsir.member_expression (%36, %37)
 // SOURCE-NEXT:                                                                   // %38 = "3|0|2|4|5|1"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %39 = jsir.string_literal {#jsir<string_literal_extra "'split'", "split">, "split"}
+// SOURCE-NEXT:                                                                 %39 = jsir.string_literal {"split"}
 // SOURCE-NEXT:                                                                   // %39 = "split"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %40 = jsir.member_expression (%38, %39)
 // SOURCE-NEXT:                                                                   // %40 = <unknown>
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %41 = jsir.string_literal {#jsir<string_literal_extra "'|'", "|">, "|"}
+// SOURCE-NEXT:                                                                 %41 = jsir.string_literal {"|"}
 // SOURCE-NEXT:                                                                   // %41 = "|"
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %42 = jsir.call_expression (%40, %41)
@@ -2437,7 +2437,7 @@
 // SOURCE-NEXT:                                                                 %44 = jsir.identifier_ref {"_0x92b385"}
 // SOURCE-NEXT:                                                                   // %44 = <unknown>
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                 %45 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                                                                 %45 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:                                                                   // %45 = 0.000000e+00 : f64
 // SOURCE-NEXT:                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                 %46 = jsir.variable_declarator (%44, %45)
@@ -2490,7 +2490,7 @@
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <executable>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {#jsir<string_literal_extra "'0'", "0">, "0"}
+// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {"0"}
 // SOURCE-NEXT:                                                                               // %39 = "0"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             jsir.expr_region_end (%39)
@@ -2509,7 +2509,7 @@
 // SOURCE-NEXT:                                                                                 %40 = jsir.identifier {"_0x27bc28"}
 // SOURCE-NEXT:                                                                                   // %40 = <unknown>
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                                 %41 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// SOURCE-NEXT:                                                                                 %41 = jsir.numeric_literal {0.000000e+00 : f64}
 // SOURCE-NEXT:                                                                                   // %41 = 0.000000e+00 : f64
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                                 %42 = jsir.member_expression (%40, %41)
@@ -2530,7 +2530,7 @@
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <executable>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {#jsir<string_literal_extra "'1'", "1">, "1"}
+// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {"1"}
 // SOURCE-NEXT:                                                                               // %39 = "1"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             jsir.expr_region_end (%39)
@@ -2564,7 +2564,7 @@
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <executable>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {#jsir<string_literal_extra "'2'", "2">, "2"}
+// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {"2"}
 // SOURCE-NEXT:                                                                               // %39 = "2"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             jsir.expr_region_end (%39)
@@ -2616,7 +2616,7 @@
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <executable>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {#jsir<string_literal_extra "'3'", "3">, "3"}
+// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {"3"}
 // SOURCE-NEXT:                                                                               // %39 = "3"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             jsir.expr_region_end (%39)
@@ -2635,19 +2635,19 @@
 // SOURCE-NEXT:                                                                                 %40 = jsir.identifier {"_0x58a38a"}
 // SOURCE-NEXT:                                                                                   // %40 = <unknown>
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                                 %41 = jsir.string_literal {#jsir<string_literal_extra "'constructor'", "constructor">, "constructor"}
+// SOURCE-NEXT:                                                                                 %41 = jsir.string_literal {"constructor"}
 // SOURCE-NEXT:                                                                                   // %41 = "constructor"
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                                 %42 = jsir.member_expression (%40, %41)
 // SOURCE-NEXT:                                                                                   // %42 = <unknown>
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                                 %43 = jsir.string_literal {#jsir<string_literal_extra "'prototype'", "prototype">, "prototype"}
+// SOURCE-NEXT:                                                                                 %43 = jsir.string_literal {"prototype"}
 // SOURCE-NEXT:                                                                                   // %43 = "prototype"
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                                 %44 = jsir.member_expression (%42, %43)
 // SOURCE-NEXT:                                                                                   // %44 = <unknown>
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                                 %45 = jsir.string_literal {#jsir<string_literal_extra "'bind'", "bind">, "bind"}
+// SOURCE-NEXT:                                                                                 %45 = jsir.string_literal {"bind"}
 // SOURCE-NEXT:                                                                                   // %45 = "bind"
 // SOURCE-NEXT:                                                                                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                                 %46 = jsir.member_expression (%44, %45)
@@ -2674,7 +2674,7 @@
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <executable>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {#jsir<string_literal_extra "'4'", "4">, "4"}
+// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {"4"}
 // SOURCE-NEXT:                                                                               // %39 = "4"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             jsir.expr_region_end (%39)
@@ -2686,7 +2686,7 @@
 // SOURCE-NEXT:                                                                             %39 = jsir.identifier {"_0x3a6f48"}
 // SOURCE-NEXT:                                                                               // %39 = <unknown>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %40 = jsir.string_literal {#jsir<string_literal_extra "'__proto__'", "__proto__">, "__proto__"}
+// SOURCE-NEXT:                                                                             %40 = jsir.string_literal {"__proto__"}
 // SOURCE-NEXT:                                                                               // %40 = "__proto__"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             %41 = jsir.member_expression_ref (%39, %40)
@@ -2695,7 +2695,7 @@
 // SOURCE-NEXT:                                                                             %42 = jsir.identifier {"_0x58a38a"}
 // SOURCE-NEXT:                                                                               // %42 = <unknown>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %43 = jsir.string_literal {#jsir<string_literal_extra "'bind'", "bind">, "bind"}
+// SOURCE-NEXT:                                                                             %43 = jsir.string_literal {"bind"}
 // SOURCE-NEXT:                                                                               // %43 = "bind"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             %44 = jsir.member_expression (%42, %43)
@@ -2720,7 +2720,7 @@
 // SOURCE-NEXT:                                                                           ^bb0:
 // SOURCE-NEXT:                                                                               // <executable>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {#jsir<string_literal_extra "'5'", "5">, "5"}
+// SOURCE-NEXT:                                                                             %39 = jsir.string_literal {"5"}
 // SOURCE-NEXT:                                                                               // %39 = "5"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             jsir.expr_region_end (%39)
@@ -2732,7 +2732,7 @@
 // SOURCE-NEXT:                                                                             %39 = jsir.identifier {"_0x3a6f48"}
 // SOURCE-NEXT:                                                                               // %39 = <unknown>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %40 = jsir.string_literal {#jsir<string_literal_extra "'toString'", "toString">, "toString"}
+// SOURCE-NEXT:                                                                             %40 = jsir.string_literal {"toString"}
 // SOURCE-NEXT:                                                                               // %40 = "toString"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             %41 = jsir.member_expression_ref (%39, %40)
@@ -2741,13 +2741,13 @@
 // SOURCE-NEXT:                                                                             %42 = jsir.identifier {"_0x3bb083"}
 // SOURCE-NEXT:                                                                               // %42 = <unknown>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %43 = jsir.string_literal {#jsir<string_literal_extra "'toString'", "toString">, "toString"}
+// SOURCE-NEXT:                                                                             %43 = jsir.string_literal {"toString"}
 // SOURCE-NEXT:                                                                               // %43 = "toString"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             %44 = jsir.member_expression (%42, %43)
 // SOURCE-NEXT:                                                                               // %44 = <unknown>
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                                             %45 = jsir.string_literal {#jsir<string_literal_extra "'bind'", "bind">, "bind"}
+// SOURCE-NEXT:                                                                             %45 = jsir.string_literal {"bind"}
 // SOURCE-NEXT:                                                                               // %45 = "bind"
 // SOURCE-NEXT:                                                                               // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                                             %46 = jsir.member_expression (%44, %45)
@@ -2796,7 +2796,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'2'", "2">, "2"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"2"}
 // SOURCE-NEXT:                                                       // %35 = "2"
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -2827,7 +2827,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'3'", "3">, "3"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"3"}
 // SOURCE-NEXT:                                                       // %35 = "3"
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -2846,7 +2846,7 @@
 // SOURCE-NEXT:                                                         %36 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %36 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %37 = jsir.string_literal {#jsir<string_literal_extra "'Fmzmy'", "Fmzmy">, "Fmzmy"}
+// SOURCE-NEXT:                                                         %37 = jsir.string_literal {"Fmzmy"}
 // SOURCE-NEXT:                                                           // %37 = "Fmzmy"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %38 = jsir.member_expression (%36, %37)
@@ -2855,7 +2855,7 @@
 // SOURCE-NEXT:                                                         %39 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %39 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %40 = jsir.string_literal {#jsir<string_literal_extra "'bDDQL'", "bDDQL">, "bDDQL"}
+// SOURCE-NEXT:                                                         %40 = jsir.string_literal {"bDDQL"}
 // SOURCE-NEXT:                                                           // %40 = "bDDQL"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %41 = jsir.member_expression (%39, %40)
@@ -2864,7 +2864,7 @@
 // SOURCE-NEXT:                                                         %42 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %42 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %43 = jsir.string_literal {#jsir<string_literal_extra "'wkULH'", "wkULH">, "wkULH"}
+// SOURCE-NEXT:                                                         %43 = jsir.string_literal {"wkULH"}
 // SOURCE-NEXT:                                                           // %43 = "wkULH"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %44 = jsir.member_expression (%42, %43)
@@ -2873,7 +2873,7 @@
 // SOURCE-NEXT:                                                         %45 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %45 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %46 = jsir.string_literal {#jsir<string_literal_extra "'Wftmu'", "Wftmu">, "Wftmu"}
+// SOURCE-NEXT:                                                         %46 = jsir.string_literal {"Wftmu"}
 // SOURCE-NEXT:                                                           // %46 = "Wftmu"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %47 = jsir.member_expression (%45, %46)
@@ -2882,7 +2882,7 @@
 // SOURCE-NEXT:                                                         %48 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %48 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %49 = jsir.string_literal {#jsir<string_literal_extra "'gXlVo'", "gXlVo">, "gXlVo"}
+// SOURCE-NEXT:                                                         %49 = jsir.string_literal {"gXlVo"}
 // SOURCE-NEXT:                                                           // %49 = "gXlVo"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %50 = jsir.member_expression (%48, %49)
@@ -2891,13 +2891,13 @@
 // SOURCE-NEXT:                                                         %51 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                                                           // %51 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %52 = jsir.string_literal {#jsir<string_literal_extra "'DRyXW'", "DRyXW">, "DRyXW"}
+// SOURCE-NEXT:                                                         %52 = jsir.string_literal {"DRyXW"}
 // SOURCE-NEXT:                                                           // %52 = "DRyXW"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %53 = jsir.member_expression (%51, %52)
 // SOURCE-NEXT:                                                           // %53 = "table"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %54 = jsir.string_literal {#jsir<string_literal_extra "'trace'", "trace">, "trace"}
+// SOURCE-NEXT:                                                         %54 = jsir.string_literal {"trace"}
 // SOURCE-NEXT:                                                           // %54 = "trace"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %55 = jsir.array_expression (%38, %41, %44, %47, %50, %53, %54)
@@ -2918,7 +2918,7 @@
 // SOURCE-NEXT:                                                   ^bb0:
 // SOURCE-NEXT:                                                       // <executable>
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                     %35 = jsir.string_literal {#jsir<string_literal_extra "'4'", "4">, "4"}
+// SOURCE-NEXT:                                                     %35 = jsir.string_literal {"4"}
 // SOURCE-NEXT:                                                       // %35 = "4"
 // SOURCE-NEXT:                                                       // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                     jsir.expr_region_end (%35)
@@ -2937,7 +2937,7 @@
 // SOURCE-NEXT:                                                         %36 = jsir.identifier {"_0x2ed7aa"}
 // SOURCE-NEXT:                                                           // %36 = <unknown>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %37 = jsir.string_literal {#jsir<string_literal_extra "'console'", "console">, "console"}
+// SOURCE-NEXT:                                                         %37 = jsir.string_literal {"console"}
 // SOURCE-NEXT:                                                           // %37 = "console"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %38 = jsir.member_expression_ref (%36, %37)
@@ -2946,7 +2946,7 @@
 // SOURCE-NEXT:                                                         %39 = jsir.identifier {"_0x2ed7aa"}
 // SOURCE-NEXT:                                                           // %39 = <unknown>
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
-// SOURCE-NEXT:                                                         %40 = jsir.string_literal {#jsir<string_literal_extra "'console'", "console">, "console"}
+// SOURCE-NEXT:                                                         %40 = jsir.string_literal {"console"}
 // SOURCE-NEXT:                                                           // %40 = "console"
 // SOURCE-NEXT:                                                           // State [default = <unknown>] { }
 // SOURCE-NEXT:                                                         %41 = jsir.member_expression (%39, %40)
@@ -3026,7 +3026,7 @@
 // SOURCE-NEXT:                 %2 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                   // %2 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %3 = jsir.string_literal {#jsir<string_literal_extra "'fPEpB'", "fPEpB">, "fPEpB"}
+// SOURCE-NEXT:                 %3 = jsir.string_literal {"fPEpB"}
 // SOURCE-NEXT:                   // %3 = "fPEpB"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %4 = jsir.member_expression (%2, %3)
@@ -3041,7 +3041,7 @@
 // SOURCE-NEXT:                 %7 = jsir.identifier {"console"}
 // SOURCE-NEXT:                   // %7 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %8 = jsir.string_literal {#jsir<string_literal_extra "'log'", "log">, "log"}
+// SOURCE-NEXT:                 %8 = jsir.string_literal {"log"}
 // SOURCE-NEXT:                   // %8 = "log"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %9 = jsir.member_expression (%7, %8)
@@ -3050,7 +3050,7 @@
 // SOURCE-NEXT:                 %10 = jsir.identifier {"_0x24a11a"}
 // SOURCE-NEXT:                   // %10 = #jsir_builtin<inline_expression_object "cmIIa", #jsir_builtin<inline_expression_function "_0x4d887e", 44, "_0x258647", 45, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x4d887e", 44>, #jsir<symbol_id "_0x258647", 45>, "===">>, "rvTTb", "LtmRg", "BLRju", #jsir_builtin<inline_expression_function "_0x32f73d", 46, "_0x51021c", 47, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x32f73d", 46>, #jsir<symbol_id "_0x51021c", 47>, "===">>, "INEBZ", "snjPo", "gCfqE", "Nngrv", "ZUNtd", "2|0|4|3|1", "soDZs", #jsir_builtin<inline_expression_function "_0x38801d", 48, "_0xf075cb", 49, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x38801d", 48>, #jsir<symbol_id "_0xf075cb", 49>>>, "NieDC", #jsir_builtin<inline_expression_function "_0x320e85", 50, "_0x58fb4d", 51, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x320e85", 50>, #jsir<symbol_id "_0x58fb4d", 51>, "+">>, "yEDez", "return (function() ", "ZEmIi", "{}.constructor(\22return this\22)( )", "jXOCo", #jsir_builtin<inline_expression_function "_0x482b82", 52, "_0x2bafd9", 53, #jsir_builtin<inline_expression_binary_expression #jsir<symbol_id "_0x482b82", 52>, #jsir<symbol_id "_0x2bafd9", 53>, "<">>, "GyCwQ", "3|0|2|4|5|1", "Fmzmy", "log", "bDDQL", "warn", "wkULH", "info", "Wftmu", "error", "gXlVo", "exception", "DRyXW", "table", "fPEpB", #jsir_builtin<inline_expression_function "_0x4d07dc", 54, #jsir_builtin<inline_expression_call #jsir<symbol_id "_0x4d07dc", 54>, >>, "Xxejz", "Hello World!">
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %11 = jsir.string_literal {#jsir<string_literal_extra "'Xxejz'", "Xxejz">, "Xxejz"}
+// SOURCE-NEXT:                 %11 = jsir.string_literal {"Xxejz"}
 // SOURCE-NEXT:                   // %11 = "Xxejz"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %12 = jsir.member_expression (%10, %11)

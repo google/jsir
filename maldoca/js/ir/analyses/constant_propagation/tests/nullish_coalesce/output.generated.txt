@@ -4,7 +4,7 @@
 // JSIR-NEXT:       %16 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
 // JSIR-NEXT:       %17 = "jsir.null_literal"() : () -> !jsir.any
 // JSIR-NEXT:       %18 = "jshir.logical_expression"(%17) <{operator_ = "??"}> ({
-// JSIR-NEXT:         %20 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "\22default for a\22", "default for a">, value = "default for a"}> : () -> !jsir.any
+// JSIR-NEXT:         %20 = "jsir.string_literal"() <{value = "default for a"}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%20) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %19 = "jsir.variable_declarator"(%16, %18) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -12,9 +12,9 @@
 // JSIR-NEXT:     }) : () -> ()
 // JSIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:       %16 = "jsir.identifier_ref"() <{name = "b"}> : () -> !jsir.any
-// JSIR-NEXT:       %17 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "\22\22", "">, value = ""}> : () -> !jsir.any
+// JSIR-NEXT:       %17 = "jsir.string_literal"() <{value = ""}> : () -> !jsir.any
 // JSIR-NEXT:       %18 = "jshir.logical_expression"(%17) <{operator_ = "??"}> ({
-// JSIR-NEXT:         %20 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "\22default for b\22", "default for b">, value = "default for b"}> : () -> !jsir.any
+// JSIR-NEXT:         %20 = "jsir.string_literal"() <{value = "default for b"}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%20) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %19 = "jsir.variable_declarator"(%16, %18) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -22,9 +22,9 @@
 // JSIR-NEXT:     }) : () -> ()
 // JSIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:       %16 = "jsir.identifier_ref"() <{name = "c"}> : () -> !jsir.any
-// JSIR-NEXT:       %17 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "42", 4.200000e+01 : f64>, value = 4.200000e+01 : f64}> : () -> !jsir.any
+// JSIR-NEXT:       %17 = "jsir.numeric_literal"() <{value = 4.200000e+01 : f64}> : () -> !jsir.any
 // JSIR-NEXT:       %18 = "jshir.logical_expression"(%17) <{operator_ = "??"}> ({
-// JSIR-NEXT:         %20 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, value = 0.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %20 = "jsir.numeric_literal"() <{value = 0.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%20) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %19 = "jsir.variable_declarator"(%16, %18) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -34,7 +34,7 @@
 // JSIR-NEXT:       %16 = "jsir.identifier_ref"() <{name = "d"}> : () -> !jsir.any
 // JSIR-NEXT:       %17 = "jsir.identifier"() <{name = "x"}> : () -> !jsir.any
 // JSIR-NEXT:       %18 = "jshir.logical_expression"(%17) <{operator_ = "??"}> ({
-// JSIR-NEXT:         %20 = "jsir.string_literal"() <{extra = #jsir<string_literal_extra "\22default for d\22", "default for d">, value = "default for d"}> : () -> !jsir.any
+// JSIR-NEXT:         %20 = "jsir.string_literal"() <{value = "default for d"}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.expr_region_end"(%20) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:       %19 = "jsir.variable_declarator"(%16, %18) : (!jsir.any, !jsir.any) -> !jsir.any
@@ -86,7 +86,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
 // JSIR-NEXT:                   // State [default = <unknown>] { }
-// JSIR-NEXT:                 %20 = jsir.string_literal {#jsir<string_literal_extra "\22default for a\22", "default for a">, "default for a"}
+// JSIR-NEXT:                 %20 = jsir.string_literal {"default for a"}
 // JSIR-NEXT:                   // %20 = "default for a"
 // JSIR-NEXT:                   // State [default = <unknown>] { }
 // JSIR-NEXT:                 jsir.expr_region_end (%20)
@@ -108,14 +108,14 @@
 // JSIR-NEXT:             %16 = jsir.identifier_ref {"b"}
 // JSIR-NEXT:               // %16 = <unknown>
 // JSIR-NEXT:               // State [default = <unknown>] { <a#0 : "default for a"> }
-// JSIR-NEXT:             %17 = jsir.string_literal {#jsir<string_literal_extra "\22\22", "">, ""}
+// JSIR-NEXT:             %17 = jsir.string_literal {""}
 // JSIR-NEXT:               // %17 = ""
 // JSIR-NEXT:               // State [default = <unknown>] { <a#0 : "default for a"> }
 // JSIR-NEXT:             %18 = jshir.logical_expression (%17) {"??"} ({
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <not executable>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
-// JSIR-NEXT:                 %20 = jsir.string_literal {#jsir<string_literal_extra "\22default for b\22", "default for b">, "default for b"}
+// JSIR-NEXT:                 %20 = jsir.string_literal {"default for b"}
 // JSIR-NEXT:                   // %20 = <uninitialized>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
 // JSIR-NEXT:                 jsir.expr_region_end (%20)
@@ -137,14 +137,14 @@
 // JSIR-NEXT:             %16 = jsir.identifier_ref {"c"}
 // JSIR-NEXT:               // %16 = <unknown>
 // JSIR-NEXT:               // State [default = <unknown>] { <a#0 : "default for a"> <b#1 : ""> }
-// JSIR-NEXT:             %17 = jsir.numeric_literal {#jsir<numeric_literal_extra "42", 4.200000e+01 : f64>, 4.200000e+01 : f64}
+// JSIR-NEXT:             %17 = jsir.numeric_literal {4.200000e+01 : f64}
 // JSIR-NEXT:               // %17 = 4.200000e+01 : f64
 // JSIR-NEXT:               // State [default = <unknown>] { <a#0 : "default for a"> <b#1 : ""> }
 // JSIR-NEXT:             %18 = jshir.logical_expression (%17) {"??"} ({
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <not executable>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
-// JSIR-NEXT:                 %20 = jsir.numeric_literal {#jsir<numeric_literal_extra "0", 0.000000e+00 : f64>, 0.000000e+00 : f64}
+// JSIR-NEXT:                 %20 = jsir.numeric_literal {0.000000e+00 : f64}
 // JSIR-NEXT:                   // %20 = <uninitialized>
 // JSIR-NEXT:                   // State [default = <uninitialized>] { }
 // JSIR-NEXT:                 jsir.expr_region_end (%20)
@@ -173,7 +173,7 @@
 // JSIR-NEXT:               ^bb0:
 // JSIR-NEXT:                   // <executable>
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : "default for a"> <b#1 : ""> <c#2 : 4.200000e+01 : f64> }
-// JSIR-NEXT:                 %20 = jsir.string_literal {#jsir<string_literal_extra "\22default for d\22", "default for d">, "default for d"}
+// JSIR-NEXT:                 %20 = jsir.string_literal {"default for d"}
 // JSIR-NEXT:                   // %20 = "default for d"
 // JSIR-NEXT:                   // State [default = <unknown>] { <a#0 : "default for a"> <b#1 : ""> <c#2 : 4.200000e+01 : f64> }
 // JSIR-NEXT:                 jsir.expr_region_end (%20)

@@ -7,14 +7,14 @@
 // JSIR-NEXT:       "jshir.block_statement"() ({
 // JSIR-NEXT:         "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:           %1 = "jsir.identifier_ref"() <{name = "is_a_const"}> : () -> !jsir.any
-// JSIR-NEXT:           %2 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:           %2 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:           %3 = "jsir.variable_declarator"(%1, %2) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:           "jsir.exprs_region_end"(%3) : (!jsir.any) -> ()
 // JSIR-NEXT:         }) : () -> ()
 // JSIR-NEXT:         "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:           %1 = "jsir.identifier_ref"() <{name = "not_a_const"}> : () -> !jsir.any
 // JSIR-NEXT:           %2 = "jsir.identifier"() <{name = "arg"}> : () -> !jsir.any
-// JSIR-NEXT:           %3 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:           %3 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:           %4 = "jsir.binary_expression"(%2, %3) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:           %5 = "jsir.variable_declarator"(%1, %4) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:           "jsir.exprs_region_end"(%5) : (!jsir.any) -> ()
@@ -61,7 +61,7 @@
 // JSIR-NEXT:                     %1 = jsir.identifier_ref {"is_a_const"}
 // JSIR-NEXT:                       // %1 = <unknown>
 // JSIR-NEXT:                       // State [default = <unknown>] { }
-// JSIR-NEXT:                     %2 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:                     %2 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:                       // %2 = 1.000000e+00 : f64
 // JSIR-NEXT:                       // State [default = <unknown>] { }
 // JSIR-NEXT:                     %3 = jsir.variable_declarator (%1, %2)
@@ -81,7 +81,7 @@
 // JSIR-NEXT:                     %2 = jsir.identifier {"arg"}
 // JSIR-NEXT:                       // %2 = <unknown>
 // JSIR-NEXT:                       // State [default = <unknown>] { <is_a_const#2 : 1.000000e+00 : f64> }
-// JSIR-NEXT:                     %3 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:                     %3 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:                       // %3 = 1.000000e+00 : f64
 // JSIR-NEXT:                       // State [default = <unknown>] { <is_a_const#2 : 1.000000e+00 : f64> }
 // JSIR-NEXT:                     %4 = jsir.binary_expression (%2, %3) {"+"}

@@ -89,6 +89,28 @@ void TestTypePbToTypeAndPrint(TypeTestCase type_test_case) {
   }
 }
 
+TEST(TypeTest, ConvertJsonType) {
+  TestTypePbToTypeAndPrint({
+      .type_pb = "json {}",
+      .js_type = "Record<string, unknown>",
+      .cc_type = "nlohmann::json",
+      .cc_getter_type = "nlohmann::json*",
+      .cc_const_getter_type = "const nlohmann::json*",
+      .td_types =
+          {
+              {FIELD_KIND_ATTR, "DictionaryAttr"},
+          },
+      .cc_mlir_builder_type =
+          {
+              {FIELD_KIND_ATTR, "mlir::DictionaryAttr"},
+          },
+      .cc_mlir_getter_type =
+          {
+              {FIELD_KIND_ATTR, "mlir::DictionaryAttr"},
+          },
+  });
+}
+
 TEST(TypeTest, ConvertBuiltinType) {
   TestTypePbToTypeAndPrint({
       .type_pb = "bool {}",

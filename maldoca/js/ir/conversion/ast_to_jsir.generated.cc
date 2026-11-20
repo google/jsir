@@ -128,11 +128,7 @@ JsirProgramBodyElementOpInterface AstToJsir::VisitProgramBodyElement(mlir::OpBui
 
 JsirDirectiveLiteralOp AstToJsir::VisitDirectiveLiteral(mlir::OpBuilder &builder, const JsDirectiveLiteral *node) {
   mlir::StringAttr mlir_value = builder.getStringAttr(node->value());
-  JsirDirectiveLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitDirectiveLiteralExtraAttr(builder, node->extra().value());
-  }
-  return CreateExpr<JsirDirectiveLiteralOp>(builder, node, mlir_value, mlir_extra);
+  return CreateExpr<JsirDirectiveLiteralOp>(builder, node, mlir_value);
 }
 
 JsirDirectiveOp AstToJsir::VisitDirective(mlir::OpBuilder &builder, const JsDirective *node) {
@@ -367,11 +363,7 @@ JsirLiteralOpInterface AstToJsir::VisitLiteral(mlir::OpBuilder &builder, const J
 JsirRegExpLiteralOp AstToJsir::VisitRegExpLiteral(mlir::OpBuilder &builder, const JsRegExpLiteral *node) {
   mlir::StringAttr mlir_pattern = builder.getStringAttr(node->pattern());
   mlir::StringAttr mlir_flags = builder.getStringAttr(node->flags());
-  JsirRegExpLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitRegExpLiteralExtraAttr(builder, node->extra().value());
-  }
-  return CreateExpr<JsirRegExpLiteralOp>(builder, node, mlir_pattern, mlir_flags, mlir_extra);
+  return CreateExpr<JsirRegExpLiteralOp>(builder, node, mlir_pattern, mlir_flags);
 }
 
 JsirNullLiteralOp AstToJsir::VisitNullLiteral(mlir::OpBuilder &builder, const JsNullLiteral *node) {
@@ -380,11 +372,7 @@ JsirNullLiteralOp AstToJsir::VisitNullLiteral(mlir::OpBuilder &builder, const Js
 
 JsirStringLiteralOp AstToJsir::VisitStringLiteral(mlir::OpBuilder &builder, const JsStringLiteral *node) {
   mlir::StringAttr mlir_value = builder.getStringAttr(node->value());
-  JsirStringLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitStringLiteralExtraAttr(builder, node->extra().value());
-  }
-  return CreateExpr<JsirStringLiteralOp>(builder, node, mlir_value, mlir_extra);
+  return CreateExpr<JsirStringLiteralOp>(builder, node, mlir_value);
 }
 
 JsirBooleanLiteralOp AstToJsir::VisitBooleanLiteral(mlir::OpBuilder &builder, const JsBooleanLiteral *node) {
@@ -394,20 +382,12 @@ JsirBooleanLiteralOp AstToJsir::VisitBooleanLiteral(mlir::OpBuilder &builder, co
 
 JsirNumericLiteralOp AstToJsir::VisitNumericLiteral(mlir::OpBuilder &builder, const JsNumericLiteral *node) {
   mlir::FloatAttr mlir_value = builder.getF64FloatAttr(node->value());
-  JsirNumericLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitNumericLiteralExtraAttr(builder, node->extra().value());
-  }
-  return CreateExpr<JsirNumericLiteralOp>(builder, node, mlir_value, mlir_extra);
+  return CreateExpr<JsirNumericLiteralOp>(builder, node, mlir_value);
 }
 
 JsirBigIntLiteralOp AstToJsir::VisitBigIntLiteral(mlir::OpBuilder &builder, const JsBigIntLiteral *node) {
   mlir::StringAttr mlir_value = builder.getStringAttr(node->value());
-  JsirBigIntLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitBigIntLiteralExtraAttr(builder, node->extra().value());
-  }
-  return CreateExpr<JsirBigIntLiteralOp>(builder, node, mlir_value, mlir_extra);
+  return CreateExpr<JsirBigIntLiteralOp>(builder, node, mlir_value);
 }
 
 JsirStatementOpInterface AstToJsir::VisitStatement(mlir::OpBuilder &builder, const JsStatement *node) {

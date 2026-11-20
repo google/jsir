@@ -69,6 +69,10 @@ void AExpression::SerializeFields(std::ostream& os, bool &needs_comma) const {
 void AIdentifier::SerializeFields(std::ostream& os, bool &needs_comma) const {
   MaybeAddComma(os, needs_comma);
   os << "\"name\":" << (nlohmann::json(name_)).dump();
+  if (metadata_.has_value()) {
+    MaybeAddComma(os, needs_comma);
+    os << "\"metadata\":" << (nlohmann::json(metadata_.value())).dump();
+  }
 }
 
 void AIdentifier::Serialize(std::ostream& os) const {
