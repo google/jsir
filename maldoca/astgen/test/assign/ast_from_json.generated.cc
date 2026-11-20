@@ -74,6 +74,15 @@ AIdentifier::GetName(const nlohmann::json& json) {
   );
 }
 
+absl::StatusOr<std::optional<nlohmann::json>>
+AIdentifier::GetMetadata(const nlohmann::json& json) {
+  return GetOptionalField<nlohmann::json>(
+      json,
+      "metadata",
+      JsonToJson
+  );
+}
+
 absl::StatusOr<std::unique_ptr<AIdentifier>>
 AIdentifier::FromJson(const nlohmann::json& json) {
   if (!json.is_object()) {
@@ -81,9 +90,11 @@ AIdentifier::FromJson(const nlohmann::json& json) {
   }
 
   ABSL_ASSIGN_OR_RETURN(auto name, AIdentifier::GetName(json));
+  ABSL_ASSIGN_OR_RETURN(auto metadata, AIdentifier::GetMetadata(json));
 
   return absl::make_unique<AIdentifier>(
-      std::move(name));
+      std::move(name),
+      std::move(metadata));
 }
 
 // =============================================================================

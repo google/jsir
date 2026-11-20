@@ -116,8 +116,7 @@ def JsirDirectiveLiteralOp : Jsir_Op<
         Pure
     ]> {
   let arguments = (ins
-    StrAttr: $value,
-    OptionalAttr<JsirDirectiveLiteralExtraAttr>: $extra
+    StrAttr: $value
   );
 
   let results = (outs
@@ -208,8 +207,7 @@ def JsirRegExpLiteralOp : Jsir_Op<
 
   let arguments = (ins
     StrAttr: $pattern,
-    StrAttr: $flags,
-    OptionalAttr<JsirRegExpLiteralExtraAttr>: $extra
+    StrAttr: $flags
   );
 
   let results = (outs
@@ -237,8 +235,7 @@ def JsirStringLiteralOp : Jsir_Op<
   let hasFolder = 1;
 
   let arguments = (ins
-    StrAttr: $value,
-    OptionalAttr<JsirStringLiteralExtraAttr>: $extra
+    StrAttr: $value
   );
 
   let results = (outs
@@ -270,8 +267,7 @@ def JsirNumericLiteralOp : Jsir_Op<
   let hasFolder = 1;
 
   let arguments = (ins
-    F64Attr: $value,
-    OptionalAttr<JsirNumericLiteralExtraAttr>: $extra
+    F64Attr: $value
   );
 
   let results = (outs
@@ -287,8 +283,7 @@ def JsirBigIntLiteralOp : Jsir_Op<
   let hasFolder = 1;
 
   let arguments = (ins
-    StrAttr: $value,
-    OptionalAttr<JsirBigIntLiteralExtraAttr>: $extra
+    StrAttr: $value
   );
 
   let results = (outs

@@ -3,6 +3,7 @@ interface Expression {
 
 interface Identifier <: Expression {
   name: string
+  metadata?: Record<string, unknown>
 }
 
 interface Assignment <: Expression {

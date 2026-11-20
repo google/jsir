@@ -24,7 +24,7 @@
 // SOURCE-NEXT:             %0 = jsir.identifier_ref {"a"}
 // SOURCE-NEXT:               // %0 = <unknown>
 // SOURCE-NEXT:               // State [default = <unknown>] { }
-// SOURCE-NEXT:             %1 = jsir.string_literal {#jsir<string_literal_extra "\22SGVsbG8gd29ybGQh\22", "SGVsbG8gd29ybGQh">, "SGVsbG8gd29ybGQh"}
+// SOURCE-NEXT:             %1 = jsir.string_literal {"SGVsbG8gd29ybGQh"}
 // SOURCE-NEXT:               // %1 = "SGVsbG8gd29ybGQh"
 // SOURCE-NEXT:               // State [default = <unknown>] { }
 // SOURCE-NEXT:             %2 = jsir.variable_declarator (%0, %1)

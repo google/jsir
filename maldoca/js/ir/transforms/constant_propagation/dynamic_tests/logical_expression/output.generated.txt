@@ -37,7 +37,7 @@
 // SOURCE-NEXT:         %3 = jsir.member_expression_ref (%2) {#jsir<identifier <L 1 C 9>, <L 1 C 12>, "key", 9, 12, 0, "key">}
 // SOURCE-NEXT:           // %3 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %4 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// SOURCE-NEXT:         %4 = jsir.numeric_literal {1.000000e+00 : f64}
 // SOURCE-NEXT:           // %4 = 1.000000e+00 : f64
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %5 = jsir.assignment_expression (%3, %4) {"="}

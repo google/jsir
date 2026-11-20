@@ -12,6 +12,7 @@ nodes {
 
 # interface Identifier <: Expression {
 #   name: string
+#   metadata?: Record<string, unknown>
 # }
 nodes {
   name: "Identifier"
@@ -21,6 +22,14 @@ nodes {
     name: "name"
     type { string {} }
     kind: FIELD_KIND_ATTR
+  }
+  # An arbitrary JSON object, to test the builtin JSON type in the IR.
+  fields {
+    name: "metadata"
+    type { json {} }
+    optionalness: OPTIONALNESS_MAYBE_UNDEFINED
+    kind: FIELD_KIND_ATTR
+    ir_attr_optional_parameter: true
   }
   kinds: FIELD_KIND_LVAL
   should_generate_ir_op: true

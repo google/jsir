@@ -88,16 +88,19 @@ mlir::Operation *maldoca::JsirDialect::materializeConstant(
         return JsirBooleanLiteralOp::create(builder, loc, value);
       })
       .Case([&](mlir::FloatAttr value) {
-        return JsirNumericLiteralOp::create(builder, loc, value,
-                                            /*extra=*/nullptr);
+        return JsirNumericLiteralOp::create(builder, loc, value);
       })
       .Case([&](mlir::StringAttr value) {
-        return JsirStringLiteralOp::create(builder, loc, value,
-                                           /*extra=*/nullptr);
+        return JsirStringLiteralOp::create(builder, loc, value);
       })
       .Case([&](JsirBigIntLiteralAttr value) {
-        return JsirBigIntLiteralOp::create(builder, loc, value.getValue(),
-                                           value.getExtra());
+        // The `extra` of the literal (e.g. its raw spelling) is in the trivia
+        // of the attribute. Keep it on the new op, if `loc` has no trivia.
+        mlir::Location new_loc = loc;
+        if (!llvm::isa<JsirTriviaAttr>(loc) && value.getLoc() != nullptr) {
+          new_loc = value.getLoc();
+        }
+        return JsirBigIntLiteralOp::create(builder, new_loc, value.getValue());
       })
       .Default([](mlir::Attribute value) { return nullptr; });
 }

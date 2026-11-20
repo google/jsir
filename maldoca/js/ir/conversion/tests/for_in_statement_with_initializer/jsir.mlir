@@ -4,7 +4,7 @@
 // JSIR-NEXT:     "jshir.for_in_statement"(%0) ({
 // JSIR-NEXT:       "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:         %1 = "jsir.identifier_ref"() <{name = "i"}> : () -> !jsir.any
-// JSIR-NEXT:         %2 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "42", 4.200000e+01 : f64>, value = 4.200000e+01 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %2 = "jsir.numeric_literal"() <{value = 4.200000e+01 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         %3 = "jsir.variable_declarator"(%1, %2) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:         "jsir.exprs_region_end"(%3) : (!jsir.any) -> ()
 // JSIR-NEXT:       }) : () -> ()

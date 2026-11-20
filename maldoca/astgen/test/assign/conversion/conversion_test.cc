@@ -95,5 +95,39 @@ module {
   });
 }
 
+TEST(ConversionTest, JsonMetadataRoundTrips) {
+  // a = b, where both identifiers have JSON metadata.
+  constexpr char kAstJsonString[] = R"(
+    {
+      "type": "Assignment",
+      "lhs": {
+        "type": "Identifier",
+        "name": "a",
+        "metadata": {"raw": "a", "count": 2, "flags": [true, null]}
+      },
+      "rhs": {
+        "type": "Identifier",
+        "name": "b",
+        "metadata": {"nested": {"ratio": 1.5}}
+      }
+    }
+  )";
+
+  constexpr char kExpectedIrDump[] = R"(
+module {
+  %0 = "air.identifier_ref"() <{metadata = {count = 2 : i64, flags = [true, unit], raw = "a"}, name = "a"}> : () -> !air.any
+  %1 = "air.identifier"() <{metadata = {nested = {ratio = 1.500000e+00 : f64}}, name = "b"}> : () -> !air.any
+  %2 = "air.assignment"(%0, %1) : (!air.any, !air.any) -> !air.any
+}
+  )";
+
+  TestIrConversion<AAssignment, AirAssignmentOp, AirDialect, AstToAir>({
+      .ast_json_string = kAstJsonString,
+      .ast_to_ir_visit = AstToAir::VisitAssignment,
+      .ir_to_ast_visit = &AirToAst::VisitAssignment,
+      .expected_ir_dump = kExpectedIrDump,
+  });
+}
+
 }  // namespace
 }  // namespace maldoca

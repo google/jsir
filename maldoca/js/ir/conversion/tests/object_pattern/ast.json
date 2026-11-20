@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 217,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "script",
 // AST-NEXT:     "body": [
@@ -110,6 +113,9 @@
 // AST-NEXT:                   "start": 59,
 // AST-NEXT:                   "end": 75,
 // AST-NEXT:                   "scopeUid": 0,
+// AST-NEXT:                   "extra": {
+// AST-NEXT:                     "shorthand": true
+// AST-NEXT:                   },
 // AST-NEXT:                   "key": {
 // AST-NEXT:                     "type": "Identifier",
 // AST-NEXT:                     "loc": {
@@ -233,11 +239,11 @@
 // AST-NEXT:                     "start": 107,
 // AST-NEXT:                     "end": 123,
 // AST-NEXT:                     "scopeUid": 0,
-// AST-NEXT:                     "value": "string_literal",
 // AST-NEXT:                     "extra": {
 // AST-NEXT:                       "raw": "'string_literal'",
 // AST-NEXT:                       "rawValue": "string_literal"
-// AST-NEXT:                     }
+// AST-NEXT:                     },
+// AST-NEXT:                     "value": "string_literal"
 // AST-NEXT:                   },
 // AST-NEXT:                   "computed": false,
 // AST-NEXT:                   "shorthand": false,
@@ -290,11 +296,11 @@
 // AST-NEXT:                     "start": 139,
 // AST-NEXT:                     "end": 142,
 // AST-NEXT:                     "scopeUid": 0,
-// AST-NEXT:                     "value": 1.0,
 // AST-NEXT:                     "extra": {
 // AST-NEXT:                       "raw": "1.0",
-// AST-NEXT:                       "rawValue": 1.0
-// AST-NEXT:                     }
+// AST-NEXT:                       "rawValue": 1
+// AST-NEXT:                     },
+// AST-NEXT:                     "value": 1.0
 // AST-NEXT:                   },
 // AST-NEXT:                   "computed": false,
 // AST-NEXT:                   "shorthand": false,
@@ -347,11 +353,11 @@
 // AST-NEXT:                     "start": 159,
 // AST-NEXT:                     "end": 169,
 // AST-NEXT:                     "scopeUid": 0,
-// AST-NEXT:                     "value": "computed",
 // AST-NEXT:                     "extra": {
 // AST-NEXT:                       "raw": "\"computed\"",
 // AST-NEXT:                       "rawValue": "computed"
-// AST-NEXT:                     }
+// AST-NEXT:                     },
+// AST-NEXT:                     "value": "computed"
 // AST-NEXT:                   },
 // AST-NEXT:                   "computed": true,
 // AST-NEXT:                   "shorthand": false,

@@ -68,14 +68,6 @@ JsirInterpreterDirectiveAttr AstToJsir::VisitInterpreterDirectiveAttr(
                                            mlir_value);
 }
 
-JsirDirectiveLiteralExtraAttr AstToJsir::VisitDirectiveLiteralExtraAttr(
-    mlir::OpBuilder& builder, const JsDirectiveLiteralExtra* node) {
-  mlir::StringAttr mlir_raw = builder.getStringAttr(node->raw());
-  mlir::StringAttr mlir_raw_value = builder.getStringAttr(node->raw_value());
-  return JsirDirectiveLiteralExtraAttr::get(builder.getContext(), mlir_raw,
-                                            mlir_raw_value);
-}
-
 JsirIdentifierAttr AstToJsir::VisitIdentifierAttr(mlir::OpBuilder& builder,
                                                   const JsIdentifier* node) {
   auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
@@ -90,70 +82,25 @@ JsirPrivateNameAttr AstToJsir::VisitPrivateNameAttr(mlir::OpBuilder& builder,
   return JsirPrivateNameAttr::get(builder.getContext(), loc, mlir_id);
 }
 
-JsirRegExpLiteralExtraAttr AstToJsir::VisitRegExpLiteralExtraAttr(
-    mlir::OpBuilder& builder, const JsRegExpLiteralExtra* node) {
-  mlir::StringAttr mlir_raw = builder.getStringAttr(node->raw());
-  return JsirRegExpLiteralExtraAttr::get(builder.getContext(), mlir_raw);
-}
-
-JsirStringLiteralExtraAttr AstToJsir::VisitStringLiteralExtraAttr(
-    mlir::OpBuilder& builder, const JsStringLiteralExtra* node) {
-  mlir::StringAttr mlir_raw = builder.getStringAttr(node->raw());
-  mlir::StringAttr mlir_raw_value = builder.getStringAttr(node->raw_value());
-  return JsirStringLiteralExtraAttr::get(builder.getContext(), mlir_raw,
-                                         mlir_raw_value);
-}
-
 JsirStringLiteralAttr AstToJsir::VisitStringLiteralAttr(
     mlir::OpBuilder& builder, const JsStringLiteral* node) {
   auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
   mlir::StringAttr mlir_value = builder.getStringAttr(node->value());
-  JsirStringLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitStringLiteralExtraAttr(builder, node->extra().value());
-  }
-  return JsirStringLiteralAttr::get(builder.getContext(), loc, mlir_value,
-                                    mlir_extra);
-}
-
-JsirNumericLiteralExtraAttr AstToJsir::VisitNumericLiteralExtraAttr(
-    mlir::OpBuilder& builder, const JsNumericLiteralExtra* node) {
-  mlir::StringAttr mlir_raw = builder.getStringAttr(node->raw());
-  mlir::FloatAttr mlir_raw_value = builder.getF64FloatAttr(node->raw_value());
-  return JsirNumericLiteralExtraAttr::get(builder.getContext(), mlir_raw,
-                                          mlir_raw_value);
+  return JsirStringLiteralAttr::get(builder.getContext(), loc, mlir_value);
 }
 
 JsirNumericLiteralAttr AstToJsir::VisitNumericLiteralAttr(
     mlir::OpBuilder& builder, const JsNumericLiteral* node) {
   auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
   mlir::FloatAttr mlir_value = builder.getF64FloatAttr(node->value());
-  JsirNumericLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitNumericLiteralExtraAttr(builder, node->extra().value());
-  }
-  return JsirNumericLiteralAttr::get(builder.getContext(), loc, mlir_value,
-                                     mlir_extra);
-}
-
-JsirBigIntLiteralExtraAttr AstToJsir::VisitBigIntLiteralExtraAttr(
-    mlir::OpBuilder& builder, const JsBigIntLiteralExtra* node) {
-  mlir::StringAttr mlir_raw = builder.getStringAttr(node->raw());
-  mlir::StringAttr mlir_raw_value = builder.getStringAttr(node->raw_value());
-  return JsirBigIntLiteralExtraAttr::get(builder.getContext(), mlir_raw,
-                                         mlir_raw_value);
+  return JsirNumericLiteralAttr::get(builder.getContext(), loc, mlir_value);
 }
 
 JsirBigIntLiteralAttr AstToJsir::VisitBigIntLiteralAttr(
     mlir::OpBuilder& builder, const JsBigIntLiteral* node) {
   auto loc = GetJsirTriviaAttr(builder.getContext(), *node);
   mlir::StringAttr mlir_value = builder.getStringAttr(node->value());
-  JsirBigIntLiteralExtraAttr mlir_extra;
-  if (node->extra().has_value()) {
-    mlir_extra = VisitBigIntLiteralExtraAttr(builder, node->extra().value());
-  }
-  return JsirBigIntLiteralAttr::get(builder.getContext(), loc, mlir_value,
-                                    mlir_extra);
+  return JsirBigIntLiteralAttr::get(builder.getContext(), loc, mlir_value);
 }
 
 JsirImportSpecifierAttr AstToJsir::VisitImportSpecifierAttr(

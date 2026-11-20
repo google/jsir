@@ -23,8 +23,10 @@
 #include <vector>
 
 #include "mlir/IR/Attributes.h"
+#include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/Operation.h"
+#include "nlohmann/json.hpp"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -50,9 +52,22 @@ struct JsTrivia {
   std::optional<std::vector<int64_t>> leading_comment_uids;
   std::optional<std::vector<int64_t>> trailing_comment_uids;
   std::optional<std::vector<int64_t>> inner_comment_uids;
+  // Babel's `extra` object (see `JsNode::extra()`).
+  std::optional<nlohmann::json> extra;
 };
 
 JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr);
+
+// Returns Babel's `extra` object of a literal: `{raw: <raw>, rawValue:
+// <raw_value>}`.
+mlir::DictionaryAttr GetJsirLiteralExtraAttr(mlir::MLIRContext* context,
+                                             mlir::StringAttr raw,
+                                             mlir::Attribute raw_value);
+
+// Returns a copy of `trivia` (which may be nullptr) with `extra` replaced.
+JsirTriviaAttr GetJsirTriviaAttrWithExtra(mlir::MLIRContext* context,
+                                          JsirTriviaAttr trivia,
+                                          mlir::DictionaryAttr extra);
 
 JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext* context,
                                  const JsNode& node);
@@ -77,7 +92,7 @@ std::unique_ptr<NodeT> CreateJsNodeWithTrivia(JsTrivia trivia, Args&&... args) {
       /*scope_uid=*/trivia.scope_uid,
       /*referenced_symbol=*/std::move(trivia.referenced_symbol),
       /*defined_symbols=*/std::move(trivia.defined_symbols),
-      std::forward<Args>(args)...);
+      /*extra=*/std::move(trivia.extra), std::forward<Args>(args)...);
 }
 
 template <typename NodeT,

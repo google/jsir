@@ -4,7 +4,7 @@
 // JSIR-NEXT:       "jsir.exprs_region_end"() : () -> ()
 // JSIR-NEXT:     }, {
 // JSIR-NEXT:       "jshir.block_statement"() ({
-// JSIR-NEXT:         %0 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %0 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         "jsir.return_statement"(%0) : (!jsir.any) -> ()
 // JSIR-NEXT:       }, {
 // JSIR-NEXT:       ^bb0:

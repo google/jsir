@@ -37,34 +37,34 @@
 // SOURCE-NEXT:               ^bb0:
 // SOURCE-NEXT:                   // <executable>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %41 = jsir.string_literal {#jsir<string_literal_extra "'a'", "a">, "a"}
+// SOURCE-NEXT:                 %41 = jsir.string_literal {"a"}
 // SOURCE-NEXT:                   // %41 = "a"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %42 = jsir.object_property (%41) {#jsir<string_literal <L 2 C 2>, <L 2 C 5>, 17, 20, 0, "a", "'a'", "a">, false}
+// SOURCE-NEXT:                 %42 = jsir.object_property (%41) {#jsir<string_literal <L 2 C 2>, <L 2 C 5>, 17, 20, 0, {raw = "'a'", rawValue = "a"}, "a">, false}
 // SOURCE-NEXT:                   // %42 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %43 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// SOURCE-NEXT:                 %43 = jsir.string_literal {""}
 // SOURCE-NEXT:                   // %43 = ""
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %44 = jsir.string_literal {#jsir<string_literal_extra "'b'", "b">, "b"}
+// SOURCE-NEXT:                 %44 = jsir.string_literal {"b"}
 // SOURCE-NEXT:                   // %44 = "b"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %45 = jsir.binary_expression (%43, %44) {"+"}
 // SOURCE-NEXT:                   // %45 = "b"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %46 = jsir.object_property (%45) {#jsir<string_literal <L 3 C 2>, <L 3 C 5>, 29, 32, 0, "b", "'b'", "b">, false}
+// SOURCE-NEXT:                 %46 = jsir.object_property (%45) {#jsir<string_literal <L 3 C 2>, <L 3 C 5>, 29, 32, 0, {raw = "'b'", rawValue = "b"}, "b">, false}
 // SOURCE-NEXT:                   // %46 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %47 = jsir.string_literal {#jsir<string_literal_extra "'c'", "c">, "c"}
+// SOURCE-NEXT:                 %47 = jsir.string_literal {"c"}
 // SOURCE-NEXT:                   // %47 = "c"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %48 = jsir.object_property (%47) {#jsir<identifier <L 4 C 2>, <L 4 C 3>, "c", 46, 47, 0, "c">, false}
 // SOURCE-NEXT:                   // %48 = <unknown>
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %49 = jsir.string_literal {#jsir<string_literal_extra "'d'", "d">, "d"}
+// SOURCE-NEXT:                 %49 = jsir.string_literal {"d"}
 // SOURCE-NEXT:                   // %49 = "d"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
-// SOURCE-NEXT:                 %50 = jsir.string_literal {#jsir<string_literal_extra "'d'", "d">, "d"}
+// SOURCE-NEXT:                 %50 = jsir.string_literal {"d"}
 // SOURCE-NEXT:                   // %50 = "d"
 // SOURCE-NEXT:                   // State [default = <unknown>] { }
 // SOURCE-NEXT:                 %51 = jsir.object_property (%49, %50) {false}
@@ -91,7 +91,7 @@
 // SOURCE-NEXT:         %2 = jsir.identifier {"object"}
 // SOURCE-NEXT:           // %2 = #jsir_builtin<inline_expression_object "a", "a", "b", #jsir_builtin<inline_expression_binary_expression "", "b", "+">, "c", "c", "d", "d">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %3 = jsir.string_literal {#jsir<string_literal_extra "'a'", "a">, "a"}
+// SOURCE-NEXT:         %3 = jsir.string_literal {"a"}
 // SOURCE-NEXT:           // %3 = "a"
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %4 = jsir.member_expression (%2, %3)
@@ -111,10 +111,10 @@
 // SOURCE-NEXT:         %8 = jsir.identifier {"object"}
 // SOURCE-NEXT:           // %8 = #jsir_builtin<inline_expression_object "a", "a", "b", #jsir_builtin<inline_expression_binary_expression "", "b", "+">, "c", "c", "d", "d">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %9 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// SOURCE-NEXT:         %9 = jsir.string_literal {""}
 // SOURCE-NEXT:           // %9 = ""
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %10 = jsir.string_literal {#jsir<string_literal_extra "'a'", "a">, "a"}
+// SOURCE-NEXT:         %10 = jsir.string_literal {"a"}
 // SOURCE-NEXT:           // %10 = "a"
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %11 = jsir.binary_expression (%9, %10) {"+"}
@@ -137,7 +137,7 @@
 // SOURCE-NEXT:         %16 = jsir.identifier {"object"}
 // SOURCE-NEXT:           // %16 = #jsir_builtin<inline_expression_object "a", "a", "b", #jsir_builtin<inline_expression_binary_expression "", "b", "+">, "c", "c", "d", "d">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %17 = jsir.string_literal {#jsir<string_literal_extra "'b'", "b">, "b"}
+// SOURCE-NEXT:         %17 = jsir.string_literal {"b"}
 // SOURCE-NEXT:           // %17 = "b"
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %18 = jsir.member_expression (%16, %17)
@@ -157,10 +157,10 @@
 // SOURCE-NEXT:         %22 = jsir.identifier {"object"}
 // SOURCE-NEXT:           // %22 = #jsir_builtin<inline_expression_object "a", "a", "b", #jsir_builtin<inline_expression_binary_expression "", "b", "+">, "c", "c", "d", "d">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %23 = jsir.string_literal {#jsir<string_literal_extra "''", "">, ""}
+// SOURCE-NEXT:         %23 = jsir.string_literal {""}
 // SOURCE-NEXT:           // %23 = ""
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %24 = jsir.string_literal {#jsir<string_literal_extra "'b'", "b">, "b"}
+// SOURCE-NEXT:         %24 = jsir.string_literal {"b"}
 // SOURCE-NEXT:           // %24 = "b"
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %25 = jsir.binary_expression (%23, %24) {"+"}

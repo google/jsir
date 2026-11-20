@@ -852,6 +852,12 @@ void AstToIrSourcePrinter::PrintBuiltinToIr(const AstDef& ast, Action action,
       Print("builder.getF64FloatAttr($rhs$)");
       break;
     }
+    case BuiltinTypeKind::kJson: {
+      // The getter returns `const nlohmann::json*`.
+      // See maldoca/astgen/mlir_json_utils.h.
+      Print("JsonToMlirDictionaryAttr(builder.getContext(), *$rhs$)");
+      break;
+    }
   }
 
   Println(";");

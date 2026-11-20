@@ -18,6 +18,8 @@
 #include "mlir/Interfaces/InferTypeOpInterface.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dialect.h"
+// For the JSON <-> MLIR conversion in the generated AST <-> IR code.
+#include "maldoca/astgen/mlir_json_utils.h"  // IWYU pragma: export
 
 // Include the auto-generated header file containing the declaration of the AIR
 // dialect.

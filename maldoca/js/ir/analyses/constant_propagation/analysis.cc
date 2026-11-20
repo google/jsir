@@ -242,8 +242,7 @@ void JsirConstantPropagationAnalysis::VisitUpdateExpression(
   mlir::OpBuilder builder(context);
 
   auto one = JsirNumericLiteralAttr::get(context, /*loc=*/nullptr,
-                                         builder.getF64FloatAttr(1.0),
-                                         /*extra=*/nullptr);
+                                         builder.getF64FloatAttr(1.0));
   std::optional<mlir::Attribute> value_after;
   if (op.getOperator_() == "++") {
     value_after = EmulateBinOp("+", context, **value_before, one);

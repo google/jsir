@@ -2,7 +2,7 @@
 // JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSIR-NEXT:     "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:       %8 = "jsir.identifier_ref"() <{name = "not_a_const"}> : () -> !jsir.any
-// JSIR-NEXT:       %9 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:       %9 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:       %10 = "jsir.variable_declarator"(%8, %9) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:       "jsir.exprs_region_end"(%10) : (!jsir.any) -> ()
 // JSIR-NEXT:     }) : () -> ()
@@ -13,13 +13,13 @@
 // JSIR-NEXT:       "jshir.block_statement"() ({
 // JSIR-NEXT:         %8 = "jsir.identifier_ref"() <{name = "not_a_const"}> : () -> !jsir.any
 // JSIR-NEXT:         %9 = "jsir.identifier"() <{name = "not_a_const"}> : () -> !jsir.any
-// JSIR-NEXT:         %10 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:         %10 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:         %11 = "jsir.binary_expression"(%9, %10) <{operator_ = "+"}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:         %12 = "jsir.assignment_expression"(%8, %11) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:         "jsir.expression_statement"(%12) : (!jsir.any) -> ()
 // JSIR-NEXT:         "jsir.variable_declaration"() <{kind = "var"}> ({
 // JSIR-NEXT:           %13 = "jsir.identifier_ref"() <{name = "is_a_const"}> : () -> !jsir.any
-// JSIR-NEXT:           %14 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:           %14 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:           %15 = "jsir.variable_declarator"(%13, %14) : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:           "jsir.exprs_region_end"(%15) : (!jsir.any) -> ()
 // JSIR-NEXT:         }) : () -> ()
@@ -56,7 +56,7 @@
 // JSIR-NEXT:             %8 = jsir.identifier_ref {"not_a_const"}
 // JSIR-NEXT:               // %8 = <unknown>
 // JSIR-NEXT:               // State [default = <unknown>] { }
-// JSIR-NEXT:             %9 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:             %9 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:               // %9 = 1.000000e+00 : f64
 // JSIR-NEXT:               // State [default = <unknown>] { }
 // JSIR-NEXT:             %10 = jsir.variable_declarator (%8, %9)
@@ -89,7 +89,7 @@
 // JSIR-NEXT:                 %9 = jsir.identifier {"not_a_const"}
 // JSIR-NEXT:                   // %9 = <unknown>
 // JSIR-NEXT:                   // State [default = <unknown>] { }
-// JSIR-NEXT:                 %10 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:                 %10 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:                   // %10 = 1.000000e+00 : f64
 // JSIR-NEXT:                   // State [default = <unknown>] { }
 // JSIR-NEXT:                 %11 = jsir.binary_expression (%9, %10) {"+"}
@@ -107,7 +107,7 @@
 // JSIR-NEXT:                     %13 = jsir.identifier_ref {"is_a_const"}
 // JSIR-NEXT:                       // %13 = <unknown>
 // JSIR-NEXT:                       // State [default = <unknown>] { }
-// JSIR-NEXT:                     %14 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:                     %14 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:                       // %14 = 1.000000e+00 : f64
 // JSIR-NEXT:                       // State [default = <unknown>] { }
 // JSIR-NEXT:                     %15 = jsir.variable_declarator (%13, %14)

@@ -23,6 +23,7 @@
 #include "mlir/IR/Operation.h"
 #include "absl/strings/str_cat.h"
 #include "maldoca/js/ir/ir.h"
+#include "maldoca/js/ir/trivia.h"
 
 namespace maldoca {
 
@@ -37,18 +38,20 @@ std::optional<JsirStringLiteralAttr> MaybeNormalizeLiteralKey(
     return std::nullopt;
   }
 
+  // Babel's `extra` of the new string literal.
+  mlir::DictionaryAttr extra = builder.getDictionaryAttr({
+      builder.getNamedAttr(
+          "raw", builder.getStringAttr(
+                     absl::StrCat("\"", identifier_key.getName().str(), "\""))),
+      builder.getNamedAttr("rawValue", identifier_key.getName()),
+  });
+
   auto string_literal_key = builder.getAttr<JsirStringLiteralAttr>(
       // loc:
-      identifier_key.getLoc(),
+      GetJsirTriviaAttrWithExtra(builder.getContext(), identifier_key.getLoc(),
+                                 extra),
       // value:
-      identifier_key.getName(),
-      // extra:
-      builder.getAttr<JsirStringLiteralExtraAttr>(
-          // raw:
-          builder.getStringAttr(
-              absl::StrCat("\"", identifier_key.getName().str(), "\"")),
-          // raw_value:
-          identifier_key.getName()));
+      identifier_key.getName());
 
   return string_literal_key;
 }

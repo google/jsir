@@ -59,12 +59,20 @@ AirExpressionOpInterface AstToAir::VisitExpression(mlir::OpBuilder &builder, con
 
 AirIdentifierOp AstToAir::VisitIdentifier(mlir::OpBuilder &builder, const AIdentifier *node) {
   mlir::StringAttr mlir_name = builder.getStringAttr(node->name());
-  return CreateExpr<AirIdentifierOp>(builder, node, mlir_name);
+  mlir::DictionaryAttr mlir_metadata;
+  if (node->metadata().has_value()) {
+    mlir_metadata = JsonToMlirDictionaryAttr(builder.getContext(), *node->metadata().value());
+  }
+  return CreateExpr<AirIdentifierOp>(builder, node, mlir_name, mlir_metadata);
 }
 
 AirIdentifierRefOp AstToAir::VisitIdentifierRef(mlir::OpBuilder &builder, const AIdentifier *node) {
   mlir::StringAttr mlir_name = builder.getStringAttr(node->name());
-  return CreateExpr<AirIdentifierRefOp>(builder, node, mlir_name);
+  mlir::DictionaryAttr mlir_metadata;
+  if (node->metadata().has_value()) {
+    mlir_metadata = JsonToMlirDictionaryAttr(builder.getContext(), *node->metadata().value());
+  }
+  return CreateExpr<AirIdentifierRefOp>(builder, node, mlir_name, mlir_metadata);
 }
 
 AirAssignmentOp AstToAir::VisitAssignment(mlir::OpBuilder &builder, const AAssignment *node) {

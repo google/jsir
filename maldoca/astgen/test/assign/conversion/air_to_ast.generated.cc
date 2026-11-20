@@ -79,9 +79,19 @@ AirToAst::VisitIdentifier(AirIdentifierOp op) {
           ToString()
       )
   );
+  ABSL_ASSIGN_OR_RETURN(
+      auto metadata,
+      Convert(
+          op.getMetadataAttr(),
+          Nullable(
+              ToJson()
+          )
+      )
+  );
   return Create<AIdentifier>(
       op,
-      std::move(name));
+      std::move(name),
+      std::move(metadata));
 }
 
 absl::StatusOr<std::unique_ptr<AIdentifier>>
@@ -93,9 +103,19 @@ AirToAst::VisitIdentifierRef(AirIdentifierRefOp op) {
           ToString()
       )
   );
+  ABSL_ASSIGN_OR_RETURN(
+      auto metadata,
+      Convert(
+          op.getMetadataAttr(),
+          Nullable(
+              ToJson()
+          )
+      )
+  );
   return Create<AIdentifier>(
       op,
-      std::move(name));
+      std::move(name),
+      std::move(metadata));
 }
 
 absl::StatusOr<std::unique_ptr<AAssignment>>

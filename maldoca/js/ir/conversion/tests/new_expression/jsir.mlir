@@ -1,8 +1,8 @@
 // JSIR:      "jsir.file"() <{comments = []}> ({
 // JSIR-NEXT:   "jsir.program"() <{source_type = "script"}> ({
 // JSIR-NEXT:     %0 = "jsir.identifier"() <{name = "foo"}> : () -> !jsir.any
-// JSIR-NEXT:     %1 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
-// JSIR-NEXT:     %2 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, value = 2.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %1 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:     %2 = "jsir.numeric_literal"() <{value = 2.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:     %3 = "jsir.identifier"() <{name = "a"}> : () -> !jsir.any
 // JSIR-NEXT:     %4 = "jsir.spread_element"(%3) : (!jsir.any) -> !jsir.any
 // JSIR-NEXT:     %5 = "jsir.new_expression"(%0, %1, %2, %4) : (!jsir.any, !jsir.any, !jsir.any, !jsir.any) -> !jsir.any

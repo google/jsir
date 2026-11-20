@@ -54,6 +54,8 @@ ParameterType GetParameterType(const AstDef& ast, const Type& type,
         return {.name = maybe_absent ? "std::optional<int64_t>" : "int64_t"};
       case BuiltinTypeKind::kBool:
         return {.name = "::mlir::BoolAttr"};
+      case BuiltinTypeKind::kJson:
+        return {.name = "::mlir::DictionaryAttr"};
     }
   }
   if (type.IsA<EnumType>()) {
