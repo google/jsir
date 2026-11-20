@@ -27,10 +27,12 @@ namespace maldoca {
 
 // @babel/parser `parseExport` sets `declaration` only in
 // `maybeParseExportNamedSpecifiers` (to null, when a `{...}` list follows) and
-// in `maybeParseExportDeclaration`. For `export * as ns from "m"`, it sets
-// neither, so `declaration` stays undefined and JSON.stringify drops the key
-// (verified in Babel 7.20.5, 7.25.3 and 7.29.11). That is the case where all
-// specifiers are ExportNamespaceSpecifier nodes.
+// in `maybeParseExportDeclaration`. For `export * as ns from "m"`
+// (`ExportNamespaceSpecifier`) and `export x from "m"`
+// (`ExportDefaultSpecifier`), it sets neither, so `declaration` stays
+// undefined and JSON.stringify drops the key (verified in Babel 7.20.5,
+// 7.25.3 and 7.29.11). That is the case whenever `specifiers` is non-empty and
+// contains no `ExportSpecifier`.
 //
 // Known limit: only Babel 7.20.5 also accepts the non-standard
 // `export * as ns, {} from "m"`, and writes `declaration: null` there. This
@@ -41,7 +43,7 @@ bool JsExportNamedDeclaration::ShouldOmitNullDeclaration() const {
     return false;
   }
   for (const auto& specifier : specifiers_) {
-    if (!std::holds_alternative<std::unique_ptr<JsExportNamespaceSpecifier>>(
+    if (std::holds_alternative<std::unique_ptr<JsExportSpecifier>>(
             specifier)) {
       return false;
     }

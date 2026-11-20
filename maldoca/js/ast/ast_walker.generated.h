@@ -1275,6 +1275,16 @@ class JsAstWalker : public JsAstVisitor<void> {
     }
   }
 
+  void VisitExportDefaultSpecifier(const JsExportDefaultSpecifier &export_default_specifier) override {
+    if (preorder_callback_) {
+      preorder_callback_->VisitExportDefaultSpecifier(export_default_specifier);
+    }
+    VisitIdentifier(*export_default_specifier.exported());
+    if (postorder_callback_) {
+      postorder_callback_->VisitExportDefaultSpecifier(export_default_specifier);
+    }
+  }
+
   void VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) override {
     if (preorder_callback_) {
       preorder_callback_->VisitExportNamedDeclaration(export_named_declaration);
@@ -1289,6 +1299,9 @@ class JsAstWalker : public JsAstVisitor<void> {
           break;
         case 1:
           VisitExportNamespaceSpecifier(*std::get<1>(elem));
+          break;
+        case 2:
+          VisitExportDefaultSpecifier(*std::get<2>(elem));
           break;
         default:
           ABSL_LOG(FATAL) << "Unreachable code.";
@@ -2589,6 +2602,16 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
     }
   }
 
+  void VisitExportDefaultSpecifier(JsExportDefaultSpecifier &export_default_specifier) override {
+    if (preorder_callback_) {
+      preorder_callback_->VisitExportDefaultSpecifier(export_default_specifier);
+    }
+    VisitIdentifier(*export_default_specifier.exported());
+    if (postorder_callback_) {
+      postorder_callback_->VisitExportDefaultSpecifier(export_default_specifier);
+    }
+  }
+
   void VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) override {
     if (preorder_callback_) {
       preorder_callback_->VisitExportNamedDeclaration(export_named_declaration);
@@ -2603,6 +2626,9 @@ class MutableJsAstWalker : public MutableJsAstVisitor<void> {
           break;
         case 1:
           VisitExportNamespaceSpecifier(*std::get<1>(elem));
+          break;
+        case 2:
+          VisitExportDefaultSpecifier(*std::get<2>(elem));
           break;
         default:
           ABSL_LOG(FATAL) << "Unreachable code.";

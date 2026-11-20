@@ -346,6 +346,8 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
 
   virtual R VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) = 0;
 
+  virtual R VisitExportDefaultSpecifier(const JsExportDefaultSpecifier &export_default_specifier) = 0;
+
   virtual R VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) = 0;
 
   virtual R VisitExportDefaultDeclaration(const JsExportDefaultDeclaration &export_default_declaration) = 0;
@@ -364,6 +366,8 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitExportSpecifier(*export_specifier);
     } else if (const JsExportNamespaceSpecifier *export_namespace_specifier = dynamic_cast<const JsExportNamespaceSpecifier *>(module_specifier_ptr)) {
       return VisitExportNamespaceSpecifier(*export_namespace_specifier);
+    } else if (const JsExportDefaultSpecifier *export_default_specifier = dynamic_cast<const JsExportDefaultSpecifier *>(module_specifier_ptr)) {
+      return VisitExportDefaultSpecifier(*export_default_specifier);
     }
 
     ABSL_LOG(FATAL) << "Unreachable code.";
@@ -476,6 +480,8 @@ class JsAstVisitor : public virtual JsPatternVisitor<R>,
       return VisitForOfStatement(*for_of_statement);
     } else if (const JsDeclaration *declaration = dynamic_cast<const JsDeclaration *>(statement_ptr)) {
       return VisitDeclaration(*declaration);
+    } else if (const JsModuleDeclaration *module_declaration = dynamic_cast<const JsModuleDeclaration *>(statement_ptr)) {
+      return VisitModuleDeclaration(*module_declaration);
     }
 
     ABSL_LOG(FATAL) << "Unreachable code.";
@@ -756,6 +762,8 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
 
   virtual R VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) = 0;
 
+  virtual R VisitExportDefaultSpecifier(JsExportDefaultSpecifier &export_default_specifier) = 0;
+
   virtual R VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) = 0;
 
   virtual R VisitExportDefaultDeclaration(JsExportDefaultDeclaration &export_default_declaration) = 0;
@@ -774,6 +782,8 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitExportSpecifier(*export_specifier);
     } else if (JsExportNamespaceSpecifier *export_namespace_specifier = dynamic_cast<JsExportNamespaceSpecifier *>(module_specifier_ptr)) {
       return VisitExportNamespaceSpecifier(*export_namespace_specifier);
+    } else if (JsExportDefaultSpecifier *export_default_specifier = dynamic_cast<JsExportDefaultSpecifier *>(module_specifier_ptr)) {
+      return VisitExportDefaultSpecifier(*export_default_specifier);
     }
 
     ABSL_LOG(FATAL) << "Unreachable code.";
@@ -886,6 +896,8 @@ class MutableJsAstVisitor : public virtual MutableJsPatternVisitor<R>,
       return VisitForOfStatement(*for_of_statement);
     } else if (JsDeclaration *declaration = dynamic_cast<JsDeclaration *>(statement_ptr)) {
       return VisitDeclaration(*declaration);
+    } else if (JsModuleDeclaration *module_declaration = dynamic_cast<JsModuleDeclaration *>(statement_ptr)) {
+      return VisitModuleDeclaration(*module_declaration);
     }
 
     ABSL_LOG(FATAL) << "Unreachable code.";
@@ -1164,6 +1176,8 @@ class EmptyJsAstVisitor : public JsAstVisitor<void> {
 
   void VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) override {}
 
+  void VisitExportDefaultSpecifier(const JsExportDefaultSpecifier &export_default_specifier) override {}
+
   void VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) override {}
 
   void VisitExportDefaultDeclaration(const JsExportDefaultDeclaration &export_default_declaration) override {}
@@ -1342,6 +1356,8 @@ class EmptyMutableJsAstVisitor : public MutableJsAstVisitor<void> {
   void VisitExportSpecifier(JsExportSpecifier &export_specifier) override {}
 
   void VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) override {}
+
+  void VisitExportDefaultSpecifier(JsExportDefaultSpecifier &export_default_specifier) override {}
 
   void VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) override {}
 
@@ -1688,6 +1704,10 @@ class DefaultJsAstVisitor : public EmptyJsAstVisitor {
 
   void VisitExportNamespaceSpecifier(const JsExportNamespaceSpecifier &export_namespace_specifier) override {
     this->VisitNodeDefault(export_namespace_specifier);
+  }
+
+  void VisitExportDefaultSpecifier(const JsExportDefaultSpecifier &export_default_specifier) override {
+    this->VisitNodeDefault(export_default_specifier);
   }
 
   void VisitExportNamedDeclaration(const JsExportNamedDeclaration &export_named_declaration) override {
@@ -2044,6 +2064,10 @@ class DefaultMutableJsAstVisitor : public EmptyMutableJsAstVisitor {
 
   void VisitExportNamespaceSpecifier(JsExportNamespaceSpecifier &export_namespace_specifier) override {
     this->VisitNodeDefault(export_namespace_specifier);
+  }
+
+  void VisitExportDefaultSpecifier(JsExportDefaultSpecifier &export_default_specifier) override {
+    this->VisitNodeDefault(export_default_specifier);
   }
 
   void VisitExportNamedDeclaration(JsExportNamedDeclaration &export_named_declaration) override {

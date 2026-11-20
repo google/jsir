@@ -353,6 +353,10 @@ enum class JsNodeType {
   kForOfStatement,
   kVariableDeclaration,
   kClassDeclaration,
+  kImportDeclaration,
+  kExportNamedDeclaration,
+  kExportDefaultDeclaration,
+  kExportAllDeclaration,
   kSwitchCase,
   kCatchClause,
   kVariableDeclarator,
@@ -401,15 +405,12 @@ enum class JsNodeType {
   kClassProperty,
   kClassPrivateProperty,
   kStaticBlock,
-  kImportDeclaration,
-  kExportNamedDeclaration,
-  kExportDefaultDeclaration,
-  kExportAllDeclaration,
   kImportSpecifier,
   kImportDefaultSpecifier,
   kImportNamespaceSpecifier,
   kExportSpecifier,
   kExportNamespaceSpecifier,
+  kExportDefaultSpecifier,
   kImportAttribute,
 };
 
@@ -4494,7 +4495,7 @@ class JsMetaProperty : public virtual JsExpression {
   std::unique_ptr<JsIdentifier> property_;
 };
 
-class JsModuleDeclaration : public virtual JsNode, public virtual JsProgramBodyElement {
+class JsModuleDeclaration : public virtual JsStatement, public virtual JsProgramBodyElement {
  public:
   explicit JsModuleDeclaration(
       std::optional<std::unique_ptr<JsSourceLocation>> loc,
@@ -4853,6 +4854,46 @@ class JsExportNamespaceSpecifier : public virtual JsModuleSpecifier {
   std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported_;
 };
 
+class JsExportDefaultSpecifier : public virtual JsModuleSpecifier {
+ public:
+  explicit JsExportDefaultSpecifier(
+      std::optional<std::unique_ptr<JsSourceLocation>> loc,
+      std::optional<int64_t> start,
+      std::optional<int64_t> end,
+      std::optional<std::vector<int64_t>> leading_comment_uids,
+      std::optional<std::vector<int64_t>> trailing_comment_uids,
+      std::optional<std::vector<int64_t>> inner_comment_uids,
+      std::optional<int64_t> scope_uid,
+      std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
+      std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+      std::unique_ptr<JsIdentifier> exported);
+
+  JsNodeType node_type() const override {
+    return JsNodeType::kExportDefaultSpecifier;
+  }
+
+  void Serialize(std::ostream& os) const override;
+
+  static absl::StatusOr<std::unique_ptr<JsExportDefaultSpecifier>> FromJson(const nlohmann::json& json);
+
+  JsIdentifier* exported();
+  const JsIdentifier* exported() const;
+  void set_exported(std::unique_ptr<JsIdentifier> exported);
+
+ protected:
+  // Internal function used by Serialize().
+  // Sets the fields defined in this class.
+  // Does not set fields defined in ancestors.
+  void SerializeFields(std::ostream& os, bool &needs_comma) const;
+
+  // Internal functions used by FromJson().
+  // Extracts a field from a JSON object.
+  static absl::StatusOr<std::unique_ptr<JsIdentifier>> GetExported(const nlohmann::json& json);
+
+ private:
+  std::unique_ptr<JsIdentifier> exported_;
+};
+
 class JsExportNamedDeclaration : public virtual JsModuleDeclaration {
  public:
   explicit JsExportNamedDeclaration(
@@ -4866,7 +4907,7 @@ class JsExportNamedDeclaration : public virtual JsModuleDeclaration {
       std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
       std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
       std::optional<std::unique_ptr<JsDeclaration>> declaration,
-      std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>> specifiers,
+      std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>> specifiers,
       std::optional<std::unique_ptr<JsStringLiteral>> source,
       std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions);
 
@@ -4882,9 +4923,9 @@ class JsExportNamedDeclaration : public virtual JsModuleDeclaration {
   std::optional<const JsDeclaration*> declaration() const;
   void set_declaration(std::optional<std::unique_ptr<JsDeclaration>> declaration);
 
-  std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>* specifiers();
-  const std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>* specifiers() const;
-  void set_specifiers(std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>> specifiers);
+  std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>>* specifiers();
+  const std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>>* specifiers() const;
+  void set_specifiers(std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>> specifiers);
 
   std::optional<JsStringLiteral*> source();
   std::optional<const JsStringLiteral*> source() const;
@@ -4908,13 +4949,13 @@ class JsExportNamedDeclaration : public virtual JsModuleDeclaration {
   // Internal functions used by FromJson().
   // Extracts a field from a JSON object.
   static absl::StatusOr<std::optional<std::unique_ptr<JsDeclaration>>> GetDeclaration(const nlohmann::json& json);
-  static absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>>> GetSpecifiers(const nlohmann::json& json);
+  static absl::StatusOr<std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>>> GetSpecifiers(const nlohmann::json& json);
   static absl::StatusOr<std::optional<std::unique_ptr<JsStringLiteral>>> GetSource(const nlohmann::json& json);
   static absl::StatusOr<std::optional<std::vector<std::unique_ptr<JsImportAttribute>>>> GetAssertions(const nlohmann::json& json);
 
  private:
   std::optional<std::unique_ptr<JsDeclaration>> declaration_;
-  std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>>> specifiers_;
+  std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>> specifiers_;
   std::optional<std::unique_ptr<JsStringLiteral>> source_;
   std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions_;
 };
