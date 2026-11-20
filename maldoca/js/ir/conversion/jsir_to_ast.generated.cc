@@ -675,6 +675,18 @@ JsirToAst::VisitStatement(JsirStatementOpInterface op) {
     .Case([&](JsirClassDeclarationOp op) {
       return VisitClassDeclaration(op);
     })
+    .Case([&](JsirImportDeclarationOp op) {
+      return VisitImportDeclaration(op);
+    })
+    .Case([&](JsirExportNamedDeclarationOp op) {
+      return VisitExportNamedDeclaration(op);
+    })
+    .Case([&](JsirExportDefaultDeclarationOp op) {
+      return VisitExportDefaultDeclaration(op);
+    })
+    .Case([&](JsirExportAllDeclarationOp op) {
+      return VisitExportAllDeclaration(op);
+    })
     .Default([&](mlir::Operation* op) {
       return absl::InvalidArgumentError("Unrecognized op");
     });
@@ -2978,6 +2990,20 @@ JsirToAst::VisitExportNamespaceSpecifier(JsirExportNamespaceSpecifierOp op) {
       std::move(exported));
 }
 
+absl::StatusOr<std::unique_ptr<JsExportDefaultSpecifier>>
+JsirToAst::VisitExportDefaultSpecifier(JsirExportDefaultSpecifierOp op) {
+  ABSL_ASSIGN_OR_RETURN(
+      auto exported,
+      Convert(
+          op.getExportedAttr(),
+          ToAttrConverter(VisitIdentifierAttr)
+      )
+  );
+  return Create<JsExportDefaultSpecifier>(
+      op,
+      std::move(exported));
+}
+
 absl::StatusOr<std::unique_ptr<JsExportNamedDeclaration>>
 JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
   ABSL_ASSIGN_OR_RETURN(
@@ -2999,7 +3025,8 @@ JsirToAst::VisitExportNamedDeclaration(JsirExportNamedDeclarationOp op) {
               List(
                   OpVariant(
                       ToOpConverter(VisitExportSpecifier),
-                      ToOpConverter(VisitExportNamespaceSpecifier)
+                      ToOpConverter(VisitExportNamespaceSpecifier),
+                      ToOpConverter(VisitExportDefaultSpecifier)
                   )
               )
           )

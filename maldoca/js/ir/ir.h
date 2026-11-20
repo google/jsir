@@ -166,6 +166,7 @@
   CIR_OP(ExportNamedDeclaration)                            \
   CIR_OP(ExportSpecifier)                                   \
   CIR_OP(ExportNamespaceSpecifier)                          \
+  CIR_OP(ExportDefaultSpecifier)                            \
   CIR_OP(ExportDefaultDeclaration)                          \
   CIR_OP(ExportAllDeclaration)
 
@@ -191,7 +192,12 @@
   HIR(ForOfStatement)                        \
   CIR(FunctionDeclaration)                   \
   CIR(VariableDeclaration)                   \
-  CIR(ClassDeclaration)
+  CIR(ClassDeclaration)                      \
+  /* ModuleDeclarations are Statements. */   \
+  CIR(ImportDeclaration)                     \
+  CIR(ExportNamedDeclaration)                \
+  CIR(ExportDefaultDeclaration)              \
+  CIR(ExportAllDeclaration)
 
 // JsirExpressionOpInterface
 #define FOR_EACH_JSIR_EXPRESSION_OP(CIR, HIR) \

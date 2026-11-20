@@ -136,8 +136,11 @@ def JsirModuleDeclarationOpInterface : OpInterface<"JsirModuleDeclarationOpInter
   let cppNamespace = "::maldoca";
 }
 
+// Like @babel/types, a ModuleDeclaration is a kind of Statement (see
+// ast_def.textproto).
 def JsirModuleDeclarationOpInterfaceTraits : TraitList<[
   DeclareOpInterfaceMethods<JsirProgramBodyElementOpInterface>,
+  DeclareOpInterfaceMethods<JsirStatementOpInterface>,
   DeclareOpInterfaceMethods<JsirModuleDeclarationOpInterface>
 ]>;
 

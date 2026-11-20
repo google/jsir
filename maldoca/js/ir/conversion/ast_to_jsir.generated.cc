@@ -474,6 +474,18 @@ JsirStatementOpInterface AstToJsir::VisitStatement(mlir::OpBuilder &builder, con
   if (auto *class_declaration = dynamic_cast<const JsClassDeclaration *>(node)) {
     return VisitClassDeclaration(builder, class_declaration);
   }
+  if (auto *import_declaration = dynamic_cast<const JsImportDeclaration *>(node)) {
+    return VisitImportDeclaration(builder, import_declaration);
+  }
+  if (auto *export_named_declaration = dynamic_cast<const JsExportNamedDeclaration *>(node)) {
+    return VisitExportNamedDeclaration(builder, export_named_declaration);
+  }
+  if (auto *export_default_declaration = dynamic_cast<const JsExportDefaultDeclaration *>(node)) {
+    return VisitExportDefaultDeclaration(builder, export_default_declaration);
+  }
+  if (auto *export_all_declaration = dynamic_cast<const JsExportAllDeclaration *>(node)) {
+    return VisitExportAllDeclaration(builder, export_all_declaration);
+  }
   ABSL_LOG(FATAL) << "Unreachable code.";
 }
 
@@ -1763,6 +1775,11 @@ JsirExportNamespaceSpecifierOp AstToJsir::VisitExportNamespaceSpecifier(mlir::Op
   return CreateStmt<JsirExportNamespaceSpecifierOp>(builder, node, mlir_exported);
 }
 
+JsirExportDefaultSpecifierOp AstToJsir::VisitExportDefaultSpecifier(mlir::OpBuilder &builder, const JsExportDefaultSpecifier *node) {
+  JsirIdentifierAttr mlir_exported = VisitIdentifierAttr(builder, node->exported());
+  return CreateStmt<JsirExportDefaultSpecifierOp>(builder, node, mlir_exported);
+}
+
 JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuilder &builder, const JsExportNamedDeclaration *node) {
   JsirStringLiteralAttr mlir_source;
   if (node->source().has_value()) {
@@ -1794,6 +1811,10 @@ JsirExportNamedDeclarationOp AstToJsir::VisitExportNamedDeclaration(mlir::OpBuil
         }
         case 1: {
           VisitExportNamespaceSpecifier(builder, std::get<1>(element).get());
+          break;
+        }
+        case 2: {
+          VisitExportDefaultSpecifier(builder, std::get<2>(element).get());
           break;
         }
         default:
