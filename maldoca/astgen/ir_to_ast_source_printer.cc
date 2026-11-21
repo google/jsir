@@ -220,7 +220,7 @@ void IrToAstSourcePrinter::PrintNonLeafNode(const AstDef& ast,
           auto ir_op = leaf->ir_op_name(ir_lang, kind);
           if (!ir_op.has_value()) {
             ABSL_LOG(FATAL) << "Leaf node " << leaf->name()
-                       << " has no IR op name for " << ir_lang;
+                            << " has no IR op name for " << ir_lang;
           }
           op_name = ir_op->ToPascalCase();
         }
@@ -875,7 +875,6 @@ void IrToAstSourcePrinter::PrintPerMemberKindsConverter(const AstDef& ast,
 }
 
 void IrToAstSourcePrinter::PrintListConverter(const AstDef& ast,
-
                                               const ListType& list_type,
                                               absl::string_view lang_name,
                                               FieldKind kind) {
