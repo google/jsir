@@ -1,7 +1,5 @@
 # Dataflow Analysis
 
-[TOC]
-
 ## Overview
 
 JSIR provides an API for **flow-sensitive, conditional**, dataflow analysis.
@@ -16,7 +14,13 @@ improvements:
     op visits, whereas a user of the MLIR API would have to manually call
     `propagateIfChanged()` to propagate states.
 
-#### Flow-sensitive analysis
+> **A note on op names:** JSIR uses two MLIR dialects: `jsir` (the low-level IR)
+> for operations without control-flow semantics — expressions, values,
+> declarations, and non-branching statements (e.g. `jsir.identifier`,
+> `jsir.binary_expression`) — and `jshir` (the high-level IR) for control-flow
+> constructs (e.g. `jshir.if_statement`, `jshir.while_statement`).
+
+### Flow-sensitive analysis
 
 **Flow-sensitive** means for the following code, we can reason about the two
 program paths, and determine that, at the end of the `if`-statement, `a` has the
@@ -34,7 +38,7 @@ if (some_unknown_condition) {
 // b == <Unknown>
 ```
 
-#### Conditional analysis
+### Conditional analysis
 
 **Conditional** means for the following code, we can skip the traversal of the
 `else`-branch of the `if`-statement and determine that at the end of the
@@ -53,7 +57,94 @@ if (true) {
 // b == "different 1"
 ```
 
-<!--  TODO: Explain how the actual API looks like in C++. -->
+## The C++ API
+
+The dataflow analysis API lives in
+[`maldoca/js/ir/analyses/`](../maldoca/js/ir/analyses/). A user implements an
+analysis by subclassing one of the analysis base classes and overriding a small
+number of methods.
+
+### States and lattices
+
+Each piece of analysis state conforms to the semi-lattice interface
+[`JsirState<T>`](../maldoca/js/ir/analyses/state.h), which requires three
+methods:
+
+*   `Join(const T& other)` — join this state with `other` when two program paths
+    merge, updating `this` in place;
+*   `operator==` / `operator!=`;
+*   `print(llvm::raw_ostream&)`.
+
+For example, `JsirConstantPropagationValue` is a lattice over three cases —
+`Uninit` (uninitialized), a constant `mlir::Attribute`, and `Unknown` — whose
+`Join` obeys:
+
+*   `Join(Uninit, x) = x`
+*   `Join(Unknown, x) = Unknown`
+*   `Join(Const M, Const M) = Const M`
+*   `Join(Const M, Const N) = Unknown` (when `M != N`)
+
+### Dense and sparse states
+
+A single analysis may carry two kinds of state at once:
+
+*   A **dense** state (`StateT`) is attached to every *program point* — before
+    and after each op, and at the entry and exit of each block. It is usually a
+    [`JsirPerVarState<ValueT>`](../maldoca/js/ir/analyses/per_var_state.h), i.e. a
+    map from each symbol to a `ValueT`, together with a default value that is
+    returned for symbols absent from the map.
+
+*   A **sparse** state (`ValueT`) is attached to individual SSA values.
+
+`JsirPerVarState` provides `Get`, `Set`, and `Join` over symbols; its `Join`
+merges the per-symbol entries and the default values of the two states.
+
+### The base classes
+
+[`JsirDataFlowAnalysis<ValueT, StateT, direction>`](../maldoca/js/ir/analyses/dataflow_analysis.h)
+is the core class, parameterized by the sparse value type, the dense state type,
+and a `DataflowDirection` (`kForward` or `kBackward`). The aliases
+`JsirForwardDataFlowAnalysis` and `JsirBackwardDataFlowAnalysis` fix the
+direction. A subclass must implement:
+
+*   `ValueT BoundaryInitialValue() const` — the initial state of a boundary SSA
+    value (e.g. a function parameter);
+*   `InitializeBoundaryBlock(...)` — the initial state at the entry (forward) or
+    exit (backward) block;
+*   `VisitOp(op, sparse_input, dense_input, sparse_output, dense_output)` — the
+    transfer function, called once per op.
+
+State is read and written through
+[`JsirStateRef<T>`](../maldoca/js/ir/analyses/dataflow_analysis.h): `value()`
+reads, `Write(...)` overwrites, and `Join(...)` merges. Every write
+automatically schedules the dependents of that program point for re-visiting, so
+a user never has to call `propagateIfChanged()` by hand.
+
+[`JsirConditionalForwardDataFlowAnalysis<ValueT, StateT>`](../maldoca/js/ir/analyses/conditional_forward_dataflow_analysis.h)
+adds an `IsExecutable` lattice per block, so blocks under a statically-false
+branch (dead code) are skipped. Overriding `IsCfgEdgeExecutable(...)` controls
+which CFG edges are considered live.
+
+[`JsirConditionalForwardPerVarDataFlowAnalysis<ValueT>`](../maldoca/js/ir/analyses/conditional_forward_per_var_dataflow_analysis.h)
+is the most convenient base class for a forward analysis over a
+`JsirPerVarState<ValueT>`. It takes a `BabelScopes` and resolves symbols via
+[`FindSymbol` / `GetSymbolId`](../maldoca/js/ir/analyses/scope.h), and it
+provides helpers such as `VisitIdentifier`, `VisitVariableDeclaration`, and
+`VisitVariableDeclarator`.
+
+### A complete example
+
+`JsirConstantPropagationAnalysis`
+([`maldoca/js/ir/analyses/constant_propagation/analysis.h`](../maldoca/js/ir/analyses/constant_propagation/analysis.h))
+subclasses `JsirConditionalForwardPerVarDataFlowAnalysis<JsirConstantPropagationValue>`
+and overrides `BoundaryInitialValue()` (returning `Unknown`), `VisitOp(...)`, and
+`IsCfgEdgeExecutable(...)`. This is the analysis traced step by step in the
+examples below.
+
+Finally, [`RunJsirAnalysis(...)`](../maldoca/js/ir/analyses/analysis.h) is the
+top-level entry point: it takes a `JsirFileOp`, the source code
+(`std::optional<std::u16string_view>`), the Babel scopes, an analysis config,
+and a `Babel*` object, and returns an `absl::StatusOr<JsirAnalysisResult>`.
 
 ## Example 1: Straightline code
 
@@ -221,8 +312,9 @@ During the traversal, when we visit an operation, we will:
 > `%b_ref`, is not a value in terms of constant propagation, as it represents a
 > reference to a variable, so its state is `Uninit`. When we visit the
 > `jsir.assignment_expression` op, we fetch the defining op of `%b_ref` (i.e.
-> the `jsir.identifier_ref` op) to get the variable name it refers to. We intend
-> to improve our API to handle lvalues in a better way.
+> the `jsir.identifier_ref` op) to get the variable name it refers to. The
+> representation of lvalues is under review; see
+> [issue #25](https://github.com/google/jsir/issues/25).
 
 When we have completed the calculation of every state in the IR, the algorithm
 terminates.
@@ -394,7 +486,7 @@ This propagation is organized by the **work queue**.
 > of flexibility in the underlying MLIR API, our CFG edges are not a supported
 > type of "visitee". Therefore, we insert the **destinations** of the CFG edges,
 > i.e. `T0` and `F0` into the work queue, and simulate the visits of the CFG
-> edges when visiting them. We hope to refactor the MLIR API to fix this.
+> edges when visiting them.
 
 ### Step 3: Computing states in the `true`-branch
 
@@ -594,6 +686,20 @@ now discuss it in more detail:
 > ```
 >
 > which means: unless explicitly specified, all symbols have the value `Uninit`.
+
+Together, `Uninit`, `Const{...}`, and `Unknown` form a partially ordered set (a
+*lattice*), ordered by how much information they carry:
+
+```text
+Uninit ≤ Const{N} ≤ Unknown
+```
+
+`Uninit` is the least element, `Unknown` is the greatest element, and each
+`Const{N}` sits in between (with `Const{M}` and `Const{N}` incomparable when
+`M != N`). The `Join()` of two states is their *least upper bound* under this
+order — the least state that is at least as informative as both inputs. For
+example, the least upper bound of `Const{1}` and `Const{2}` is `Unknown`, while
+the least upper bound of `Uninit` and `Const{1}` is `Const{1}`.
 
 The final result of the analysis, in full detail, is as follows:
 
@@ -953,9 +1059,6 @@ end of the `body` region `I6` becomes `{a: Unknown}`.
 We propagate `I6={a: Unknown}` to `T0`, but `T0` is already `{a: Unknown}`, so
 `Join({a: Unknown}, {a: Unknown})` doesn't change `T0`. No new states are
 generated, the fixpoint is reached, and the algorithm terminates.
-
-<!--  TODO: Explain "lattice order" in more detail, maybe when introducing the
-concept of lattice -->
 
 > ### Concept: Monotonicity
 >
