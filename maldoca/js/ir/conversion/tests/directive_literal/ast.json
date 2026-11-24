@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 14,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "script",
 // AST-NEXT:     "body": [],
@@ -61,11 +64,12 @@
 // AST-NEXT:           "start": 0,
 // AST-NEXT:           "end": 12,
 // AST-NEXT:           "scopeUid": 0,
-// AST-NEXT:           "value": "use strict",
 // AST-NEXT:           "extra": {
+// AST-NEXT:             "expressionValue": "use strict",
 // AST-NEXT:             "raw": "'use strict'",
 // AST-NEXT:             "rawValue": "use strict"
-// AST-NEXT:           }
+// AST-NEXT:           },
+// AST-NEXT:           "value": "use strict"
 // AST-NEXT:         }
 // AST-NEXT:       }
 // AST-NEXT:     ]

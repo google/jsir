@@ -8,12 +8,12 @@
 // JSIR-NEXT:     %0 = "jsir.identifier"() <{name = "x"}> : () -> !jsir.any
 // JSIR-NEXT:     "jshir.if_statement"(%0) ({
 // JSIR-NEXT:       %2 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
-// JSIR-NEXT:       %3 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, value = 1.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:       %3 = "jsir.numeric_literal"() <{value = 1.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:       %4 = "jsir.assignment_expression"(%2, %3) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:       "jsir.expression_statement"(%4) : (!jsir.any) -> ()
 // JSIR-NEXT:     }, {
 // JSIR-NEXT:       %2 = "jsir.identifier_ref"() <{name = "a"}> : () -> !jsir.any
-// JSIR-NEXT:       %3 = "jsir.numeric_literal"() <{extra = #jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, value = 2.000000e+00 : f64}> : () -> !jsir.any
+// JSIR-NEXT:       %3 = "jsir.numeric_literal"() <{value = 2.000000e+00 : f64}> : () -> !jsir.any
 // JSIR-NEXT:       %4 = "jsir.assignment_expression"(%2, %3) <{operator_ = "="}> : (!jsir.any, !jsir.any) -> !jsir.any
 // JSIR-NEXT:       "jsir.expression_statement"(%4) : (!jsir.any) -> ()
 // JSIR-NEXT:     }) : (!jsir.any) -> ()
@@ -55,7 +55,7 @@
 // JSIR-NEXT:             %2 = jsir.identifier_ref {"a"}
 // JSIR-NEXT:               // %2 = <unknown>
 // JSIR-NEXT:               // State [default = <unknown>] { }
-// JSIR-NEXT:             %3 = jsir.numeric_literal {#jsir<numeric_literal_extra "1", 1.000000e+00 : f64>, 1.000000e+00 : f64}
+// JSIR-NEXT:             %3 = jsir.numeric_literal {1.000000e+00 : f64}
 // JSIR-NEXT:               // %3 = 1.000000e+00 : f64
 // JSIR-NEXT:               // State [default = <unknown>] { }
 // JSIR-NEXT:             %4 = jsir.assignment_expression (%2, %3) {"="}
@@ -70,7 +70,7 @@
 // JSIR-NEXT:             %2 = jsir.identifier_ref {"a"}
 // JSIR-NEXT:               // %2 = <unknown>
 // JSIR-NEXT:               // State [default = <unknown>] { }
-// JSIR-NEXT:             %3 = jsir.numeric_literal {#jsir<numeric_literal_extra "2", 2.000000e+00 : f64>, 2.000000e+00 : f64}
+// JSIR-NEXT:             %3 = jsir.numeric_literal {2.000000e+00 : f64}
 // JSIR-NEXT:               // %3 = 2.000000e+00 : f64
 // JSIR-NEXT:               // State [default = <unknown>] { }
 // JSIR-NEXT:             %4 = jsir.assignment_expression (%2, %3) {"="}

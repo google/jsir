@@ -301,6 +301,9 @@ void AstFromJsonPrinter::PrintTypeCheckerName(const ScalarType& type) {
         case BuiltinTypeKind::kDouble:
           Print("IsDouble");
           break;
+        case BuiltinTypeKind::kJson:
+          Print("IsJson");
+          break;
         default:
           LOG(FATAL) << "Unreachable code.";
       }
@@ -358,6 +361,9 @@ void AstFromJsonPrinter::PrintBuiltinConverter(const BuiltinType& builtin_type,
       break;
     case BuiltinTypeKind::kDouble:
       Print("JsonToDouble");
+      break;
+    case BuiltinTypeKind::kJson:
+      Print("JsonToJson");
       break;
     default:
       LOG(FATAL) << "Unreachable code.";

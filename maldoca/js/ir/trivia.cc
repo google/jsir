@@ -25,11 +25,16 @@
 #include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/Casting.h"
 #include "mlir/IR/Attributes.h"
+#include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/Operation.h"
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/memory/memory.h"
+#include "absl/status/statusor.h"
+#include "nlohmann/json.hpp"
+#include "maldoca/astgen/mlir_json_utils.h"
 #include "maldoca/js/ast/ast.generated.h"
 #include "maldoca/js/ir/ir.h"
 
@@ -131,9 +136,42 @@ JsirTriviaAttr GetJsirTriviaAttr(mlir::MLIRContext* context,
     }
   }
 
+  mlir::DictionaryAttr mlir_extra = nullptr;
+  if (node.extra().has_value()) {
+    mlir_extra = JsonToMlirDictionaryAttr(context, **node.extra());
+  }
+
   return JsirTriviaAttr::get(context, jsir_location, leading_comment_uids,
                              trailing_comment_uids, inner_comment_uids,
-                             mlir_referenced_symbol, mlir_defined_symbols);
+                             mlir_referenced_symbol, mlir_defined_symbols,
+                             mlir_extra);
+}
+
+mlir::DictionaryAttr GetJsirLiteralExtraAttr(mlir::MLIRContext* context,
+                                             mlir::StringAttr raw,
+                                             mlir::Attribute raw_value) {
+  mlir::Builder builder(context);
+  return builder.getDictionaryAttr({
+      builder.getNamedAttr("raw", raw),
+      builder.getNamedAttr("rawValue", raw_value),
+  });
+}
+
+JsirTriviaAttr GetJsirTriviaAttrWithExtra(mlir::MLIRContext* context,
+                                          JsirTriviaAttr trivia,
+                                          mlir::DictionaryAttr extra) {
+  if (trivia == nullptr) {
+    return JsirTriviaAttr::get(context, /*loc=*/nullptr,
+                               /*leading_comment_uids=*/{},
+                               /*trailing_comment_uids=*/{},
+                               /*inner_comment_uids=*/{},
+                               /*referenced_symbol=*/nullptr,
+                               /*defined_symbols=*/{}, extra);
+  }
+  return JsirTriviaAttr::get(
+      context, trivia.getLoc(), trivia.getLeadingCommentUids(),
+      trivia.getTrailingCommentUids(), trivia.getInnerCommentUids(),
+      trivia.getReferencedSymbol(), trivia.getDefinedSymbols(), extra);
 }
 
 JsTrivia GetJsTrivia(mlir::Operation* op) {
@@ -145,10 +183,16 @@ JsTrivia GetJsTrivia(mlir::Operation* op) {
 }
 
 JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr) {
-  CHECK(attr.getLoc() != nullptr);
-
+  // A node without a source location can still have trivia, e.g. an `extra`.
   std::optional<std::unique_ptr<JsSourceLocation>> loc;
-  {
+  std::optional<int64_t> start_index;
+  std::optional<int64_t> end_index;
+  std::optional<int64_t> scope_uid;
+  if (attr.getLoc() != nullptr) {
+    start_index = attr.getLoc().getStartIndex();
+    end_index = attr.getLoc().getEndIndex();
+    scope_uid = attr.getLoc().getScopeUid();
+
     std::optional<std::unique_ptr<JsPosition>> start;
     if (JsirPositionAttr mlir_start = attr.getLoc().getStart();
         mlir_start != nullptr) {
@@ -217,16 +261,29 @@ JsTrivia JsirTriviaAttr2JsTrivia(JsirTriviaAttr attr) {
     defined_symbols = std::move(defined_symbols_vec);
   }
 
+  std::optional<nlohmann::json> extra;
+  if (mlir::DictionaryAttr mlir_extra = attr.getExtra();
+      mlir_extra != nullptr) {
+    absl::StatusOr<nlohmann::json> json_extra = MlirAttrToJson(mlir_extra);
+    if (json_extra.ok()) {
+      extra = *std::move(json_extra);
+    } else {
+      LOG(ERROR) << "Invalid `extra` in JsirTriviaAttr: "
+                 << json_extra.status();
+    }
+  }
+
   return JsTrivia{
       .loc = std::move(loc),
-      .start = attr.getLoc().getStartIndex(),
-      .end = attr.getLoc().getEndIndex(),
-      .scope_uid = attr.getLoc().getScopeUid(),
+      .start = start_index,
+      .end = end_index,
+      .scope_uid = scope_uid,
       .referenced_symbol = std::move(referenced_symbol),
       .defined_symbols = std::move(defined_symbols),
       .leading_comment_uids = std::move(leading_comment_uids),
       .trailing_comment_uids = std::move(trailing_comment_uids),
       .inner_comment_uids = std::move(inner_comment_uids),
+      .extra = std::move(extra),
   };
 }
 

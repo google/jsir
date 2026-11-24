@@ -318,7 +318,13 @@ void AstSourcePrinter::PrintGetterBody(const std::string& cc_expr,
 
   switch (type.kind()) {
     case TypeKind::kBuiltin: {
-      Println("return $cc_expr$;");
+      const auto& builtin_type = static_cast<const BuiltinType&>(type);
+      if (builtin_type.builtin_kind() == BuiltinTypeKind::kJson) {
+        // JSON values are returned by pointer (like lists), to avoid copies.
+        Println("return &$cc_expr$;");
+      } else {
+        Println("return $cc_expr$;");
+      }
       break;
     }
 

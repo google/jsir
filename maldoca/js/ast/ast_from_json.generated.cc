@@ -353,6 +353,15 @@ JsNode::GetDefinedSymbols(const nlohmann::json& json) {
   );
 }
 
+absl::StatusOr<std::optional<nlohmann::json>>
+JsNode::GetExtra(const nlohmann::json& json) {
+  return GetOptionalField<nlohmann::json>(
+      json,
+      "extra",
+      JsonToJson
+  );
+}
+
 absl::StatusOr<std::unique_ptr<JsNode>>
 JsNode::FromJson(const nlohmann::json& json) {
   if (!json.is_object()) {
@@ -595,6 +604,7 @@ JsInterpreterDirective::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsInterpreterDirective::GetValue(json));
 
   return absl::make_unique<JsInterpreterDirective>(
@@ -607,6 +617,7 @@ JsInterpreterDirective::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(value));
 }
 
@@ -683,42 +694,6 @@ JsProgramBodyElement::FromJson(const nlohmann::json& json) {
 }
 
 // =============================================================================
-// JsDirectiveLiteralExtra
-// =============================================================================
-
-absl::StatusOr<std::string>
-JsDirectiveLiteralExtra::GetRaw(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "raw",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::string>
-JsDirectiveLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "rawValue",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsDirectiveLiteralExtra>>
-JsDirectiveLiteralExtra::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  ABSL_ASSIGN_OR_RETURN(auto raw, JsDirectiveLiteralExtra::GetRaw(json));
-  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsDirectiveLiteralExtra::GetRawValue(json));
-
-  return absl::make_unique<JsDirectiveLiteralExtra>(
-      std::move(raw),
-      std::move(raw_value));
-}
-
-// =============================================================================
 // JsDirectiveLiteral
 // =============================================================================
 
@@ -728,15 +703,6 @@ JsDirectiveLiteral::GetValue(const nlohmann::json& json) {
       json,
       "value",
       JsonToString
-  );
-}
-
-absl::StatusOr<std::optional<std::unique_ptr<JsDirectiveLiteralExtra>>>
-JsDirectiveLiteral::GetExtra(const nlohmann::json& json) {
-  return GetOptionalField<std::unique_ptr<JsDirectiveLiteralExtra>>(
-      json,
-      "extra",
-      JsDirectiveLiteralExtra::FromJson
   );
 }
 
@@ -755,8 +721,8 @@ JsDirectiveLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsDirectiveLiteral::GetValue(json));
-  ABSL_ASSIGN_OR_RETURN(auto extra, JsDirectiveLiteral::GetExtra(json));
 
   return absl::make_unique<JsDirectiveLiteral>(
       std::move(loc),
@@ -768,8 +734,8 @@ JsDirectiveLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
-      std::move(value),
-      std::move(extra));
+      std::move(extra),
+      std::move(value));
 }
 
 // =============================================================================
@@ -800,6 +766,7 @@ JsDirective::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsDirective::GetValue(json));
 
   return absl::make_unique<JsDirective>(
@@ -812,6 +779,7 @@ JsDirective::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(value));
 }
 
@@ -874,6 +842,7 @@ JsProgram::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto interpreter, JsProgram::GetInterpreter(json));
   ABSL_ASSIGN_OR_RETURN(auto source_type, JsProgram::GetSourceType(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsProgram::GetBody(json));
@@ -889,6 +858,7 @@ JsProgram::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(interpreter),
       std::move(source_type),
       std::move(body),
@@ -934,6 +904,7 @@ JsFile::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto program, JsFile::GetProgram(json));
   ABSL_ASSIGN_OR_RETURN(auto comments, JsFile::GetComments(json));
 
@@ -947,6 +918,7 @@ JsFile::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(program),
       std::move(comments));
 }
@@ -1237,6 +1209,7 @@ JsIdentifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto name, JsIdentifier::GetName(json));
 
   return absl::make_unique<JsIdentifier>(
@@ -1249,6 +1222,7 @@ JsIdentifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(name));
 }
 
@@ -1296,6 +1270,7 @@ JsPrivateName::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsPrivateName::GetId(json));
 
   return absl::make_unique<JsPrivateName>(
@@ -1308,6 +1283,7 @@ JsPrivateName::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id));
 }
 
@@ -1340,31 +1316,6 @@ JsLiteral::FromJson(const nlohmann::json& json) {
 }
 
 // =============================================================================
-// JsRegExpLiteralExtra
-// =============================================================================
-
-absl::StatusOr<std::string>
-JsRegExpLiteralExtra::GetRaw(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "raw",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsRegExpLiteralExtra>>
-JsRegExpLiteralExtra::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  ABSL_ASSIGN_OR_RETURN(auto raw, JsRegExpLiteralExtra::GetRaw(json));
-
-  return absl::make_unique<JsRegExpLiteralExtra>(
-      std::move(raw));
-}
-
-// =============================================================================
 // JsRegExpLiteral
 // =============================================================================
 
@@ -1386,15 +1337,6 @@ JsRegExpLiteral::GetFlags(const nlohmann::json& json) {
   );
 }
 
-absl::StatusOr<std::optional<std::unique_ptr<JsRegExpLiteralExtra>>>
-JsRegExpLiteral::GetExtra(const nlohmann::json& json) {
-  return GetOptionalField<std::unique_ptr<JsRegExpLiteralExtra>>(
-      json,
-      "extra",
-      JsRegExpLiteralExtra::FromJson
-  );
-}
-
 absl::StatusOr<std::unique_ptr<JsRegExpLiteral>>
 JsRegExpLiteral::FromJson(const nlohmann::json& json) {
   if (!json.is_object()) {
@@ -1410,9 +1352,9 @@ JsRegExpLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto pattern, JsRegExpLiteral::GetPattern(json));
   ABSL_ASSIGN_OR_RETURN(auto flags, JsRegExpLiteral::GetFlags(json));
-  ABSL_ASSIGN_OR_RETURN(auto extra, JsRegExpLiteral::GetExtra(json));
 
   return absl::make_unique<JsRegExpLiteral>(
       std::move(loc),
@@ -1424,9 +1366,9 @@ JsRegExpLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(pattern),
-      std::move(flags),
-      std::move(extra));
+      std::move(flags));
 }
 
 // =============================================================================
@@ -1448,6 +1390,7 @@ JsNullLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
 
   return absl::make_unique<JsNullLiteral>(
       std::move(loc),
@@ -1458,43 +1401,8 @@ JsNullLiteral::FromJson(const nlohmann::json& json) {
       std::move(inner_comment_uids),
       std::move(scope_uid),
       std::move(referenced_symbol),
-      std::move(defined_symbols));
-}
-
-// =============================================================================
-// JsStringLiteralExtra
-// =============================================================================
-
-absl::StatusOr<std::string>
-JsStringLiteralExtra::GetRaw(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "raw",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::string>
-JsStringLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "rawValue",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsStringLiteralExtra>>
-JsStringLiteralExtra::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  ABSL_ASSIGN_OR_RETURN(auto raw, JsStringLiteralExtra::GetRaw(json));
-  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsStringLiteralExtra::GetRawValue(json));
-
-  return absl::make_unique<JsStringLiteralExtra>(
-      std::move(raw),
-      std::move(raw_value));
+      std::move(defined_symbols),
+      std::move(extra));
 }
 
 // =============================================================================
@@ -1526,15 +1434,6 @@ JsStringLiteral::GetValue(const nlohmann::json& json) {
   );
 }
 
-absl::StatusOr<std::optional<std::unique_ptr<JsStringLiteralExtra>>>
-JsStringLiteral::GetExtra(const nlohmann::json& json) {
-  return GetOptionalField<std::unique_ptr<JsStringLiteralExtra>>(
-      json,
-      "extra",
-      JsStringLiteralExtra::FromJson
-  );
-}
-
 absl::StatusOr<std::unique_ptr<JsStringLiteral>>
 JsStringLiteral::FromJson(const nlohmann::json& json) {
   if (!json.is_object()) {
@@ -1550,8 +1449,8 @@ JsStringLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsStringLiteral::GetValue(json));
-  ABSL_ASSIGN_OR_RETURN(auto extra, JsStringLiteral::GetExtra(json));
 
   return absl::make_unique<JsStringLiteral>(
       std::move(loc),
@@ -1563,8 +1462,8 @@ JsStringLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
-      std::move(value),
-      std::move(extra));
+      std::move(extra),
+      std::move(value));
 }
 
 // =============================================================================
@@ -1595,6 +1494,7 @@ JsBooleanLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsBooleanLiteral::GetValue(json));
 
   return absl::make_unique<JsBooleanLiteral>(
@@ -1607,43 +1507,8 @@ JsBooleanLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(value));
-}
-
-// =============================================================================
-// JsNumericLiteralExtra
-// =============================================================================
-
-absl::StatusOr<std::string>
-JsNumericLiteralExtra::GetRaw(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "raw",
-      JsonToString
-  );
-}
-
-absl::StatusOr<double>
-JsNumericLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  return GetRequiredField<double>(
-      json,
-      "rawValue",
-      JsonToDouble
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsNumericLiteralExtra>>
-JsNumericLiteralExtra::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  ABSL_ASSIGN_OR_RETURN(auto raw, JsNumericLiteralExtra::GetRaw(json));
-  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsNumericLiteralExtra::GetRawValue(json));
-
-  return absl::make_unique<JsNumericLiteralExtra>(
-      std::move(raw),
-      std::move(raw_value));
 }
 
 // =============================================================================
@@ -1656,15 +1521,6 @@ JsNumericLiteral::GetValue(const nlohmann::json& json) {
       json,
       "value",
       JsonToDouble
-  );
-}
-
-absl::StatusOr<std::optional<std::unique_ptr<JsNumericLiteralExtra>>>
-JsNumericLiteral::GetExtra(const nlohmann::json& json) {
-  return GetOptionalField<std::unique_ptr<JsNumericLiteralExtra>>(
-      json,
-      "extra",
-      JsNumericLiteralExtra::FromJson
   );
 }
 
@@ -1683,8 +1539,8 @@ JsNumericLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsNumericLiteral::GetValue(json));
-  ABSL_ASSIGN_OR_RETURN(auto extra, JsNumericLiteral::GetExtra(json));
 
   return absl::make_unique<JsNumericLiteral>(
       std::move(loc),
@@ -1696,44 +1552,8 @@ JsNumericLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
-      std::move(value),
-      std::move(extra));
-}
-
-// =============================================================================
-// JsBigIntLiteralExtra
-// =============================================================================
-
-absl::StatusOr<std::string>
-JsBigIntLiteralExtra::GetRaw(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "raw",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::string>
-JsBigIntLiteralExtra::GetRawValue(const nlohmann::json& json) {
-  return GetRequiredField<std::string>(
-      json,
-      "rawValue",
-      JsonToString
-  );
-}
-
-absl::StatusOr<std::unique_ptr<JsBigIntLiteralExtra>>
-JsBigIntLiteralExtra::FromJson(const nlohmann::json& json) {
-  if (!json.is_object()) {
-    return absl::InvalidArgumentError("JSON is not an object.");
-  }
-
-  ABSL_ASSIGN_OR_RETURN(auto raw, JsBigIntLiteralExtra::GetRaw(json));
-  ABSL_ASSIGN_OR_RETURN(auto raw_value, JsBigIntLiteralExtra::GetRawValue(json));
-
-  return absl::make_unique<JsBigIntLiteralExtra>(
-      std::move(raw),
-      std::move(raw_value));
+      std::move(extra),
+      std::move(value));
 }
 
 // =============================================================================
@@ -1746,15 +1566,6 @@ JsBigIntLiteral::GetValue(const nlohmann::json& json) {
       json,
       "value",
       JsonToString
-  );
-}
-
-absl::StatusOr<std::optional<std::unique_ptr<JsBigIntLiteralExtra>>>
-JsBigIntLiteral::GetExtra(const nlohmann::json& json) {
-  return GetOptionalField<std::unique_ptr<JsBigIntLiteralExtra>>(
-      json,
-      "extra",
-      JsBigIntLiteralExtra::FromJson
   );
 }
 
@@ -1773,8 +1584,8 @@ JsBigIntLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsBigIntLiteral::GetValue(json));
-  ABSL_ASSIGN_OR_RETURN(auto extra, JsBigIntLiteral::GetExtra(json));
 
   return absl::make_unique<JsBigIntLiteral>(
       std::move(loc),
@@ -1786,8 +1597,8 @@ JsBigIntLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
-      std::move(value),
-      std::move(extra));
+      std::move(extra),
+      std::move(value));
 }
 
 // =============================================================================
@@ -1985,6 +1796,7 @@ JsBlockStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsBlockStatement::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto directives, JsBlockStatement::GetDirectives(json));
 
@@ -1998,6 +1810,7 @@ JsBlockStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(body),
       std::move(directives));
 }
@@ -2065,6 +1878,7 @@ JsExpressionStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto expression, JsExpressionStatement::GetExpression(json));
 
   return absl::make_unique<JsExpressionStatement>(
@@ -2077,6 +1891,7 @@ JsExpressionStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(expression));
 }
 
@@ -2099,6 +1914,7 @@ JsEmptyStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
 
   return absl::make_unique<JsEmptyStatement>(
       std::move(loc),
@@ -2109,7 +1925,8 @@ JsEmptyStatement::FromJson(const nlohmann::json& json) {
       std::move(inner_comment_uids),
       std::move(scope_uid),
       std::move(referenced_symbol),
-      std::move(defined_symbols));
+      std::move(defined_symbols),
+      std::move(extra));
 }
 
 // =============================================================================
@@ -2131,6 +1948,7 @@ JsDebuggerStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
 
   return absl::make_unique<JsDebuggerStatement>(
       std::move(loc),
@@ -2141,7 +1959,8 @@ JsDebuggerStatement::FromJson(const nlohmann::json& json) {
       std::move(inner_comment_uids),
       std::move(scope_uid),
       std::move(referenced_symbol),
-      std::move(defined_symbols));
+      std::move(defined_symbols),
+      std::move(extra));
 }
 
 // =============================================================================
@@ -2181,6 +2000,7 @@ JsWithStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto object, JsWithStatement::GetObject(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsWithStatement::GetBody(json));
 
@@ -2194,6 +2014,7 @@ JsWithStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(object),
       std::move(body));
 }
@@ -2226,6 +2047,7 @@ JsReturnStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsReturnStatement::GetArgument(json));
 
   return absl::make_unique<JsReturnStatement>(
@@ -2238,6 +2060,7 @@ JsReturnStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(argument));
 }
 
@@ -2278,6 +2101,7 @@ JsLabeledStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto label, JsLabeledStatement::GetLabel(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsLabeledStatement::GetBody(json));
 
@@ -2291,6 +2115,7 @@ JsLabeledStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(label),
       std::move(body));
 }
@@ -2323,6 +2148,7 @@ JsBreakStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto label, JsBreakStatement::GetLabel(json));
 
   return absl::make_unique<JsBreakStatement>(
@@ -2335,6 +2161,7 @@ JsBreakStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(label));
 }
 
@@ -2366,6 +2193,7 @@ JsContinueStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto label, JsContinueStatement::GetLabel(json));
 
   return absl::make_unique<JsContinueStatement>(
@@ -2378,6 +2206,7 @@ JsContinueStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(label));
 }
 
@@ -2427,6 +2256,7 @@ JsIfStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsIfStatement::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto consequent, JsIfStatement::GetConsequent(json));
   ABSL_ASSIGN_OR_RETURN(auto alternate, JsIfStatement::GetAlternate(json));
@@ -2441,6 +2271,7 @@ JsIfStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(test),
       std::move(consequent),
       std::move(alternate));
@@ -2485,6 +2316,7 @@ JsSwitchCase::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsSwitchCase::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto consequent, JsSwitchCase::GetConsequent(json));
 
@@ -2498,6 +2330,7 @@ JsSwitchCase::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(test),
       std::move(consequent));
 }
@@ -2541,6 +2374,7 @@ JsSwitchStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto discriminant, JsSwitchStatement::GetDiscriminant(json));
   ABSL_ASSIGN_OR_RETURN(auto cases, JsSwitchStatement::GetCases(json));
 
@@ -2554,6 +2388,7 @@ JsSwitchStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(discriminant),
       std::move(cases));
 }
@@ -2586,6 +2421,7 @@ JsThrowStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsThrowStatement::GetArgument(json));
 
   return absl::make_unique<JsThrowStatement>(
@@ -2598,6 +2434,7 @@ JsThrowStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(argument));
 }
 
@@ -2638,6 +2475,7 @@ JsCatchClause::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto param, JsCatchClause::GetParam(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsCatchClause::GetBody(json));
 
@@ -2651,6 +2489,7 @@ JsCatchClause::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(param),
       std::move(body));
 }
@@ -2701,6 +2540,7 @@ JsTryStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto block, JsTryStatement::GetBlock(json));
   ABSL_ASSIGN_OR_RETURN(auto handler, JsTryStatement::GetHandler(json));
   ABSL_ASSIGN_OR_RETURN(auto finalizer, JsTryStatement::GetFinalizer(json));
@@ -2715,6 +2555,7 @@ JsTryStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(block),
       std::move(handler),
       std::move(finalizer));
@@ -2757,6 +2598,7 @@ JsWhileStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsWhileStatement::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsWhileStatement::GetBody(json));
 
@@ -2770,6 +2612,7 @@ JsWhileStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(test),
       std::move(body));
 }
@@ -2811,6 +2654,7 @@ JsDoWhileStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsDoWhileStatement::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsDoWhileStatement::GetTest(json));
 
@@ -2824,6 +2668,7 @@ JsDoWhileStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(body),
       std::move(test));
 }
@@ -2887,6 +2732,7 @@ JsVariableDeclarator::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsVariableDeclarator::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto init, JsVariableDeclarator::GetInit(json));
 
@@ -2900,6 +2746,7 @@ JsVariableDeclarator::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id),
       std::move(init));
 }
@@ -2959,6 +2806,7 @@ JsVariableDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto declarations, JsVariableDeclaration::GetDeclarations(json));
   ABSL_ASSIGN_OR_RETURN(auto kind, JsVariableDeclaration::GetKind(json));
 
@@ -2972,6 +2820,7 @@ JsVariableDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(declarations),
       std::move(kind));
 }
@@ -3039,6 +2888,7 @@ JsForStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto init, JsForStatement::GetInit(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsForStatement::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto update, JsForStatement::GetUpdate(json));
@@ -3054,6 +2904,7 @@ JsForStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(init),
       std::move(test),
       std::move(update),
@@ -3114,6 +2965,7 @@ JsForInStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto left, JsForInStatement::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsForInStatement::GetRight(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsForInStatement::GetBody(json));
@@ -3128,6 +2980,7 @@ JsForInStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(left),
       std::move(right),
       std::move(body));
@@ -3196,6 +3049,7 @@ JsForOfStatement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto left, JsForOfStatement::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsForOfStatement::GetRight(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsForOfStatement::GetBody(json));
@@ -3211,6 +3065,7 @@ JsForOfStatement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(left),
       std::move(right),
       std::move(body),
@@ -3252,6 +3107,7 @@ JsFunctionDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
   ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
@@ -3268,6 +3124,7 @@ JsFunctionDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id),
       std::move(params),
       std::move(generator),
@@ -3310,6 +3167,7 @@ JsSuper::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
 
   return absl::make_unique<JsSuper>(
       std::move(loc),
@@ -3320,7 +3178,8 @@ JsSuper::FromJson(const nlohmann::json& json) {
       std::move(inner_comment_uids),
       std::move(scope_uid),
       std::move(referenced_symbol),
-      std::move(defined_symbols));
+      std::move(defined_symbols),
+      std::move(extra));
 }
 
 // =============================================================================
@@ -3358,6 +3217,7 @@ JsImport::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
 
   return absl::make_unique<JsImport>(
       std::move(loc),
@@ -3368,7 +3228,8 @@ JsImport::FromJson(const nlohmann::json& json) {
       std::move(inner_comment_uids),
       std::move(scope_uid),
       std::move(referenced_symbol),
-      std::move(defined_symbols));
+      std::move(defined_symbols),
+      std::move(extra));
 }
 
 // =============================================================================
@@ -3390,6 +3251,7 @@ JsThisExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
 
   return absl::make_unique<JsThisExpression>(
       std::move(loc),
@@ -3400,7 +3262,8 @@ JsThisExpression::FromJson(const nlohmann::json& json) {
       std::move(inner_comment_uids),
       std::move(scope_uid),
       std::move(referenced_symbol),
-      std::move(defined_symbols));
+      std::move(defined_symbols),
+      std::move(extra));
 }
 
 // =============================================================================
@@ -3439,6 +3302,7 @@ JsArrowFunctionExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
   ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
@@ -3455,6 +3319,7 @@ JsArrowFunctionExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id),
       std::move(params),
       std::move(generator),
@@ -3499,6 +3364,7 @@ JsYieldExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsYieldExpression::GetArgument(json));
   ABSL_ASSIGN_OR_RETURN(auto delegate, JsYieldExpression::GetDelegate(json));
 
@@ -3512,6 +3378,7 @@ JsYieldExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(argument),
       std::move(delegate));
 }
@@ -3544,6 +3411,7 @@ JsAwaitExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsAwaitExpression::GetArgument(json));
 
   return absl::make_unique<JsAwaitExpression>(
@@ -3556,6 +3424,7 @@ JsAwaitExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(argument));
 }
 
@@ -3603,6 +3472,7 @@ JsSpreadElement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsSpreadElement::GetArgument(json));
 
   return absl::make_unique<JsSpreadElement>(
@@ -3615,6 +3485,7 @@ JsSpreadElement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(argument));
 }
 
@@ -3658,6 +3529,7 @@ JsArrayExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto elements, JsArrayExpression::GetElements(json));
 
   return absl::make_unique<JsArrayExpression>(
@@ -3670,6 +3542,7 @@ JsArrayExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(elements));
 }
 
@@ -3772,6 +3645,7 @@ JsObjectProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto key, JsObjectMember::GetKey(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsObjectMember::GetComputed(json));
   ABSL_ASSIGN_OR_RETURN(auto shorthand, JsObjectProperty::GetShorthand(json));
@@ -3787,6 +3661,7 @@ JsObjectProperty::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(key),
       std::move(computed),
       std::move(shorthand),
@@ -3837,6 +3712,7 @@ JsObjectMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto key, JsObjectMember::GetKey(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsObjectMember::GetComputed(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
@@ -3856,6 +3732,7 @@ JsObjectMethod::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(key),
       std::move(computed),
       std::move(id),
@@ -3908,6 +3785,7 @@ JsObjectExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto properties_, JsObjectExpression::GetProperties(json));
 
   return absl::make_unique<JsObjectExpression>(
@@ -3920,6 +3798,7 @@ JsObjectExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(properties_));
 }
 
@@ -3942,6 +3821,7 @@ JsFunctionExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
   ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
@@ -3958,6 +3838,7 @@ JsFunctionExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id),
       std::move(params),
       std::move(generator),
@@ -4011,6 +3892,7 @@ JsUnaryExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto operator_, JsUnaryExpression::GetOperator(json));
   ABSL_ASSIGN_OR_RETURN(auto prefix, JsUnaryExpression::GetPrefix(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsUnaryExpression::GetArgument(json));
@@ -4025,6 +3907,7 @@ JsUnaryExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(operator_),
       std::move(prefix),
       std::move(argument));
@@ -4076,6 +3959,7 @@ JsUpdateExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto operator_, JsUpdateExpression::GetOperator(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsUpdateExpression::GetArgument(json));
   ABSL_ASSIGN_OR_RETURN(auto prefix, JsUpdateExpression::GetPrefix(json));
@@ -4090,6 +3974,7 @@ JsUpdateExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(operator_),
       std::move(argument),
       std::move(prefix));
@@ -4149,6 +4034,7 @@ JsBinaryExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto operator_, JsBinaryExpression::GetOperator(json));
   ABSL_ASSIGN_OR_RETURN(auto left, JsBinaryExpression::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsBinaryExpression::GetRight(json));
@@ -4163,6 +4049,7 @@ JsBinaryExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(operator_),
       std::move(left),
       std::move(right));
@@ -4214,6 +4101,7 @@ JsAssignmentExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto operator_, JsAssignmentExpression::GetOperator(json));
   ABSL_ASSIGN_OR_RETURN(auto left, JsAssignmentExpression::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsAssignmentExpression::GetRight(json));
@@ -4228,6 +4116,7 @@ JsAssignmentExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(operator_),
       std::move(left),
       std::move(right));
@@ -4279,6 +4168,7 @@ JsLogicalExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto operator_, JsLogicalExpression::GetOperator(json));
   ABSL_ASSIGN_OR_RETURN(auto left, JsLogicalExpression::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsLogicalExpression::GetRight(json));
@@ -4293,6 +4183,7 @@ JsLogicalExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(operator_),
       std::move(left),
       std::move(right));
@@ -4360,6 +4251,7 @@ JsMemberExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto object, JsMemberExpression::GetObject(json));
   ABSL_ASSIGN_OR_RETURN(auto property, JsMemberExpression::GetProperty(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsMemberExpression::GetComputed(json));
@@ -4374,6 +4266,7 @@ JsMemberExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(object),
       std::move(property),
       std::move(computed));
@@ -4442,6 +4335,7 @@ JsOptionalMemberExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto object, JsOptionalMemberExpression::GetObject(json));
   ABSL_ASSIGN_OR_RETURN(auto property, JsOptionalMemberExpression::GetProperty(json));
   ABSL_ASSIGN_OR_RETURN(auto computed, JsOptionalMemberExpression::GetComputed(json));
@@ -4457,6 +4351,7 @@ JsOptionalMemberExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(object),
       std::move(property),
       std::move(computed),
@@ -4509,6 +4404,7 @@ JsConditionalExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto test, JsConditionalExpression::GetTest(json));
   ABSL_ASSIGN_OR_RETURN(auto alternate, JsConditionalExpression::GetAlternate(json));
   ABSL_ASSIGN_OR_RETURN(auto consequent, JsConditionalExpression::GetConsequent(json));
@@ -4523,6 +4419,7 @@ JsConditionalExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(test),
       std::move(alternate),
       std::move(consequent));
@@ -4587,6 +4484,7 @@ JsCallExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto callee, JsCallExpression::GetCallee(json));
   ABSL_ASSIGN_OR_RETURN(auto arguments, JsCallExpression::GetArguments(json));
 
@@ -4600,6 +4498,7 @@ JsCallExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(callee),
       std::move(arguments));
 }
@@ -4660,6 +4559,7 @@ JsOptionalCallExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto callee, JsOptionalCallExpression::GetCallee(json));
   ABSL_ASSIGN_OR_RETURN(auto arguments, JsOptionalCallExpression::GetArguments(json));
   ABSL_ASSIGN_OR_RETURN(auto optional, JsOptionalCallExpression::GetOptional(json));
@@ -4674,6 +4574,7 @@ JsOptionalCallExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(callee),
       std::move(arguments),
       std::move(optional));
@@ -4738,6 +4639,7 @@ JsNewExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto callee, JsNewExpression::GetCallee(json));
   ABSL_ASSIGN_OR_RETURN(auto arguments, JsNewExpression::GetArguments(json));
 
@@ -4751,6 +4653,7 @@ JsNewExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(callee),
       std::move(arguments));
 }
@@ -4785,6 +4688,7 @@ JsSequenceExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto expressions, JsSequenceExpression::GetExpressions(json));
 
   return absl::make_unique<JsSequenceExpression>(
@@ -4797,6 +4701,7 @@ JsSequenceExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(expressions));
 }
 
@@ -4828,6 +4733,7 @@ JsParenthesizedExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto expression, JsParenthesizedExpression::GetExpression(json));
 
   return absl::make_unique<JsParenthesizedExpression>(
@@ -4840,6 +4746,7 @@ JsParenthesizedExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(expression));
 }
 
@@ -4916,6 +4823,7 @@ JsTemplateElement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto tail, JsTemplateElement::GetTail(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsTemplateElement::GetValue(json));
 
@@ -4929,6 +4837,7 @@ JsTemplateElement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(tail),
       std::move(value));
 }
@@ -4974,6 +4883,7 @@ JsTemplateLiteral::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto quasis, JsTemplateLiteral::GetQuasis(json));
   ABSL_ASSIGN_OR_RETURN(auto expressions, JsTemplateLiteral::GetExpressions(json));
 
@@ -4987,6 +4897,7 @@ JsTemplateLiteral::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(quasis),
       std::move(expressions));
 }
@@ -5028,6 +4939,7 @@ JsTaggedTemplateExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto tag, JsTaggedTemplateExpression::GetTag(json));
   ABSL_ASSIGN_OR_RETURN(auto quasi, JsTaggedTemplateExpression::GetQuasi(json));
 
@@ -5041,6 +4953,7 @@ JsTaggedTemplateExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(tag),
       std::move(quasi));
 }
@@ -5089,6 +5002,7 @@ JsRestElement::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto argument, JsRestElement::GetArgument(json));
 
   return absl::make_unique<JsRestElement>(
@@ -5101,6 +5015,7 @@ JsRestElement::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(argument));
 }
 
@@ -5142,6 +5057,7 @@ JsObjectPattern::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto properties_, JsObjectPattern::GetProperties(json));
 
   return absl::make_unique<JsObjectPattern>(
@@ -5154,6 +5070,7 @@ JsObjectPattern::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(properties_));
 }
 
@@ -5189,6 +5106,7 @@ JsArrayPattern::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto elements, JsArrayPattern::GetElements(json));
 
   return absl::make_unique<JsArrayPattern>(
@@ -5201,6 +5119,7 @@ JsArrayPattern::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(elements));
 }
 
@@ -5241,6 +5160,7 @@ JsAssignmentPattern::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto left, JsAssignmentPattern::GetLeft(json));
   ABSL_ASSIGN_OR_RETURN(auto right, JsAssignmentPattern::GetRight(json));
 
@@ -5254,6 +5174,7 @@ JsAssignmentPattern::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(left),
       std::move(right));
 }
@@ -5329,6 +5250,7 @@ JsClassMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
   ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
@@ -5349,6 +5271,7 @@ JsClassMethod::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id),
       std::move(params),
       std::move(generator),
@@ -5431,6 +5354,7 @@ JsClassPrivateMethod::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsFunction::GetId(json));
   ABSL_ASSIGN_OR_RETURN(auto params, JsFunction::GetParams(json));
   ABSL_ASSIGN_OR_RETURN(auto generator, JsFunction::GetGenerator(json));
@@ -5451,6 +5375,7 @@ JsClassPrivateMethod::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(id),
       std::move(params),
       std::move(generator),
@@ -5533,6 +5458,7 @@ JsClassProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto key, JsClassProperty::GetKey(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsClassProperty::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto static_, JsClassProperty::GetStatic(json));
@@ -5548,6 +5474,7 @@ JsClassProperty::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(key),
       std::move(value),
       std::move(static_),
@@ -5616,6 +5543,7 @@ JsClassPrivateProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto key, JsClassPrivateProperty::GetKey(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsClassPrivateProperty::GetValue(json));
   ABSL_ASSIGN_OR_RETURN(auto static_, JsClassPrivateProperty::GetStatic(json));
@@ -5630,6 +5558,7 @@ JsClassPrivateProperty::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(key),
       std::move(value),
       std::move(static_));
@@ -5681,6 +5610,7 @@ JsStaticBlock::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsStaticBlock::GetBody(json));
 
   return absl::make_unique<JsStaticBlock>(
@@ -5693,6 +5623,7 @@ JsStaticBlock::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(body));
 }
 
@@ -5746,6 +5677,7 @@ JsClassBody::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsClassBody::GetBody(json));
 
   return absl::make_unique<JsClassBody>(
@@ -5758,6 +5690,7 @@ JsClassBody::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(body));
 }
 
@@ -5843,6 +5776,7 @@ JsClassDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto super_class, JsClass::GetSuperClass(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsClassDeclaration::GetId(json));
@@ -5857,6 +5791,7 @@ JsClassDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(super_class),
       std::move(body),
       std::move(id));
@@ -5890,6 +5825,7 @@ JsClassExpression::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto super_class, JsClass::GetSuperClass(json));
   ABSL_ASSIGN_OR_RETURN(auto body, JsClass::GetBody(json));
   ABSL_ASSIGN_OR_RETURN(auto id, JsClassExpression::GetId(json));
@@ -5904,6 +5840,7 @@ JsClassExpression::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(super_class),
       std::move(body),
       std::move(id));
@@ -5946,6 +5883,7 @@ JsMetaProperty::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto meta, JsMetaProperty::GetMeta(json));
   ABSL_ASSIGN_OR_RETURN(auto property, JsMetaProperty::GetProperty(json));
 
@@ -5959,6 +5897,7 @@ JsMetaProperty::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(meta),
       std::move(property));
 }
@@ -6076,6 +6015,7 @@ JsImportSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto imported, JsImportSpecifier::GetImported(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsImportSpecifier::GetLocal(json));
 
@@ -6089,6 +6029,7 @@ JsImportSpecifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(imported),
       std::move(local));
 }
@@ -6137,6 +6078,7 @@ JsImportDefaultSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsImportDefaultSpecifier::GetLocal(json));
 
   return absl::make_unique<JsImportDefaultSpecifier>(
@@ -6149,6 +6091,7 @@ JsImportDefaultSpecifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(local));
 }
 
@@ -6196,6 +6139,7 @@ JsImportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsImportNamespaceSpecifier::GetLocal(json));
 
   return absl::make_unique<JsImportNamespaceSpecifier>(
@@ -6208,6 +6152,7 @@ JsImportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(local));
 }
 
@@ -6248,6 +6193,7 @@ JsImportAttribute::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto key, JsImportAttribute::GetKey(json));
   ABSL_ASSIGN_OR_RETURN(auto value, JsImportAttribute::GetValue(json));
 
@@ -6261,6 +6207,7 @@ JsImportAttribute::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(key),
       std::move(value));
 }
@@ -6325,6 +6272,7 @@ JsImportDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto specifiers, JsImportDeclaration::GetSpecifiers(json));
   ABSL_ASSIGN_OR_RETURN(auto source, JsImportDeclaration::GetSource(json));
   ABSL_ASSIGN_OR_RETURN(auto assertions, JsImportDeclaration::GetAssertions(json));
@@ -6339,6 +6287,7 @@ JsImportDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(specifiers),
       std::move(source),
       std::move(assertions));
@@ -6413,6 +6362,7 @@ JsExportSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto exported, JsExportSpecifier::GetExported(json));
   ABSL_ASSIGN_OR_RETURN(auto local, JsExportSpecifier::GetLocal(json));
 
@@ -6426,6 +6376,7 @@ JsExportSpecifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(exported),
       std::move(local));
 }
@@ -6482,6 +6433,7 @@ JsExportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto exported, JsExportNamespaceSpecifier::GetExported(json));
 
   return absl::make_unique<JsExportNamespaceSpecifier>(
@@ -6494,6 +6446,7 @@ JsExportNamespaceSpecifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(exported));
 }
 
@@ -6541,6 +6494,7 @@ JsExportDefaultSpecifier::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto exported, JsExportDefaultSpecifier::GetExported(json));
 
   return absl::make_unique<JsExportDefaultSpecifier>(
@@ -6553,6 +6507,7 @@ JsExportDefaultSpecifier::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(exported));
 }
 
@@ -6627,6 +6582,7 @@ JsExportNamedDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto declaration, JsExportNamedDeclaration::GetDeclaration(json));
   ABSL_ASSIGN_OR_RETURN(auto specifiers, JsExportNamedDeclaration::GetSpecifiers(json));
   ABSL_ASSIGN_OR_RETURN(auto source, JsExportNamedDeclaration::GetSource(json));
@@ -6642,6 +6598,7 @@ JsExportNamedDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(declaration),
       std::move(specifiers),
       std::move(source),
@@ -6688,6 +6645,7 @@ JsExportDefaultDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto declaration, JsExportDefaultDeclaration::GetDeclaration(json));
 
   return absl::make_unique<JsExportDefaultDeclaration>(
@@ -6700,6 +6658,7 @@ JsExportDefaultDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(declaration));
 }
 
@@ -6742,6 +6701,7 @@ JsExportAllDeclaration::FromJson(const nlohmann::json& json) {
   ABSL_ASSIGN_OR_RETURN(auto scope_uid, JsNode::GetScopeUid(json));
   ABSL_ASSIGN_OR_RETURN(auto referenced_symbol, JsNode::GetReferencedSymbol(json));
   ABSL_ASSIGN_OR_RETURN(auto defined_symbols, JsNode::GetDefinedSymbols(json));
+  ABSL_ASSIGN_OR_RETURN(auto extra, JsNode::GetExtra(json));
   ABSL_ASSIGN_OR_RETURN(auto source, JsExportAllDeclaration::GetSource(json));
   ABSL_ASSIGN_OR_RETURN(auto assertions, JsExportAllDeclaration::GetAssertions(json));
 
@@ -6755,6 +6715,7 @@ JsExportAllDeclaration::FromJson(const nlohmann::json& json) {
       std::move(scope_uid),
       std::move(referenced_symbol),
       std::move(defined_symbols),
+      std::move(extra),
       std::move(source),
       std::move(assertions));
 }

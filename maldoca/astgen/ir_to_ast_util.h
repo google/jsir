@@ -38,6 +38,8 @@
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "nlohmann/json.hpp"
+#include "maldoca/astgen/mlir_json_utils.h"
 
 namespace maldoca {
 
@@ -671,6 +673,15 @@ inline ToAttrConverter<mlir::IntegerAttr, int64_t> ToInt64() {
   return ToAttrConverter<mlir::IntegerAttr, int64_t>(
       [](mlir::IntegerAttr attr) -> absl::StatusOr<int64_t> {
         return attr.getValue().getSExtValue();
+      });
+}
+inline bool IsJson(mlir::Attribute attr) {
+  return llvm::isa<mlir::DictionaryAttr>(attr);
+}
+inline ToAttrConverter<mlir::DictionaryAttr, nlohmann::json> ToJson() {
+  return ToAttrConverter<mlir::DictionaryAttr, nlohmann::json>(
+      [](mlir::DictionaryAttr attr) -> absl::StatusOr<nlohmann::json> {
+        return MlirAttrToJson(attr);
       });
 }
 

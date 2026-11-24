@@ -29,6 +29,7 @@ cc_library(
     hdrs = ["pass.h"],
     deps = [
         "//maldoca/js/ir",
+        "//maldoca/js/ir:trivia",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@llvm-project//llvm:Support",

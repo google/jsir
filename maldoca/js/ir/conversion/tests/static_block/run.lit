@@ -17,3 +17,4 @@
 // RUN: jsir_gen --input_file "$(dirname "${INPUT}")"/input.js \
 // RUN:     --passes source2ast,ast2jsir,jsir2ast \
 // RUN:   | FileCheck --check-prefix AST "$(dirname "${INPUT}")"/ast.json
+

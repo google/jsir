@@ -31,7 +31,8 @@ def AirExpressionAttr : AttrDef<Air_Dialect, "AirExpression", []> {
 def AirIdentifierAttr : AttrDef<Air_Dialect, "AirIdentifier", []> {
   let mnemonic = "identifier";
   let parameters = (ins
-    "::mlir::StringAttr": $name
+    "::mlir::StringAttr": $name,
+    OptionalParameter<"::mlir::DictionaryAttr">: $metadata
   );
   let assemblyFormat = "params";
 }

@@ -770,6 +770,9 @@ void IrToAstSourcePrinter::PrintBuiltinConverter(
     case BuiltinTypeKind::kDouble:
       Print("ToDouble()");
       break;
+    case BuiltinTypeKind::kJson:
+      Print("ToJson()");
+      break;
     default:
       ABSL_LOG(FATAL) << "Unreachable code.";
   }

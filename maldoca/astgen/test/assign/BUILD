@@ -174,6 +174,7 @@ cc_library(
         ":air_ops_generated_inc_gen",
         ":air_types_inc_gen",
         ":interfaces_inc_gen",
+        "//maldoca/astgen:mlir_json_utils",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:InferTypeOpInterface",

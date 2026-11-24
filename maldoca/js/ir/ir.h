@@ -56,17 +56,13 @@
   ATTRIB(PrivateName)                                       \
                                                             \
   /* Literals */                                            \
-  ATTRIB(RegExpLiteralExtra)                                \
   CIR_OP(RegExpLiteral)                                     \
   CIR_OP(NullLiteral)                                       \
-  ATTRIB(StringLiteralExtra)                                \
   CIR_OP(StringLiteral)                                     \
   ATTRIB(StringLiteral)                                     \
   CIR_OP(BooleanLiteral)                                    \
-  ATTRIB(NumericLiteralExtra)                               \
   CIR_OP(NumericLiteral)                                    \
   ATTRIB(NumericLiteral)                                    \
-  ATTRIB(BigIntLiteralExtra)                                \
   CIR_OP(BigIntLiteral)                                     \
   ATTRIB(BigIntLiteral)                                     \
                                                             \
@@ -102,7 +98,6 @@
                                                             \
   /* Directives */                                          \
   CIR_OP(Directive)                                         \
-  ATTRIB(DirectiveLiteralExtra)                             \
   CIR_OP(DirectiveLiteral)                                  \
   ATTRIB(InterpreterDirective)                              \
                                                             \

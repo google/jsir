@@ -34,7 +34,8 @@ def AirIdentifierOp : Air_Op<
         AirExpressionOpInterfaceTraits
     ]> {
   let arguments = (ins
-    StrAttr: $name
+    StrAttr: $name,
+    OptionalAttr<DictionaryAttr>: $metadata
   );
 
   let results = (outs
@@ -44,7 +45,8 @@ def AirIdentifierOp : Air_Op<
 
 def AirIdentifierRefOp : Air_Op<"identifier_ref", []> {
   let arguments = (ins
-    StrAttr: $name
+    StrAttr: $name,
+    OptionalAttr<DictionaryAttr>: $metadata
   );
 
   let results = (outs

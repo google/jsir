@@ -784,7 +784,8 @@ JsNode::JsNode(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
     : loc_(std::move(loc)),
       start_(std::move(start)),
       end_(std::move(end)),
@@ -793,7 +794,8 @@ JsNode::JsNode(
       inner_comment_uids_(std::move(inner_comment_uids)),
       scope_uid_(std::move(scope_uid)),
       referenced_symbol_(std::move(referenced_symbol)),
-      defined_symbols_(std::move(defined_symbols)) {}
+      defined_symbols_(std::move(defined_symbols)),
+      extra_(std::move(extra)) {}
 
 std::optional<JsSourceLocation*> JsNode::loc() {
   if (!loc_.has_value()) {
@@ -951,6 +953,26 @@ void JsNode::set_defined_symbols(std::optional<std::vector<std::unique_ptr<JsSym
   defined_symbols_ = std::move(defined_symbols);
 }
 
+std::optional<nlohmann::json*> JsNode::extra() {
+  if (!extra_.has_value()) {
+    return std::nullopt;
+  } else {
+    return &extra_.value();
+  }
+}
+
+std::optional<const nlohmann::json*> JsNode::extra() const {
+  if (!extra_.has_value()) {
+    return std::nullopt;
+  } else {
+    return &extra_.value();
+  }
+}
+
+void JsNode::set_extra(std::optional<nlohmann::json> extra) {
+  extra_ = std::move(extra);
+}
+
 // =============================================================================
 // JsInterpreterDirective
 // =============================================================================
@@ -965,8 +987,9 @@ JsInterpreterDirective::JsInterpreterDirective(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::string value)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       value_(std::move(value)) {}
 
 std::string_view JsInterpreterDirective::value() const {
@@ -990,34 +1013,9 @@ JsProgramBodyElement::JsProgramBodyElement(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
-
-// =============================================================================
-// JsDirectiveLiteralExtra
-// =============================================================================
-
-JsDirectiveLiteralExtra::JsDirectiveLiteralExtra(
-    std::string raw,
-    std::string raw_value)
-    : raw_(std::move(raw)),
-      raw_value_(std::move(raw_value)) {}
-
-std::string_view JsDirectiveLiteralExtra::raw() const {
-  return raw_;
-}
-
-void JsDirectiveLiteralExtra::set_raw(std::string raw) {
-  raw_ = std::move(raw);
-}
-
-std::string_view JsDirectiveLiteralExtra::raw_value() const {
-  return raw_value_;
-}
-
-void JsDirectiveLiteralExtra::set_raw_value(std::string raw_value) {
-  raw_value_ = std::move(raw_value);
-}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsDirectiveLiteral
@@ -1033,11 +1031,10 @@ JsDirectiveLiteral::JsDirectiveLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-    std::string value,
-    std::optional<std::unique_ptr<JsDirectiveLiteralExtra>> extra)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      value_(std::move(value)),
-      extra_(std::move(extra)) {}
+    std::optional<nlohmann::json> extra,
+    std::string value)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      value_(std::move(value)) {}
 
 std::string_view JsDirectiveLiteral::value() const {
   return value_;
@@ -1045,26 +1042,6 @@ std::string_view JsDirectiveLiteral::value() const {
 
 void JsDirectiveLiteral::set_value(std::string value) {
   value_ = std::move(value);
-}
-
-std::optional<JsDirectiveLiteralExtra*> JsDirectiveLiteral::extra() {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-std::optional<const JsDirectiveLiteralExtra*> JsDirectiveLiteral::extra() const {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-void JsDirectiveLiteral::set_extra(std::optional<std::unique_ptr<JsDirectiveLiteralExtra>> extra) {
-  extra_ = std::move(extra);
 }
 
 // =============================================================================
@@ -1081,8 +1058,9 @@ JsDirective::JsDirective(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsDirectiveLiteral> value)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       value_(std::move(value)) {}
 
 JsDirectiveLiteral* JsDirective::value() {
@@ -1111,11 +1089,12 @@ JsProgram::JsProgram(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsInterpreterDirective>> interpreter,
     std::string source_type,
     std::vector<std::unique_ptr<JsProgramBodyElement>> body,
     std::vector<std::unique_ptr<JsDirective>> directives)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       interpreter_(std::move(interpreter)),
       source_type_(std::move(source_type)),
       body_(std::move(body)),
@@ -1187,9 +1166,10 @@ JsFile::JsFile(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsProgram> program,
     std::optional<std::vector<std::unique_ptr<JsComment>>> comments)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       program_(std::move(program)),
       comments_(std::move(comments)) {}
 
@@ -1238,8 +1218,9 @@ JsExpression::JsExpression(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsPattern
@@ -1254,8 +1235,9 @@ JsPattern::JsPattern(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsLVal
@@ -1270,8 +1252,9 @@ JsLVal::JsLVal(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsIdentifier
@@ -1287,11 +1270,12 @@ JsIdentifier::JsIdentifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::string name)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       name_(std::move(name)) {}
 
 std::string_view JsIdentifier::name() const {
@@ -1316,8 +1300,9 @@ JsPrivateName::JsPrivateName(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> id)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       id_(std::move(id)) {}
 
 JsIdentifier* JsPrivateName::id() {
@@ -1345,25 +1330,10 @@ JsLiteral::JsLiteral(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
-
-// =============================================================================
-// JsRegExpLiteralExtra
-// =============================================================================
-
-JsRegExpLiteralExtra::JsRegExpLiteralExtra(
-    std::string raw)
-    : raw_(std::move(raw)) {}
-
-std::string_view JsRegExpLiteralExtra::raw() const {
-  return raw_;
-}
-
-void JsRegExpLiteralExtra::set_raw(std::string raw) {
-  raw_ = std::move(raw);
-}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsRegExpLiteral
@@ -1379,15 +1349,14 @@ JsRegExpLiteral::JsRegExpLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::string pattern,
-    std::string flags,
-    std::optional<std::unique_ptr<JsRegExpLiteralExtra>> extra)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    std::string flags)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       pattern_(std::move(pattern)),
-      flags_(std::move(flags)),
-      extra_(std::move(extra)) {}
+      flags_(std::move(flags)) {}
 
 std::string_view JsRegExpLiteral::pattern() const {
   return pattern_;
@@ -1405,26 +1374,6 @@ void JsRegExpLiteral::set_flags(std::string flags) {
   flags_ = std::move(flags);
 }
 
-std::optional<JsRegExpLiteralExtra*> JsRegExpLiteral::extra() {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-std::optional<const JsRegExpLiteralExtra*> JsRegExpLiteral::extra() const {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-void JsRegExpLiteral::set_extra(std::optional<std::unique_ptr<JsRegExpLiteralExtra>> extra) {
-  extra_ = std::move(extra);
-}
-
 // =============================================================================
 // JsNullLiteral
 // =============================================================================
@@ -1438,36 +1387,11 @@ JsNullLiteral::JsNullLiteral(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
-
-// =============================================================================
-// JsStringLiteralExtra
-// =============================================================================
-
-JsStringLiteralExtra::JsStringLiteralExtra(
-    std::string raw,
-    std::string raw_value)
-    : raw_(std::move(raw)),
-      raw_value_(std::move(raw_value)) {}
-
-std::string_view JsStringLiteralExtra::raw() const {
-  return raw_;
-}
-
-void JsStringLiteralExtra::set_raw(std::string raw) {
-  raw_ = std::move(raw);
-}
-
-std::string_view JsStringLiteralExtra::raw_value() const {
-  return raw_value_;
-}
-
-void JsStringLiteralExtra::set_raw_value(std::string raw_value) {
-  raw_value_ = std::move(raw_value);
-}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsStringLiteral
@@ -1483,13 +1407,12 @@ JsStringLiteral::JsStringLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-    std::string value,
-    std::optional<std::unique_ptr<JsStringLiteralExtra>> extra)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      value_(std::move(value)),
-      extra_(std::move(extra)) {}
+    std::optional<nlohmann::json> extra,
+    std::string value)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      value_(std::move(value)) {}
 
 std::string_view JsStringLiteral::value() const {
   return value_;
@@ -1497,26 +1420,6 @@ std::string_view JsStringLiteral::value() const {
 
 void JsStringLiteral::set_value(std::string value) {
   value_ = std::move(value);
-}
-
-std::optional<JsStringLiteralExtra*> JsStringLiteral::extra() {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-std::optional<const JsStringLiteralExtra*> JsStringLiteral::extra() const {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-void JsStringLiteral::set_extra(std::optional<std::unique_ptr<JsStringLiteralExtra>> extra) {
-  extra_ = std::move(extra);
 }
 
 // =============================================================================
@@ -1533,10 +1436,11 @@ JsBooleanLiteral::JsBooleanLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     bool value)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       value_(std::move(value)) {}
 
 bool JsBooleanLiteral::value() const {
@@ -1545,32 +1449,6 @@ bool JsBooleanLiteral::value() const {
 
 void JsBooleanLiteral::set_value(bool value) {
   value_ = value;
-}
-
-// =============================================================================
-// JsNumericLiteralExtra
-// =============================================================================
-
-JsNumericLiteralExtra::JsNumericLiteralExtra(
-    std::string raw,
-    double raw_value)
-    : raw_(std::move(raw)),
-      raw_value_(std::move(raw_value)) {}
-
-std::string_view JsNumericLiteralExtra::raw() const {
-  return raw_;
-}
-
-void JsNumericLiteralExtra::set_raw(std::string raw) {
-  raw_ = std::move(raw);
-}
-
-double JsNumericLiteralExtra::raw_value() const {
-  return raw_value_;
-}
-
-void JsNumericLiteralExtra::set_raw_value(double raw_value) {
-  raw_value_ = raw_value;
 }
 
 // =============================================================================
@@ -1587,13 +1465,12 @@ JsNumericLiteral::JsNumericLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-    double value,
-    std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      value_(std::move(value)),
-      extra_(std::move(extra)) {}
+    std::optional<nlohmann::json> extra,
+    double value)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      value_(std::move(value)) {}
 
 double JsNumericLiteral::value() const {
   return value_;
@@ -1601,52 +1478,6 @@ double JsNumericLiteral::value() const {
 
 void JsNumericLiteral::set_value(double value) {
   value_ = value;
-}
-
-std::optional<JsNumericLiteralExtra*> JsNumericLiteral::extra() {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-std::optional<const JsNumericLiteralExtra*> JsNumericLiteral::extra() const {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-void JsNumericLiteral::set_extra(std::optional<std::unique_ptr<JsNumericLiteralExtra>> extra) {
-  extra_ = std::move(extra);
-}
-
-// =============================================================================
-// JsBigIntLiteralExtra
-// =============================================================================
-
-JsBigIntLiteralExtra::JsBigIntLiteralExtra(
-    std::string raw,
-    std::string raw_value)
-    : raw_(std::move(raw)),
-      raw_value_(std::move(raw_value)) {}
-
-std::string_view JsBigIntLiteralExtra::raw() const {
-  return raw_;
-}
-
-void JsBigIntLiteralExtra::set_raw(std::string raw) {
-  raw_ = std::move(raw);
-}
-
-std::string_view JsBigIntLiteralExtra::raw_value() const {
-  return raw_value_;
-}
-
-void JsBigIntLiteralExtra::set_raw_value(std::string raw_value) {
-  raw_value_ = std::move(raw_value);
 }
 
 // =============================================================================
@@ -1663,13 +1494,12 @@ JsBigIntLiteral::JsBigIntLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
-    std::string value,
-    std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      value_(std::move(value)),
-      extra_(std::move(extra)) {}
+    std::optional<nlohmann::json> extra,
+    std::string value)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLiteral(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      value_(std::move(value)) {}
 
 std::string_view JsBigIntLiteral::value() const {
   return value_;
@@ -1677,26 +1507,6 @@ std::string_view JsBigIntLiteral::value() const {
 
 void JsBigIntLiteral::set_value(std::string value) {
   value_ = std::move(value);
-}
-
-std::optional<JsBigIntLiteralExtra*> JsBigIntLiteral::extra() {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-std::optional<const JsBigIntLiteralExtra*> JsBigIntLiteral::extra() const {
-  if (!extra_.has_value()) {
-    return std::nullopt;
-  } else {
-    return extra_.value().get();
-  }
-}
-
-void JsBigIntLiteral::set_extra(std::optional<std::unique_ptr<JsBigIntLiteralExtra>> extra) {
-  extra_ = std::move(extra);
 }
 
 // =============================================================================
@@ -1713,11 +1523,12 @@ JsFunction::JsFunction(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
     bool async)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       id_(std::move(id)),
       params_(std::move(params)),
       generator_(std::move(generator)),
@@ -1784,9 +1595,10 @@ JsStatement::JsStatement(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsBlockStatement
@@ -1802,11 +1614,12 @@ JsBlockStatement::JsBlockStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::unique_ptr<JsStatement>> body,
     std::vector<std::unique_ptr<JsDirective>> directives)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       body_(std::move(body)),
       directives_(std::move(directives)) {}
 
@@ -1848,13 +1661,14 @@ JsBlockStatementFunction::JsBlockStatementFunction(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
     bool async,
     std::unique_ptr<JsBlockStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
       body_(std::move(body)) {}
 
 JsBlockStatement* JsBlockStatementFunction::body() {
@@ -1883,10 +1697,11 @@ JsExpressionStatement::JsExpressionStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> expression)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       expression_(std::move(expression)) {}
 
 JsExpression* JsExpressionStatement::expression() {
@@ -1914,10 +1729,11 @@ JsEmptyStatement::JsEmptyStatement(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsDebuggerStatement
@@ -1932,10 +1748,11 @@ JsDebuggerStatement::JsDebuggerStatement(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsWithStatement
@@ -1951,11 +1768,12 @@ JsWithStatement::JsWithStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> object,
     std::unique_ptr<JsStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       object_(std::move(object)),
       body_(std::move(body)) {}
 
@@ -1997,10 +1815,11 @@ JsReturnStatement::JsReturnStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> argument)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       argument_(std::move(argument)) {}
 
 std::optional<JsExpression*> JsReturnStatement::argument() {
@@ -2037,11 +1856,12 @@ JsLabeledStatement::JsLabeledStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> label,
     std::unique_ptr<JsStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       label_(std::move(label)),
       body_(std::move(body)) {}
 
@@ -2083,10 +1903,11 @@ JsBreakStatement::JsBreakStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> label)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       label_(std::move(label)) {}
 
 std::optional<JsIdentifier*> JsBreakStatement::label() {
@@ -2123,10 +1944,11 @@ JsContinueStatement::JsContinueStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> label)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       label_(std::move(label)) {}
 
 std::optional<JsIdentifier*> JsContinueStatement::label() {
@@ -2163,12 +1985,13 @@ JsIfStatement::JsIfStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> test,
     std::unique_ptr<JsStatement> consequent,
     std::optional<std::unique_ptr<JsStatement>> alternate)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       test_(std::move(test)),
       consequent_(std::move(consequent)),
       alternate_(std::move(alternate)) {}
@@ -2231,9 +2054,10 @@ JsSwitchCase::JsSwitchCase(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> test,
     std::vector<std::unique_ptr<JsStatement>> consequent)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       test_(std::move(test)),
       consequent_(std::move(consequent)) {}
 
@@ -2283,11 +2107,12 @@ JsSwitchStatement::JsSwitchStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> discriminant,
     std::vector<std::unique_ptr<JsSwitchCase>> cases)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       discriminant_(std::move(discriminant)),
       cases_(std::move(cases)) {}
 
@@ -2329,10 +2154,11 @@ JsThrowStatement::JsThrowStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> argument)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       argument_(std::move(argument)) {}
 
 JsExpression* JsThrowStatement::argument() {
@@ -2361,9 +2187,10 @@ JsCatchClause::JsCatchClause(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsPattern>> param,
     std::unique_ptr<JsBlockStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       param_(std::move(param)),
       body_(std::move(body)) {}
 
@@ -2413,12 +2240,13 @@ JsTryStatement::JsTryStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsBlockStatement> block,
     std::optional<std::unique_ptr<JsCatchClause>> handler,
     std::optional<std::unique_ptr<JsBlockStatement>> finalizer)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       block_(std::move(block)),
       handler_(std::move(handler)),
       finalizer_(std::move(finalizer)) {}
@@ -2489,11 +2317,12 @@ JsWhileStatement::JsWhileStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> test,
     std::unique_ptr<JsStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       test_(std::move(test)),
       body_(std::move(body)) {}
 
@@ -2535,11 +2364,12 @@ JsDoWhileStatement::JsDoWhileStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsStatement> body,
     std::unique_ptr<JsExpression> test)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       body_(std::move(body)),
       test_(std::move(test)) {}
 
@@ -2580,10 +2410,11 @@ JsDeclaration::JsDeclaration(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsVariableDeclarator
@@ -2599,9 +2430,10 @@ JsVariableDeclarator::JsVariableDeclarator(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsLVal> id,
     std::optional<std::unique_ptr<JsExpression>> init)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       id_(std::move(id)),
       init_(std::move(init)) {}
 
@@ -2651,12 +2483,13 @@ JsVariableDeclaration::JsVariableDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::unique_ptr<JsVariableDeclarator>> declarations,
     std::string kind)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       declarations_(std::move(declarations)),
       kind_(std::move(kind)) {}
 
@@ -2694,13 +2527,14 @@ JsForStatement::JsForStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsExpression>>> init,
     std::optional<std::unique_ptr<JsExpression>> test,
     std::optional<std::unique_ptr<JsExpression>> update,
     std::unique_ptr<JsStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       init_(std::move(init)),
       test_(std::move(test)),
       update_(std::move(update)),
@@ -2810,12 +2644,13 @@ JsForInStatement::JsForInStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>> left,
     std::unique_ptr<JsExpression> right,
     std::unique_ptr<JsStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       left_(std::move(left)),
       right_(std::move(right)),
       body_(std::move(body)) {}
@@ -2888,13 +2723,14 @@ JsForOfStatement::JsForOfStatement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsVariableDeclaration>, std::unique_ptr<JsLVal>> left,
     std::unique_ptr<JsExpression> right,
     std::unique_ptr<JsStatement> body,
     bool await)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       left_(std::move(left)),
       right_(std::move(right)),
       body_(std::move(body)),
@@ -2976,17 +2812,18 @@ JsFunctionDeclaration::JsFunctionDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
     bool async,
     std::unique_ptr<JsBlockStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
-      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsSuper
@@ -3001,8 +2838,9 @@ JsSuper::JsSuper(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsImport
@@ -3017,8 +2855,9 @@ JsImport::JsImport(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsThisExpression
@@ -3033,9 +2872,10 @@ JsThisExpression::JsThisExpression(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsArrowFunctionExpression
@@ -3051,14 +2891,15 @@ JsArrowFunctionExpression::JsArrowFunctionExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
     bool async,
     std::variant<std::unique_ptr<JsBlockStatement>, std::unique_ptr<JsExpression>> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       body_(std::move(body)) {}
 
 std::variant<JsBlockStatement*, JsExpression*> JsArrowFunctionExpression::body() {
@@ -3105,10 +2946,11 @@ JsYieldExpression::JsYieldExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> argument,
     bool delegate)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       argument_(std::move(argument)),
       delegate_(std::move(delegate)) {}
 
@@ -3154,9 +2996,10 @@ JsAwaitExpression::JsAwaitExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> argument)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       argument_(std::move(argument)) {}
 
 std::optional<JsExpression*> JsAwaitExpression::argument() {
@@ -3193,8 +3036,9 @@ JsSpreadElement::JsSpreadElement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> argument)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       argument_(std::move(argument)) {}
 
 JsExpression* JsSpreadElement::argument() {
@@ -3223,9 +3067,10 @@ JsArrayExpression::JsArrayExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>> elements)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       elements_(std::move(elements)) {}
 
 std::vector<std::optional<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>>>* JsArrayExpression::elements() {
@@ -3254,9 +3099,10 @@ JsObjectMember::JsObjectMember(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> key,
     bool computed)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       key_(std::move(key)),
       computed_(std::move(computed)) {}
 
@@ -3294,12 +3140,13 @@ JsObjectProperty::JsObjectProperty(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> key,
     bool computed,
     bool shorthand,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPattern>> value)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsObjectMember(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(key), std::move(computed)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsObjectMember(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(key), std::move(computed)) /* NOLINT */,
       shorthand_(std::move(shorthand)),
       value_(std::move(value)) {}
 
@@ -3355,6 +3202,7 @@ JsObjectMethod::JsObjectMethod(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> key,
     bool computed,
     std::optional<std::unique_ptr<JsIdentifier>> id,
@@ -3363,10 +3211,10 @@ JsObjectMethod::JsObjectMethod(
     bool async,
     std::unique_ptr<JsBlockStatement> body,
     std::string kind)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsObjectMember(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(key), std::move(computed)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
-      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsObjectMember(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(key), std::move(computed)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
       kind_(std::move(kind)) {}
 
 std::string_view JsObjectMethod::kind() const {
@@ -3391,9 +3239,10 @@ JsObjectExpression::JsObjectExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>> properties_)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       properties__(std::move(properties_)) {}
 
 std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsObjectMethod>, std::unique_ptr<JsSpreadElement>>>* JsObjectExpression::properties_() {
@@ -3422,15 +3271,16 @@ JsFunctionExpression::JsFunctionExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
     bool async,
     std::unique_ptr<JsBlockStatement> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
-      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsUnaryExpression
@@ -3446,11 +3296,12 @@ JsUnaryExpression::JsUnaryExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     JsUnaryOperator operator_,
     bool prefix,
     std::unique_ptr<JsExpression> argument)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       operator__(std::move(operator_)),
       prefix_(std::move(prefix)),
       argument_(std::move(argument)) {}
@@ -3497,11 +3348,12 @@ JsUpdateExpression::JsUpdateExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     JsUpdateOperator operator_,
     std::unique_ptr<JsLVal> argument,
     bool prefix)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       operator__(std::move(operator_)),
       argument_(std::move(argument)),
       prefix_(std::move(prefix)) {}
@@ -3548,11 +3400,12 @@ JsBinaryExpression::JsBinaryExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     JsBinaryOperator operator_,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> left,
     std::unique_ptr<JsExpression> right)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       operator__(std::move(operator_)),
       left_(std::move(left)),
       right_(std::move(right)) {}
@@ -3621,11 +3474,12 @@ JsAssignmentExpression::JsAssignmentExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     JsAssignmentOperator operator_,
     std::unique_ptr<JsLVal> left,
     std::unique_ptr<JsExpression> right)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       operator__(std::move(operator_)),
       left_(std::move(left)),
       right_(std::move(right)) {}
@@ -3676,11 +3530,12 @@ JsLogicalExpression::JsLogicalExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     JsLogicalOperator operator_,
     std::unique_ptr<JsExpression> left,
     std::unique_ptr<JsExpression> right)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       operator__(std::move(operator_)),
       left_(std::move(left)),
       right_(std::move(right)) {}
@@ -3731,13 +3586,14 @@ JsMemberExpression::JsMemberExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>> object,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property,
     bool computed)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       object_(std::move(object)),
       property_(std::move(property)),
       computed_(std::move(computed)) {}
@@ -3824,12 +3680,13 @@ JsOptionalMemberExpression::JsOptionalMemberExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> object,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsPrivateName>> property,
     bool computed,
     bool optional)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       object_(std::move(object)),
       property_(std::move(property)),
       computed_(std::move(computed)),
@@ -3907,11 +3764,12 @@ JsConditionalExpression::JsConditionalExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> test,
     std::unique_ptr<JsExpression> alternate,
     std::unique_ptr<JsExpression> consequent)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       test_(std::move(test)),
       alternate_(std::move(alternate)),
       consequent_(std::move(consequent)) {}
@@ -3966,10 +3824,11 @@ JsCallExpression::JsCallExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>> callee,
     std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       callee_(std::move(callee)),
       arguments_(std::move(arguments)) {}
 
@@ -4035,11 +3894,12 @@ JsOptionalCallExpression::JsOptionalCallExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> callee,
     std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments,
     bool optional)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       callee_(std::move(callee)),
       arguments_(std::move(arguments)),
       optional_(std::move(optional)) {}
@@ -4090,10 +3950,11 @@ JsNewExpression::JsNewExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSuper>, std::unique_ptr<JsImport>> callee,
     std::vector<std::variant<std::unique_ptr<JsExpression>, std::unique_ptr<JsSpreadElement>>> arguments)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       callee_(std::move(callee)),
       arguments_(std::move(arguments)) {}
 
@@ -4159,9 +4020,10 @@ JsSequenceExpression::JsSequenceExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::unique_ptr<JsExpression>> expressions)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       expressions_(std::move(expressions)) {}
 
 std::vector<std::unique_ptr<JsExpression>>* JsSequenceExpression::expressions() {
@@ -4190,11 +4052,12 @@ JsParenthesizedExpression::JsParenthesizedExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> expression)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       expression_(std::move(expression)) {}
 
 JsExpression* JsParenthesizedExpression::expression() {
@@ -4253,9 +4116,10 @@ JsTemplateElement::JsTemplateElement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     bool tail,
     std::unique_ptr<JsTemplateElementValue> value)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       tail_(std::move(tail)),
       value_(std::move(value)) {}
 
@@ -4293,10 +4157,11 @@ JsTemplateLiteral::JsTemplateLiteral(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::unique_ptr<JsTemplateElement>> quasis,
     std::vector<std::unique_ptr<JsExpression>> expressions)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       quasis_(std::move(quasis)),
       expressions_(std::move(expressions)) {}
 
@@ -4338,10 +4203,11 @@ JsTaggedTemplateExpression::JsTaggedTemplateExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> tag,
     std::unique_ptr<JsTemplateLiteral> quasi)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       tag_(std::move(tag)),
       quasi_(std::move(quasi)) {}
 
@@ -4383,10 +4249,11 @@ JsRestElement::JsRestElement(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsLVal> argument)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       argument_(std::move(argument)) {}
 
 JsLVal* JsRestElement::argument() {
@@ -4415,10 +4282,11 @@ JsObjectPattern::JsObjectPattern(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>> properties_)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       properties__(std::move(properties_)) {}
 
 std::vector<std::variant<std::unique_ptr<JsObjectProperty>, std::unique_ptr<JsRestElement>>>* JsObjectPattern::properties_() {
@@ -4447,10 +4315,11 @@ JsArrayPattern::JsArrayPattern(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::optional<std::unique_ptr<JsPattern>>> elements)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       elements_(std::move(elements)) {}
 
 std::vector<std::optional<std::unique_ptr<JsPattern>>>* JsArrayPattern::elements() {
@@ -4479,11 +4348,12 @@ JsAssignmentPattern::JsAssignmentPattern(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsPattern> left,
     std::unique_ptr<JsExpression> right)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsPattern(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsLVal(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       left_(std::move(left)),
       right_(std::move(right)) {}
 
@@ -4525,6 +4395,7 @@ JsClassMethod::JsClassMethod(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
@@ -4534,9 +4405,9 @@ JsClassMethod::JsClassMethod(
     std::string kind,
     bool computed,
     bool static_)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
-      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
       key_(std::move(key)),
       kind_(std::move(kind)),
       computed_(std::move(computed)),
@@ -4592,6 +4463,7 @@ JsClassPrivateMethod::JsClassPrivateMethod(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsIdentifier>> id,
     std::vector<std::unique_ptr<JsPattern>> params,
     bool generator,
@@ -4601,9 +4473,9 @@ JsClassPrivateMethod::JsClassPrivateMethod(
     std::string kind,
     bool static_,
     std::optional<bool> computed)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
-      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async)) /* NOLINT */,
+      JsBlockStatementFunction(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(id), std::move(params), std::move(generator), std::move(async), std::move(body)) /* NOLINT */,
       key_(std::move(key)),
       kind_(std::move(kind)),
       static__(std::move(static_)),
@@ -4663,11 +4535,12 @@ JsClassProperty::JsClassProperty(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsExpression> key,
     std::optional<std::unique_ptr<JsExpression>> value,
     bool static_,
     bool computed)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       key_(std::move(key)),
       value_(std::move(value)),
       static__(std::move(static_)),
@@ -4735,10 +4608,11 @@ JsClassPrivateProperty::JsClassPrivateProperty(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsPrivateName> key,
     std::optional<std::unique_ptr<JsExpression>> value,
     bool static_)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       key_(std::move(key)),
       value_(std::move(value)),
       static__(std::move(static_)) {}
@@ -4797,8 +4671,9 @@ JsStaticBlock::JsStaticBlock(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::unique_ptr<JsStatement>> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       body_(std::move(body)) {}
 
 std::vector<std::unique_ptr<JsStatement>>* JsStaticBlock::body() {
@@ -4827,8 +4702,9 @@ JsClassBody::JsClassBody(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       body_(std::move(body)) {}
 
 std::vector<std::variant<std::unique_ptr<JsClassMethod>, std::unique_ptr<JsClassPrivateMethod>, std::unique_ptr<JsClassProperty>, std::unique_ptr<JsClassPrivateProperty>, std::unique_ptr<JsStaticBlock>>>* JsClassBody::body() {
@@ -4857,9 +4733,10 @@ JsClass::JsClass(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> super_class,
     std::unique_ptr<JsClassBody> body)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       super_class_(std::move(super_class)),
       body_(std::move(body)) {}
 
@@ -4909,14 +4786,15 @@ JsClassDeclaration::JsClassDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> super_class,
     std::unique_ptr<JsClassBody> body,
     std::optional<std::unique_ptr<JsIdentifier>> id)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsClass(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(super_class), std::move(body)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsClass(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(super_class), std::move(body)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       id_(std::move(id)) {}
 
 std::optional<JsIdentifier*> JsClassDeclaration::id() {
@@ -4953,12 +4831,13 @@ JsClassExpression::JsClassExpression(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsExpression>> super_class,
     std::unique_ptr<JsClassBody> body,
     std::optional<std::unique_ptr<JsIdentifier>> id)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsClass(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(super_class), std::move(body)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsClass(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra), std::move(super_class), std::move(body)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       id_(std::move(id)) {}
 
 std::optional<JsIdentifier*> JsClassExpression::id() {
@@ -4995,10 +4874,11 @@ JsMetaProperty::JsMetaProperty(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> meta,
     std::unique_ptr<JsIdentifier> property)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsExpression(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       meta_(std::move(meta)),
       property_(std::move(property)) {}
 
@@ -5039,10 +4919,11 @@ JsModuleDeclaration::JsModuleDeclaration(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsModuleSpecifier
@@ -5057,8 +4938,9 @@ JsModuleSpecifier::JsModuleSpecifier(
     std::optional<std::vector<int64_t>> inner_comment_uids,
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
-    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */ {}
+    std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra)
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */ {}
 
 // =============================================================================
 // JsImportSpecifier
@@ -5074,10 +4956,11 @@ JsImportSpecifier::JsImportSpecifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> imported,
     std::unique_ptr<JsIdentifier> local)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       imported_(std::move(imported)),
       local_(std::move(local)) {}
 
@@ -5137,9 +5020,10 @@ JsImportDefaultSpecifier::JsImportDefaultSpecifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> local)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       local_(std::move(local)) {}
 
 JsIdentifier* JsImportDefaultSpecifier::local() {
@@ -5168,9 +5052,10 @@ JsImportNamespaceSpecifier::JsImportNamespaceSpecifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> local)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       local_(std::move(local)) {}
 
 JsIdentifier* JsImportNamespaceSpecifier::local() {
@@ -5199,9 +5084,10 @@ JsImportAttribute::JsImportAttribute(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> key,
     std::unique_ptr<JsStringLiteral> value)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       key_(std::move(key)),
       value_(std::move(value)) {}
 
@@ -5243,13 +5129,14 @@ JsImportDeclaration::JsImportDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::vector<std::variant<std::unique_ptr<JsImportSpecifier>, std::unique_ptr<JsImportDefaultSpecifier>, std::unique_ptr<JsImportNamespaceSpecifier>>> specifiers,
     std::unique_ptr<JsStringLiteral> source,
     std::optional<std::unique_ptr<JsImportAttribute>> assertions)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       specifiers_(std::move(specifiers)),
       source_(std::move(source)),
       assertions_(std::move(assertions)) {}
@@ -5312,10 +5199,11 @@ JsExportSpecifier::JsExportSpecifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported,
     std::optional<std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>>> local)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       exported_(std::move(exported)),
       local_(std::move(local)) {}
 
@@ -5401,9 +5289,10 @@ JsExportNamespaceSpecifier::JsExportNamespaceSpecifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsIdentifier>, std::unique_ptr<JsStringLiteral>> exported)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       exported_(std::move(exported)) {}
 
 std::variant<JsIdentifier*, JsStringLiteral*> JsExportNamespaceSpecifier::exported() {
@@ -5450,9 +5339,10 @@ JsExportDefaultSpecifier::JsExportDefaultSpecifier(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsIdentifier> exported)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleSpecifier(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       exported_(std::move(exported)) {}
 
 JsIdentifier* JsExportDefaultSpecifier::exported() {
@@ -5481,14 +5371,15 @@ JsExportNamedDeclaration::JsExportNamedDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::optional<std::unique_ptr<JsDeclaration>> declaration,
     std::vector<std::variant<std::unique_ptr<JsExportSpecifier>, std::unique_ptr<JsExportNamespaceSpecifier>, std::unique_ptr<JsExportDefaultSpecifier>>> specifiers,
     std::optional<std::unique_ptr<JsStringLiteral>> source,
     std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       declaration_(std::move(declaration)),
       specifiers_(std::move(specifiers)),
       source_(std::move(source)),
@@ -5580,11 +5471,12 @@ JsExportDefaultDeclaration::JsExportDefaultDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::variant<std::unique_ptr<JsFunctionDeclaration>, std::unique_ptr<JsClassDeclaration>, std::unique_ptr<JsExpression>> declaration)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       declaration_(std::move(declaration)) {}
 
 std::variant<JsFunctionDeclaration*, JsClassDeclaration*, JsExpression*> JsExportDefaultDeclaration::declaration() {
@@ -5637,12 +5529,13 @@ JsExportAllDeclaration::JsExportAllDeclaration(
     std::optional<int64_t> scope_uid,
     std::optional<std::unique_ptr<JsSymbolId>> referenced_symbol,
     std::optional<std::vector<std::unique_ptr<JsSymbolId>>> defined_symbols,
+    std::optional<nlohmann::json> extra,
     std::unique_ptr<JsStringLiteral> source,
     std::optional<std::vector<std::unique_ptr<JsImportAttribute>>> assertions)
-    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
-      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols)) /* NOLINT */,
+    : JsNode(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsProgramBodyElement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsStatement(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
+      JsModuleDeclaration(std::move(loc), std::move(start), std::move(end), std::move(leading_comment_uids), std::move(trailing_comment_uids), std::move(inner_comment_uids), std::move(scope_uid), std::move(referenced_symbol), std::move(defined_symbols), std::move(extra)) /* NOLINT */,
       source_(std::move(source)),
       assertions_(std::move(assertions)) {}
 

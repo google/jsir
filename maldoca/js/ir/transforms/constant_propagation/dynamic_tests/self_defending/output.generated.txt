@@ -80,7 +80,7 @@
 // SOURCE-NEXT:         %1 = jsir.identifier {"_0x4cdc8a"}
 // SOURCE-NEXT:           // %1 = #jsir_builtin<builtin_function "_0x4cdc8a">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %2 = jsir.numeric_literal {#jsir<numeric_literal_extra "0x1d5", 4.690000e+02 : f64>, 4.690000e+02 : f64}
+// SOURCE-NEXT:         %2 = jsir.numeric_literal {4.690000e+02 : f64}
 // SOURCE-NEXT:           // %2 = 4.690000e+02 : f64
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %3 = jsir.call_expression (%1, %2)
@@ -89,7 +89,7 @@
 // SOURCE-NEXT:         %4 = jsir.member_expression (%0, %3)
 // SOURCE-NEXT:           // %4 = <unknown>
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %5 = jsir.string_literal {#jsir<string_literal_extra "'Hello\\x20World!'", "Hello World!">, "Hello World!"}
+// SOURCE-NEXT:         %5 = jsir.string_literal {"Hello World!"}
 // SOURCE-NEXT:           // %5 = "Hello World!"
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %6 = jsir.call_expression (%4, %5)

@@ -287,15 +287,18 @@ cc_library(
     hdrs = ["trivia.h"],
     deps = [
         ":ir",
+        "//maldoca/astgen:mlir_json_utils",
         "//maldoca/js/ast",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/memory",
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
         "@abseil-cpp//absl/types:span",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:Support",
+        "@nlohmann_json//:json",
     ],
 )
 

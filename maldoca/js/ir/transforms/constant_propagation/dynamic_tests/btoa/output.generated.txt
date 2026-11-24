@@ -28,7 +28,7 @@
 // SOURCE-NEXT:         %2 = jsir.identifier {"btoa"}
 // SOURCE-NEXT:           // %2 = #jsir_builtin<builtin_function "btoa">
 // SOURCE-NEXT:           // State [default = <unknown>] { }
-// SOURCE-NEXT:         %3 = jsir.string_literal {#jsir<string_literal_extra "'aGk='", "aGk=">, "aGk="}
+// SOURCE-NEXT:         %3 = jsir.string_literal {"aGk="}
 // SOURCE-NEXT:           // %3 = "aGk="
 // SOURCE-NEXT:           // State [default = <unknown>] { }
 // SOURCE-NEXT:         %4 = jsir.call_expression (%2, %3)
@@ -69,7 +69,7 @@
 // SOURCE-NEXT:             %8 = jsir.identifier {"btoa"}
 // SOURCE-NEXT:               // %8 = #jsir_builtin<builtin_function "atob">
 // SOURCE-NEXT:               // State [default = <unknown>] { <btoa#0 : #jsir_builtin<builtin_function "atob">> }
-// SOURCE-NEXT:             %9 = jsir.string_literal {#jsir<string_literal_extra "'aGk='", "aGk=">, "aGk="}
+// SOURCE-NEXT:             %9 = jsir.string_literal {"aGk="}
 // SOURCE-NEXT:               // %9 = "aGk="
 // SOURCE-NEXT:               // State [default = <unknown>] { <btoa#0 : #jsir_builtin<builtin_function "atob">> }
 // SOURCE-NEXT:             %10 = jsir.call_expression (%8, %9)

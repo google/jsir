@@ -309,15 +309,43 @@ cc_library(
 )
 
 cc_library(
+    name = "mlir_json_utils",
+    srcs = ["mlir_json_utils.cc"],
+    hdrs = ["mlir_json_utils.h"],
+    deps = [
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
+        "@abseil-cpp//absl/status:statusor",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:IR",
+        "@nlohmann_json//:json",
+    ],
+)
+
+cc_test(
+    name = "mlir_json_utils_test",
+    srcs = ["mlir_json_utils_test.cc"],
+    deps = [
+        ":mlir_json_utils",
+        "@googletest//:gtest_main",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:IR",
+        "@nlohmann_json//:json",
+    ],
+)
+
+cc_library(
     name = "ir_to_ast_util",
     hdrs = ["ir_to_ast_util.h"],
     deps = [
+        ":mlir_json_utils",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
         "@llvm-project//llvm:Support",
         "@llvm-project//mlir:IR",
+        "@nlohmann_json//:json",
     ],
 )
 

@@ -44,7 +44,7 @@ class NodeDef;
 // Type        ::= NonListType, ListType
 // NonListType ::= ScalarType, VariantType
 // ScalarType  ::= BuiltinType, ClassType
-// BuiltinType ::= BoolType, DoubleType, StringType
+// BuiltinType ::= BoolType, DoubleType, StringType, JsonType
 //
 //                                  Type
 //                                    |
@@ -488,6 +488,12 @@ enum class BuiltinTypeKind {
   kInt64,
   kDouble,
   kString,
+  // An arbitrary JSON value (e.g. Babel's `extra` object).
+  //   C++:        nlohmann::json
+  //   Python:     dict[str, Any]
+  //   TypeScript: Record<string, unknown>
+  //   MLIR:       mlir::DictionaryAttr
+  kJson,
 };
 
 class BuiltinType : public ScalarType {

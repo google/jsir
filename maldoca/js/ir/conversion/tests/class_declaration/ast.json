@@ -27,6 +27,9 @@
 // AST-NEXT:     "start": 0,
 // AST-NEXT:     "end": 266,
 // AST-NEXT:     "scopeUid": 0,
+// AST-NEXT:     "extra": {
+// AST-NEXT:       "topLevelAwait": false
+// AST-NEXT:     },
 // AST-NEXT:     "interpreter": null,
 // AST-NEXT:     "sourceType": "script",
 // AST-NEXT:     "body": [
@@ -116,11 +119,11 @@
 // AST-NEXT:                 "start": 36,
 // AST-NEXT:                 "end": 37,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 1.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "1",
-// AST-NEXT:                   "rawValue": 1.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 1
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 1.0
 // AST-NEXT:               },
 // AST-NEXT:               "static": false,
 // AST-NEXT:               "computed": false
@@ -189,11 +192,11 @@
 // AST-NEXT:                 "start": 66,
 // AST-NEXT:                 "end": 67,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 2.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "2",
-// AST-NEXT:                   "rawValue": 2.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 2
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 2.0
 // AST-NEXT:               },
 // AST-NEXT:               "static": false
 // AST-NEXT:             },
@@ -227,11 +230,11 @@
 // AST-NEXT:                 "start": 71,
 // AST-NEXT:                 "end": 96,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": "property_literal_string",
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "\"property_literal_string\"",
 // AST-NEXT:                   "rawValue": "property_literal_string"
-// AST-NEXT:                 }
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": "property_literal_string"
 // AST-NEXT:               },
 // AST-NEXT:               "value": {
 // AST-NEXT:                 "type": "NumericLiteral",
@@ -248,11 +251,11 @@
 // AST-NEXT:                 "start": 99,
 // AST-NEXT:                 "end": 100,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 3.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "3",
-// AST-NEXT:                   "rawValue": 3.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 3
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 3.0
 // AST-NEXT:               },
 // AST-NEXT:               "static": false,
 // AST-NEXT:               "computed": false
@@ -287,11 +290,11 @@
 // AST-NEXT:                 "start": 104,
 // AST-NEXT:                 "end": 107,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 1.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "1.0",
-// AST-NEXT:                   "rawValue": 1.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 1
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 1.0
 // AST-NEXT:               },
 // AST-NEXT:               "value": {
 // AST-NEXT:                 "type": "NumericLiteral",
@@ -308,11 +311,11 @@
 // AST-NEXT:                 "start": 110,
 // AST-NEXT:                 "end": 111,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 4.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "4",
-// AST-NEXT:                   "rawValue": 4.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 4
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 4.0
 // AST-NEXT:               },
 // AST-NEXT:               "static": false,
 // AST-NEXT:               "computed": false
@@ -347,11 +350,11 @@
 // AST-NEXT:                 "start": 116,
 // AST-NEXT:                 "end": 135,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": "property_computed",
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "\"property_computed\"",
 // AST-NEXT:                   "rawValue": "property_computed"
-// AST-NEXT:                 }
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": "property_computed"
 // AST-NEXT:               },
 // AST-NEXT:               "value": {
 // AST-NEXT:                 "type": "NumericLiteral",
@@ -368,11 +371,11 @@
 // AST-NEXT:                 "start": 139,
 // AST-NEXT:                 "end": 140,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 5.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "5",
-// AST-NEXT:                   "rawValue": 5.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 5
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 5.0
 // AST-NEXT:               },
 // AST-NEXT:               "static": false,
 // AST-NEXT:               "computed": true
@@ -562,11 +565,11 @@
 // AST-NEXT:                 "start": 197,
 // AST-NEXT:                 "end": 220,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": "method_literal_string",
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "\"method_literal_string\"",
 // AST-NEXT:                   "rawValue": "method_literal_string"
-// AST-NEXT:                 }
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": "method_literal_string"
 // AST-NEXT:               },
 // AST-NEXT:               "kind": "method",
 // AST-NEXT:               "computed": false,
@@ -624,11 +627,11 @@
 // AST-NEXT:                 "start": 228,
 // AST-NEXT:                 "end": 231,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": 1.0,
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "1.0",
-// AST-NEXT:                   "rawValue": 1.0
-// AST-NEXT:                 }
+// AST-NEXT:                   "rawValue": 1
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": 1.0
 // AST-NEXT:               },
 // AST-NEXT:               "kind": "method",
 // AST-NEXT:               "computed": false,
@@ -686,11 +689,11 @@
 // AST-NEXT:                 "start": 240,
 // AST-NEXT:                 "end": 257,
 // AST-NEXT:                 "scopeUid": 1,
-// AST-NEXT:                 "value": "method_computed",
 // AST-NEXT:                 "extra": {
 // AST-NEXT:                   "raw": "\"method_computed\"",
 // AST-NEXT:                   "rawValue": "method_computed"
-// AST-NEXT:                 }
+// AST-NEXT:                 },
+// AST-NEXT:                 "value": "method_computed"
 // AST-NEXT:               },
 // AST-NEXT:               "kind": "method",
 // AST-NEXT:               "computed": true,
