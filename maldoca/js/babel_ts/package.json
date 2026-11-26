@@ -1,0 +1,7 @@
+{
+  "description": "Only for esbuild (see :babel_bundle in BUILD): maps the @babel/standalone import in bundle_main.ts to babel.min.js.",
+  "private": true,
+  "browser": {
+    "@babel/standalone": "@babel/standalone/babel.min.js"
+  }
+}
